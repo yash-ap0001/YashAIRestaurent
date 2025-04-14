@@ -32,6 +32,7 @@ import { WebSocketServer } from 'ws';
 import { initializeRealTimeService } from './services/realtime';
 import { generateOrderNumber, generateTokenNumber, generateBillNumber, handleError } from './utils';
 import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
+import { handleVoiceCommand } from './services/voiceAssistant';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -1072,6 +1073,33 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     } catch (err) {
       console.error("Error processing external order:", err);
       errorHandler(err, res);
+    }
+  });
+
+  // Voice Assistant API endpoints
+  app.post("/api/voice-assistant/process", async (req: Request, res: Response) => {
+    try {
+      const { command } = req.body;
+      
+      if (!command || typeof command !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: "Command is required and must be a string"
+        });
+      }
+      
+      console.log(`Processing voice command: ${command}`);
+      
+      const result = await handleVoiceCommand(command);
+      
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error(`Error processing voice command:`, error);
+      return res.status(500).json({
+        success: false,
+        response: "An error occurred while processing your command",
+        error: handleError(error, "processing voice command").message
+      });
     }
   });
 

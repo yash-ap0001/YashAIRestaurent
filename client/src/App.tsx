@@ -19,6 +19,7 @@ import Customers from "@/pages/Customers";
 import MenuItems from "@/pages/MenuItems";
 import Reports from "@/pages/Reports";
 import ExternalIntegration from "@/pages/ExternalIntegration";
+import VoiceAssistant from "@/pages/VoiceAssistant";
 import { AppShell } from "@/components/layouts/AppShell";
 
 function Router() {
