@@ -326,7 +326,7 @@ function OrderStatusCard({ order }: { order: any }) {
               )}
             </p>
             <p className="text-neutral-400">
-              ₹{order.totalAmount.toFixed(2)} 
+              {order.totalAmount !== undefined ? `₹${order.totalAmount.toFixed(2)}` : `₹0.00`}
               {order.bill && <span className="ml-2">• Bill #{order.bill.billNumber}</span>}
             </p>
           </div>

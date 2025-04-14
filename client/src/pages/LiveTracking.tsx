@@ -166,7 +166,7 @@ export default function LiveTracking() {
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="font-medium">₹{order.totalAmount.toFixed(2)}</p>
+                                <p className="font-medium">₹{order.totalAmount !== undefined ? order.totalAmount.toFixed(2) : '0.00'}</p>
                               </div>
                             </div>
                           </div>
@@ -366,7 +366,7 @@ function ShareTrackingView({ orders, baseUrl }: { orders: any[], baseUrl: string
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">₹{order.totalAmount.toFixed(2)}</p>
+                      <p className="font-medium">₹{order.totalAmount !== undefined ? order.totalAmount.toFixed(2) : '0.00'}</p>
                     </div>
                   </div>
                 </div>
