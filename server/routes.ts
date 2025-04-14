@@ -110,6 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {
+      console.log("Received order creation request:", req.body);
+      
       // Create a new order
       const orderData = {
         ...req.body,
@@ -121,6 +123,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create order items if provided
       if (Array.isArray(req.body.items)) {
+        console.log(`Creating ${req.body.items.length} order items`);
+        for (const item of req.body.items) {
+          const orderItem = {
+            ...item,
+            orderId: order.id
+          };
+          const parsedOrderItem = insertOrderItemSchema.parse(orderItem);
+          await storage.createOrderItem(parsedOrderItem);
+        }
+      } else {
+        console.log("No order items provided in request");
+      }
+      
+      // Create a kitchen token if needed
+      if (order.status !== "completed" && order.status !== "cancelled") {
+        console.log("Creating kitchen token for order:", order.id);
+        const tokenData = {
+          tokenNumber: generateTokenNumber(),
+          orderId: order.id,
+          status: "pending",
+          isUrgent: req.body.isUrgent || false
+        };
+        
+        const parsedToken = insertKitchenTokenSchema.parse(tokenData);
+        await storage.createKitchenToken(parsedToken);
+      }
+      
+      console.log("Order created successfully:", order);
+      res.setHeader('Content-Type', 'application/json');
+      res.status(201).json(order);
+    } catch (err) {
+      console.error("Error creating order:", err);
+      errorHandler(err, res);
+    }
+  });
+  
+  // Special endpoint for regular order creation that might be conflicting with Vite routing
+  app.post("/api/simulator/create-order", async (req: Request, res: Response) => {
+    try {
+      console.log("Simulator - Received order creation request:", req.body);
+      
+      // Create a new order
+      const orderData = {
+        ...req.body,
+        orderNumber: generateOrderNumber()
+      };
+      
+      const parsedOrder = insertOrderSchema.parse(orderData);
+      const order = await storage.createOrder(parsedOrder);
+      
+      // Create order items if provided
+      if (Array.isArray(req.body.items)) {
+        console.log(`Simulator - Creating ${req.body.items.length} order items`);
         for (const item of req.body.items) {
           const orderItem = {
             ...item,
@@ -133,6 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create a kitchen token if needed
       if (order.status !== "completed" && order.status !== "cancelled") {
+        console.log("Simulator - Creating kitchen token for order:", order.id);
         const tokenData = {
           tokenNumber: generateTokenNumber(),
           orderId: order.id,
@@ -144,8 +200,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createKitchenToken(parsedToken);
       }
       
+      console.log("Simulator - Order created successfully:", order);
+      res.setHeader('Content-Type', 'application/json');
       res.status(201).json(order);
     } catch (err) {
+      console.error("Simulator - Error creating order:", err);
       errorHandler(err, res);
     }
   });

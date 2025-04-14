@@ -26,7 +26,18 @@ export function NaturalLanguageOrderInput({ onOrderProcessed }: NaturalLanguageO
 
   const processOrderMutation = useMutation({
     mutationFn: async (text: string) => {
+      console.log("Processing natural language order:", text);
       const response = await apiRequest("POST", "/api/ai/process-order", { orderText: text });
+      
+      // Check if response is HTML instead of JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        console.error('Received HTML response instead of JSON for AI order processing');
+        const htmlContent = await response.text();
+        console.error('Response content:', htmlContent);
+        throw new Error('Received unexpected HTML response from server');
+      }
+      
       return response.json();
     },
     onSuccess: (data) => {

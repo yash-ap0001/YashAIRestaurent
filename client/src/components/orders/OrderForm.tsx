@@ -93,7 +93,8 @@ export function OrderForm() {
         isUrgent: data.isUrgent,
       };
       
-      const response = await apiRequest("POST", "/api/orders", orderData);
+      console.log("Submitting order data:", orderData);
+      const response = await apiRequest("POST", "/api/simulator/create-order", orderData);
       return response.json();
     },
     onSuccess: () => {
