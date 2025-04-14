@@ -805,6 +805,45 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       errorHandler(err, res);
     }
   });
+  
+  // Chatbot endpoint - process requests for user, client, or admin
+  app.post("/api/ai/chatbot", async (req: Request, res: Response) => {
+    try {
+      console.log("Processing chatbot request for userType:", req.body.userType);
+      
+      const { message, userType, messageHistory, customerId, orderId } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+      
+      if (!userType || !["customer", "admin", "kitchen"].includes(userType)) {
+        return res.status(400).json({ error: "Valid userType is required (customer, admin, or kitchen)" });
+      }
+      
+      // Process the chatbot request
+      const response = await processChatbotRequest({
+        message,
+        userType,
+        messageHistory: messageHistory || [],
+        customerId: customerId ? Number(customerId) : undefined,
+        orderId: orderId ? Number(orderId) : undefined
+      });
+      
+      // Log activity
+      await storage.createActivity({
+        type: "chatbot_interaction",
+        description: `${userType.charAt(0).toUpperCase() + userType.slice(1)} chatbot conversation`,
+        entityId: customerId || 0,
+        entityType: customerId ? "customer" : "general"
+      });
+      
+      res.json({ response });
+    } catch (err) {
+      console.error("Error processing chatbot request:", err);
+      errorHandler(err, res);
+    }
+  });
 
   // WhatsApp Integration APIs
   

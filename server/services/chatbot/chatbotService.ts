@@ -116,10 +116,10 @@ async function getContextData(userType: string, customerId?: number, orderId?: n
     const menuItems = await storage.getMenuItems();
     const menuData = menuItems.map(item => 
       `${item.name}: ₹${item.price} - ${item.category}${item.description ? ` - ${item.description}` : ''}`
-    ).join('\\n');
+    ).join('\n');
 
     // Common context for all user types
-    contextData += `MENU ITEMS:\\n${menuData}\\n\\n`;
+    contextData += `MENU ITEMS:\n${menuData}\n\n`;
 
     // Add user-specific context
     switch (userType) {
@@ -129,19 +129,27 @@ async function getContextData(userType: string, customerId?: number, orderId?: n
           const order = await storage.getOrder(orderId);
           if (order) {
             const orderItems = await storage.getOrderItems(orderId);
+            // Connect menu items to order items to get item names
+            const itemsWithNames = orderItems.map(item => {
+              const menuItem = menuItems.find(m => m.id === item.menuItemId);
+              return {
+                ...item,
+                itemName: menuItem ? menuItem.name : `Item #${item.menuItemId}`
+              };
+            });
             
-            contextData += `ORDER INFORMATION:\\n`;
-            contextData += `Order #${order.orderNumber}\\n`;
-            contextData += `Status: ${order.status}\\n`;
-            contextData += `Items: ${orderItems.map(item => `${item.quantity}x ${item.name}`).join(', ')}\\n`;
-            contextData += `Total: ₹${order.totalAmount}\\n\\n`;
+            contextData += `ORDER INFORMATION:\n`;
+            contextData += `Order #${order.orderNumber}\n`;
+            contextData += `Status: ${order.status}\n`;
+            contextData += `Items: ${itemsWithNames.map(item => `${item.quantity}x ${item.itemName}`).join(', ')}\n`;
+            contextData += `Total: ₹${order.totalAmount}\n\n`;
             
             // Add kitchen token info if available
             const kitchenTokens = await storage.getKitchenTokens();
             const kitchenToken = kitchenTokens.find(token => token.orderId === order.id);
             if (kitchenToken) {
-              contextData += `Kitchen Token: ${kitchenToken.tokenNumber}\\n`;
-              contextData += `Kitchen Status: ${kitchenToken.status}\\n\\n`;
+              contextData += `Kitchen Token: ${kitchenToken.tokenNumber}\n`;
+              contextData += `Kitchen Status: ${kitchenToken.status}\n\n`;
             }
           }
         }
@@ -150,18 +158,28 @@ async function getContextData(userType: string, customerId?: number, orderId?: n
         if (customerId) {
           const customer = await storage.getCustomer(customerId);
           if (customer) {
-            contextData += `CUSTOMER INFORMATION:\\n`;
-            contextData += `Name: ${customer.name}\\n`;
-            contextData += `Phone: ${customer.phone}\\n`;
-            contextData += `Email: ${customer.email || 'Not provided'}\\n`;
-            contextData += `Preferences: ${customer.preferences || 'None recorded'}\\n\\n`;
+            contextData += `CUSTOMER INFORMATION:\n`;
+            contextData += `Name: ${customer.name}\n`;
+            contextData += `Phone: ${customer.phone || 'Not provided'}\n`;
+            contextData += `Email: ${customer.email || 'Not provided'}\n`;
+            
+            // Check if preferences exists and is an array
+            const preferencesText = customer.preferences && Array.isArray(customer.preferences) 
+              ? customer.preferences.join(', ') 
+              : 'None recorded';
+            
+            contextData += `Preferences: ${preferencesText}\n\n`;
             
             // Add previous orders
-            const orders = await storage.getOrders();
-            const customerOrders = orders.filter(order => order.customerId === customerId);
+            const customerOrders = await storage.getOrdersByCustomerId(customerId);
             if (customerOrders && customerOrders.length > 0) {
-              contextData += `Previous Order History: ${customerOrders.length} orders\\n`;
-              contextData += `Most recent order: ${new Date(customerOrders[0].orderDate).toLocaleDateString()}\\n\\n`;
+              contextData += `Previous Order History: ${customerOrders.length} orders\n`;
+              
+              const orderDate = customerOrders[0].createdAt 
+                ? new Date(customerOrders[0].createdAt).toLocaleDateString() 
+                : 'Unknown date';
+                
+              contextData += `Most recent order: ${orderDate}\n\n`;
             }
           }
         }
@@ -171,43 +189,63 @@ async function getContextData(userType: string, customerId?: number, orderId?: n
         // Add business metrics
         const orders = await storage.getOrders();
         const customers = await storage.getCustomers();
-        const inventory = await storage.getInventoryItems();
+        const adminInventory = await storage.getInventoryItems();
         
-        const todaysOrders = orders.filter(order => 
-          new Date(order.orderDate).toLocaleDateString() === new Date().toLocaleDateString()
-        );
+        const todaysOrders = orders.filter(order => {
+          if (!order.createdAt) return false;
+          return new Date(order.createdAt).toLocaleDateString() === new Date().toLocaleDateString();
+        });
         
-        contextData += `BUSINESS METRICS:\\n`;
-        contextData += `Total Orders: ${orders.length}\\n`;
-        contextData += `Today's Orders: ${todaysOrders.length}\\n`;
-        contextData += `Total Customers: ${customers.length}\\n`;
+        contextData += `BUSINESS METRICS:\n`;
+        contextData += `Total Orders: ${orders.length}\n`;
+        contextData += `Today's Orders: ${todaysOrders.length}\n`;
+        contextData += `Total Customers: ${customers.length}\n`;
         
         // Low inventory warning
-        const lowInventoryItems = inventory.filter(item => item.quantity <= item.minQuantity);
+        const lowInventoryItems = adminInventory.filter(item => {
+          return typeof item.quantity === 'number' && 
+                 typeof item.minQuantity === 'number' && 
+                 item.quantity <= item.minQuantity;
+        });
+        
         if (lowInventoryItems.length > 0) {
-          contextData += `\\nLOW INVENTORY WARNING:\\n`;
+          contextData += `\nLOW INVENTORY WARNING:\n`;
           contextData += lowInventoryItems.map(item => 
             `${item.name}: ${item.quantity} ${item.unit} remaining (min: ${item.minQuantity})`
-          ).join('\\n');
-          contextData += `\\n\\n`;
+          ).join('\n');
+          contextData += `\n\n`;
         }
         
         if (orderId) {
           const order = await storage.getOrder(orderId);
           if (order) {
             const orderItems = await storage.getOrderItems(orderId);
-            const customer = order.customerId ? await storage.getCustomer(order.customerId) : null;
+            // Connect menu items to order items to get item names
+            const itemsWithNames = orderItems.map(item => {
+              const menuItem = menuItems.find(m => m.id === item.menuItemId);
+              return {
+                ...item,
+                itemName: menuItem ? menuItem.name : `Item #${item.menuItemId}`
+              };
+            });
             
-            contextData += `ORDER DETAILS:\\n`;
-            contextData += `Order #${order.orderNumber}\\n`;
-            contextData += `Date: ${new Date(order.orderDate).toLocaleString()}\\n`;
-            contextData += `Status: ${order.status}\\n`;
-            contextData += `Items: ${orderItems.map(item => `${item.quantity}x ${item.name}`).join(', ')}\\n`;
-            contextData += `Total: ₹${order.totalAmount}\\n`;
-            if (customer) {
-              contextData += `Customer: ${customer.name} (${customer.phone})\\n`;
+            // Try to get customer information if there's a note with customer info
+            const relatedCustomer = order.notes && order.notes.includes("Customer:") 
+              ? customers.find(c => order.notes?.includes(c.name)) 
+              : null;
+            
+            contextData += `ORDER DETAILS:\n`;
+            contextData += `Order #${order.orderNumber}\n`;
+            contextData += `Date: ${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Unknown'}\n`;
+            contextData += `Status: ${order.status}\n`;
+            contextData += `Items: ${itemsWithNames.map(item => `${item.quantity}x ${item.itemName}`).join(', ')}\n`;
+            contextData += `Total: ₹${order.totalAmount}\n`;
+            
+            if (relatedCustomer) {
+              contextData += `Customer: ${relatedCustomer.name} (${relatedCustomer.phone || 'No phone'})\n`;
             }
-            contextData += `\\n`;
+            
+            contextData += `\n`;
           }
         }
         break;
@@ -219,52 +257,70 @@ async function getContextData(userType: string, customerId?: number, orderId?: n
           token.status !== "completed" && token.status !== "cancelled"
         );
         
-        contextData += `KITCHEN OPERATIONS:\\n`;
-        contextData += `Active Orders: ${activeTokens.length}\\n\\n`;
+        contextData += `KITCHEN OPERATIONS:\n`;
+        contextData += `Active Orders: ${activeTokens.length}\n\n`;
         
         if (activeTokens.length > 0) {
-          contextData += `ACTIVE ORDERS:\\n`;
+          contextData += `ACTIVE ORDERS:\n`;
           
           for (const token of activeTokens) {
             const order = await storage.getOrder(token.orderId);
             if (order) {
               const orderItems = await storage.getOrderItems(order.id);
+              // Connect menu items to order items to get item names
+              const itemsWithNames = orderItems.map(item => {
+                const menuItem = menuItems.find(m => m.id === item.menuItemId);
+                return {
+                  ...item,
+                  itemName: menuItem ? menuItem.name : `Item #${item.menuItemId}`
+                };
+              });
               
-              contextData += `Token #${token.tokenNumber} (${token.status}):\\n`;
-              contextData += `Items: ${orderItems.map(item => `${item.quantity}x ${item.name}`).join(', ')}\\n`;
-              contextData += `Priority: ${token.isUrgent ? 'URGENT' : 'Normal'}\\n`;
-              contextData += `Order Time: ${new Date(order.orderDate).toLocaleTimeString()}\\n\\n`;
+              contextData += `Token #${token.tokenNumber} (${token.status}):\n`;
+              contextData += `Items: ${itemsWithNames.map(item => `${item.quantity}x ${item.itemName}`).join(', ')}\n`;
+              contextData += `Priority: ${token.isUrgent ? 'URGENT' : 'Normal'}\n`;
+              contextData += `Order Time: ${order.createdAt ? new Date(order.createdAt).toLocaleTimeString() : 'Unknown'}\n\n`;
             }
           }
         }
         
         // Low inventory relevant to kitchen
-        const inventory = await storage.getInventoryItems();
-        const lowKitchenInventory = inventory.filter(item => 
-          item.quantity <= item.minQuantity && 
-          (item.category === "Ingredients" || item.category === "Fresh Produce" || item.category === "Meat & Seafood")
-        );
+        const kitchenInventory = await storage.getInventoryItems();
+        const kitchenCategories = ["Ingredients", "Fresh Produce", "Meat & Seafood"];
+        
+        const lowKitchenInventory = kitchenInventory.filter(item => {
+          return typeof item.quantity === 'number' && 
+                 typeof item.minQuantity === 'number' && 
+                 item.quantity <= item.minQuantity &&
+                 kitchenCategories.includes(item.category);
+        });
         
         if (lowKitchenInventory.length > 0) {
-          contextData += `LOW KITCHEN INVENTORY:\\n`;
+          contextData += `LOW KITCHEN INVENTORY:\n`;
           contextData += lowKitchenInventory.map(item => 
             `${item.name}: ${item.quantity} ${item.unit} remaining`
-          ).join('\\n');
-          contextData += `\\n\\n`;
+          ).join('\n');
+          contextData += `\n\n`;
         }
         
         if (orderId) {
           const order = await storage.getOrder(orderId);
           if (order) {
             const orderItems = await storage.getOrderItems(orderId);
+            // Connect menu items to order items to get item names
+            const itemsWithNames = orderItems.map(item => {
+              const menuItem = menuItems.find(m => m.id === item.menuItemId);
+              return {
+                ...item,
+                itemName: menuItem ? menuItem.name : `Item #${item.menuItemId}`
+              };
+            });
             
-            contextData += `SPECIFIC ORDER DETAILS:\\n`;
-            contextData += `Order #${order.orderNumber}\\n`;
-            contextData += `Items: ${orderItems.map(item => {
-              // Add preparation notes if available
-              const menuItem = menuItems.find(m => m.name === item.name);
-              return `${item.quantity}x ${item.name}${item.specialInstructions ? ` (${item.specialInstructions})` : ''}`;
-            }).join('\\n')}\\n\\n`;
+            contextData += `SPECIFIC ORDER DETAILS:\n`;
+            contextData += `Order #${order.orderNumber}\n`;
+            contextData += `Items: ${itemsWithNames.map(item => 
+              `${item.quantity}x ${item.itemName}${item.notes ? ` (${item.notes})` : ''}`
+            ).join('\n')}\n\n`;
           }
         }
         break;
