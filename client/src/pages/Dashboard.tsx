@@ -4,7 +4,7 @@ import { LiveKitchenStatus } from "@/components/dashboard/LiveKitchenStatus";
 import { SalesOverview } from "@/components/dashboard/SalesOverview";
 import { TopSellingItems } from "@/components/dashboard/TopSellingItems";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
-import { PersonalizedRecommendations } from "@/components/menu/PersonalizedRecommendations";
+import { PersonalizedRecommendations } from "@/components/dashboard/PersonalizedRecommendations";
 
 export default function Dashboard() {
   return (
