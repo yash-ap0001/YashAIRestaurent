@@ -145,7 +145,7 @@ export default function AICallCenter() {
     isLoading: isLoadingCalls 
   } = useQuery({
     queryKey: ['/api/telephony/calls'],
-    queryFn: () => apiRequest('/api/telephony/calls')
+    queryFn: () => apiRequest('GET', '/api/telephony/calls')
   });
 
   const { 
@@ -153,7 +153,7 @@ export default function AICallCenter() {
     isLoading: isLoadingStats 
   } = useQuery({
     queryKey: ['/api/telephony/stats'],
-    queryFn: () => apiRequest('/api/telephony/stats')
+    queryFn: () => apiRequest('GET', '/api/telephony/stats')
   });
   
   const {
@@ -161,7 +161,7 @@ export default function AICallCenter() {
     isLoading: isLoadingSettings
   } = useQuery({
     queryKey: ['/api/telephony/voice-settings'],
-    queryFn: () => apiRequest('/api/telephony/voice-settings'),
+    queryFn: () => apiRequest('GET', '/api/telephony/voice-settings'),
     onSuccess: (data) => {
       if (data) {
         setSettings(data);
