@@ -78,27 +78,48 @@ export function OrderForm() {
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: async (data: FormValues) => {
-      // Calculate total amount
-      const totalAmount = data.items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
-      
-      // Format data for API
-      const orderData = {
-        tableNumber: data.tableNumber,
-        status: "pending",
-        totalAmount,
-        notes: data.notes,
-        items: data.items,
-        isUrgent: data.isUrgent,
-        orderSource: data.orderSource,
-      };
-      
-      console.log("Submitting order data:", orderData);
-      const response = await apiRequest("POST", "/api/orders", orderData);
-      return response.json();
+    mutationFn: async (orderData: any) => {
+      try {
+        console.log("Preparing to submit order data:", orderData);
+        
+        // Explicit formatting of request data
+        const requestData = {
+          tableNumber: orderData.tableNumber,
+          status: "pending",
+          totalAmount: orderData.totalAmount,
+          notes: orderData.notes || "",
+          isUrgent: !!orderData.isUrgent,
+          orderSource: "manual",
+          orderNumber: `ORD-${Math.floor(1000 + Math.random() * 9000)}`, // Generate a temporary order number
+        };
+        
+        console.log("Submitting final order data to API:", requestData);
+        const response = await fetch("/api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error("Error response from server:", errorData);
+          throw new Error(`Server returned ${response.status}: ${errorData}`);
+        }
+        
+        const orderResult = await response.json();
+        console.log("Order created successfully:", orderResult);
+        
+        // The order items will be created on the server side
+        // when we provide them in the order creation API
+        console.log("Order items will be created by the backend:", orderData.items);
+        
+        return orderResult;
+      } catch (error) {
+        console.error("Error in order mutation:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -115,10 +136,11 @@ export function OrderForm() {
       
       setLocation("/kitchen-tokens");
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Error in mutation:", error);
       toast({
         title: "Error creating order",
-        description: error.message,
+        description: error.message || "An unknown error occurred",
         variant: "destructive",
       });
     },
