@@ -9,14 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+// Predefined orders
+const PREDEFINED_ORDERS = [
+  { id: "order1", label: "2 Butter Chicken and 1 Veg Biryani", text: "I'd like 2 butter chicken and 1 vegetable biryani please" },
+  { id: "order2", label: "1 Paneer Tikka and 2 Masala Chai", text: "I want one paneer tikka and two masala chai" },
+  { id: "order3", label: "Family Combo - All Main Dishes", text: "Give me one of each main course item on the menu" },
+  { id: "order4", label: "Butter Chicken with Extra Spice", text: "I'd like a butter chicken, make it extra spicy please" },
+  { id: "order5", label: "Veg Biryani and Gulab Jamun", text: "Can I get a veg biryani and one gulab jamun for dessert" },
+];
+
 // Form schema for the AI-driven order creation
 const formSchema = z.object({
-  orderText: z.string().min(5, "Please provide a longer order description"),
+  orderOption: z.string().min(1, "Please select an order option"),
   orderSource: z.string().default("ai"),
   tableNumber: z.string().optional(),
 });
@@ -35,7 +44,7 @@ export function AICompleteDrivenOrder() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      orderText: "",
+      orderOption: "",
       orderSource: "ai",
       tableNumber: "",
     },
@@ -44,7 +53,20 @@ export function AICompleteDrivenOrder() {
   const onSubmit = async (data: FormValues) => {
     try {
       setStatus("processing");
-      console.log("Submitting AI-driven order:", data);
+      
+      // Get the actual order text based on the selected option
+      const selectedOrder = PREDEFINED_ORDERS.find(order => order.id === data.orderOption);
+      if (!selectedOrder) {
+        throw new Error("Invalid order selection");
+      }
+      
+      const orderData = {
+        orderText: selectedOrder.text,
+        orderSource: data.orderSource,
+        tableNumber: data.tableNumber
+      };
+      
+      console.log("Submitting AI-driven order:", orderData);
 
       // Call the API to create an AI-driven order
       const response = await fetch("/api/ai/create-order", {
@@ -52,7 +74,7 @@ export function AICompleteDrivenOrder() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(orderData),
       });
       
       if (!response.ok) {
@@ -78,7 +100,7 @@ export function AICompleteDrivenOrder() {
 
       // Reset the form
       form.reset({
-        orderText: "",
+        orderOption: "",
         orderSource: "ai",
         tableNumber: "",
       });
@@ -98,7 +120,7 @@ export function AICompleteDrivenOrder() {
       <CardHeader>
         <CardTitle className="text-2xl font-bold">AI-Driven Order Creation</CardTitle>
         <CardDescription>
-          Create and process orders automatically using AI. Describe your order in natural language,
+          Create and process orders automatically using AI. Select a predefined order,
           and the AI will handle everything from order creation to billing.
         </CardDescription>
       </CardHeader>
@@ -108,19 +130,29 @@ export function AICompleteDrivenOrder() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="orderText"
+              name="orderOption"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Order Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="E.g., I'd like to order 2 butter chicken, 3 naan, and 1 chicken biryani. Make the butter chicken spicy."
-                      className="min-h-32 resize-none"
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel>Select an Order</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose one of the predefined orders" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PREDEFINED_ORDERS.map((order) => (
+                        <SelectItem key={order.id} value={order.id}>
+                          {order.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormDescription>
-                    Describe the order in natural language. Include quantities, special instructions, etc.
+                    Select one of the predefined orders to let the AI process it automatically.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
