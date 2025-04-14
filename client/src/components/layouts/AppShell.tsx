@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { ChatInterface, MinimizedChatButton } from "@/components/chatbot/ChatInterface";
 
 interface NavItem {
   label: string;
@@ -46,10 +47,25 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [chatVisible, setChatVisible] = useState(false);
 
   const currentPage = mainNavItems.find(item => item.href === location) || 
                       managementNavItems.find(item => item.href === location) ||
                       { label: "Dashboard" };
+                      
+  // Determine the user type based on the current location
+  const getUserType = () => {
+    if (location.includes("kitchen")) {
+      return "kitchen";
+    }
+    
+    const adminRoutes = ["/inventory", "/customers", "/menu-items", "/reports"];
+    if (adminRoutes.some(route => location === route)) {
+      return "admin";
+    }
+    
+    return "customer";
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-neutral-900 text-neutral-200">
@@ -348,6 +364,17 @@ export function AppShell({ children }: AppShellProps) {
           </Link>
         </div>
       </nav>
+      
+      {/* Chatbot UI */}
+      {chatVisible ? (
+        <ChatInterface 
+          userType={getUserType()}
+          minimized={false}
+          onMinimize={() => setChatVisible(false)}
+        />
+      ) : (
+        <MinimizedChatButton onClick={() => setChatVisible(true)} />
+      )}
     </div>
   );
 }
