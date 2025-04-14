@@ -178,6 +178,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/kitchen-tokens", async (req: Request, res: Response) => {
     try {
+      console.log("Received kitchen token creation request:", req.body);
+      
       const tokenData = {
         ...req.body,
         tokenNumber: generateTokenNumber()
@@ -186,8 +188,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parsedToken = insertKitchenTokenSchema.parse(tokenData);
       const kitchenToken = await storage.createKitchenToken(parsedToken);
       
+      console.log("Created kitchen token:", kitchenToken);
+      res.setHeader('Content-Type', 'application/json');
       res.status(201).json(kitchenToken);
     } catch (err) {
+      console.error("Kitchen token creation error:", err);
       errorHandler(err, res);
     }
   });
@@ -241,6 +246,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/bills", async (req: Request, res: Response) => {
     try {
+      console.log("Received bill creation request:", req.body);
+      
       // Verify that the order exists
       const orderId = req.body.orderId;
       const order = await storage.getOrder(orderId);
@@ -261,8 +268,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update order status
       await storage.updateOrder(orderId, { status: "billed" });
       
+      console.log("Created bill:", bill);
+      res.setHeader('Content-Type', 'application/json');
       res.status(201).json(bill);
     } catch (err) {
+      console.error("Bill creation error:", err);
       errorHandler(err, res);
     }
   });

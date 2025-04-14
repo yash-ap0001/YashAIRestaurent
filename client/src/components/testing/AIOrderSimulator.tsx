@@ -109,6 +109,7 @@ export function AIOrderSimulator() {
       
       // Step 3: Generate kitchen token
       updateStepStatus(2, "processing", "Generating kitchen token...");
+      console.log("Making API request to create kitchen token");
       const kitchenTokenResponse = await apiRequest(
         "POST",
         "/api/kitchen-tokens",
@@ -170,18 +171,33 @@ export function AIOrderSimulator() {
       // Step 5: Generate bill
       updateStepStatus(4, "processing", "Generating bill...");
       
+      console.log("Creating bill for order:", orderResult.id);
       const billResponse = await apiRequest(
         "POST",
         "/api/bills",
         {
           orderId: orderResult.id,
           amount: orderResult.totalAmount,
+          subtotal: orderResult.totalAmount * 0.9, // 90% of total
+          tax: orderResult.totalAmount * 0.1, // 10% of total
+          discount: 0,
+          total: orderResult.totalAmount,
           paymentMethod: "card",
           status: "paid",
           customerName: "AI Customer",
           customerPhone: "+911234567890"
         }
       );
+      
+      // Check if response is HTML
+      const billContentType = billResponse.headers.get('content-type');
+      if (billContentType && billContentType.includes('text/html')) {
+        console.error('Received HTML response instead of JSON for bill creation');
+        const htmlContent = await billResponse.text();
+        console.error('Bill response content:', htmlContent);
+        throw new Error('Received HTML response from server for bill creation');
+      }
+      
       const billResult = await billResponse.json();
       
       if (!billResult || !billResult.id) {
