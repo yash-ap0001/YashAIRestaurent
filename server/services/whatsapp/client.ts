@@ -1,4 +1,4 @@
-import { Client, LocalAuth } from 'whatsapp-web.js';
+import { Client } from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 import { EventEmitter } from 'events';
 import { processNaturalLanguageOrder } from '../aiService';
@@ -252,8 +252,10 @@ class WhatsAppClient extends EventEmitter {
         });
       }
       
-      // Create the order
+      // Create the order with generated order number
+      const orderNumber = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
       const order = await storage.createOrder({
+        orderNumber,
         tableNumber: "WhatsApp",
         status: "pending",
         totalAmount: processedOrder.items.reduce((sum: number, item: any) => 
@@ -275,16 +277,15 @@ class WhatsAppClient extends EventEmitter {
       // Create activity record
       await storage.createActivity({
         type: "order_created",
-        description: `New order #${order.orderNumber} placed via WhatsApp by ${customer.name}`,
-        timestamp: new Date()
+        description: `New order #${order.orderNumber} placed via WhatsApp by ${customer.name}`
       });
       
       // Create kitchen token
       await storage.createKitchenToken({
         orderId: order.id,
+        tokenNumber: `T${Math.floor(10 + Math.random() * 90)}`,
         status: "pending",
-        isUrgent: false,
-        startTime: new Date()
+        isUrgent: false
       });
       
       return order;
@@ -337,9 +338,12 @@ class WhatsAppClient extends EventEmitter {
         bill = await storage.createBill({
           orderId: orderId,
           billNumber: `BILL-${Math.floor(Math.random() * 10000)}`,
-          amount: order.totalAmount,
-          status: "pending",
-          createdAt: new Date()
+          subtotal: order.totalAmount,
+          tax: order.totalAmount * 0.05, // 5% tax
+          discount: 0,
+          total: order.totalAmount * 1.05, // total with tax
+          paymentStatus: "pending",
+          paymentMethod: null
         });
       }
       

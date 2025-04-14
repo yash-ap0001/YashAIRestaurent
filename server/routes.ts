@@ -471,5 +471,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // WhatsApp Integration APIs
+  
+  // Initialize WhatsApp service when the server starts
+  try {
+    console.log("Initializing WhatsApp service...");
+    initializeWhatsAppService()
+      .then(() => console.log("WhatsApp service initialized successfully"))
+      .catch(error => console.error("Failed to initialize WhatsApp service:", error));
+  } catch (error) {
+    console.error("Error setting up WhatsApp service:", error);
+  }
+  
+  // Send a WhatsApp message
+  app.post("/api/whatsapp/send-message", handleSendMessage);
+  
+  // Send a bill via WhatsApp
+  app.post("/api/whatsapp/send-bill", handleSendBill);
+  
+  // Get WhatsApp connection status
+  app.get("/api/whatsapp/status", handleGetStatus);
+
   return httpServer;
 }

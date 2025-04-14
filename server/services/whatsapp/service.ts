@@ -66,7 +66,7 @@ export async function handleSendMessage(req: Request, res: Response) {
     console.error('Error in WhatsApp send message handler:', error);
     res.status(500).json({
       error: 'Failed to send WhatsApp message',
-      details: error.message
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 }
@@ -118,7 +118,7 @@ export async function handleSendBill(req: Request, res: Response) {
       billMessage += `${menuItem?.name || 'Item'} x${item.quantity} - ₹${(item.price * item.quantity).toFixed(2)}\n`;
     }
     
-    billMessage += `\n*TOTAL: ₹${bill.amount.toFixed(2)}*\n\n`;
+    billMessage += `\n*TOTAL: ₹${bill.total.toFixed(2)}*\n\n`;
     billMessage += "Thank you for your order! Please pay at the counter or use our online payment options.";
     
     // Send the bill via WhatsApp
@@ -132,7 +132,7 @@ export async function handleSendBill(req: Request, res: Response) {
     console.error('Error in WhatsApp send bill handler:', error);
     res.status(500).json({
       error: 'Failed to send bill via WhatsApp',
-      details: error.message
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 }
@@ -153,7 +153,7 @@ export async function handleGetStatus(req: Request, res: Response) {
     console.error('Error in WhatsApp status handler:', error);
     res.status(500).json({
       error: 'Failed to get WhatsApp service status',
-      details: error.message
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 }
