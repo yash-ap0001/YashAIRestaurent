@@ -404,9 +404,9 @@ export class MemStorage implements IStorage {
     return newActivity;
   }
   
-  // Initialize with sample data for development
+  // Initialize only the menu items for the application to work properly
   private initSampleData() {
-    // Sample admin user
+    // Sample admin user (keep this for authentication)
     this.createUser({
       username: "admin",
       password: "admin123",
@@ -414,7 +414,7 @@ export class MemStorage implements IStorage {
       role: "admin"
     });
     
-    // Sample menu items
+    // Sample menu items (required for orders to reference)
     const menuItemsToCreate = [
       { name: "Butter Chicken", price: 320, category: "Main Course", description: "Tender chicken cooked in creamy tomato sauce", isAvailable: true },
       { name: "Paneer Tikka", price: 280, category: "Appetizer", description: "Grilled cottage cheese with spices", isAvailable: true },
@@ -425,54 +425,8 @@ export class MemStorage implements IStorage {
     
     menuItemsToCreate.forEach(item => this.createMenuItem(item));
     
-    // Sample orders
-    const ordersToCreate = [
-      { orderNumber: "ORD-7652", tableNumber: "Table 5", status: "completed", totalAmount: 1290, notes: "" },
-      { orderNumber: "ORD-7651", tableNumber: "Table 12", status: "in-progress", totalAmount: 540, notes: "" },
-      { orderNumber: "ORD-7650", tableNumber: "Table 3", status: "billed", totalAmount: 2350, notes: "" },
-      { orderNumber: "ORD-7649", tableNumber: "Takeaway", status: "completed", totalAmount: 180, notes: "" },
-      { orderNumber: "ORD-7648", tableNumber: "Table 8", status: "completed", totalAmount: 890, notes: "" }
-    ];
-    
-    ordersToCreate.forEach(order => this.createOrder(order));
-    
-    // Sample kitchen tokens
-    const tokensToCreate = [
-      { tokenNumber: "T45", orderId: 2, status: "preparing", isUrgent: false },
-      { tokenNumber: "T44", orderId: 2, status: "preparing", isUrgent: false },
-      { tokenNumber: "T43", orderId: 1, status: "delayed", isUrgent: true },
-      { tokenNumber: "T42", orderId: 5, status: "ready", isUrgent: false }
-    ];
-    
-    tokensToCreate.forEach(token => this.createKitchenToken(token));
-    
-    // Sample inventory items
-    const inventoryToCreate = [
-      { name: "Chicken", category: "Meat", quantity: 5, unit: "kg", minQuantity: 2 },
-      { name: "Paneer", category: "Dairy", quantity: 3, unit: "kg", minQuantity: 1 },
-      { name: "Rice", category: "Grains", quantity: 20, unit: "kg", minQuantity: 5 },
-      { name: "Tomatoes", category: "Vegetables", quantity: 2, unit: "kg", minQuantity: 3 },
-      { name: "Milk", category: "Dairy", quantity: 10, unit: "liter", minQuantity: 3 }
-    ];
-    
-    inventoryToCreate.forEach(item => this.createInventoryItem(item));
-    
-    // Sample customers
-    const customersToCreate = [
-      { name: "Rahul Singh", phone: "9876543210", email: "rahul@example.com", visitCount: 5, preferences: ["Veg Biryani", "Masala Chai"] },
-      { name: "Priya Sharma", phone: "9876543211", email: "priya@example.com", visitCount: 2, preferences: ["Paneer Tikka"] }
-    ];
-    
-    customersToCreate.forEach(customer => this.createCustomer(customer));
-    
-    // Sample bills
-    const billsToCreate = [
-      { billNumber: "BILL-3245", orderId: 1, subtotal: 1200, tax: 90, discount: 0, total: 1290, paymentStatus: "paid", paymentMethod: "cash" },
-      { billNumber: "BILL-3244", orderId: 3, subtotal: 2150, tax: 200, discount: 0, total: 2350, paymentStatus: "paid", paymentMethod: "card" },
-      { billNumber: "BILL-3243", orderId: 4, subtotal: 170, tax: 10, discount: 0, total: 180, paymentStatus: "paid", paymentMethod: "cash" }
-    ];
-    
-    billsToCreate.forEach(bill => this.createBill(bill));
+    // No more sample orders, kitchen tokens, inventory, customers or bills
+    // These will be created dynamically by the application when needed
   }
 }
 

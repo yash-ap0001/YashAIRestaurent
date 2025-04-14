@@ -29,6 +29,21 @@ export function RecentOrders({ className }: RecentOrdersProps) {
         return 'bg-neutral-800 text-neutral-400';
     }
   };
+  
+  const getSourceBadgeClass = (source?: string) => {
+    switch (source) {
+      case 'manual':
+        return 'bg-blue-900 bg-opacity-40 text-blue-400';
+      case 'ai_simulator':
+        return 'bg-purple-900 bg-opacity-40 text-purple-400';
+      case 'whatsapp':
+        return 'bg-green-900 bg-opacity-40 text-green-400';
+      case 'phone':
+        return 'bg-amber-900 bg-opacity-40 text-amber-400';
+      default:
+        return 'bg-neutral-800 text-neutral-400';
+    }
+  };
 
   const formatTimeAgo = (dateString: any) => {
     if (!dateString) return 'Unknown time';
@@ -81,6 +96,9 @@ export function RecentOrders({ className }: RecentOrdersProps) {
                     Status
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
+                    Source
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                     Time
                   </th>
                 </tr>
@@ -106,6 +124,19 @@ export function RecentOrders({ className }: RecentOrdersProps) {
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {order.orderSource ? (
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getSourceBadgeClass(order.orderSource)}`}>
+                          {order.orderSource === 'ai_simulator' ? 'AI' :
+                           order.orderSource === 'whatsapp' ? 'WhatsApp' :
+                           order.orderSource === 'manual' ? 'Manual' :
+                           order.orderSource === 'phone' ? 'Phone' :
+                           order.orderSource}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-neutral-500">N/A</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-300">
                       {formatTimeAgo(order.createdAt)}
                     </td>
@@ -113,7 +144,7 @@ export function RecentOrders({ className }: RecentOrdersProps) {
                 ))}
                 {!data?.length && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-3 text-sm text-center text-neutral-400">
+                    <td colSpan={7} className="px-4 py-3 text-sm text-center text-neutral-400">
                       No orders found
                     </td>
                   </tr>
