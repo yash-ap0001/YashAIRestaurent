@@ -118,6 +118,16 @@ export function AIOrderSimulator() {
           isUrgent: false
         }
       );
+      
+      // Check if response is HTML by looking at content-type
+      const contentType = kitchenTokenResponse.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        console.error('Received HTML response instead of JSON');
+        const htmlContent = await kitchenTokenResponse.text();
+        console.error('Response content:', htmlContent);
+        throw new Error('Received HTML response from server. See console for details.');
+      }
+      
       const kitchenTokenResult = await kitchenTokenResponse.json();
       
       if (!kitchenTokenResult || !kitchenTokenResult.id) {
