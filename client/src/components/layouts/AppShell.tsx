@@ -33,6 +33,10 @@ const managementNavItems: NavItem[] = [
   { label: "Reports", href: "/reports", icon: <BarChart3 className="w-5 h-5" /> },
 ];
 
+const testingNavItems: NavItem[] = [
+  { label: "AI Order Simulator", href: "/test-ai-order", icon: <Cpu className="w-5 h-5" /> },
+];
+
 interface AppShellProps {
   children: React.ReactNode;
 }
@@ -63,16 +67,17 @@ export function AppShell({ children }: AppShellProps) {
           <ul>
             {mainNavItems.map((item) => (
               <li key={item.href}>
-                <Link href={item.href}>
-                  <a className={cn(
+                <Link 
+                  href={item.href}
+                  className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                     location === item.href 
                       ? "text-purple-400 bg-purple-900 bg-opacity-40" 
                       : "text-neutral-400 hover:bg-neutral-800"
-                  )}>
-                    <span className="mr-3 text-current">{item.icon}</span>
-                    {item.label}
-                  </a>
+                  )}
+                >
+                  <span className="mr-3 text-current">{item.icon}</span>
+                  {item.label}
                 </Link>
               </li>
             ))}
@@ -84,16 +89,39 @@ export function AppShell({ children }: AppShellProps) {
           <ul>
             {managementNavItems.map((item) => (
               <li key={item.href}>
-                <Link href={item.href}>
-                  <a className={cn(
+                <Link 
+                  href={item.href}
+                  className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                     location === item.href 
                       ? "text-purple-400 bg-purple-900 bg-opacity-40" 
                       : "text-neutral-400 hover:bg-neutral-800"
-                  )}>
-                    <span className="mr-3 text-current">{item.icon}</span>
-                    {item.label}
-                  </a>
+                  )}
+                >
+                  <span className="mr-3 text-current">{item.icon}</span>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          
+          <div className="px-3 mb-2 mt-6">
+            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Testing</p>
+          </div>
+          <ul>
+            {testingNavItems.map((item) => (
+              <li key={item.href}>
+                <Link 
+                  href={item.href}
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                    location === item.href 
+                      ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                      : "text-neutral-400 hover:bg-neutral-800"
+                  )}
+                >
+                  <span className="mr-3 text-current">{item.icon}</span>
+                  {item.label}
                 </Link>
               </li>
             ))}
@@ -178,19 +206,18 @@ export function AppShell({ children }: AppShellProps) {
             <ul>
               {mainNavItems.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href}>
-                    <a 
-                      className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                        location === item.href 
-                          ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                          : "text-neutral-400 hover:bg-neutral-800"
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <span className="mr-3 text-current">{item.icon}</span>
-                      {item.label}
-                    </a>
+                  <Link 
+                    href={item.href}
+                    className={cn(
+                      "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                      location === item.href 
+                        ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                        : "text-neutral-400 hover:bg-neutral-800"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="mr-3 text-current">{item.icon}</span>
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -202,19 +229,41 @@ export function AppShell({ children }: AppShellProps) {
             <ul>
               {managementNavItems.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href}>
-                    <a 
-                      className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                        location === item.href 
-                          ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                          : "text-neutral-400 hover:bg-neutral-800"
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <span className="mr-3 text-current">{item.icon}</span>
-                      {item.label}
-                    </a>
+                  <Link 
+                    href={item.href}
+                    className={cn(
+                      "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                      location === item.href 
+                        ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                        : "text-neutral-400 hover:bg-neutral-800"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="mr-3 text-current">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            
+            <div className="px-3 mb-2 mt-6">
+              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Testing</p>
+            </div>
+            <ul>
+              {testingNavItems.map((item) => (
+                <li key={item.href}>
+                  <Link 
+                    href={item.href}
+                    className={cn(
+                      "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                      location === item.href 
+                        ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                        : "text-neutral-400 hover:bg-neutral-800"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="mr-3 text-current">{item.icon}</span>
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -243,51 +292,57 @@ export function AppShell({ children }: AppShellProps) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-neutral-800 px-4 py-2 z-10">
         <div className="flex justify-around">
           {mainNavItems.slice(0, 4).map((item) => (
-            <Link key={item.href} href={item.href}>
-              <a className={cn(
+            <Link 
+              key={item.href} 
+              href={item.href}
+              className={cn(
                 "flex flex-col items-center px-2 py-1",
                 location === item.href ? "text-purple-400" : "text-neutral-400"
-              )}>
-                <span className="text-xl">{item.icon}</span>
-                <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
-              </a>
+              )}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
             </Link>
           ))}
-          <Link href="/health-advisor">
-            <a className={cn(
+          <Link 
+            href="/test-ai-order"
+            className={cn(
               "flex flex-col items-center px-2 py-1",
-              location === "/health-advisor" ? "text-purple-400" : "text-neutral-400"
-            )}>
-              <span className="text-xl"><HeartPulse className="w-5 h-5" /></span>
-              <span className="text-xs mt-1">Health</span>
-            </a>
+              location === "/test-ai-order" ? "text-purple-400" : "text-neutral-400"
+            )}
+          >
+            <span className="text-xl"><Cpu className="w-5 h-5" /></span>
+            <span className="text-xs mt-1">Test AI</span>
           </Link>
-          <Link href="/whatsapp">
-            <a className={cn(
+          <Link 
+            href="/whatsapp"
+            className={cn(
               "flex flex-col items-center px-2 py-1",
               location === "/whatsapp" ? "text-purple-400" : "text-neutral-400"
-            )}>
-              <span className="text-xl"><MessageCircle className="w-5 h-5" /></span>
-              <span className="text-xs mt-1">WhatsApp</span>
-            </a>
+            )}
+          >
+            <span className="text-xl"><MessageCircle className="w-5 h-5" /></span>
+            <span className="text-xs mt-1">WhatsApp</span>
           </Link>
-          <Link href="/phone-orders">
-            <a className={cn(
+          <Link 
+            href="/phone-orders"
+            className={cn(
               "flex flex-col items-center px-2 py-1",
               location === "/phone-orders" ? "text-purple-400" : "text-neutral-400"
-            )}>
-              <span className="text-xl"><Phone className="w-5 h-5" /></span>
-              <span className="text-xs mt-1">Phone</span>
-            </a>
+            )}
+          >
+            <span className="text-xl"><Phone className="w-5 h-5" /></span>
+            <span className="text-xs mt-1">Phone</span>
           </Link>
-          <Link href="/ai-call-center">
-            <a className={cn(
+          <Link 
+            href="/ai-call-center"
+            className={cn(
               "flex flex-col items-center px-2 py-1",
               location === "/ai-call-center" ? "text-purple-400" : "text-neutral-400"
-            )}>
-              <span className="text-xl"><PhoneCall className="w-5 h-5" /></span>
-              <span className="text-xs mt-1">AI Call</span>
-            </a>
+            )}
+          >
+            <span className="text-xl"><PhoneCall className="w-5 h-5" /></span>
+            <span className="text-xs mt-1">AI Call</span>
           </Link>
         </div>
       </nav>
