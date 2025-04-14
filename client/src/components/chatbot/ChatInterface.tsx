@@ -181,19 +181,19 @@ export function ChatInterface({
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 w-80 md:w-96 shadow-lg z-50 border-primary/20">
-      <CardHeader className="bg-primary/5 p-3 flex flex-row items-center justify-between border-b">
+    <Card className="fixed bottom-4 right-4 w-80 md:w-96 shadow-lg z-50 border-purple-800 bg-black">
+      <CardHeader className="bg-black p-3 flex flex-row items-center justify-between border-b border-neutral-800">
         <div className="flex items-center">
-          <Avatar className="h-8 w-8 mr-2">
+          <Avatar className="h-8 w-8 mr-2 bg-purple-900">
             <AvatarImage src="/bot-avatar.png" alt="Bot Avatar" />
             <AvatarFallback>
-              <Bot className="h-4 w-4" />
+              <Bot className="h-4 w-4 text-purple-300" />
             </AvatarFallback>
           </Avatar>
-          <CardTitle className="text-sm font-medium">
+          <CardTitle className="text-sm font-medium text-white">
             YashBot Assistant
             <div>
-              <Badge variant="outline" className="text-xs font-normal">
+              <Badge variant="outline" className="text-xs font-normal bg-purple-900/20 text-purple-300 border-purple-800">
                 {userType === "customer" 
                   ? "Customer Support" 
                   : userType === "admin" 
@@ -207,7 +207,7 @@ export function ChatInterface({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-7 w-7" 
+            className="h-7 w-7 text-neutral-400 hover:text-purple-400 hover:bg-purple-900/20" 
             onClick={clearChat}
           >
             <RefreshCw className="h-4 w-4" />
@@ -216,7 +216,7 @@ export function ChatInterface({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-7 w-7" 
+            className="h-7 w-7 text-neutral-400 hover:text-purple-400 hover:bg-purple-900/20" 
             onClick={onMinimize}
           >
             <X className="h-4 w-4" />
@@ -224,7 +224,7 @@ export function ChatInterface({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 bg-neutral-900">
         <div className="h-96 overflow-y-auto p-4 space-y-4">
           {messages.map((message, index) => (
             <div
@@ -235,9 +235,9 @@ export function ChatInterface({
               )}
             >
               {message.role === "assistant" && (
-                <Avatar className="h-8 w-8 mt-0.5">
+                <Avatar className="h-8 w-8 mt-0.5 bg-purple-900">
                   <AvatarFallback>
-                    <Bot className="h-4 w-4" />
+                    <Bot className="h-4 w-4 text-purple-300" />
                   </AvatarFallback>
                 </Avatar>
               )}
@@ -245,8 +245,8 @@ export function ChatInterface({
                 className={cn(
                   "rounded-lg px-3 py-2 max-w-[85%]",
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                    ? "bg-purple-800 text-purple-50"
+                    : "bg-neutral-800 text-neutral-100"
                 )}
               >
                 <div className="whitespace-pre-wrap text-sm">
@@ -257,9 +257,9 @@ export function ChatInterface({
                 </div>
               </div>
               {message.role === "user" && (
-                <Avatar className="h-8 w-8 mt-0.5">
+                <Avatar className="h-8 w-8 mt-0.5 bg-purple-700">
                   <AvatarFallback>
-                    <User className="h-4 w-4" />
+                    <User className="h-4 w-4 text-purple-100" />
                   </AvatarFallback>
                 </Avatar>
               )}
@@ -267,16 +267,16 @@ export function ChatInterface({
           ))}
           {isLoading && (
             <div className="flex items-start gap-2">
-              <Avatar className="h-8 w-8 mt-0.5">
+              <Avatar className="h-8 w-8 mt-0.5 bg-purple-900">
                 <AvatarFallback>
-                  <Bot className="h-4 w-4" />
+                  <Bot className="h-4 w-4 text-purple-300" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted rounded-lg px-3 py-2 max-w-[85%]">
+              <div className="bg-neutral-800 rounded-lg px-3 py-2 max-w-[85%]">
                 <div className="flex items-center gap-1">
-                  <div className="h-2 w-2 rounded-full bg-primary/40 animate-bounce delay-0"></div>
-                  <div className="h-2 w-2 rounded-full bg-primary/40 animate-bounce delay-150"></div>
-                  <div className="h-2 w-2 rounded-full bg-primary/40 animate-bounce delay-300"></div>
+                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-bounce delay-0"></div>
+                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-bounce delay-150"></div>
+                  <div className="h-2 w-2 rounded-full bg-purple-500 animate-bounce delay-300"></div>
                 </div>
               </div>
             </div>
@@ -284,7 +284,7 @@ export function ChatInterface({
           <div ref={messagesEndRef} />
         </div>
       </CardContent>
-      <CardFooter className="p-3 pt-0">
+      <CardFooter className="p-3 pt-0 bg-black border-t border-neutral-800">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -298,13 +298,14 @@ export function ChatInterface({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your message..."
-            className="flex-1"
+            className="flex-1 bg-neutral-800 border-neutral-700 text-neutral-100 focus-visible:ring-purple-600"
             disabled={isLoading}
           />
           <Button 
             size="icon" 
             type="submit" 
             disabled={isLoading || !input.trim()}
+            className="bg-purple-700 hover:bg-purple-600"
           >
             {isLoading ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -323,9 +324,9 @@ export function MinimizedChatButton({ onClick }: { onClick: () => void }) {
   return (
     <Button
       onClick={onClick}
-      className="fixed bottom-4 right-4 z-50 rounded-full h-14 w-14 shadow-lg p-0 bg-primary/90 hover:bg-primary"
+      className="fixed bottom-4 right-4 z-50 rounded-full h-14 w-14 shadow-lg p-0 bg-purple-800 hover:bg-purple-700 border-2 border-purple-700"
     >
-      <Bot className="h-6 w-6" />
+      <Bot className="h-6 w-6 text-purple-100" />
       <span className="sr-only">Open Chat</span>
     </Button>
   );
