@@ -27,6 +27,7 @@ import {
   updateAIVoiceSettings, 
   simulateIncomingCall 
 } from "./services/telephony";
+import { processChatbotRequest } from "./services/chatbot";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
