@@ -35,6 +35,10 @@ export default function WhatsApp() {
   } = useQuery<Message[]>({
     queryKey: ['/api/whatsapp/message-history'],
     refetchInterval: 5000, // Refresh every 5 seconds
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/whatsapp/message-history');
+      return await response.json();
+    }
   });
 
   // Query to fetch WhatsApp service status
@@ -44,12 +48,18 @@ export default function WhatsApp() {
     refetch: refetchStatus
   } = useQuery<StatusData>({
     queryKey: ['/api/whatsapp/status'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/whatsapp/status');
+      return await response.json();
+    }
   });
 
   // Mutation to simulate a message
   const simulateMessageMutation = useMutation({
-    mutationFn: (payload: { phone: string; message: string; name: string }) => 
-      apiRequest('/api/whatsapp/simulate-message', 'POST', payload),
+    mutationFn: async (payload: { phone: string; message: string; name: string }) => {
+      const response = await apiRequest('POST', '/api/whatsapp/simulate-message', payload);
+      return await response.json();
+    },
     onSuccess: () => {
       toast({
         title: 'Message sent successfully',
@@ -69,8 +79,10 @@ export default function WhatsApp() {
 
   // Mutation to send a direct message
   const sendMessageMutation = useMutation({
-    mutationFn: (payload: { phone: string; message: string }) => 
-      apiRequest('/api/whatsapp/send-message', 'POST', payload),
+    mutationFn: async (payload: { phone: string; message: string }) => {
+      const response = await apiRequest('POST', '/api/whatsapp/send-message', payload);
+      return await response.json();
+    },
     onSuccess: () => {
       toast({
         title: 'Message sent successfully',
