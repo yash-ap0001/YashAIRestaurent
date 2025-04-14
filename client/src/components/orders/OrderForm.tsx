@@ -44,6 +44,7 @@ const formSchema = z.object({
   ).min(1, "At least one item is required"),
   notes: z.string().optional(),
   isUrgent: z.boolean().default(false),
+  orderSource: z.string().default("manual"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -68,6 +69,7 @@ export function OrderForm() {
       items: [],
       notes: "",
       isUrgent: false,
+      orderSource: "manual",
     },
   });
 
@@ -91,6 +93,7 @@ export function OrderForm() {
         notes: data.notes,
         items: data.items,
         isUrgent: data.isUrgent,
+        orderSource: data.orderSource,
       };
       
       console.log("Submitting order data:", orderData);
