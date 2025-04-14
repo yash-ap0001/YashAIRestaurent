@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader, Check, AlertTriangle, RefreshCcw, HeartPulse, ReceiptText, PhoneCall } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -30,13 +31,15 @@ export function AIOrderSimulator() {
   );
   const [processing, setProcessing] = useState<boolean>(false);
   const [phone, setPhone] = useState('918765432100');
+  const [autoSendToWhatsApp, setAutoSendToWhatsApp] = useState(true);
   const [lastCreatedBillId, setLastCreatedBillId] = useState<string>('');
   const [steps, setSteps] = useState<ProcessStep[]>([
     { name: "Parse order with AI", status: "pending" },
     { name: "Create order", status: "pending" },
     { name: "Generate kitchen token", status: "pending" },
     { name: "Process payment", status: "pending" },
-    { name: "Generate bill", status: "pending" }
+    { name: "Generate bill", status: "pending" },
+    { name: "Share bill via WhatsApp", status: "pending" }
   ]);
 
   const updateStepStatus = (index: number, status: ProcessStep["status"], details?: string, data?: any) => {
@@ -215,6 +218,36 @@ export function AIOrderSimulator() {
       
       updateStepStatus(4, "completed", "Bill generated successfully", billResult);
       
+      // Step 6: Send bill with health tips via WhatsApp
+      if (autoSendToWhatsApp && phone) {
+        updateStepStatus(5, "processing", "Sending bill with health tips to WhatsApp...");
+        
+        try {
+          const whatsappResponse = await apiRequest(
+            "POST",
+            "/api/whatsapp/send-bill-with-health-tips",
+            { 
+              billId: billResult.id.toString(),
+              phone 
+            }
+          );
+          
+          const whatsappResult = await whatsappResponse.json();
+          
+          if (whatsappResult.success) {
+            updateStepStatus(5, "completed", "Bill with health tips sent successfully to WhatsApp", whatsappResult);
+            queryClient.invalidateQueries({ queryKey: ['/api/whatsapp/message-history'] });
+          } else {
+            throw new Error(whatsappResult.error || "Failed to send bill to WhatsApp");
+          }
+        } catch (error) {
+          console.error("Failed to send bill to WhatsApp:", error);
+          updateStepStatus(5, "error", error instanceof Error ? error.message : "Failed to send bill to WhatsApp");
+        }
+      } else {
+        updateStepStatus(5, "pending", "WhatsApp integration is available in the panel below");
+      }
+      
       // Invalidate queries to refresh data across the application
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
@@ -267,7 +300,7 @@ export function AIOrderSimulator() {
       <CardHeader>
         <CardTitle className="text-white">AI Order Simulator</CardTitle>
         <CardDescription className="text-neutral-400">
-          Test the complete AI order processing flow from natural language to bill generation
+          Test the complete AI order workflow from natural language to bill generation with automated WhatsApp sharing
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -279,6 +312,29 @@ export function AIOrderSimulator() {
             className="min-h-[100px] bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500"
             disabled={processing}
           />
+        </div>
+        
+        <div className="flex items-center space-x-2 w-full px-1 py-1">
+          <div className="flex items-center space-x-2 flex-1">
+            <label className="text-sm text-white font-medium">WhatsApp Number:</label>
+            <Input
+              type="text"
+              placeholder="918765432100"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-[180px] h-8 bg-neutral-900 border-neutral-700 text-white"
+              disabled={processing}
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={autoSendToWhatsApp}
+              onCheckedChange={setAutoSendToWhatsApp}
+              disabled={processing}
+              className="data-[state=checked]:bg-purple-600"
+            />
+            <label className="text-sm text-white">Auto-send bill via WhatsApp</label>
+          </div>
         </div>
         
         <Button
@@ -347,7 +403,8 @@ export function AIOrderSimulator() {
           ))}
         </div>
       </CardContent>
-      {steps.some(step => step.status === "completed" && step.name === "Generate bill") && (
+      {steps.some(step => step.status === "completed" && step.name === "Generate bill") && 
+       !autoSendToWhatsApp && (
         <CardFooter className="flex flex-col space-y-4 pt-4 border-t border-neutral-700">
           <h3 className="text-sm font-medium text-white w-full">WhatsApp Integration</h3>
           
