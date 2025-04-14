@@ -129,6 +129,9 @@ export function OrderForm() {
       notes: item.notes
     }));
     
+    // Set the order source to "manual" to identify orders created through the form
+    data.orderSource = "manual";
+    
     createOrderMutation.mutate(data);
   };
 

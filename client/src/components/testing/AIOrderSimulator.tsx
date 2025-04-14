@@ -96,7 +96,7 @@ export function AIOrderSimulator() {
           items: orderItems,
           status: "confirmed",
           totalAmount: orderItems.reduce((total, item) => total + (item.price * item.quantity), 0),
-          orderSource: "ai_simulator"
+          orderSource: "ai_simulator" // This identifies orders created by the AI simulator
         }
       );
       const orderResult = await orderResponse.json();

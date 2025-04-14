@@ -229,7 +229,8 @@ class WhatsAppClient extends EventEmitter {
         status: "pending",
         totalAmount: processedOrder.items.reduce((sum: number, item: any) => 
           sum + (item.quantity * item.price), 0),
-        notes: processedOrder.notes || "Order placed via WhatsApp"
+        notes: processedOrder.notes || "Order placed via WhatsApp",
+        orderSource: "whatsapp" // Identify orders created through WhatsApp
       });
       
       // Create order items
