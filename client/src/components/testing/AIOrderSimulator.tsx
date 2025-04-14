@@ -32,6 +32,7 @@ export function AIOrderSimulator() {
   const [processing, setProcessing] = useState<boolean>(false);
   const [phone, setPhone] = useState('918765432100');
   const [autoSendToWhatsApp, setAutoSendToWhatsApp] = useState(true);
+  const [orderSource, setOrderSource] = useState<string>("zomato");
   const [lastCreatedBillId, setLastCreatedBillId] = useState<string>('');
   const [steps, setSteps] = useState<ProcessStep[]>([
     { name: "Parse order with AI", status: "pending" },
@@ -105,7 +106,7 @@ export function AIOrderSimulator() {
           items: orderItems,
           status: "confirmed",
           totalAmount: orderItems.reduce((total, item) => total + (item.price * item.quantity), 0),
-          orderSource: "ai_simulator" // This identifies orders created by the AI simulator
+          orderSource: orderSource // Using the selected order source (zomato, swiggy, whatsapp, manual)
         }
       );
       const orderResult = await orderResponse.json();
@@ -298,9 +299,9 @@ export function AIOrderSimulator() {
   return (
     <Card className="bg-neutral-800 border-neutral-700 w-full">
       <CardHeader>
-        <CardTitle className="text-white">AI Order Simulator</CardTitle>
+        <CardTitle className="text-white">Food Delivery Platform Simulator</CardTitle>
         <CardDescription className="text-neutral-400">
-          Test the complete AI order workflow from natural language to bill generation with automated WhatsApp sharing
+          Simulate orders from Zomato, Swiggy, and WhatsApp with automated AI processing and bill sharing
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -316,13 +317,27 @@ export function AIOrderSimulator() {
         
         <div className="flex items-center space-x-2 w-full px-1 py-1">
           <div className="flex items-center space-x-2 flex-1">
-            <label className="text-sm text-white font-medium">WhatsApp Number:</label>
+            <div className="flex items-center space-x-2">
+              <label className="text-sm text-white font-medium">Order Source:</label>
+              <Select value={orderSource} onValueChange={setOrderSource} disabled={processing}>
+                <SelectTrigger className="w-[120px] h-8 bg-neutral-900 border-neutral-700 text-white">
+                  <SelectValue placeholder="Select source" />
+                </SelectTrigger>
+                <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
+                  <SelectItem value="zomato">Zomato</SelectItem>
+                  <SelectItem value="swiggy">Swiggy</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="manual">Manual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <label className="text-sm text-white font-medium ml-2">WhatsApp Number:</label>
             <Input
               type="text"
               placeholder="918765432100"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-[180px] h-8 bg-neutral-900 border-neutral-700 text-white"
+              className="w-[150px] h-8 bg-neutral-900 border-neutral-700 text-white"
               disabled={processing}
             />
           </div>
