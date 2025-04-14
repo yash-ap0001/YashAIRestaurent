@@ -108,11 +108,8 @@ export function OrderForm() {
         // Log the complete request
         console.log("DEBUG - Submitting data to API:", JSON.stringify(requestData, null, 2));
         
-        // Use the project's standard API request function
-        const result = await apiRequest("/api/orders", {
-          method: "POST",
-          body: JSON.stringify(requestData)
-        });
+        // Use the project's standard API request function - pass method as first parameter
+        const result = await apiRequest("POST", "/api/orders", requestData);
         
         console.log("DEBUG - Order API response:", result);
         return result;
@@ -121,8 +118,10 @@ export function OrderForm() {
         throw error;
       }
     },
-    onSuccess: (data) => {
-      console.log("DEBUG - Order created successfully:", data);
+    onSuccess: async (response) => {
+      // Convert response to JSON
+      const data = await response.json();
+      console.log("DEBUG - Order created successfully with data:", data);
       
       // Show success toast with order number
       toast({
@@ -570,7 +569,18 @@ export function OrderForm() {
                 description: "Submitting a test order to the API..."
               });
               
-              createOrderMutation.mutate(testOrderData);
+              // Direct API call to ensure it works
+              try {
+                console.log("Making direct emergency test order");
+                createOrderMutation.mutate(testOrderData);
+              } catch (error: any) {
+                console.error("Emergency order creation failed:", error);
+                toast({
+                  title: "Emergency Order Failed",
+                  description: `Error: ${error?.message || "Unknown error"}`,
+                  variant: "destructive"
+                });
+              }
             }}
           >
             Emergency Debug Order
