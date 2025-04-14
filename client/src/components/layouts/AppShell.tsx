@@ -20,6 +20,7 @@ const mainNavItems: NavItem[] = [
   { label: "New Order", href: "/new-order", icon: <PlusSquare className="w-5 h-5" /> },
   { label: "Kitchen Tokens", href: "/kitchen-tokens", icon: <Receipt className="w-5 h-5" /> },
   { label: "Billing", href: "/billing", icon: <CreditCard className="w-5 h-5" /> },
+  { label: "Health Advisor", href: "/health-advisor", icon: <HeartPulse className="w-5 h-5" /> },
 ];
 
 const managementNavItems: NavItem[] = [
@@ -249,10 +250,15 @@ export function AppShell({ children }: AppShellProps) {
               </a>
             </Link>
           ))}
-          <Button variant="ghost" className="flex flex-col items-center px-2 py-1 text-neutral-500 h-auto">
-            <ChevronDown className="w-5 h-5" />
-            <span className="text-xs mt-1">More</span>
-          </Button>
+          <Link href="/health-advisor">
+            <a className={cn(
+              "flex flex-col items-center px-2 py-1",
+              location === "/health-advisor" ? "text-primary-500" : "text-neutral-500"
+            )}>
+              <span className="text-xl"><HeartPulse className="w-5 h-5" /></span>
+              <span className="text-xs mt-1">Health</span>
+            </a>
+          </Link>
         </div>
       </nav>
     </div>

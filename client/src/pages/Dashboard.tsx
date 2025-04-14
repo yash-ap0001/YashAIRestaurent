@@ -4,6 +4,7 @@ import { LiveKitchenStatus } from "@/components/dashboard/LiveKitchenStatus";
 import { SalesOverview } from "@/components/dashboard/SalesOverview";
 import { TopSellingItems } from "@/components/dashboard/TopSellingItems";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { PersonalizedRecommendations } from "@/components/menu/PersonalizedRecommendations";
 
 export default function Dashboard() {
   return (
@@ -23,8 +24,11 @@ export default function Dashboard() {
         <TopSellingItems />
       </div>
       
-      {/* Recent Activity */}
-      <RecentActivity />
+      {/* AI and Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <RecentActivity className="lg:col-span-2" />
+        <PersonalizedRecommendations />
+      </div>
     </div>
   );
 }
