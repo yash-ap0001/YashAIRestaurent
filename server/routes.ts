@@ -714,16 +714,11 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Health Recommendations
   app.post("/api/ai/health-recommendations", async (req: Request, res: Response) => {
     try {
-      const { preferences, restrictions } = req.body;
+      const { customerPhone, preferences, restrictions } = req.body;
       
-      if (!preferences) {
-        return res.status(400).json({ error: "Dietary preferences are required" });
-      }
-      
-      const menuItems = await storage.getMenuItems();
-      const recommendations = await getHealthRecommendations(
-        menuItems,
-        preferences,
+      // Use the new AI service to get health recommendations
+      const recommendations = await aiService.getHealthRecommendations(
+        customerPhone,
         restrictions || []
       );
       
@@ -737,14 +732,14 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Natural Language Order Processing
   app.post("/api/ai/process-order", async (req: Request, res: Response) => {
     try {
-      const { orderText } = req.body;
+      const { orderText, source = "ai" } = req.body;
       
       if (!orderText) {
         return res.status(400).json({ error: "Order text is required" });
       }
       
-      const menuItems = await storage.getMenuItems();
-      const processedOrder = await processNaturalLanguageOrder(orderText, menuItems);
+      // Use the new AI service to process natural language orders
+      const processedOrder = await aiService.processNaturalLanguageOrder(orderText, source);
       
       res.json(processedOrder);
     } catch (err) {
@@ -764,91 +759,21 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       
       console.log(`AI-driven order creation received for text: "${orderText}"`);
       
-      // Step 1: Process natural language order
-      const menuItems = await storage.getMenuItems();
-      const processedOrder = await processNaturalLanguageOrder(orderText, menuItems);
+      // Use the new AI service to process natural language orders
+      const result = await aiService.processNaturalLanguageOrder(orderText, orderSource);
       
-      if (!processedOrder.items || processedOrder.items.length === 0) {
-        return res.status(400).json({ 
-          error: "Failed to identify any menu items in the order text",
-          processed: processedOrder
+      if (!result.success) {
+        return res.status(400).json({
+          error: result.message || "Failed to process natural language order",
+          details: result
         });
       }
       
-      // Step 2: Add price information to each item by looking it up from menuItems
-      for (const item of processedOrder.items) {
-        // Find corresponding menu item to get the price
-        const menuItem = menuItems.find(mi => mi.id === item.menuItemId);
-        if (menuItem) {
-          item.price = menuItem.price;
-        } else {
-          // Set a default price if menu item not found (should not happen)
-          console.warn(`Menu item with ID ${item.menuItemId} not found. Using default price.`);
-          item.price = 0;
-        }
-      }
-      
-      // Calculate total amount with the now-populated prices
-      const totalAmount = processedOrder.items.reduce((total, item) => {
-        return total + (item.price * item.quantity);
-      }, 0);
-      
-      // Create the order with useAIAutomation enabled
-      const orderData = {
-        orderNumber: generateOrderNumber(),
-        tableNumber: tableNumber,
-        status: "pending",
-        totalAmount: totalAmount,
-        notes: processedOrder.notes || null,
-        orderSource: orderSource,
-        useAIAutomation: true, // Always enable AI automation for AI-created orders
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      console.log("Creating AI-driven order:", orderData);
-      
-      // Create the order
-      const parsedOrder = insertOrderSchema.parse(orderData);
-      const order = await storage.createOrder(parsedOrder);
-      
-      // Step 3: Create order items
-      console.log(`Creating ${processedOrder.items.length} order items`);
-      for (const item of processedOrder.items) {
-        const orderItem = {
-          orderId: order.id,
-          menuItemId: item.menuItemId,
-          quantity: item.quantity,
-          price: item.price,
-          notes: item.notes || null
-        };
-        
-        const parsedOrderItem = insertOrderItemSchema.parse(orderItem);
-        await storage.createOrderItem(parsedOrderItem);
-      }
-      
-      // Step 4: Create a kitchen token
-      console.log("Creating kitchen token for AI-driven order:", order.id);
-      const tokenData = {
-        tokenNumber: generateTokenNumber(),
-        orderId: order.id,
-        status: "pending",
-        isUrgent: false,
-        startTime: new Date(),
-        completionTime: null
-      };
-      
-      const parsedToken = insertKitchenTokenSchema.parse(tokenData);
-      const kitchenToken = await storage.createKitchenToken(parsedToken);
-      
-      // Step 5: Set up automated order progression
-      setupAIAutomatedOrderProcessing(order);
-      
-      // Step 6: Log the activity
+      // Record activity for the dashboard
       await storage.createActivity({
         type: "order_created",
-        description: `AI created and processing order #${order.orderNumber} automatically`,
-        entityId: order.id,
+        description: `AI created and processing order #${result.order.orderNumber} automatically`,
+        entityId: result.order.id,
         entityType: "order"
       });
       
@@ -856,9 +781,8 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       res.status(201).json({
         success: true,
         message: "AI-driven order created successfully and being processed automatically",
-        order: order,
-        items: processedOrder.items,
-        kitchenToken: kitchenToken
+        order: result.order,
+        items: result.items
       });
     } catch (err) {
       console.error("AI order creation error:", err);
@@ -869,20 +793,10 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Personalized Menu Recommendations
   app.post("/api/ai/menu-recommendations", async (req: Request, res: Response) => {
     try {
-      const { customerId, preferences } = req.body;
+      const { customerPhone } = req.body;
       
-      // Get customer order history
-      const orders = await storage.getOrders();
-      // In production, orders would have a customer ID
-      // For now, just return an empty array for customer history
-      const customerHistory = [];
-        
-      const menuItems = await storage.getMenuItems();
-      const recommendations = await getPersonalizedRecommendations(
-        customerHistory,
-        menuItems,
-        preferences
-      );
+      // Use the new AI service to get personalized recommendations
+      const recommendations = await aiService.getPersonalizedRecommendations(customerPhone);
       
       res.json(recommendations);
     } catch (err) {
