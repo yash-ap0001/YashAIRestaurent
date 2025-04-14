@@ -5,6 +5,7 @@ import PDFDocument from "pdfkit";
 import { insertOrderSchema, insertOrderItemSchema, insertKitchenTokenSchema, insertBillSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { getHealthRecommendations, processNaturalLanguageOrder, getPersonalizedRecommendations } from "./services/aiService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -359,9 +360,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       today.setHours(0, 0, 0, 0);
       
       // Filter for today's data
-      const todaysOrders = orders.filter(order => 
-        new Date(order.createdAt).getTime() >= today.getTime()
-      );
+      const todaysOrders = orders.filter(order => {
+        if (order.createdAt) {
+          return new Date(order.createdAt).getTime() >= today.getTime();
+        }
+        return false;
+      });
       
       const todaysSales = todaysOrders.reduce((sum, order) => sum + order.totalAmount, 0);
       
@@ -389,6 +393,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
         urgentTokensCount: urgentTokens.length
       });
     } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+
+  // AI-powered APIs
+  
+  // Health Recommendations
+  app.post("/api/ai/health-recommendations", async (req: Request, res: Response) => {
+    try {
+      const { preferences, restrictions } = req.body;
+      
+      if (!preferences) {
+        return res.status(400).json({ error: "Dietary preferences are required" });
+      }
+      
+      const menuItems = await storage.getMenuItems();
+      const recommendations = await getHealthRecommendations(
+        menuItems,
+        preferences,
+        restrictions || []
+      );
+      
+      res.json(recommendations);
+    } catch (err) {
+      console.error("Health recommendations error:", err);
+      errorHandler(err, res);
+    }
+  });
+
+  // Natural Language Order Processing
+  app.post("/api/ai/process-order", async (req: Request, res: Response) => {
+    try {
+      const { orderText } = req.body;
+      
+      if (!orderText) {
+        return res.status(400).json({ error: "Order text is required" });
+      }
+      
+      const menuItems = await storage.getMenuItems();
+      const processedOrder = await processNaturalLanguageOrder(orderText, menuItems);
+      
+      res.json(processedOrder);
+    } catch (err) {
+      console.error("Order processing error:", err);
+      errorHandler(err, res);
+    }
+  });
+
+  // Personalized Menu Recommendations
+  app.post("/api/ai/menu-recommendations", async (req: Request, res: Response) => {
+    try {
+      const { customerId, preferences } = req.body;
+      
+      // Get customer order history
+      const orders = await storage.getOrders();
+      const customerHistory = customerId ? 
+        orders.filter(order => order.customerId === customerId) : [];
+        
+      const menuItems = await storage.getMenuItems();
+      const recommendations = await getPersonalizedRecommendations(
+        customerHistory,
+        menuItems,
+        preferences
+      );
+      
+      res.json(recommendations);
+    } catch (err) {
+      console.error("Menu recommendations error:", err);
       errorHandler(err, res);
     }
   });

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 
 import {
   Form,
@@ -29,7 +29,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MenuItem } from "@shared/schema";
-import { Loader2, Minus, Plus, Trash2 } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2, Sparkles } from "lucide-react";
+import { NaturalLanguageOrderInput } from "./NaturalLanguageOrderInput";
 
 const formSchema = z.object({
   tableNumber: z.string().min(1, "Table number is required"),
@@ -50,7 +51,7 @@ type FormValues = z.infer<typeof formSchema>;
 export function OrderForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [navigate] = useNavigate();
+  const [, setLocation] = useLocation();
   
   const [selectedItems, setSelectedItems] = useState<{
     menuItemId: number;
@@ -102,7 +103,7 @@ export function OrderForm() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
-      navigate("/kitchen-tokens");
+      setLocation("/kitchen-tokens");
     },
     onError: (error) => {
       toast({
@@ -217,24 +218,62 @@ export function OrderForm() {
               )}
             />
 
-            <div>
-              <FormLabel>Add Menu Items</FormLabel>
-              <div className="flex mt-2">
-                <Select
-                  disabled={menuLoading}
-                  onValueChange={(value) => addMenuItem(parseInt(value))}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select menu item" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {menuItems?.map((item) => (
-                      <SelectItem key={item.id} value={item.id.toString()}>
-                        {item.name} - ₹{item.price}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <FormLabel>Add Menu Items</FormLabel>
+                <div className="flex mt-2">
+                  <Select
+                    disabled={menuLoading}
+                    onValueChange={(value) => addMenuItem(parseInt(value))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select menu item" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {menuItems?.map((item) => (
+                        <SelectItem key={item.id} value={item.id.toString()}>
+                          {item.name} - ₹{item.price}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="md:border-l md:pl-4 md:border-neutral-200">
+                <NaturalLanguageOrderInput
+                  onOrderProcessed={(processedOrder) => {
+                    if (!menuItems || !processedOrder.items.length) return;
+                    
+                    // Map the processed items to selectedItems format
+                    const newItems = processedOrder.items.map(item => {
+                      const menuItem = menuItems.find(mi => mi.id === item.menuItemId);
+                      if (!menuItem) return null;
+                      
+                      return {
+                        menuItemId: menuItem.id,
+                        name: menuItem.name,
+                        quantity: item.quantity,
+                        price: menuItem.price,
+                        notes: item.notes || ""
+                      };
+                    }).filter(Boolean) as {
+                      menuItemId: number;
+                      name: string;
+                      quantity: number;
+                      price: number;
+                      notes: string;
+                    }[];
+                    
+                    // Add all new items
+                    setSelectedItems([...selectedItems, ...newItems]);
+                    
+                    // Set the order notes if provided
+                    if (processedOrder.notes) {
+                      form.setValue("notes", processedOrder.notes);
+                    }
+                  }}
+                />
               </div>
             </div>
 
@@ -342,7 +381,7 @@ export function OrderForm() {
           <Button 
             type="button" 
             variant="outline"
-            onClick={() => navigate("/")}
+            onClick={() => setLocation("/")}
           >
             Cancel
           </Button>
