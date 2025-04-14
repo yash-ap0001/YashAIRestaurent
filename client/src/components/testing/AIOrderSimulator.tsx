@@ -115,7 +115,6 @@ export function AIOrderSimulator() {
         {
           orderId: orderResult.id,
           status: "pending",
-          startTime: new Date().toISOString(),
           isUrgent: false
         }
       );

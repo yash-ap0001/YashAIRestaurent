@@ -175,6 +175,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       errorHandler(err, res);
     }
   });
+  
+  app.post("/api/kitchen-tokens", async (req: Request, res: Response) => {
+    try {
+      const tokenData = {
+        ...req.body,
+        tokenNumber: generateTokenNumber()
+      };
+      
+      const parsedToken = insertKitchenTokenSchema.parse(tokenData);
+      const kitchenToken = await storage.createKitchenToken(parsedToken);
+      
+      res.status(201).json(kitchenToken);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
 
   app.patch("/api/kitchen-tokens/:id", async (req: Request, res: Response) => {
     try {
