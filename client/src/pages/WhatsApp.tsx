@@ -9,6 +9,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { MessageCircle, Send, RefreshCcw, Utensils, FileText, HeartPulse } from 'lucide-react';
+import BillSimulator from '@/components/whatsapp/BillSimulator';
 
 interface Message {
   to: string;
@@ -333,6 +334,9 @@ export default function WhatsApp() {
               </form>
             </CardContent>
           </Card>
+
+          {/* Bill Simulator Component */}
+          <BillSimulator />
         </div>
 
         {/* Message History */}
