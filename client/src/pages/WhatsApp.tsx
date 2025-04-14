@@ -335,8 +335,6 @@ export default function WhatsApp() {
             </CardContent>
           </Card>
 
-          {/* Bill Simulator Component */}
-          <BillSimulator />
         </div>
 
         {/* Message History */}

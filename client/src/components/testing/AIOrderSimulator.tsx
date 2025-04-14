@@ -4,13 +4,17 @@ import {
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle, 
+  CardFooter 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Loader, Check, AlertTriangle } from "lucide-react";
+import { Loader, Check, AlertTriangle, RefreshCcw, HeartPulse, ReceiptText, PhoneCall } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useMutation } from "@tanstack/react-query";
 
 type ProcessStep = {
   name: string;
@@ -25,6 +29,8 @@ export function AIOrderSimulator() {
     "I'd like to order butter chicken, 2 garlic naan, and a mango lassi. Add some extra spice to the butter chicken please."
   );
   const [processing, setProcessing] = useState<boolean>(false);
+  const [phone, setPhone] = useState('918765432100');
+  const [lastCreatedBillId, setLastCreatedBillId] = useState<string>('');
   const [steps, setSteps] = useState<ProcessStep[]>([
     { name: "Parse order with AI", status: "pending" },
     { name: "Create order", status: "pending" },
@@ -204,6 +210,9 @@ export function AIOrderSimulator() {
         throw new Error("Failed to generate bill");
       }
       
+      // Set the last created bill ID for WhatsApp sharing
+      setLastCreatedBillId(billResult.id.toString());
+      
       updateStepStatus(4, "completed", "Bill generated successfully", billResult);
       
       // Invalidate queries to refresh data across the application
@@ -338,6 +347,76 @@ export function AIOrderSimulator() {
           ))}
         </div>
       </CardContent>
+      {steps.some(step => step.status === "completed" && step.name === "Generate bill") && (
+        <CardFooter className="flex flex-col space-y-4 pt-4 border-t border-neutral-700">
+          <h3 className="text-sm font-medium text-white w-full">WhatsApp Integration</h3>
+          
+          <div className="w-full space-y-3">
+            <div className="flex items-center space-x-2">
+              <Input
+                type="text"
+                placeholder="WhatsApp phone number (e.g., 918765432100)"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="flex-1 bg-neutral-900 border-neutral-700 text-white"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button 
+                className="flex-1 bg-purple-900 hover:bg-purple-800 text-white"
+                onClick={async () => {
+                  try {
+                    if (!lastCreatedBillId || !phone) {
+                      toast({
+                        title: "Error",
+                        description: "Please enter a phone number and ensure a bill has been created",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    const response = await apiRequest(
+                      "POST",
+                      "/api/whatsapp/send-bill-with-health-tips",
+                      { 
+                        billId: lastCreatedBillId,
+                        phone 
+                      }
+                    );
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                      toast({
+                        title: "Success",
+                        description: "Bill with health tips sent successfully to WhatsApp!",
+                      });
+                      // Refresh WhatsApp messages
+                      queryClient.invalidateQueries({ queryKey: ['/api/whatsapp/message-history'] });
+                    } else {
+                      toast({
+                        title: "Error",
+                        description: result.error || "Failed to send bill to WhatsApp",
+                        variant: "destructive",
+                      });
+                    }
+                  } catch (error) {
+                    console.error("Failed to send bill to WhatsApp:", error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to send bill to WhatsApp. See console for details.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                <HeartPulse className="mr-2 h-4 w-4" />
+                Send Bill with Health Tips
+              </Button>
+            </div>
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 }
