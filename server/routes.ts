@@ -6,6 +6,7 @@ import { insertOrderSchema, insertOrderItemSchema, insertKitchenTokenSchema, ins
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getHealthRecommendations, processNaturalLanguageOrder, getPersonalizedRecommendations } from "./services/aiService";
+import { aiService, centralAIController, notificationSystem } from "./services";
 import { 
   initializeWhatsAppService, 
   handleSendMessage, 
@@ -66,104 +67,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     console.log(`Setting up AI-driven automation for order ${order.id} (${order.orderNumber})`);
     
-    // Simulate AI-driven process by using timeouts for different stages
-    // In a real-world scenario, this would integrate with actual order tracking systems
-    
-    // Update to 'preparing' status after a short delay (5 seconds)
-    setTimeout(async () => {
-      try {
-        console.log(`AI Automation: Updating order ${order.id} to 'preparing' status`);
-        await storage.updateOrder(order.id, { status: "preparing" });
-        
-        // Log the activity for the dashboard
-        await storage.createActivity({
-          type: "status_update",
-          description: `Order #${order.orderNumber} is now being prepared (AI Automated)`,
-          entityId: order.id,
-          entityType: "order"
-        });
-      } catch (error) {
-        console.error(`Error in AI automation for order ${order.id} - preparing stage:`, error);
+    try {
+      // Use the Central AI Controller to process this order
+      await centralAIController.processNewOrder(order);
+      
+      // Set up notifications if this is a customer-facing order
+      if (order.orderSource && order.orderSource !== 'manual') {
+        notificationSystem.setupOrderNotifications(order);
       }
-    }, 5000); // 5 seconds
-    
-    // Update to 'ready' status after a medium delay (15 seconds)
-    setTimeout(async () => {
-      try {
-        console.log(`AI Automation: Updating order ${order.id} to 'ready' status`);
-        await storage.updateOrder(order.id, { status: "ready" });
-        
-        // Update the kitchen token status
-        const kitchenTokens = await storage.getKitchenTokens();
-        const orderToken = kitchenTokens.find(token => token.orderId === order.id);
-        if (orderToken) {
-          await storage.updateKitchenToken(orderToken.id, { status: "ready" });
+      
+      console.log(`AI Controller: Order ${order.id} has been registered for automated processing`);
+    } catch (error) {
+      console.error(`Error setting up AI automation for order ${order.id}:`, error);
+      
+      // Fall back to the legacy approach if the AI Controller fails
+      console.log(`Falling back to legacy automation for order ${order.id}`);
+      
+      // Update to 'preparing' status after a short delay (5 seconds)
+      setTimeout(async () => {
+        try {
+          console.log(`Legacy AI Automation: Updating order ${order.id} to 'preparing' status`);
+          await storage.updateOrder(order.id, { status: "preparing" });
+          
+          // Log the activity for the dashboard
+          await storage.createActivity({
+            type: "status_update",
+            description: `Order #${order.orderNumber} is now being prepared (AI Automated)`,
+            entityId: order.id,
+            entityType: "order"
+          });
+        } catch (error) {
+          console.error(`Error in legacy AI automation for order ${order.id} - preparing stage:`, error);
         }
-        
-        // Log the activity for the dashboard
-        await storage.createActivity({
-          type: "status_update",
-          description: `Order #${order.orderNumber} is ready for service (AI Automated)`,
-          entityId: order.id,
-          entityType: "order"
-        });
-      } catch (error) {
-        console.error(`Error in AI automation for order ${order.id} - ready stage:`, error);
-      }
-    }, 15000); // 15 seconds
-    
-    // Update to 'complete' status after a longer delay (30 seconds)
-    setTimeout(async () => {
-      try {
-        console.log(`AI Automation: Updating order ${order.id} to 'completed' status`);
-        await storage.updateOrder(order.id, { status: "completed" });
-        
-        // Log the activity for the dashboard
-        await storage.createActivity({
-          type: "status_update",
-          description: `Order #${order.orderNumber} has been delivered (AI Automated)`,
-          entityId: order.id,
-          entityType: "order"
-        });
-        
-        // Create a bill for the order
-        console.log(`AI Automation: Creating bill for order ${order.id}`);
-        const orderItems = await storage.getOrderItems(order.id);
-        
-        // Calculate bill amounts
-        const subtotal = orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-        const taxRate = 0.18; // 18% tax
-        const tax = subtotal * taxRate;
-        const total = subtotal + tax;
-        
-        const billData = {
-          orderId: order.id,
-          billNumber: generateBillNumber(),
-          subtotal: subtotal,
-          tax: tax,
-          discount: 0,
-          total: total,
-          paymentStatus: "pending",
-          paymentMethod: null
-        };
-        
-        const parsedBill = insertBillSchema.parse(billData);
-        const bill = await storage.createBill(parsedBill);
-        
-        // Update order status to 'billed'
-        await storage.updateOrder(order.id, { status: "billed" });
-        
-        // Log the activity
-        await storage.createActivity({
-          type: "bill_created",
-          description: `Bill #${bill.billNumber} created for Order #${order.orderNumber} (AI Automated)`,
-          entityId: bill.id,
-          entityType: "bill"
-        });
-      } catch (error) {
-        console.error(`Error in AI automation for order ${order.id} - completed/billing stage:`, error);
-      }
-    }, 30000); // 30 seconds
+      }, 5000); // 5 seconds
+      
+      // Update to 'ready' status after a medium delay (15 seconds)
+      setTimeout(async () => {
+        try {
+          console.log(`Legacy AI Automation: Updating order ${order.id} to 'ready' status`);
+          await storage.updateOrder(order.id, { status: "ready" });
+          
+          // Update the kitchen token status
+          const kitchenTokens = await storage.getKitchenTokens();
+          const orderToken = kitchenTokens.find(token => token.orderId === order.id);
+          if (orderToken) {
+            await storage.updateKitchenToken(orderToken.id, { status: "ready" });
+          }
+          
+          // Log the activity for the dashboard
+          await storage.createActivity({
+            type: "status_update",
+            description: `Order #${order.orderNumber} is ready for service (AI Automated)`,
+            entityId: order.id,
+            entityType: "order"
+          });
+        } catch (error) {
+          console.error(`Error in legacy AI automation for order ${order.id} - ready stage:`, error);
+        }
+      }, 15000); // 15 seconds
+      
+      // Update to 'complete' status after a longer delay (30 seconds)
+      setTimeout(async () => {
+        try {
+          console.log(`Legacy AI Automation: Updating order ${order.id} to 'completed' status`);
+          await storage.updateOrder(order.id, { status: "completed" });
+          
+          // Log the activity for the dashboard
+          await storage.createActivity({
+            type: "status_update",
+            description: `Order #${order.orderNumber} has been delivered (AI Automated)`,
+            entityId: order.id,
+            entityType: "order"
+          });
+          
+          // Create a bill for the order
+          console.log(`Legacy AI Automation: Creating bill for order ${order.id}`);
+          const orderItems = await storage.getOrderItems(order.id);
+          
+          // Calculate bill amounts
+          const subtotal = orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+          const taxRate = 0.18; // 18% tax
+          const tax = subtotal * taxRate;
+          const total = subtotal + tax;
+          
+          const billData = {
+            orderId: order.id,
+            billNumber: generateBillNumber(),
+            subtotal: subtotal,
+            tax: tax,
+            discount: 0,
+            total: total,
+            paymentStatus: "pending",
+            paymentMethod: null
+          };
+          
+          const parsedBill = insertBillSchema.parse(billData);
+          const bill = await storage.createBill(parsedBill);
+          
+          // Update order status to 'billed'
+          await storage.updateOrder(order.id, { status: "billed" });
+          
+          // Log the activity
+          await storage.createActivity({
+            type: "bill_created",
+            description: `Bill #${bill.billNumber} created for Order #${order.orderNumber} (AI Automated)`,
+            entityId: bill.id,
+            entityType: "bill"
+          });
+        } catch (error) {
+          console.error(`Error in legacy AI automation for order ${order.id} - completed/billing stage:`, error);
+        }
+      }, 30000); // 30 seconds
+    }
   };
 
   // API Routes - all prefixed with /api
