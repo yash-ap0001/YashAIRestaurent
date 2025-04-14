@@ -8,6 +8,41 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-neutral-900 text-neutral-200;
+  }
+  
+  /* Card and elements styles for dark purple theme */
+  .card {
+    @apply bg-neutral-900 border-neutral-800 shadow-md;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-white;
+  }
+  
+  /* Button styles for dark purple theme */
+  .btn-primary {
+    @apply bg-purple-600 hover:bg-purple-700 text-white;
+  }
+  
+  .btn-outline {
+    @apply border-purple-600 text-purple-400 hover:bg-purple-900 hover:bg-opacity-30;
+  }
+  
+  /* Table styles for dark theme */
+  table {
+    @apply bg-neutral-900 border-neutral-800;
+  }
+  
+  th {
+    @apply bg-neutral-800 text-neutral-300;
+  }
+  
+  td {
+    @apply border-neutral-800 text-neutral-300;
+  }
+  
+  tr:hover {
+    @apply bg-neutral-800;
   }
 }
