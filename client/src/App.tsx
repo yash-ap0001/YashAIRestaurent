@@ -43,6 +43,7 @@ function Router() {
       <Route path="/menu-items" component={MenuItems} />
       <Route path="/reports" component={Reports} />
       <Route path="/external-integration" component={ExternalIntegration} />
+      <Route path="/voice-assistant" component={VoiceAssistant} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
