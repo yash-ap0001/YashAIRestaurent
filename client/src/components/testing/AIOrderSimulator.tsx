@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader, Check, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -205,6 +205,13 @@ export function AIOrderSimulator() {
       }
       
       updateStepStatus(4, "completed", "Bill generated successfully", billResult);
+      
+      // Invalidate queries to refresh data across the application
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/activities'] });
       
       toast({
         title: "Order Completed",

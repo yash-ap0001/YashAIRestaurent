@@ -102,8 +102,14 @@ export function OrderForm() {
         title: "Order created",
         description: "The order has been created successfully",
       });
+      
+      // Refresh all relevant data across the application
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/activities'] });
+      
       setLocation("/kitchen-tokens");
     },
     onError: (error) => {
