@@ -11,6 +11,7 @@ import HealthAdvisor from "@/pages/HealthAdvisor";
 import WhatsApp from "@/pages/WhatsApp";
 import PhoneOrders from "@/pages/PhoneOrders";
 import AICallCenter from "@/pages/AICallCenter";
+import TestAIOrder from "@/pages/TestAIOrder";
 import { AppShell } from "@/components/layouts/AppShell";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/whatsapp" component={WhatsApp} />
       <Route path="/phone-orders" component={PhoneOrders} />
       <Route path="/ai-call-center" component={AICallCenter} />
+      <Route path="/test-ai-order" component={TestAIOrder} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
