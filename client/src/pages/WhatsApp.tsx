@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { MessageCircle, Send, RefreshCcw } from 'lucide-react';
+import { MessageCircle, Send, RefreshCcw, Utensils, FileText, HeartPulse } from 'lucide-react';
 
 interface Message {
   to: string;
@@ -25,6 +25,7 @@ export default function WhatsApp() {
   const [phone, setPhone] = useState('918765432100');
   const [name, setName] = useState('Test Customer');
   const [message, setMessage] = useState('');
+  const [billId, setBillId] = useState('1');
   const [activeTab, setActiveTab] = useState('simulate');
 
   // Query to fetch message history
@@ -99,6 +100,28 @@ export default function WhatsApp() {
       });
     }
   });
+  
+  // Mutation to send a bill with health tips
+  const sendBillWithHealthTipsMutation = useMutation({
+    mutationFn: async (payload: { phone: string; billId: string }) => {
+      const response = await apiRequest('POST', '/api/whatsapp/send-bill-with-health-tips', payload);
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Bill sent successfully',
+        description: 'The bill with health tips has been sent via WhatsApp.',
+      });
+      refetchMessages();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Failed to send bill',
+        description: error.message || 'Something went wrong',
+        variant: 'destructive',
+      });
+    }
+  });
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +140,21 @@ export default function WhatsApp() {
     } else {
       sendMessageMutation.mutate({ phone, message });
     }
+  };
+  
+  const handleSendBillWithHealthTips = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!phone || !billId) {
+      toast({
+        title: 'Missing information',
+        description: 'Phone number and bill ID are required',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    sendBillWithHealthTipsMutation.mutate({ phone, billId });
   };
 
   const refreshData = () => {

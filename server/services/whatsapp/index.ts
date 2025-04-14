@@ -4,7 +4,8 @@ import {
   sendWhatsAppMessage,
   handleSendMessage,
   handleSendBill,
-  handleGetStatus
+  handleGetStatus,
+  handleSendBillWithHealthTips
 } from './service';
 
 export {
@@ -13,5 +14,6 @@ export {
   sendWhatsAppMessage,
   handleSendMessage,
   handleSendBill,
-  handleGetStatus
+  handleGetStatus,
+  handleSendBillWithHealthTips
 };

@@ -11,7 +11,8 @@ import {
   handleSendMessage, 
   handleSendBill, 
   handleGetStatus,
-  getWhatsAppClient
+  getWhatsAppClient,
+  handleSendBillWithHealthTips
 } from "./services/whatsapp";
 import { 
   initializeTelephonyService, 
@@ -644,6 +645,9 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   
   // Send a bill via WhatsApp
   app.post("/api/whatsapp/send-bill", handleSendBill);
+  
+  // Send a bill with health tips via WhatsApp
+  app.post("/api/whatsapp/send-bill-with-health-tips", handleSendBillWithHealthTips);
   
   // Get WhatsApp connection status
   app.get("/api/whatsapp/status", handleGetStatus);
