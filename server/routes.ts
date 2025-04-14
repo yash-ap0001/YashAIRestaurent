@@ -760,12 +760,30 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         });
       }
       
-      // Step 2: Create the order with useAIAutomation enabled
+      // Step 2: Add price information to each item by looking it up from menuItems
+      for (const item of processedOrder.items) {
+        // Find corresponding menu item to get the price
+        const menuItem = menuItems.find(mi => mi.id === item.menuItemId);
+        if (menuItem) {
+          item.price = menuItem.price;
+        } else {
+          // Set a default price if menu item not found (should not happen)
+          console.warn(`Menu item with ID ${item.menuItemId} not found. Using default price.`);
+          item.price = 0;
+        }
+      }
+      
+      // Calculate total amount with the now-populated prices
+      const totalAmount = processedOrder.items.reduce((total, item) => {
+        return total + (item.price * item.quantity);
+      }, 0);
+      
+      // Create the order with useAIAutomation enabled
       const orderData = {
         orderNumber: generateOrderNumber(),
         tableNumber: tableNumber,
         status: "pending",
-        totalAmount: processedOrder.items.reduce((total, item) => total + (item.price * item.quantity), 0),
+        totalAmount: totalAmount,
         notes: processedOrder.notes || null,
         orderSource: orderSource,
         useAIAutomation: true, // Always enable AI automation for AI-created orders
