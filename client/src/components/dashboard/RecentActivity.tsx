@@ -29,46 +29,51 @@ export function RecentActivity({ className }: RecentActivityProps) {
     switch (type) {
       case 'order_created':
         return (
-          <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
+          <div className="h-8 w-8 rounded-full bg-purple-900 bg-opacity-40 flex items-center justify-center text-purple-300">
             <Receipt className="h-4 w-4" />
           </div>
         );
       case 'inventory_alert':
         return (
-          <div className="h-8 w-8 rounded-full bg-warning-100 flex items-center justify-center text-warning-600">
+          <div className="h-8 w-8 rounded-full bg-amber-900 bg-opacity-40 flex items-center justify-center text-amber-300">
             <Bell className="h-4 w-4" />
           </div>
         );
       case 'bill_created':
         return (
-          <div className="h-8 w-8 rounded-full bg-secondary-100 flex items-center justify-center text-secondary-600">
+          <div className="h-8 w-8 rounded-full bg-blue-900 bg-opacity-40 flex items-center justify-center text-blue-300">
             <CreditCard className="h-4 w-4" />
           </div>
         );
       case 'customer_created':
         return (
-          <div className="h-8 w-8 rounded-full bg-accent-100 flex items-center justify-center text-accent-600">
+          <div className="h-8 w-8 rounded-full bg-green-900 bg-opacity-40 flex items-center justify-center text-green-300">
             <UserRound className="h-4 w-4" />
           </div>
         );
       default:
         return (
-          <div className="h-8 w-8 rounded-full bg-error-100 flex items-center justify-center text-error-600">
+          <div className="h-8 w-8 rounded-full bg-red-900 bg-opacity-40 flex items-center justify-center text-red-300">
             <AlertTriangle className="h-4 w-4" />
           </div>
         );
     }
   };
 
-  const formatTimeAgo = (dateString: Date) => {
-    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  const formatTimeAgo = (dateString: Date | null) => {
+    if (!dateString) return "unknown time";
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch (e) {
+      return "unknown time";
+    }
   };
 
   return (
-    <Card className={className}>
+    <Card className={`bg-neutral-800 border-neutral-700 ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between py-3">
-        <CardTitle className="font-medium text-base">Recent Activity</CardTitle>
-        <Button variant="link" className="text-primary-500 hover:text-primary-600">
+        <CardTitle className="font-medium text-base text-white">Recent Activity</CardTitle>
+        <Button variant="link" className="text-purple-400 hover:text-purple-300">
           View All
         </Button>
       </CardHeader>
@@ -77,10 +82,10 @@ export function RecentActivity({ className }: RecentActivityProps) {
           <ul className="space-y-4">
             {[...Array(5)].map((_, i) => (
               <li key={i} className="flex">
-                <Skeleton className="h-8 w-8 rounded-full mr-3" />
+                <Skeleton className="h-8 w-8 rounded-full mr-3 bg-neutral-700" />
                 <div className="flex-1">
-                  <Skeleton className="h-4 w-3/4 mb-1" />
-                  <Skeleton className="h-3 w-1/4" />
+                  <Skeleton className="h-4 w-3/4 mb-1 bg-neutral-700" />
+                  <Skeleton className="h-3 w-1/4 bg-neutral-700" />
                 </div>
               </li>
             ))}
@@ -94,12 +99,12 @@ export function RecentActivity({ className }: RecentActivityProps) {
                 </div>
                 <div>
                   <p className="text-sm">
-                    <span className="font-medium text-neutral-800">
+                    <span className="font-medium text-white">
                       {activity.type.replace('_', ' ').split(' ').map(word => 
                         word.charAt(0).toUpperCase() + word.slice(1)
                       ).join(' ')}
                     </span>
-                    <span className="font-normal text-neutral-600"> {activity.description}</span>
+                    <span className="font-normal text-neutral-400"> {activity.description}</span>
                   </p>
                   <p className="text-xs text-neutral-500 mt-1">{formatTimeAgo(activity.createdAt)}</p>
                 </div>
@@ -107,7 +112,7 @@ export function RecentActivity({ className }: RecentActivityProps) {
             ))}
             
             {(!data || data.length === 0) && (
-              <li className="py-4 text-center text-neutral-500">
+              <li className="py-4 text-center text-neutral-400">
                 No recent activity
               </li>
             )}

@@ -62,19 +62,19 @@ export function TopSellingItems({ className }: TopSellingItemsProps) {
   // Generate a color for the icon background based on item index
   const getIconBgColor = (index: number) => {
     const colors = [
-      'bg-accent-100 text-accent-600',
-      'bg-primary-100 text-primary-600',
-      'bg-secondary-100 text-secondary-600',
-      'bg-warning-100 text-warning-600',
-      'bg-neutral-100 text-neutral-600'
+      'bg-purple-900 bg-opacity-40 text-purple-300',
+      'bg-indigo-900 bg-opacity-40 text-indigo-300',
+      'bg-blue-900 bg-opacity-40 text-blue-300',
+      'bg-amber-900 bg-opacity-40 text-amber-300',
+      'bg-green-900 bg-opacity-40 text-green-300'
     ];
     return colors[index % colors.length];
   };
 
   return (
-    <Card className={className}>
+    <Card className={`bg-neutral-800 border-neutral-700 ${className}`}>
       <CardHeader className="py-3">
-        <CardTitle className="font-medium text-base">Top Selling Items</CardTitle>
+        <CardTitle className="font-medium text-base text-white">Top Selling Items</CardTitle>
       </CardHeader>
       <CardContent className="p-4">
         {isLoading ? (
@@ -82,13 +82,13 @@ export function TopSellingItems({ className }: TopSellingItemsProps) {
             {[...Array(5)].map((_, i) => (
               <li key={i} className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-8 w-8 rounded-full bg-neutral-700" />
                   <div className="ml-3">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-16 mt-1" />
+                    <Skeleton className="h-4 w-24 bg-neutral-700" />
+                    <Skeleton className="h-3 w-16 mt-1 bg-neutral-700" />
                   </div>
                 </div>
-                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16 bg-neutral-700" />
               </li>
             ))}
           </ul>
@@ -101,16 +101,16 @@ export function TopSellingItems({ className }: TopSellingItemsProps) {
                     {getCategoryIcon(item.menuItem.category)}
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-neutral-800">{item.menuItem.name}</p>
-                    <p className="text-xs text-neutral-500">{item.orderCount} orders today</p>
+                    <p className="text-sm font-medium text-white">{item.menuItem.name}</p>
+                    <p className="text-xs text-neutral-400">{item.orderCount} orders today</p>
                   </div>
                 </div>
-                <div className="text-sm font-medium text-neutral-800">₹{item.totalSales.toLocaleString()}</div>
+                <div className="text-sm font-medium text-purple-300">₹{item.totalSales.toLocaleString()}</div>
               </li>
             ))}
 
             {(!menuItems || menuItems.length === 0) && (
-              <li className="py-4 text-center text-neutral-500">
+              <li className="py-4 text-center text-neutral-400">
                 No menu items available
               </li>
             )}
@@ -118,7 +118,7 @@ export function TopSellingItems({ className }: TopSellingItemsProps) {
         )}
         
         <Link href="/menu-items">
-          <Button className="w-full mt-4 border border-neutral-300 text-neutral-700 bg-white hover:bg-neutral-50">
+          <Button className="w-full mt-4 border border-purple-700 text-white bg-purple-900 hover:bg-purple-800">
             View All Menu Items
           </Button>
         </Link>

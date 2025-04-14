@@ -111,9 +111,9 @@ export function SalesOverview({ className }: SalesOverviewProps) {
   const chartData = getChartData();
 
   return (
-    <Card className={className}>
+    <Card className={`bg-neutral-800 border-neutral-700 ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between py-3">
-        <CardTitle className="font-medium text-base">Sales Overview</CardTitle>
+        <CardTitle className="font-medium text-base text-white">Sales Overview</CardTitle>
         <div className="flex space-x-2">
           <Button 
             variant="ghost" 
@@ -121,8 +121,8 @@ export function SalesOverview({ className }: SalesOverviewProps) {
             className={cn(
               "px-3 py-1 text-xs font-medium rounded-md",
               timeFrame === "day" 
-                ? "bg-primary-50 text-primary-700" 
-                : "text-neutral-600 hover:bg-neutral-100"
+                ? "bg-purple-900 bg-opacity-70 text-purple-300" 
+                : "text-neutral-400 hover:bg-neutral-700"
             )}
             onClick={() => setTimeFrame("day")}
           >
@@ -134,8 +134,8 @@ export function SalesOverview({ className }: SalesOverviewProps) {
             className={cn(
               "px-3 py-1 text-xs font-medium rounded-md",
               timeFrame === "week" 
-                ? "bg-primary-50 text-primary-700" 
-                : "text-neutral-600 hover:bg-neutral-100"
+                ? "bg-purple-900 bg-opacity-70 text-purple-300" 
+                : "text-neutral-400 hover:bg-neutral-700"
             )}
             onClick={() => setTimeFrame("week")}
           >
@@ -147,8 +147,8 @@ export function SalesOverview({ className }: SalesOverviewProps) {
             className={cn(
               "px-3 py-1 text-xs font-medium rounded-md",
               timeFrame === "month" 
-                ? "bg-primary-50 text-primary-700" 
-                : "text-neutral-600 hover:bg-neutral-100"
+                ? "bg-purple-900 bg-opacity-70 text-purple-300" 
+                : "text-neutral-400 hover:bg-neutral-700"
             )}
             onClick={() => setTimeFrame("month")}
           >
@@ -169,44 +169,51 @@ export function SalesOverview({ className }: SalesOverviewProps) {
                   bottom: 30,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
                 <XAxis 
                   dataKey="name" 
                   fontSize={12} 
-                  tick={{ fill: '#64748b' }} 
-                  axisLine={{ stroke: '#cbd5e1' }}
-                  tickLine={{ stroke: '#cbd5e1' }}
+                  tick={{ fill: '#a0aec0' }} 
+                  axisLine={{ stroke: '#4a5568' }}
+                  tickLine={{ stroke: '#4a5568' }}
                   tickMargin={10}
                 />
                 <YAxis 
                   fontSize={12} 
-                  tick={{ fill: '#64748b' }} 
-                  axisLine={{ stroke: '#cbd5e1' }}
-                  tickLine={{ stroke: '#cbd5e1' }}
+                  tick={{ fill: '#a0aec0' }} 
+                  axisLine={{ stroke: '#4a5568' }}
+                  tickLine={{ stroke: '#4a5568' }}
                   tickFormatter={(value) => `₹${value}`}
                 />
                 <Tooltip 
                   formatter={(value) => [`₹${value}`, 'Sales']}
                   labelFormatter={(label) => `Time: ${label}`}
                   contentStyle={{ 
-                    backgroundColor: 'white', 
-                    border: '1px solid #e2e8f0',
+                    backgroundColor: '#1e1e1e', 
+                    border: '1px solid #333333',
                     borderRadius: '6px',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.25)',
+                    color: '#e2e8f0'
+                  }}
+                  itemStyle={{
+                    color: '#a0aec0'
+                  }}
+                  labelStyle={{
+                    color: '#e2e8f0'
                   }}
                 />
                 <Bar 
                   dataKey="sales" 
-                  fill="hsl(var(--primary))" 
+                  fill="#9333ea" 
                   radius={[4, 4, 0, 0]}
                   barSize={timeFrame === "day" ? 10 : 20}
                 />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="w-full h-full bg-neutral-50 rounded flex items-center justify-center">
+            <div className="w-full h-full bg-neutral-700 rounded flex items-center justify-center">
               <div className="text-center">
-                <p className="text-sm text-neutral-500">No sales data available</p>
+                <p className="text-sm text-neutral-300">No sales data available</p>
               </div>
             </div>
           )}
