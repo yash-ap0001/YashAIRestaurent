@@ -82,6 +82,7 @@ export function AIOrderSimulator() {
       const orderItems = processedOrderResult.items.map((item: any) => ({
         menuItemId: item.menuItemId || 1, // Fallback to first menu item if not found
         quantity: item.quantity || 1,
+        price: item.price || 320, // Add required price field
         notes: item.specialInstructions || ""
       }));
       
@@ -94,6 +95,7 @@ export function AIOrderSimulator() {
           customerPhone: "+911234567890",
           items: orderItems,
           status: "confirmed",
+          totalAmount: orderItems.reduce((total, item) => total + (item.price * item.quantity), 0),
           orderSource: "ai_simulator"
         }
       );
