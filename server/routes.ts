@@ -7,6 +7,7 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getHealthRecommendations, processNaturalLanguageOrder, getPersonalizedRecommendations } from "./services/aiService";
 import { aiService, centralAIController, notificationSystem } from "./services";
+import { n8nService } from "./services/n8nService";
 import { 
   initializeWhatsAppService, 
   handleSendMessage, 
@@ -1099,6 +1100,204 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         success: false,
         response: "An error occurred while processing your command",
         error: handleError(error, "processing voice command").message
+      });
+    }
+  });
+
+  // n8n Integration API endpoints
+  app.get("/api/n8n/webhooks", async (req: Request, res: Response) => {
+    try {
+      const webhooks = n8nService.getWebhooks();
+      
+      // Convert Map to array for JSON response
+      const webhooksArray = Array.from(webhooks.entries()).map(([id, config]) => ({
+        id,
+        ...config
+      }));
+      
+      res.json(webhooksArray);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.post("/api/n8n/webhooks", async (req: Request, res: Response) => {
+    try {
+      const { id, url, secret, events } = req.body;
+      
+      if (!id || !url || !secret || !events) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required webhook parameters: id, url, secret, and events are required"
+        });
+      }
+      
+      n8nService.registerWebhook(id, {
+        url,
+        secret,
+        events,
+        active: req.body.active !== false // default to active if not specified
+      });
+      
+      // Create activity log
+      await storage.createActivity({
+        type: "webhook_created",
+        description: `Webhook registered for events: ${events.join(', ')}`,
+        entityType: "webhook"
+      });
+      
+      res.status(201).json({
+        success: true,
+        message: "Webhook registered successfully",
+        id
+      });
+    } catch (err) {
+      console.error("Error registering webhook:", err);
+      errorHandler(err, res);
+    }
+  });
+  
+  app.delete("/api/n8n/webhooks/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const result = n8nService.removeWebhook(id);
+      
+      if (result) {
+        // Create activity log
+        await storage.createActivity({
+          type: "webhook_deleted",
+          description: `Webhook ${id} was removed`,
+          entityType: "webhook"
+        });
+        
+        res.json({
+          success: true,
+          message: "Webhook removed successfully"
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "Webhook not found"
+        });
+      }
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.post("/api/n8n/test-webhook/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { event, payload } = req.body;
+      
+      if (!event) {
+        return res.status(400).json({
+          success: false,
+          error: "Event name is required"
+        });
+      }
+      
+      const webhooks = n8nService.getWebhooks();
+      if (!webhooks.has(id)) {
+        return res.status(404).json({
+          success: false,
+          error: "Webhook not found"
+        });
+      }
+      
+      const testPayload = payload || {
+        test: true,
+        timestamp: new Date().toISOString(),
+        message: "This is a test webhook from YashHotelBot"
+      };
+      
+      const success = await n8nService.triggerWebhook(event, testPayload);
+      
+      if (success) {
+        res.json({
+          success: true,
+          message: `Test webhook for event '${event}' triggered successfully`
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          error: `Failed to trigger test webhook for event '${event}'`
+        });
+      }
+    } catch (err) {
+      console.error("Error triggering test webhook:", err);
+      errorHandler(err, res);
+    }
+  });
+  
+  app.get("/api/n8n/documentation", async (req: Request, res: Response) => {
+    try {
+      const docs = n8nService.getWebhooksDocumentation();
+      res.json(docs);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.post("/api/n8n/config", async (req: Request, res: Response) => {
+    try {
+      const { n8nBaseUrl, apiKey } = req.body;
+      
+      if (n8nBaseUrl) {
+        n8nService.setN8nBaseUrl(n8nBaseUrl);
+      }
+      
+      if (apiKey) {
+        n8nService.setApiKey(apiKey);
+      }
+      
+      // Create activity log
+      await storage.createActivity({
+        type: "system_config",
+        description: "n8n integration configuration updated",
+        entityType: "system"
+      });
+      
+      res.json({
+        success: true,
+        message: "n8n configuration updated successfully"
+      });
+    } catch (err) {
+      console.error("Error updating n8n configuration:", err);
+      errorHandler(err, res);
+    }
+  });
+  
+  app.get("/api/n8n/workflows", async (req: Request, res: Response) => {
+    try {
+      const workflows = await n8nService.fetchWorkflows();
+      res.json(workflows);
+    } catch (err) {
+      console.error("Error fetching n8n workflows:", err);
+      res.status(500).json({
+        success: false,
+        error: err.message || "Error fetching n8n workflows"
+      });
+    }
+  });
+  
+  app.post("/api/n8n/workflows/:id/execute", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { data } = req.body;
+      
+      const result = await n8nService.triggerWorkflow(id, data);
+      
+      res.json({
+        success: true,
+        result
+      });
+    } catch (err) {
+      console.error(`Error executing n8n workflow ${req.params.id}:`, err);
+      res.status(500).json({
+        success: false,
+        error: err.message || "Error executing n8n workflow"
       });
     }
   });
