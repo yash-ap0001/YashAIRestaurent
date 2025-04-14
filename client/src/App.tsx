@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import NewOrder from "@/pages/NewOrder";
 import KitchenTokens from "@/pages/KitchenTokens";
 import Billing from "@/pages/Billing";
+import HealthAdvisor from "@/pages/HealthAdvisor";
 import { AppShell } from "@/components/layouts/AppShell";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/new-order" component={NewOrder} />
       <Route path="/kitchen-tokens" component={KitchenTokens} />
       <Route path="/billing" component={Billing} />
+      <Route path="/health-advisor" component={HealthAdvisor} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
