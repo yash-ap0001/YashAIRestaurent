@@ -279,12 +279,21 @@ export function LiveOrderTracker() {
               Real-time status updates for all orders across all channels
             </CardDescription>
           </div>
-          <Badge 
-            variant="outline" 
-            className={`px-2 py-1 ${isLoading ? 'animate-pulse bg-purple-900 text-purple-100' : 'bg-green-900 text-green-100'}`}
-          >
-            {isLoading ? "Updating..." : "Live"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant="outline" 
+              className={`flex items-center gap-1 px-2 py-1 ${websocketConnected ? 'bg-green-900 text-green-100' : 'bg-amber-900 text-amber-100'}`}
+            >
+              {websocketConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+              {websocketConnected ? "Real-time" : "Polling"}
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className={`px-2 py-1 ${isLoading ? 'animate-pulse bg-purple-900 text-purple-100' : 'bg-green-900 text-green-100'}`}
+            >
+              {isLoading ? "Updating..." : "Live"}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent>

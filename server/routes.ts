@@ -30,6 +30,8 @@ import {
 import { processChatbotRequest } from "./services/chatbot";
 import { WebSocketServer } from 'ws';
 import { initializeRealTimeService } from './services/realtime';
+import { generateOrderNumber, generateTokenNumber, generateBillNumber, handleError } from './utils';
+import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -1007,6 +1009,68 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       const callData = simulateIncomingCall(phoneNumber);
       res.json(callData);
     } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+
+  // External platforms integration (Zomato, Swiggy, etc.)
+  
+  // Simulate receiving an order from Zomato
+  app.post("/api/external/zomato/simulate", async (req: Request, res: Response) => {
+    try {
+      console.log("Simulating Zomato order:", req.body);
+      
+      const result = await simulateZomatoOrder(req.body);
+      res.json(result);
+    } catch (err) {
+      console.error("Error simulating Zomato order:", err);
+      errorHandler(err, res);
+    }
+  });
+  
+  // Simulate receiving an order from Swiggy
+  app.post("/api/external/swiggy/simulate", async (req: Request, res: Response) => {
+    try {
+      console.log("Simulating Swiggy order:", req.body);
+      
+      const result = await simulateSwiggyOrder(req.body);
+      res.json(result);
+    } catch (err) {
+      console.error("Error simulating Swiggy order:", err);
+      errorHandler(err, res);
+    }
+  });
+  
+  // Generic endpoint for external orders (can be used for future integrations)
+  app.post("/api/external/process-order", async (req: Request, res: Response) => {
+    try {
+      const { platformName } = req.body;
+      
+      if (!platformName) {
+        return res.status(400).json({
+          success: false,
+          error: "Platform name is required"
+        });
+      }
+      
+      console.log(`Processing external order from ${platformName}:`, req.body);
+      
+      // Route to the appropriate platform handler
+      let result;
+      if (platformName.toLowerCase() === 'zomato') {
+        result = await simulateZomatoOrder(req.body);
+      } else if (platformName.toLowerCase() === 'swiggy') {
+        result = await simulateSwiggyOrder(req.body);
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: `Unsupported platform: ${platformName}`
+        });
+      }
+      
+      res.json(result);
+    } catch (err) {
+      console.error("Error processing external order:", err);
       errorHandler(err, res);
     }
   });
