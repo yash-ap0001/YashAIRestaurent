@@ -80,7 +80,19 @@ export function OrderForm() {
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
       try {
-        console.log("Preparing to submit order data:", orderData);
+        console.log("DEBUG - Preparing to submit order data:", orderData);
+        
+        // Check if we have items
+        if (!orderData.items || !orderData.items.length) {
+          console.error("No items in order data");
+          throw new Error("Order must contain at least one item");
+        }
+        
+        // Check if we have a table number
+        if (!orderData.tableNumber) {
+          console.error("No table number in order data");
+          throw new Error("Table number is required");
+        }
         
         // Combine everything in one complete request
         const requestData = {
@@ -94,46 +106,50 @@ export function OrderForm() {
         };
         
         // Log the complete request
-        console.log("Submitting complete order data to API:", requestData);
+        console.log("DEBUG - Submitting data to API:", JSON.stringify(requestData, null, 2));
         
         // Use the project's standard API request function
-        const response = await apiRequest("POST", "/api/orders", requestData);
+        const result = await apiRequest("/api/orders", {
+          method: "POST",
+          body: JSON.stringify(requestData)
+        });
         
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error("Error response from server:", errorData);
-          throw new Error(`Server returned ${response.status}: ${errorData}`);
-        }
-        
-        const orderResult = await response.json();
-        console.log("Order created successfully:", orderResult);
-        return orderResult;
+        console.log("DEBUG - Order API response:", result);
+        return result;
       } catch (error) {
-        console.error("Error in order mutation:", error);
+        console.error("DEBUG - Error in order mutation:", error);
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("DEBUG - Order created successfully:", data);
+      
+      // Show success toast with order number
       toast({
-        title: "Order created",
-        description: "The order has been created successfully",
+        title: "✅ Order created successfully",
+        description: `Order #${data.orderNumber} has been created and sent to the kitchen`,
+        variant: "default",
+        duration: 5000
       });
       
       // Refresh all relevant data across the application
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/activities'] });
       
+      // Navigate to kitchen tokens view
       setLocation("/kitchen-tokens");
     },
     onError: (error: any) => {
-      console.error("Error in mutation:", error);
+      console.error("DEBUG - Error creating order:", error);
+      
+      // Show detailed error message
       toast({
-        title: "Error creating order",
-        description: error.message || "An unknown error occurred",
+        title: "❌ Error creating order",
+        description: error.message || "An unknown error occurred. Please try again.",
         variant: "destructive",
+        duration: 7000
       });
     },
   });
@@ -240,15 +256,94 @@ export function OrderForm() {
     return selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
+  // Debug form state
+  console.log("Form state:", {
+    isValid: form.formState.isValid,
+    isDirty: form.formState.isDirty,
+    errors: form.formState.errors,
+    submitCount: form.formState.submitCount,
+    isSubmitting: form.formState.isSubmitting,
+    selectedItems: selectedItems
+  });
+  
+  // Direct form submit handler function for debugging
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Direct form submit triggered");
+    
+    // Check if there's a table number selected
+    if (!form.getValues("tableNumber")) {
+      console.error("Missing table number");
+      toast({
+        title: "Error",
+        description: "Please select a table number",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check if items are selected
+    if (selectedItems.length === 0) {
+      console.error("No items selected");
+      toast({
+        title: "Error",
+        description: "Please add at least one menu item",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log("Attempting manual form submit with form data:", form.getValues());
+    console.log("Selected items:", selectedItems);
+    
+    // Calculate total amount
+    const totalAmount = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Create order data manually
+    const orderData = {
+      tableNumber: form.getValues("tableNumber"),
+      status: "pending",
+      totalAmount: totalAmount,
+      notes: form.getValues("notes") || "",
+      isUrgent: !!form.getValues("isUrgent"),
+      orderSource: "manual",
+      items: selectedItems.map(item => ({
+        menuItemId: item.menuItemId,
+        quantity: item.quantity,
+        price: item.price,
+        notes: item.notes || ""
+      }))
+    };
+    
+    console.log("Submitting order data manually:", orderData);
+    createOrderMutation.mutate(orderData);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <span>Order Details</span>
             </CardTitle>
             <p className="text-sm text-neutral-500 mt-1">Fill in the order details manually or use AI to process natural language orders</p>
+            
+            {/* Debug Info */}
+            <div className="bg-neutral-800 p-2 mt-2 rounded text-xs text-white">
+              <p>Form Status: {form.formState.isValid ? '✅ Valid' : '❌ Invalid'}</p>
+              {Object.keys(form.formState.errors).length > 0 && (
+                <div className="mt-1">
+                  <p>Errors:</p>
+                  <ul className="list-disc pl-5">
+                    {Object.entries(form.formState.errors).map(([field, error]) => (
+                      <li key={field}>{field}: {error?.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <p>Items: {selectedItems.length}</p>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
@@ -446,21 +541,57 @@ export function OrderForm() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end space-x-2">
+        <div className="flex justify-between space-x-2">
           <Button 
             type="button" 
-            variant="outline"
-            onClick={() => setLocation("/")}
+            variant="destructive"
+            onClick={() => {
+              // Create an emergency test order with fixed data
+              const testOrderData = {
+                tableNumber: "Table 1",
+                status: "pending",
+                totalAmount: 320,
+                notes: "Debug Test Order",
+                isUrgent: false,
+                orderSource: "manual",
+                items: [
+                  {
+                    menuItemId: 1,
+                    quantity: 1,
+                    price: 320,
+                    notes: ""
+                  }
+                ]
+              };
+              
+              console.log("EMERGENCY TEST ORDER:", testOrderData);
+              toast({
+                title: "Attempting Emergency Test Order",
+                description: "Submitting a test order to the API..."
+              });
+              
+              createOrderMutation.mutate(testOrderData);
+            }}
           >
-            Cancel
+            Emergency Debug Order
           </Button>
-          <Button 
-            type="submit"
-            disabled={createOrderMutation.isPending || selectedItems.length === 0}
-          >
-            {createOrderMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Create Order
-          </Button>
+          
+          <div className="flex space-x-2">
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => setLocation("/")}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit"
+              disabled={createOrderMutation.isPending || selectedItems.length === 0}
+            >
+              {createOrderMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Order
+            </Button>
+          </div>
         </div>
       </form>
     </Form>
