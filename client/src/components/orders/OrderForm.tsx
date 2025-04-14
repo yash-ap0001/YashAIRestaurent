@@ -101,7 +101,7 @@ export function OrderForm() {
           totalAmount: orderData.totalAmount,
           notes: orderData.notes || "",
           isUrgent: !!orderData.isUrgent,
-          orderSource: "manual", 
+          orderSource: orderData.orderSource || "manual", 
           items: orderData.items || []
         };
         
@@ -345,39 +345,69 @@ export function OrderForm() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="tableNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Table Number</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a table" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Table 1">Table 1</SelectItem>
-                        <SelectItem value="Table 2">Table 2</SelectItem>
-                        <SelectItem value="Table 3">Table 3</SelectItem>
-                        <SelectItem value="Table 4">Table 4</SelectItem>
-                        <SelectItem value="Table 5">Table 5</SelectItem>
-                        <SelectItem value="Table 6">Table 6</SelectItem>
-                        <SelectItem value="Table 7">Table 7</SelectItem>
-                        <SelectItem value="Table 8">Table 8</SelectItem>
-                        <SelectItem value="Table 9">Table 9</SelectItem>
-                        <SelectItem value="Table 10">Table 10</SelectItem>
-                        <SelectItem value="Takeaway">Takeaway</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="tableNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Table Number</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a table" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Table 1">Table 1</SelectItem>
+                          <SelectItem value="Table 2">Table 2</SelectItem>
+                          <SelectItem value="Table 3">Table 3</SelectItem>
+                          <SelectItem value="Table 4">Table 4</SelectItem>
+                          <SelectItem value="Table 5">Table 5</SelectItem>
+                          <SelectItem value="Table 6">Table 6</SelectItem>
+                          <SelectItem value="Table 7">Table 7</SelectItem>
+                          <SelectItem value="Table 8">Table 8</SelectItem>
+                          <SelectItem value="Table 9">Table 9</SelectItem>
+                          <SelectItem value="Table 10">Table 10</SelectItem>
+                          <SelectItem value="Takeaway">Takeaway</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="orderSource"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Order Source</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select order source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="manual">Manual / In-Person</SelectItem>
+                          <SelectItem value="zomato">Zomato</SelectItem>
+                          <SelectItem value="swiggy">Swiggy</SelectItem>
+                          <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                          <SelectItem value="phone">Phone</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
