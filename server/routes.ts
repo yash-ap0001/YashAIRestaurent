@@ -6,6 +6,12 @@ import { insertOrderSchema, insertOrderItemSchema, insertKitchenTokenSchema, ins
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getHealthRecommendations, processNaturalLanguageOrder, getPersonalizedRecommendations } from "./services/aiService";
+import { 
+  initializeWhatsAppService, 
+  handleSendMessage, 
+  handleSendBill, 
+  handleGetStatus 
+} from "./services/whatsapp";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
