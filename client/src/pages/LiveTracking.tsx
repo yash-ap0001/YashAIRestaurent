@@ -1,34 +1,117 @@
 import { LiveOrderTracker } from "@/components/orders/LiveOrderTracker";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QRCodeSVG } from "qrcode.react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Share2, Printer, Copy } from "lucide-react";
+import { Share2, Printer, Copy, PlusCircle, ChefHat, CheckCircle, DollarSign, RotateCw } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 
 export default function LiveTracking() {
+  const { toast } = useToast();
+  const [isSimulating, setIsSimulating] = useState(false);
+  
   // Get all orders for ShareTrackingView
   const { data: orders = [] } = useQuery({ 
     queryKey: ['/api/orders'],
     refetchInterval: 5000
   });
   
+  // Get menu items for simulator
+  const { data: menuItems = [] } = useQuery({
+    queryKey: ['/api/menu-items'],
+  });
+  
   // Get public URL base
   const baseUrl = window.location.origin;
   
+  // Create a simulated order to test tracking
+  const createSimulatedOrder = async () => {
+    if (isSimulating) return;
+    
+    setIsSimulating(true);
+    
+    try {
+      // Random order details
+      const randomItems = getRandomMenuItems(menuItems, Math.floor(Math.random() * 3) + 1);
+      
+      const orderData = {
+        tableNumber: `T${Math.floor(Math.random() * 20) + 1}`,
+        items: randomItems.map(item => ({
+          menuItemId: item.id,
+          quantity: Math.floor(Math.random() * 2) + 1,
+          price: item.price,
+          notes: ''
+        })),
+        orderSource: "simulator",
+        useAIAutomation: true
+      };
+      
+      // Create order
+      await apiRequest('/api/simulator/create-order', {
+        method: 'POST',
+        body: JSON.stringify(orderData)
+      });
+      
+      toast({
+        title: "Order Created",
+        description: "A simulated order has been created. Watch it progress automatically!",
+        duration: 3000,
+      });
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to create order",
+        description: "There was an error creating the simulated order.",
+        duration: 3000,
+      });
+    } finally {
+      setIsSimulating(false);
+    }
+  };
+  
+  // Helper to get random menu items
+  const getRandomMenuItems = (items: any[], count: number) => {
+    const shuffled = [...items].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+  
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <h1 className="text-3xl font-bold mb-2">Live Order Tracking</h1>
-      <p className="text-neutral-400 mb-6">
-        Monitor all orders in real-time and share tracking links with customers
-      </p>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Live Order Tracking</h1>
+          <p className="text-neutral-400">
+            Monitor all orders in real-time and share tracking links with customers
+          </p>
+        </div>
+        <Button onClick={createSimulatedOrder} disabled={isSimulating} className="gap-2">
+          {isSimulating ? (
+            <>
+              <RotateCw className="h-4 w-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            <>
+              <PlusCircle className="h-4 w-4" />
+              Create Test Order
+            </>
+          )}
+        </Button>
+      </div>
       
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="dashboard">Staff Dashboard</TabsTrigger>
           <TabsTrigger value="share">Share With Customers</TabsTrigger>
+          <TabsTrigger value="simulator">Simulator Controls</TabsTrigger>
         </TabsList>
         
         <TabsContent value="dashboard">
@@ -48,8 +131,153 @@ export default function LiveTracking() {
             <ShareTrackingView orders={orders} baseUrl={baseUrl} />
           </div>
         </TabsContent>
+        
+        <TabsContent value="simulator">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Status Simulator</CardTitle>
+                <CardDescription>
+                  Test the order tracking system by simulating order status changes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-neutral-400">
+                    Select any active order from below to manually progress its status through the system:
+                  </p>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    {orders.length === 0 ? (
+                      <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                        <p className="text-neutral-400">No orders available</p>
+                        <p className="text-sm text-neutral-500 mt-1">Create a test order to begin</p>
+                      </div>
+                    ) : (
+                      orders.map((order: any) => (
+                        <Card key={order.id} className="overflow-hidden">
+                          <div className="p-4 border-b">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="font-semibold">Order #{order.orderNumber}</p>
+                                <p className="text-sm text-neutral-400">
+                                  {order.tableNumber ? `Table ${order.tableNumber}` : 'Takeaway'} • 
+                                  Status: <span className="font-medium">{order.status}</span>
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-medium">₹{order.totalAmount.toFixed(2)}</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <CardFooter className="flex justify-between p-4 gap-2">
+                            <StatusButton 
+                              order={order}
+                              targetStatus="preparing"
+                              currentStatus="pending"
+                              icon={<ChefHat className="h-4 w-4 mr-2" />}
+                              label="Start Preparing"
+                            />
+                            <StatusButton 
+                              order={order}
+                              targetStatus="ready"
+                              currentStatus="preparing"
+                              icon={<CheckCircle className="h-4 w-4 mr-2" />}
+                              label="Mark Ready"
+                            />
+                            <StatusButton 
+                              order={order}
+                              targetStatus="completed"
+                              currentStatus="ready"
+                              icon={<CheckCircle className="h-4 w-4 mr-2" />}
+                              label="Complete Order"
+                            />
+                            <StatusButton 
+                              order={order}
+                              targetStatus="billed"
+                              currentStatus="completed"
+                              icon={<DollarSign className="h-4 w-4 mr-2" />}
+                              label="Generate Bill"
+                            />
+                          </CardFooter>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+// Status button component
+function StatusButton({ 
+  order, 
+  targetStatus, 
+  currentStatus, 
+  icon, 
+  label 
+}: { 
+  order: any, 
+  targetStatus: string, 
+  currentStatus: string, 
+  icon: React.ReactNode, 
+  label: string 
+}) {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const updateStatus = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      await apiRequest(`/api/orders/${order.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: targetStatus })
+      });
+      
+      toast({
+        title: "Status Updated",
+        description: `Order #${order.orderNumber} is now ${targetStatus}`,
+        duration: 3000,
+      });
+      
+      // Refresh order data
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to update status",
+        description: "There was an error updating the order status.",
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const isCurrentStatus = order.status === currentStatus;
+  const isPastCurrentStatus = ["pending", "preparing", "ready", "completed", "billed"].indexOf(order.status) > 
+                              ["pending", "preparing", "ready", "completed", "billed"].indexOf(currentStatus);
+  
+  return (
+    <Button
+      size="sm"
+      variant={isCurrentStatus ? "default" : "outline"}
+      onClick={updateStatus}
+      disabled={!isCurrentStatus || isLoading || isPastCurrentStatus}
+      className="flex-1"
+    >
+      {isLoading ? <RotateCw className="h-4 w-4 animate-spin mr-2" /> : icon}
+      {label}
+    </Button>
   );
 }
 
