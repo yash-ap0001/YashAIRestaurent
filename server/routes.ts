@@ -119,6 +119,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderNumber: generateOrderNumber()
       };
       
+      // Log if AI automation is enabled
+      if (req.body.useAIAutomation) {
+        console.log("AI Automation enabled for this order - will manage status updates automatically");
+      } else {
+        console.log("AI Automation disabled for this order - staff will manage status updates manually");
+      }
+      
       const parsedOrder = insertOrderSchema.parse(orderData);
       const order = await storage.createOrder(parsedOrder);
       

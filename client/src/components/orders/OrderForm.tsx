@@ -198,6 +198,7 @@ export function OrderForm() {
       notes: data.notes || "",
       isUrgent: !!data.isUrgent,
       orderSource: data.orderSource || "manual",
+      useAIAutomation: data.useAIAutomation,
       items: formattedItems
     };
     
@@ -309,6 +310,7 @@ export function OrderForm() {
       notes: form.getValues("notes") || "",
       isUrgent: !!form.getValues("isUrgent"),
       orderSource: form.getValues("orderSource") || "manual",
+      useAIAutomation: form.getValues("useAIAutomation"),
       items: selectedItems.map(item => ({
         menuItemId: item.menuItemId,
         quantity: item.quantity,
@@ -612,6 +614,7 @@ export function OrderForm() {
                 notes: "Debug Test Order",
                 isUrgent: false,
                 orderSource: form.getValues("orderSource") || "manual",
+                useAIAutomation: form.getValues("useAIAutomation"),
                 items: [
                   {
                     menuItemId: 1,
