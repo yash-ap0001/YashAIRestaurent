@@ -82,25 +82,22 @@ export function OrderForm() {
       try {
         console.log("Preparing to submit order data:", orderData);
         
-        // Explicit formatting of request data
+        // Combine everything in one complete request
         const requestData = {
           tableNumber: orderData.tableNumber,
           status: "pending",
           totalAmount: orderData.totalAmount,
           notes: orderData.notes || "",
           isUrgent: !!orderData.isUrgent,
-          orderSource: "manual",
-          orderNumber: `ORD-${Math.floor(1000 + Math.random() * 9000)}`, // Generate a temporary order number
+          orderSource: "manual", 
+          items: orderData.items || []
         };
         
-        console.log("Submitting final order data to API:", requestData);
-        const response = await fetch("/api/orders", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestData),
-        });
+        // Log the complete request
+        console.log("Submitting complete order data to API:", requestData);
+        
+        // Use the project's standard API request function
+        const response = await apiRequest("POST", "/api/orders", requestData);
         
         if (!response.ok) {
           const errorData = await response.text();
@@ -110,11 +107,6 @@ export function OrderForm() {
         
         const orderResult = await response.json();
         console.log("Order created successfully:", orderResult);
-        
-        // The order items will be created on the server side
-        // when we provide them in the order creation API
-        console.log("Order items will be created by the backend:", orderData.items);
-        
         return orderResult;
       } catch (error) {
         console.error("Error in order mutation:", error);
