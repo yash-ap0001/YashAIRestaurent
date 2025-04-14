@@ -12,6 +12,8 @@ import WhatsApp from "@/pages/WhatsApp";
 import PhoneOrders from "@/pages/PhoneOrders";
 import AICallCenter from "@/pages/AICallCenter";
 import TestAIOrder from "@/pages/TestAIOrder";
+import LiveTracking from "@/pages/LiveTracking";
+import TrackOrder from "@/pages/TrackOrder";
 import { AppShell } from "@/components/layouts/AppShell";
 
 function Router() {
@@ -26,6 +28,8 @@ function Router() {
       <Route path="/phone-orders" component={PhoneOrders} />
       <Route path="/ai-call-center" component={AICallCenter} />
       <Route path="/test-ai-order" component={TestAIOrder} />
+      <Route path="/live-tracking" component={LiveTracking} />
+      <Route path="/track-order/:orderNumber" component={TrackOrder} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

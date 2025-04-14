@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
-  Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Waypoints
+  Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
+  Radio, Signal
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +21,7 @@ const mainNavItems: NavItem[] = [
   { label: "New Order", href: "/new-order", icon: <PlusSquare className="w-5 h-5" /> },
   { label: "Kitchen Tokens", href: "/kitchen-tokens", icon: <Receipt className="w-5 h-5" /> },
   { label: "Billing", href: "/billing", icon: <CreditCard className="w-5 h-5" /> },
+  { label: "Live Tracking", href: "/live-tracking", icon: <Activity className="w-5 h-5" /> },
   { label: "Health Advisor", href: "/health-advisor", icon: <HeartPulse className="w-5 h-5" /> },
   { label: "WhatsApp", href: "/whatsapp", icon: <MessageCircle className="w-5 h-5" /> },
   { label: "Phone Orders", href: "/phone-orders", icon: <Phone className="w-5 h-5" /> },
