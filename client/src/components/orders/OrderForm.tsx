@@ -45,6 +45,7 @@ const formSchema = z.object({
   notes: z.string().optional(),
   isUrgent: z.boolean().default(false),
   orderSource: z.string().default("manual"),
+  useAIAutomation: z.boolean().default(true),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -70,6 +71,7 @@ export function OrderForm() {
       notes: "",
       isUrgent: false,
       orderSource: "manual",
+      useAIAutomation: true,
     },
   });
 
@@ -101,7 +103,8 @@ export function OrderForm() {
           totalAmount: orderData.totalAmount,
           notes: orderData.notes || "",
           isUrgent: !!orderData.isUrgent,
-          orderSource: orderData.orderSource || "manual", 
+          orderSource: orderData.orderSource || "manual",
+          useAIAutomation: orderData.useAIAutomation !== undefined ? orderData.useAIAutomation : true,
           items: orderData.items || []
         };
         
@@ -550,23 +553,49 @@ export function OrderForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="isUrgent"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-2">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Mark as Urgent</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="isUrgent"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Mark as Urgent</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="useAIAutomation"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="flex items-center gap-1.5">
+                        <span>Use AI Automation</span>
+                        <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                      </FormLabel>
+                      <p className="text-xs text-neutral-500">
+                        AI will automatically manage this order's status updates and workflow
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
           </CardContent>
         </Card>
 

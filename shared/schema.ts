@@ -51,7 +51,8 @@ export const orders = pgTable("orders", {
   status: text("status").notNull().default("pending"),
   totalAmount: doublePrecision("total_amount").notNull().default(0),
   notes: text("notes"),
-  orderSource: text("order_source").default("manual"), // "manual", "ai_simulator", "whatsapp", "phone"
+  orderSource: text("order_source").default("manual"), // "manual", "ai_simulator", "whatsapp", "phone", "zomato", "swiggy" 
+  useAIAutomation: boolean("use_ai_automation").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -63,6 +64,7 @@ export const insertOrderSchema = createInsertSchema(orders).pick({
   totalAmount: true,
   notes: true,
   orderSource: true,
+  useAIAutomation: true,
 });
 
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
