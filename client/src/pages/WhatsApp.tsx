@@ -32,7 +32,7 @@ export default function WhatsApp() {
     data: messages, 
     isLoading: messagesLoading, 
     refetch: refetchMessages 
-  } = useQuery({
+  } = useQuery<Message[]>({
     queryKey: ['/api/whatsapp/message-history'],
     refetchInterval: 5000, // Refresh every 5 seconds
   });
@@ -42,7 +42,7 @@ export default function WhatsApp() {
     data: statusData, 
     isLoading: statusLoading,
     refetch: refetchStatus
-  } = useQuery({
+  } = useQuery<StatusData>({
     queryKey: ['/api/whatsapp/status'],
   });
 
@@ -140,10 +140,15 @@ export default function WhatsApp() {
             <CardContent>
               {statusLoading ? (
                 <p>Loading status...</p>
+              ) : statusData ? (
+                <div className="flex items-center gap-2">
+                  <div className={`h-3 w-3 rounded-full ${statusData.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <p>{statusData.message}</p>
+                </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <div className={`h-3 w-3 rounded-full ${statusData?.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                  <p>{statusData?.message || 'Status unknown'}</p>
+                  <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+                  <p>Status unknown</p>
                 </div>
               )}
             </CardContent>
@@ -266,7 +271,7 @@ export default function WhatsApp() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(messages as Message[]).map((msg, index) => (
+                      {messages.map((msg, index) => (
                         <TableRow key={index}>
                           <TableCell className="font-medium whitespace-nowrap">
                             {formatTimestamp(msg.timestamp)}
