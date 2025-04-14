@@ -13,6 +13,18 @@ import {
   handleGetStatus,
   getWhatsAppClient
 } from "./services/whatsapp";
+import { 
+  initializeTelephonyService, 
+  handleIncomingCall, 
+  processSpeech, 
+  confirmOrder, 
+  retryOrder, 
+  getCalls, 
+  getCallStatistics, 
+  getAIVoiceSettings, 
+  updateAIVoiceSettings, 
+  simulateIncomingCall 
+} from "./services/telephony";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -543,6 +555,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const messages = simulatedClient.getMessageHistory();
       
       res.json(messages);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+
+  // Telephony Integration APIs
+  
+  // Initialize Telephony service when the server starts
+  try {
+    console.log("Initializing Telephony service...");
+    initializeTelephonyService()
+      .then((success) => {
+        if (success) {
+          console.log("Telephony service initialized successfully");
+        } else {
+          console.warn("Telephony service initialization failed - using simulation mode");
+        }
+      })
+      .catch(error => console.error("Failed to initialize Telephony service:", error));
+  } catch (error) {
+    console.error("Error setting up Telephony service:", error);
+  }
+  
+  // Incoming call webhook (for Twilio)
+  app.post("/api/telephony/incoming-call", handleIncomingCall);
+  
+  // Speech processing webhook (for Twilio)
+  app.post("/api/telephony/process-speech", processSpeech);
+  
+  // Order confirmation webhook (for Twilio)
+  app.post("/api/telephony/confirm-order", confirmOrder);
+  
+  // Retry order webhook (for Twilio)
+  app.post("/api/telephony/retry-order", retryOrder);
+  
+  // Get call history
+  app.get("/api/telephony/calls", async (req: Request, res: Response) => {
+    try {
+      const calls = getCalls();
+      res.json(calls);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Get call statistics
+  app.get("/api/telephony/stats", async (req: Request, res: Response) => {
+    try {
+      const stats = getCallStatistics();
+      res.json(stats);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Get AI voice settings
+  app.get("/api/telephony/voice-settings", async (req: Request, res: Response) => {
+    try {
+      const settings = getAIVoiceSettings();
+      res.json(settings);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Update AI voice settings
+  app.post("/api/telephony/voice-settings", async (req: Request, res: Response) => {
+    try {
+      const updatedSettings = updateAIVoiceSettings(req.body);
+      res.json(updatedSettings);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Simulate an incoming call (for testing only)
+  app.post("/api/telephony/simulate-call", async (req: Request, res: Response) => {
+    try {
+      const { phoneNumber } = req.body;
+      
+      const callData = simulateIncomingCall(phoneNumber);
+      res.json(callData);
     } catch (err) {
       errorHandler(err, res);
     }

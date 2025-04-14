@@ -64,6 +64,14 @@ interface CallStatistics {
   conversionRate: number;
 }
 
+interface AIVoiceSettings {
+  greeting: string;
+  confirmationPrompt: string;
+  farewell: string;
+  maxRetries: number;
+  autoAnswerCalls: boolean;
+}
+
 export default function AICallCenter() {
   const queryClient = useQueryClient();
   const [systemActive, setSystemActive] = useState(true);
@@ -121,15 +129,34 @@ export default function AICallCenter() {
     conversionRate: 69 // percentage
   };
 
-  // In a real implementation, these would be actual API queries
-  const { data: recentCalls = mockRecentCalls } = useQuery({
-    queryKey: ['/api/ai-call-center/calls'],
-    enabled: false // Disabled since we're using mock data
+  // Fetch actual call data from our telephony API
+  const { 
+    data: recentCalls = [], 
+    isLoading: isLoadingCalls 
+  } = useQuery({
+    queryKey: ['/api/telephony/calls'],
+    queryFn: () => apiRequest('/api/telephony/calls')
   });
 
-  const { data: callStats = mockStatistics } = useQuery({
-    queryKey: ['/api/ai-call-center/statistics'],
-    enabled: false // Disabled since we're using mock data
+  const { 
+    data: callStats, 
+    isLoading: isLoadingStats 
+  } = useQuery({
+    queryKey: ['/api/telephony/stats'],
+    queryFn: () => apiRequest('/api/telephony/stats')
+  });
+  
+  const {
+    data: voiceSettings,
+    isLoading: isLoadingSettings
+  } = useQuery({
+    queryKey: ['/api/telephony/voice-settings'],
+    queryFn: () => apiRequest('/api/telephony/voice-settings'),
+    onSuccess: (data) => {
+      if (data) {
+        setSettings(data);
+      }
+    }
   });
 
   // Format timestamps
@@ -146,24 +173,36 @@ export default function AICallCenter() {
     return `${durationMinutes}m ${Math.round((end - start) % 60000 / 1000)}s`;
   };
 
+  // Handle simulating a new incoming call using the real API
+  const simulateCallMutation = useMutation({
+    mutationFn: () => apiRequest('/api/telephony/simulate-call', { 
+      method: 'POST',
+      body: JSON.stringify({ 
+        phoneNumber: '+91' + Math.floor(Math.random() * 9000000000 + 1000000000) 
+      })
+    }),
+    onSuccess: (data) => {
+      toast({
+        title: 'Incoming Call',
+        description: `Receiving call from ${data.phoneNumber}`,
+      });
+      
+      // Refresh calls data
+      queryClient.invalidateQueries({ queryKey: ['/api/telephony/calls'] });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to simulate incoming call',
+        variant: 'destructive',
+      });
+      console.error('Failed to simulate call:', error);
+    }
+  });
+  
   // Handle simulating a new incoming call
   const simulateIncomingCall = () => {
-    const newCall: PhoneCall = {
-      id: (Math.floor(Math.random() * 10000) + 5).toString(),
-      phoneNumber: '+91' + Math.floor(Math.random() * 9000000000 + 1000000000),
-      startTime: new Date().toISOString(),
-      status: 'active'
-    };
-    
-    toast({
-      title: 'Incoming Call',
-      description: `Receiving call from ${newCall.phoneNumber}`,
-    });
-    
-    // In a real implementation, this would call an API to add the call
-    // For now, we'll just add it to our local state via mock data
-    const updatedCalls = [newCall, ...recentCalls.slice(0, recentCalls.length - 1)];
-    queryClient.setQueryData(['/api/ai-call-center/calls'], updatedCalls);
+    simulateCallMutation.mutate();
   };
 
   // Handle toggling the AI system
@@ -180,13 +219,35 @@ export default function AICallCenter() {
     setSelectedCall(call);
   };
 
+  // Handle saving settings to the API
+  const updateSettingsMutation = useMutation({
+    mutationFn: (settings: any) => apiRequest('/api/telephony/voice-settings', {
+      method: 'POST',
+      body: JSON.stringify(settings)
+    }),
+    onSuccess: () => {
+      toast({
+        title: 'Settings Saved',
+        description: 'AI Call Center settings have been updated',
+      });
+      setShowSettings(false);
+      
+      // Refresh settings data
+      queryClient.invalidateQueries({ queryKey: ['/api/telephony/voice-settings'] });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to save settings',
+        variant: 'destructive',
+      });
+      console.error('Failed to save settings:', error);
+    }
+  });
+  
   // Handle saving settings
   const saveSettings = () => {
-    toast({
-      title: 'Settings Saved',
-      description: 'AI Call Center settings have been updated',
-    });
-    setShowSettings(false);
+    updateSettingsMutation.mutate(settings);
   };
 
   // Status badge color
