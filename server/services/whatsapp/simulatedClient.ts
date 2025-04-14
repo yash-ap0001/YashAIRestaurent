@@ -1,102 +1,20 @@
-import { Client } from 'whatsapp-web.js';
-import qrcode from 'qrcode-terminal';
 import { EventEmitter } from 'events';
 import { processNaturalLanguageOrder } from '../aiService';
-
-// Fix for missing declarations
-declare module 'qrcode-terminal';
 
 // Types for WhatsApp message events
 type MessageHandler = (message: any, customer: { name: string, phone: string }) => Promise<void>;
 
+/**
+ * A mock WhatsApp client for demo purposes.
+ * In a real implementation, this would use whatsapp-web.js or the WhatsApp Business API.
+ */
 class WhatsAppClient extends EventEmitter {
-  private client: Client;
   private isReady: boolean = false;
   private messageHandlers: Map<string, MessageHandler> = new Map();
+  private mockMessages: any[] = [];
 
   constructor() {
     super();
-    
-    // Create the WhatsApp client with headless mode to avoid Puppeteer issues
-    this.client = new Client({
-      puppeteer: {
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process'
-        ]
-      }
-    });
-
-    // Initialize event listeners
-    this.initEventListeners();
-  }
-
-  private initEventListeners() {
-    // Generate QR code for authentication
-    this.client.on('qr', (qr) => {
-      console.log('WhatsApp QR Code:');
-      qrcode.generate(qr, { small: true });
-      this.emit('qrCode', qr);
-    });
-
-    // Log when client is ready
-    this.client.on('ready', () => {
-      console.log('WhatsApp client is ready!');
-      this.isReady = true;
-      this.emit('ready');
-    });
-
-    // Handle authentication failures
-    this.client.on('auth_failure', (error) => {
-      console.error('WhatsApp authentication failed:', error);
-      this.emit('authFailure', error);
-    });
-
-    // Handle incoming messages
-    this.client.on('message', async (message) => {
-      try {
-        if (message.from.endsWith('@c.us')) { // Only process private chats
-          const contact = await message.getContact();
-          const customerName = contact.name || contact.pushname || 'Unknown';
-          const phone = message.from.replace('@c.us', '');
-          
-          console.log(`Message from ${customerName} (${phone}): ${message.body}`);
-          
-          // Check if this is an order message
-          if (message.body.toLowerCase().startsWith('order:') || 
-              message.body.toLowerCase().startsWith('order ')) {
-            await this.handleOrderMessage(message, { name: customerName, phone });
-          } 
-          // Check for bill request
-          else if (message.body.toLowerCase().includes('bill') || 
-                   message.body.toLowerCase().includes('pay')) {
-            await this.handleBillRequest(message, { name: customerName, phone });
-          }
-          // Otherwise provide help
-          else {
-            await this.sendHelpMessage(message.from);
-          }
-        }
-      } catch (error) {
-        console.error('Error handling WhatsApp message:', error);
-      }
-    });
-
-    // Handle disconnections
-    this.client.on('disconnected', (reason) => {
-      console.log('WhatsApp client disconnected:', reason);
-      this.isReady = false;
-      this.emit('disconnected', reason);
-      
-      // Attempt to reconnect
-      this.initialize();
-    });
   }
 
   /**
@@ -104,10 +22,18 @@ class WhatsAppClient extends EventEmitter {
    */
   async initialize() {
     try {
-      console.log('Initializing WhatsApp client...');
-      await this.client.initialize();
+      console.log('Initializing demo WhatsApp client...');
+      
+      // Simulate successful connection after a short delay
+      setTimeout(() => {
+        this.isReady = true;
+        this.emit('ready');
+        console.log('Demo WhatsApp client is ready!');
+      }, 1000);
+      
+      return true;
     } catch (error) {
-      console.error('Failed to initialize WhatsApp client:', error);
+      console.error('Failed to initialize demo WhatsApp client:', error);
       throw error;
     }
   }
@@ -121,13 +47,51 @@ class WhatsAppClient extends EventEmitter {
     }
 
     try {
-      // Format the phone number if needed
-      const formattedNumber = to.includes('@c.us') ? to : `${to}@c.us`;
-      await this.client.sendMessage(formattedNumber, text);
+      console.log(`[WhatsApp] Sending message to ${to}: ${text}`);
+      
+      // Store the message in our mock message array
+      this.mockMessages.push({
+        to,
+        text,
+        timestamp: new Date()
+      });
+      
       return true;
     } catch (error) {
       console.error('Error sending WhatsApp message:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Simulate receiving a message to test functionality
+   */
+  async simulateIncomingMessage(from: string, text: string, contact: { name: string }) {
+    if (!this.isReady) {
+      console.warn('Cannot simulate message, client not ready');
+      return;
+    }
+    
+    const message = {
+      from,
+      body: text,
+      getContact: async () => contact
+    };
+    
+    console.log(`[WhatsApp] Received message from ${from}: ${text}`);
+    
+    try {
+      if (text.toLowerCase().startsWith('order:') || text.toLowerCase().startsWith('order ')) {
+        await this.handleOrderMessage(message, { name: contact.name, phone: from.replace('@c.us', '') });
+      } 
+      else if (text.toLowerCase().includes('bill') || text.toLowerCase().includes('pay')) {
+        await this.handleBillRequest(message, { name: contact.name, phone: from.replace('@c.us', '') });
+      }
+      else {
+        await this.sendHelpMessage(from);
+      }
+    } catch (error) {
+      console.error('Error handling simulated message:', error);
     }
   }
 
@@ -145,14 +109,12 @@ class WhatsAppClient extends EventEmitter {
       }
       
       // Send acknowledgement
-      await this.client.sendMessage(
+      await this.sendMessage(
         message.from, 
         `Thank you for your order, ${customer.name}! We're processing it now...`
       );
       
       // Process the order using our NLP AI service
-      // This process would include getting menu items from the database and processing
-      // the natural language order
       const menuItems = await this.getMenuItems();
       const processedOrder = await processNaturalLanguageOrder(orderText, menuItems);
       
@@ -161,11 +123,11 @@ class WhatsAppClient extends EventEmitter {
       
       // Send confirmation with order details
       const confirmationMessage = this.formatOrderConfirmation(createdOrder);
-      await this.client.sendMessage(message.from, confirmationMessage);
+      await this.sendMessage(message.from, confirmationMessage);
       
     } catch (error) {
       console.error('Error processing order from WhatsApp:', error);
-      await this.client.sendMessage(
+      await this.sendMessage(
         message.from, 
         "Sorry, we couldn't process your order. Please try again or call us directly."
       );
@@ -181,7 +143,7 @@ class WhatsAppClient extends EventEmitter {
       const customerOrders = await this.getCustomerOrders(customer.phone);
       
       if (customerOrders.length === 0) {
-        await this.client.sendMessage(
+        await this.sendMessage(
           message.from, 
           "Sorry, we couldn't find any recent orders for your number. If you believe this is an error, please contact us."
         );
@@ -196,7 +158,7 @@ class WhatsAppClient extends EventEmitter {
           orderListMessage += `${index + 1}. Order #${order.orderNumber} - ₹${order.totalAmount.toFixed(2)}\n`;
         });
         
-        await this.client.sendMessage(message.from, orderListMessage);
+        await this.sendMessage(message.from, orderListMessage);
       } else {
         // If only one order, send the bill directly
         const bill = await this.generateBill(customerOrders[0].id);
@@ -204,7 +166,7 @@ class WhatsAppClient extends EventEmitter {
       }
     } catch (error) {
       console.error('Error handling bill request from WhatsApp:', error);
-      await this.client.sendMessage(
+      await this.sendMessage(
         message.from, 
         "Sorry, we couldn't retrieve your bill at the moment. Please try again later or contact us directly."
       );
@@ -220,16 +182,15 @@ class WhatsAppClient extends EventEmitter {
       "• To place an order, start your message with 'Order:' followed by your items\n" +
       "  Example: 'Order: 2 butter chicken, 3 naan, 1 paneer tikka'\n\n" +
       "• To request your bill, simply send 'bill' or 'show my bill'\n\n" +
-      "• For assistance, contact us at: +91-XXXXXXXXXX";
+      "• For assistance, contact us at: +91-1234567890";
     
-    await this.client.sendMessage(to, helpMessage);
+    await this.sendMessage(to, helpMessage);
   }
 
   /**
    * Helper function to get menu items from the database
    */
   private async getMenuItems() {
-    // This would be replaced with actual storage calls
     try {
       // Import dynamically to avoid circular dependencies
       const { storage } = await import('../../storage');
@@ -386,10 +347,7 @@ class WhatsAppClient extends EventEmitter {
       billMessage += `\n*TOTAL: ₹${bill.totalAmount.toFixed(2)}*\n\n`;
       billMessage += "Thank you for your order! Please pay at the counter or use our online payment options.";
       
-      await this.client.sendMessage(to, billMessage);
-      
-      // In a real implementation, we could also generate and send a PDF bill
-      // or provide a payment link
+      await this.sendMessage(to, billMessage);
       
     } catch (error) {
       console.error('Error sending bill:', error);
@@ -406,6 +364,13 @@ class WhatsAppClient extends EventEmitter {
            `Status: ${order.status}\n` +
            `Total Amount: ₹${order.totalAmount.toFixed(2)}\n\n` +
            `Your order has been received and is being processed. You can check the status of your order or request your bill by sending 'bill' on WhatsApp.`;
+  }
+
+  /**
+   * Get all messages sent by this client (for debugging and demo purposes)
+   */
+  getMessageHistory() {
+    return this.mockMessages;
   }
 }
 

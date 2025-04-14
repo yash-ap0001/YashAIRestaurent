@@ -10,7 +10,8 @@ import {
   initializeWhatsAppService, 
   handleSendMessage, 
   handleSendBill, 
-  handleGetStatus 
+  handleGetStatus,
+  getWhatsAppClient
 } from "./services/whatsapp";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -491,6 +492,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get WhatsApp connection status
   app.get("/api/whatsapp/status", handleGetStatus);
+  
+  // Simulate an incoming WhatsApp message (for testing only)
+  app.post("/api/whatsapp/simulate-message", async (req: Request, res: Response) => {
+    try {
+      const { phone, message, name } = req.body;
+      
+      if (!phone || !message || !name) {
+        return res.status(400).json({
+          error: 'Phone number, message text, and contact name are required'
+        });
+      }
+      
+      const client = getWhatsAppClient();
+      // Use type assertion to access the simulateIncomingMessage method
+      const simulatedClient = client as any;
+      
+      if (!simulatedClient.simulateIncomingMessage) {
+        return res.status(400).json({
+          error: 'Simulation is only available with the simulated WhatsApp client'
+        });
+      }
+      
+      const formattedPhone = phone.includes('@c.us') ? phone : `${phone}@c.us`;
+      await simulatedClient.simulateIncomingMessage(formattedPhone, message, { name });
+      
+      res.json({
+        success: true,
+        message: 'WhatsApp message simulated successfully'
+      });
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Get WhatsApp message history (for testing only)
+  app.get("/api/whatsapp/message-history", async (req: Request, res: Response) => {
+    try {
+      const client = getWhatsAppClient();
+      // Use type assertion to access the getMessageHistory method
+      const simulatedClient = client as any;
+      
+      if (!simulatedClient.getMessageHistory) {
+        return res.status(400).json({
+          error: 'Message history is only available with the simulated WhatsApp client'
+        });
+      }
+      
+      const messages = simulatedClient.getMessageHistory();
+      
+      res.json(messages);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
 
   return httpServer;
 }
