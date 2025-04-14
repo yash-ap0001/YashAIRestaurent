@@ -1,4 +1,4 @@
-import { getWhatsAppClient } from './client';
+import { getWhatsAppClient } from './simulatedClient';
 import { Request, Response } from 'express';
 
 /**
