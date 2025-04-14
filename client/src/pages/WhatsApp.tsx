@@ -292,6 +292,47 @@ export default function WhatsApp() {
               </Tabs>
             </CardContent>
           </Card>
+          
+          {/* Bill with Health Tips Form */}
+          <Card className="mt-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <HeartPulse className="h-5 w-5" />
+                Send Bill with Health Tips
+              </CardTitle>
+              <CardDescription>
+                Send a bill with nutritional information and health recommendations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSendBillWithHealthTips} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Phone Number</label>
+                  <Input 
+                    value={phone} 
+                    onChange={(e) => setPhone(e.target.value)} 
+                    placeholder="e.g., 918765432100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Bill ID</label>
+                  <Input 
+                    value={billId} 
+                    onChange={(e) => setBillId(e.target.value)} 
+                    placeholder="Enter Bill ID"
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={sendBillWithHealthTipsMutation.isPending}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  {sendBillWithHealthTipsMutation.isPending ? 'Sending...' : 'Send Bill with Health Tips'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Message History */}
