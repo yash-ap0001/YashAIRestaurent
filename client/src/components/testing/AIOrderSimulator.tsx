@@ -64,11 +64,12 @@ export function AIOrderSimulator() {
     try {
       // Step 1: Parse the natural language order
       updateStepStatus(0, "processing", "Sending to OpenAI for processing...");
-      const processedOrderResult = await apiRequest({
-        url: "/api/ai/process-order",
-        method: "POST",
-        body: { orderText: naturalLanguageOrder }
-      });
+      const processedOrderResponse = await apiRequest(
+        "POST",
+        "/api/ai/process-order",
+        { orderText: naturalLanguageOrder }
+      );
+      const processedOrderResult = await processedOrderResponse.json();
 
       if (!processedOrderResult || !processedOrderResult.items || !Array.isArray(processedOrderResult.items)) {
         throw new Error("Failed to process order with AI");
@@ -84,10 +85,10 @@ export function AIOrderSimulator() {
         notes: item.specialInstructions || ""
       }));
       
-      const orderResult = await apiRequest({
-        url: "/api/orders",
-        method: "POST",
-        body: {
+      const orderResponse = await apiRequest(
+        "POST",
+        "/api/orders",
+        {
           tableNumber: "AI-Test",
           customerName: "AI Customer",
           customerPhone: "+911234567890",
@@ -95,7 +96,8 @@ export function AIOrderSimulator() {
           status: "confirmed",
           orderSource: "ai_simulator"
         }
-      });
+      );
+      const orderResult = await orderResponse.json();
       
       if (!orderResult || !orderResult.id) {
         throw new Error("Failed to create order");
@@ -105,16 +107,17 @@ export function AIOrderSimulator() {
       
       // Step 3: Generate kitchen token
       updateStepStatus(2, "processing", "Generating kitchen token...");
-      const kitchenTokenResult = await apiRequest({
-        url: "/api/kitchen-tokens",
-        method: "POST",
-        body: {
+      const kitchenTokenResponse = await apiRequest(
+        "POST",
+        "/api/kitchen-tokens",
+        {
           orderId: orderResult.id,
           status: "pending",
           startTime: new Date().toISOString(),
           isUrgent: false
         }
-      });
+      );
+      const kitchenTokenResult = await kitchenTokenResponse.json();
       
       if (!kitchenTokenResult || !kitchenTokenResult.id) {
         throw new Error("Failed to create kitchen token");
@@ -126,13 +129,14 @@ export function AIOrderSimulator() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Update kitchen token status to 'preparing'
-      const updatedToken = await apiRequest({
-        url: `/api/kitchen-tokens/${kitchenTokenResult.id}`,
-        method: "PATCH",
-        body: {
+      const updatedTokenResponse = await apiRequest(
+        "PATCH",
+        `/api/kitchen-tokens/${kitchenTokenResult.id}`,
+        {
           status: "preparing"
         }
-      });
+      );
+      const updatedToken = await updatedTokenResponse.json();
       
       updateStepStatus(2, "completed", "Kitchen is preparing the order", updatedToken);
       
@@ -155,10 +159,10 @@ export function AIOrderSimulator() {
       // Step 5: Generate bill
       updateStepStatus(4, "processing", "Generating bill...");
       
-      const billResult = await apiRequest({
-        url: "/api/bills",
-        method: "POST",
-        body: {
+      const billResponse = await apiRequest(
+        "POST",
+        "/api/bills",
+        {
           orderId: orderResult.id,
           amount: orderResult.totalAmount,
           paymentMethod: "card",
@@ -166,7 +170,8 @@ export function AIOrderSimulator() {
           customerName: "AI Customer",
           customerPhone: "+911234567890"
         }
-      });
+      );
+      const billResult = await billResponse.json();
       
       if (!billResult || !billResult.id) {
         throw new Error("Failed to generate bill");
