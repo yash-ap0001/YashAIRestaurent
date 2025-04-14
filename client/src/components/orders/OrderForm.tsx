@@ -194,7 +194,7 @@ export function OrderForm() {
       totalAmount: totalAmount,
       notes: data.notes || "",
       isUrgent: !!data.isUrgent,
-      orderSource: "manual",
+      orderSource: data.orderSource || "manual",
       items: formattedItems
     };
     
@@ -305,7 +305,7 @@ export function OrderForm() {
       totalAmount: totalAmount,
       notes: form.getValues("notes") || "",
       isUrgent: !!form.getValues("isUrgent"),
-      orderSource: "manual",
+      orderSource: form.getValues("orderSource") || "manual",
       items: selectedItems.map(item => ({
         menuItemId: item.menuItemId,
         quantity: item.quantity,
@@ -582,7 +582,7 @@ export function OrderForm() {
                 totalAmount: 320,
                 notes: "Debug Test Order",
                 isUrgent: false,
-                orderSource: "manual",
+                orderSource: form.getValues("orderSource") || "manual",
                 items: [
                   {
                     menuItemId: 1,
