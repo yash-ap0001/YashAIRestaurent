@@ -46,19 +46,19 @@ export function AppShell({ children }: AppShellProps) {
                       { label: "Dashboard" };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-neutral-50 text-neutral-800">
+    <div className="flex h-screen w-full overflow-hidden bg-neutral-900 text-neutral-200">
       {/* Sidebar - hidden on mobile */}
-      <aside className="hidden md:flex md:w-64 flex-col bg-white border-r border-neutral-200 h-full">
-        <div className="p-4 flex items-center space-x-3 border-b border-neutral-200">
-          <div className="h-8 w-8 rounded-md bg-primary-500 flex items-center justify-center text-white">
+      <aside className="hidden md:flex md:w-64 flex-col bg-black border-r border-neutral-800 h-full">
+        <div className="p-4 flex items-center space-x-3 border-b border-neutral-800">
+          <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
             <HandPlatter size={20} />
           </div>
-          <h1 className="text-lg font-semibold text-neutral-800">YashHotelBot</h1>
+          <h1 className="text-lg font-semibold text-white">YashHotelBot</h1>
         </div>
         
         <nav className="flex-1 pt-4 pb-4">
           <div className="px-3 mb-2">
-            <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Main</p>
+            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Main</p>
           </div>
           <ul>
             {mainNavItems.map((item) => (
@@ -67,8 +67,8 @@ export function AppShell({ children }: AppShellProps) {
                   <a className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                     location === item.href 
-                      ? "text-primary-500 bg-primary-50" 
-                      : "text-neutral-600 hover:bg-neutral-100"
+                      ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                      : "text-neutral-400 hover:bg-neutral-800"
                   )}>
                     <span className="mr-3 text-current">{item.icon}</span>
                     {item.label}
@@ -79,7 +79,7 @@ export function AppShell({ children }: AppShellProps) {
           </ul>
           
           <div className="px-3 mb-2 mt-6">
-            <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Management</p>
+            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Management</p>
           </div>
           <ul>
             {managementNavItems.map((item) => (
@@ -88,8 +88,8 @@ export function AppShell({ children }: AppShellProps) {
                   <a className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                     location === item.href 
-                      ? "text-primary-500 bg-primary-50" 
-                      : "text-neutral-600 hover:bg-neutral-100"
+                      ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                      : "text-neutral-400 hover:bg-neutral-800"
                   )}>
                     <span className="mr-3 text-current">{item.icon}</span>
                     {item.label}
@@ -100,18 +100,18 @@ export function AppShell({ children }: AppShellProps) {
           </ul>
         </nav>
         
-        <div className="p-4 border-t border-neutral-200">
+        <div className="p-4 border-t border-neutral-800">
           <div className="flex items-center">
             <Avatar className="h-8 w-8">
               <AvatarImage src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" />
               <AvatarFallback>YS</AvatarFallback>
             </Avatar>
             <div className="ml-3">
-              <p className="text-sm font-medium text-neutral-700">Yash Sharma</p>
-              <p className="text-xs text-neutral-500">Admin</p>
+              <p className="text-sm font-medium text-neutral-200">Yash Sharma</p>
+              <p className="text-xs text-neutral-400">Admin</p>
             </div>
             <Button variant="ghost" size="icon" className="ml-auto">
-              <LogOut className="h-4 w-4 text-neutral-400 hover:text-neutral-600" />
+              <LogOut className="h-4 w-4 text-neutral-400 hover:text-purple-400" />
             </Button>
           </div>
         </div>
@@ -120,28 +120,28 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 border-b border-neutral-200 bg-white flex items-center justify-between px-4 sm:px-6">
+        <header className="h-16 border-b border-neutral-800 bg-black flex items-center justify-between px-4 sm:px-6">
           <div className="flex items-center md:hidden">
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setMobileMenuOpen(true)}
             >
-              <Menu className="h-5 w-5 text-neutral-500" />
+              <Menu className="h-5 w-5 text-neutral-300" />
               <span className="sr-only">Open menu</span>
             </Button>
-            <h1 className="ml-3 text-lg font-semibold text-neutral-800">{currentPage.label}</h1>
+            <h1 className="ml-3 text-lg font-semibold text-white">{currentPage.label}</h1>
           </div>
           
           <div className="hidden md:block">
-            <h1 className="text-lg font-semibold text-neutral-800">{currentPage.label}</h1>
+            <h1 className="text-lg font-semibold text-white">{currentPage.label}</h1>
           </div>
           
           <div className="flex items-center space-x-4">
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5 text-neutral-500" />
-                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-error-500"></span>
+                <Bell className="h-5 w-5 text-neutral-300" />
+                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-purple-500"></span>
                 <span className="sr-only">Notifications</span>
               </Button>
             </div>
@@ -156,24 +156,24 @@ export function AppShell({ children }: AppShellProps) {
         </header>
         
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6">
+        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-neutral-900">
           {children}
         </div>
       </main>
 
       {/* Mobile menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0">
-          <div className="p-4 flex items-center space-x-3 border-b border-neutral-200">
-            <div className="h-8 w-8 rounded-md bg-primary-500 flex items-center justify-center text-white">
+        <SheetContent side="left" className="w-64 p-0 bg-black border-r-neutral-800">
+          <div className="p-4 flex items-center space-x-3 border-b border-neutral-800">
+            <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
               <HandPlatter size={20} />
             </div>
-            <h1 className="text-lg font-semibold text-neutral-800">YashHotelBot</h1>
+            <h1 className="text-lg font-semibold text-white">YashHotelBot</h1>
           </div>
           
           <nav className="flex-1 pt-4 pb-4">
             <div className="px-3 mb-2">
-              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Main</p>
+              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Main</p>
             </div>
             <ul>
               {mainNavItems.map((item) => (
@@ -183,8 +183,8 @@ export function AppShell({ children }: AppShellProps) {
                       className={cn(
                         "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                         location === item.href 
-                          ? "text-primary-500 bg-primary-50" 
-                          : "text-neutral-600 hover:bg-neutral-100"
+                          ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                          : "text-neutral-400 hover:bg-neutral-800"
                       )}
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -197,7 +197,7 @@ export function AppShell({ children }: AppShellProps) {
             </ul>
             
             <div className="px-3 mb-2 mt-6">
-              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Management</p>
+              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Management</p>
             </div>
             <ul>
               {managementNavItems.map((item) => (
@@ -207,8 +207,8 @@ export function AppShell({ children }: AppShellProps) {
                       className={cn(
                         "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                         location === item.href 
-                          ? "text-primary-500 bg-primary-50" 
-                          : "text-neutral-600 hover:bg-neutral-100"
+                          ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                          : "text-neutral-400 hover:bg-neutral-800"
                       )}
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -221,18 +221,18 @@ export function AppShell({ children }: AppShellProps) {
             </ul>
           </nav>
           
-          <div className="p-4 border-t border-neutral-200">
+          <div className="p-4 border-t border-neutral-800">
             <div className="flex items-center">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" />
                 <AvatarFallback>YS</AvatarFallback>
               </Avatar>
               <div className="ml-3">
-                <p className="text-sm font-medium text-neutral-700">Yash Sharma</p>
-                <p className="text-xs text-neutral-500">Admin</p>
+                <p className="text-sm font-medium text-neutral-200">Yash Sharma</p>
+                <p className="text-xs text-neutral-400">Admin</p>
               </div>
               <Button variant="ghost" size="icon" className="ml-auto">
-                <LogOut className="h-4 w-4 text-neutral-400 hover:text-neutral-600" />
+                <LogOut className="h-4 w-4 text-neutral-400 hover:text-purple-400" />
               </Button>
             </div>
           </div>
@@ -240,13 +240,13 @@ export function AppShell({ children }: AppShellProps) {
       </Sheet>
       
       {/* Mobile Bottom Navigation - visible only on small screens */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 px-4 py-2 z-10">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-neutral-800 px-4 py-2 z-10">
         <div className="flex justify-around">
           {mainNavItems.slice(0, 4).map((item) => (
             <Link key={item.href} href={item.href}>
               <a className={cn(
                 "flex flex-col items-center px-2 py-1",
-                location === item.href ? "text-primary-500" : "text-neutral-500"
+                location === item.href ? "text-purple-400" : "text-neutral-400"
               )}>
                 <span className="text-xl">{item.icon}</span>
                 <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
@@ -256,7 +256,7 @@ export function AppShell({ children }: AppShellProps) {
           <Link href="/health-advisor">
             <a className={cn(
               "flex flex-col items-center px-2 py-1",
-              location === "/health-advisor" ? "text-primary-500" : "text-neutral-500"
+              location === "/health-advisor" ? "text-purple-400" : "text-neutral-400"
             )}>
               <span className="text-xl"><HeartPulse className="w-5 h-5" /></span>
               <span className="text-xs mt-1">Health</span>
@@ -265,7 +265,7 @@ export function AppShell({ children }: AppShellProps) {
           <Link href="/whatsapp">
             <a className={cn(
               "flex flex-col items-center px-2 py-1",
-              location === "/whatsapp" ? "text-primary-500" : "text-neutral-500"
+              location === "/whatsapp" ? "text-purple-400" : "text-neutral-400"
             )}>
               <span className="text-xl"><MessageCircle className="w-5 h-5" /></span>
               <span className="text-xs mt-1">WhatsApp</span>
@@ -274,7 +274,7 @@ export function AppShell({ children }: AppShellProps) {
           <Link href="/phone-orders">
             <a className={cn(
               "flex flex-col items-center px-2 py-1",
-              location === "/phone-orders" ? "text-primary-500" : "text-neutral-500"
+              location === "/phone-orders" ? "text-purple-400" : "text-neutral-400"
             )}>
               <span className="text-xl"><Phone className="w-5 h-5" /></span>
               <span className="text-xs mt-1">Phone</span>
@@ -283,7 +283,7 @@ export function AppShell({ children }: AppShellProps) {
           <Link href="/ai-call-center">
             <a className={cn(
               "flex flex-col items-center px-2 py-1",
-              location === "/ai-call-center" ? "text-primary-500" : "text-neutral-500"
+              location === "/ai-call-center" ? "text-purple-400" : "text-neutral-400"
             )}>
               <span className="text-xl"><PhoneCall className="w-5 h-5" /></span>
               <span className="text-xs mt-1">AI Call</span>
