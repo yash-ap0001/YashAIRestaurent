@@ -145,7 +145,10 @@ export default function AICallCenter() {
     isLoading: isLoadingCalls 
   } = useQuery({
     queryKey: ['/api/telephony/calls'],
-    queryFn: () => apiRequest('GET', '/api/telephony/calls')
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/telephony/calls');
+      return await response.json();
+    }
   });
 
   const { 
@@ -153,7 +156,10 @@ export default function AICallCenter() {
     isLoading: isLoadingStats 
   } = useQuery({
     queryKey: ['/api/telephony/stats'],
-    queryFn: () => apiRequest('GET', '/api/telephony/stats')
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/telephony/stats');
+      return await response.json();
+    }
   });
   
   const {
@@ -161,13 +167,18 @@ export default function AICallCenter() {
     isLoading: isLoadingSettings
   } = useQuery({
     queryKey: ['/api/telephony/voice-settings'],
-    queryFn: () => apiRequest('GET', '/api/telephony/voice-settings'),
-    onSuccess: (data) => {
-      if (data) {
-        setSettings(data);
-      }
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/telephony/voice-settings');
+      return await response.json();
     }
   });
+  
+  // Update settings state when voiceSettings data is loaded
+  useEffect(() => {
+    if (voiceSettings) {
+      setSettings(voiceSettings);
+    }
+  }, [voiceSettings]);
 
   // Format timestamps
   const formatTime = (isoString: string) => {
@@ -185,13 +196,10 @@ export default function AICallCenter() {
 
   // Handle simulating a new incoming call using the real API
   const simulateCallMutation = useMutation({
-    mutationFn: () => apiRequest('/api/telephony/simulate-call', { 
-      method: 'POST',
-      body: JSON.stringify({ 
-        phoneNumber: '+91' + Math.floor(Math.random() * 9000000000 + 1000000000) 
-      })
+    mutationFn: () => apiRequest('POST', '/api/telephony/simulate-call', { 
+      phoneNumber: '+91' + Math.floor(Math.random() * 9000000000 + 1000000000) 
     }),
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: 'Incoming Call',
         description: `Receiving call from ${data.phoneNumber}`,
@@ -231,10 +239,7 @@ export default function AICallCenter() {
 
   // Handle saving settings to the API
   const updateSettingsMutation = useMutation({
-    mutationFn: (settings: any) => apiRequest('/api/telephony/voice-settings', {
-      method: 'POST',
-      body: JSON.stringify(settings)
-    }),
+    mutationFn: (settings: any) => apiRequest('POST', '/api/telephony/voice-settings', settings),
     onSuccess: () => {
       toast({
         title: 'Settings Saved',
