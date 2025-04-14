@@ -269,8 +269,13 @@ export class NotificationSystem {
     }
     
     try {
-      // Convert order source to channel type
-      const channelType = order.orderSource as any;
+      // Handle simulator order sources
+      if (order.orderSource === 'simulator' || order.orderSource === 'ai_simulator') {
+        return getChannelAdapter('simulator');
+      }
+      
+      // Convert order source to channel type for other sources
+      const channelType = order.orderSource as 'phone' | 'whatsapp' | 'zomato' | 'swiggy' | 'manual' | 'ai';
       return getChannelAdapter(channelType);
     } catch (error) {
       console.error(`Error getting channel adapter for order ${order.id}:`, error);

@@ -8,7 +8,7 @@ import { centralAIController } from './centralController';
  * This ensures consistent handling of orders across different input channels.
  */
 export interface ChannelAdapter {
-  channelType: 'phone' | 'whatsapp' | 'zomato' | 'swiggy' | 'manual' | 'ai';
+  channelType: 'phone' | 'whatsapp' | 'zomato' | 'swiggy' | 'manual' | 'ai' | 'simulator' | 'ai_simulator';
   processIncomingOrder(rawData: any): Promise<Order>;
   sendOrderConfirmation(order: Order): Promise<boolean>;
   sendStatusUpdate(order: Order, status: string): Promise<boolean>;
@@ -414,8 +414,57 @@ export class AIChannelAdapter implements ChannelAdapter {
   }
 }
 
+/**
+ * Simulator Channel Adapter
+ * 
+ * Handles simulator-generated orders for testing AI capabilities.
+ */
+export class SimulatorChannelAdapter implements ChannelAdapter {
+  channelType: 'simulator' | 'ai_simulator' = 'simulator';
+  
+  /**
+   * Process a simulated order
+   */
+  async processIncomingOrder(rawData: any): Promise<Order> {
+    console.log('Simulator Adapter: Processing incoming order', rawData);
+    
+    // Prepare standardized order data
+    const orderData = {
+      ...rawData,
+      useAIAutomation: true // Simulator orders are always AI-automated
+    };
+    
+    // Hand off to central controller
+    return centralAIController.processOrderFromChannel(this.channelType, orderData);
+  }
+  
+  /**
+   * No external confirmation needed for simulator orders
+   */
+  async sendOrderConfirmation(order: Order): Promise<boolean> {
+    console.log(`Simulator Adapter: Order ${order.id} confirmed (no external notification needed)`);
+    return true;
+  }
+  
+  /**
+   * No external status update needed for simulator orders
+   */
+  async sendStatusUpdate(order: Order, status: string): Promise<boolean> {
+    console.log(`Simulator Adapter: Order ${order.id} status updated to ${status} (no external notification needed)`);
+    return true;
+  }
+  
+  /**
+   * No external bill notification needed for simulator orders
+   */
+  async sendBill(order: Order, billId: number): Promise<boolean> {
+    console.log(`Simulator Adapter: Bill ${billId} for order ${order.id} created (no external notification needed)`);
+    return true;
+  }
+}
+
 // Export adapter factory
-export function getChannelAdapter(channelType: 'phone' | 'whatsapp' | 'zomato' | 'swiggy' | 'manual' | 'ai'): ChannelAdapter {
+export function getChannelAdapter(channelType: 'phone' | 'whatsapp' | 'zomato' | 'swiggy' | 'manual' | 'ai' | 'simulator' | 'ai_simulator'): ChannelAdapter {
   switch (channelType) {
     case 'whatsapp':
       return new WhatsAppChannelAdapter();
@@ -429,6 +478,9 @@ export function getChannelAdapter(channelType: 'phone' | 'whatsapp' | 'zomato' |
       return new ManualChannelAdapter();
     case 'ai':
       return new AIChannelAdapter();
+    case 'simulator':
+    case 'ai_simulator':
+      return new SimulatorChannelAdapter();
     default:
       throw new Error(`Unknown channel type: ${channelType}`);
   }
