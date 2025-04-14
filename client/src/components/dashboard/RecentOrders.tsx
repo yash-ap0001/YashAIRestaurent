@@ -20,26 +20,31 @@ export function RecentOrders({ className }: RecentOrdersProps) {
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-secondary-50 text-secondary-700';
+        return 'bg-green-900 bg-opacity-40 text-green-400';
       case 'in-progress':
-        return 'bg-warning-50 text-warning-700';
+        return 'bg-amber-900 bg-opacity-40 text-amber-400';
       case 'billed':
-        return 'bg-primary-50 text-primary-700';
+        return 'bg-purple-900 bg-opacity-40 text-purple-400';
       default:
-        return 'bg-neutral-50 text-neutral-600';
+        return 'bg-neutral-800 text-neutral-400';
     }
   };
 
-  const formatTimeAgo = (dateString: Date) => {
-    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  const formatTimeAgo = (dateString: any) => {
+    if (!dateString) return 'Unknown time';
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch (e) {
+      return 'Invalid date';
+    }
   };
 
   return (
-    <Card className={className}>
+    <Card className={`bg-neutral-800 border-neutral-700 ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between py-3">
-        <CardTitle className="font-medium text-base">Recent Orders</CardTitle>
+        <CardTitle className="font-medium text-base text-white">Recent Orders</CardTitle>
         <Link href="/orders">
-          <Button variant="link" className="text-primary-500 hover:text-primary-600">
+          <Button variant="link" className="text-purple-400 hover:text-purple-300">
             View All
           </Button>
         </Link>
@@ -49,51 +54,51 @@ export function RecentOrders({ className }: RecentOrdersProps) {
           <div className="p-4 space-y-4">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex justify-between items-center">
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-4 w-1/4 bg-neutral-700" />
+                <Skeleton className="h-4 w-1/4 bg-neutral-700" />
+                <Skeleton className="h-4 w-1/4 bg-neutral-700" />
               </div>
             ))}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-neutral-200">
-              <thead className="bg-neutral-50">
+            <table className="min-w-full divide-y divide-neutral-700">
+              <thead className="bg-neutral-900">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                     Order #
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                     Table
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                     Items
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
                     Time
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-neutral-200">
+              <tbody className="bg-neutral-800 divide-y divide-neutral-700">
                 {data?.slice(0, 5).map((order) => (
-                  <tr key={order.id}>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-800">
+                  <tr key={order.id} className="hover:bg-neutral-700">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-white">
                       #{order.orderNumber}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-300">
                       {order.tableNumber || 'Takeaway'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-300">
                       {/* This would be a count from order items */}
                       {Math.floor(Math.random() * 6) + 1} items
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-300">
                       ₹{order.totalAmount.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -101,14 +106,14 @@ export function RecentOrders({ className }: RecentOrdersProps) {
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-300">
                       {formatTimeAgo(order.createdAt)}
                     </td>
                   </tr>
                 ))}
                 {!data?.length && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-3 text-sm text-center text-neutral-500">
+                    <td colSpan={6} className="px-4 py-3 text-sm text-center text-neutral-400">
                       No orders found
                     </td>
                   </tr>
