@@ -125,6 +125,10 @@ export function OrderForm() {
   });
 
   const onSubmit = (data: FormValues) => {
+    // Calculate total amount from selected items
+    const totalAmount = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Map items to the format the API expects
     data.items = selectedItems.map(item => ({
       menuItemId: item.menuItemId,
       quantity: item.quantity,
@@ -135,7 +139,15 @@ export function OrderForm() {
     // Set the order source to "manual" to identify orders created through the form
     data.orderSource = "manual";
     
-    createOrderMutation.mutate(data);
+    // Add required fields - we need status and totalAmount
+    const orderData = {
+      ...data,
+      status: "pending",
+      totalAmount: totalAmount
+    };
+    
+    console.log("Form submission - Full order data:", orderData);
+    createOrderMutation.mutate(orderData as any);
   };
 
   const addMenuItem = (menuItemId: number) => {
