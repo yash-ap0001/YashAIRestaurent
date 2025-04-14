@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
-  Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone
+  Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +23,7 @@ const mainNavItems: NavItem[] = [
   { label: "Health Advisor", href: "/health-advisor", icon: <HeartPulse className="w-5 h-5" /> },
   { label: "WhatsApp", href: "/whatsapp", icon: <MessageCircle className="w-5 h-5" /> },
   { label: "Phone Orders", href: "/phone-orders", icon: <Phone className="w-5 h-5" /> },
+  { label: "AI Call Center", href: "/ai-call-center", icon: <PhoneCall className="w-5 h-5" /> },
 ];
 
 const managementNavItems: NavItem[] = [
@@ -277,6 +278,15 @@ export function AppShell({ children }: AppShellProps) {
             )}>
               <span className="text-xl"><Phone className="w-5 h-5" /></span>
               <span className="text-xs mt-1">Phone</span>
+            </a>
+          </Link>
+          <Link href="/ai-call-center">
+            <a className={cn(
+              "flex flex-col items-center px-2 py-1",
+              location === "/ai-call-center" ? "text-primary-500" : "text-neutral-500"
+            )}>
+              <span className="text-xl"><PhoneCall className="w-5 h-5" /></span>
+              <span className="text-xs mt-1">AI Call</span>
             </a>
           </Link>
         </div>
