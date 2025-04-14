@@ -129,6 +129,16 @@ export default function AICallCenter() {
     conversionRate: 69 // percentage
   };
 
+  // Default values for when API data is loading
+  const defaultCallStats: CallStatistics = {
+    totalCalls: 0,
+    answeredCalls: 0,
+    missedCalls: 0,
+    averageCallDuration: 0,
+    ordersPlaced: 0,
+    conversionRate: 0
+  };
+
   // Fetch actual call data from our telephony API
   const { 
     data: recentCalls = [], 
@@ -139,7 +149,7 @@ export default function AICallCenter() {
   });
 
   const { 
-    data: callStats, 
+    data: callStats = defaultCallStats, 
     isLoading: isLoadingStats 
   } = useQuery({
     queryKey: ['/api/telephony/stats'],
