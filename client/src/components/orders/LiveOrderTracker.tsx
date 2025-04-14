@@ -185,18 +185,18 @@ export function LiveOrderTracker() {
   });
 
   return (
-    <Card>
+    <Card className="bg-neutral-800 border-neutral-700">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Live Order Tracker</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-white">Live Order Tracker</CardTitle>
+            <CardDescription className="text-neutral-400">
               Real-time status updates for all orders across all channels
             </CardDescription>
           </div>
           <Badge 
             variant="outline" 
-            className={`px-2 py-1 ${isLoading ? 'animate-pulse bg-blue-100' : 'bg-green-100'}`}
+            className={`px-2 py-1 ${isLoading ? 'animate-pulse bg-purple-900 text-purple-100' : 'bg-green-900 text-green-100'}`}
           >
             {isLoading ? "Updating..." : "Live"}
           </Badge>
@@ -204,16 +204,16 @@ export function LiveOrderTracker() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="all" className="w-full" onValueChange={(value) => setFilter(value as any)}>
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="all">All Orders</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-4 bg-neutral-700">
+            <TabsTrigger value="all" className="data-[state=active]:bg-purple-700 data-[state=active]:text-white">All Orders</TabsTrigger>
+            <TabsTrigger value="active" className="data-[state=active]:bg-purple-700 data-[state=active]:text-white">Active</TabsTrigger>
+            <TabsTrigger value="completed" className="data-[state=active]:bg-purple-700 data-[state=active]:text-white">Completed</TabsTrigger>
           </TabsList>
           
           <TabsContent value="all" className="mt-0">
             <div className="space-y-4">
               {sortedOrders.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-neutral-400">
                   <AlertCircle className="mx-auto h-12 w-12 mb-2 opacity-20" />
                   <p>No orders available</p>
                 </div>
@@ -228,7 +228,7 @@ export function LiveOrderTracker() {
           <TabsContent value="active" className="mt-0">
             <div className="space-y-4">
               {filteredOrders.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-neutral-400">
                   <CheckCircle2 className="mx-auto h-12 w-12 mb-2 opacity-20" />
                   <p>No active orders</p>
                 </div>
@@ -243,7 +243,7 @@ export function LiveOrderTracker() {
           <TabsContent value="completed" className="mt-0">
             <div className="space-y-4">
               {filteredOrders.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-neutral-400">
                   <AlertCircle className="mx-auto h-12 w-12 mb-2 opacity-20" />
                   <p>No completed orders</p>
                 </div>
@@ -270,15 +270,15 @@ function OrderStatusCard({ order }: { order: any }) {
   const statusLabel = STATUS_CONFIG[order.status as OrderStatus]?.label || "Unknown";
   
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden bg-neutral-800 border-neutral-700">
       <div className={`h-1 ${statusColor} w-full`}></div>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="text-xl">{order.sourceIcon}</span>
-            <h3 className="font-semibold">
+            <h3 className="font-semibold text-white">
               Order #{order.orderNumber}
-              {order.tableNumber && <span className="ml-2 text-sm text-muted-foreground">
+              {order.tableNumber && <span className="ml-2 text-sm text-neutral-400">
                 (Table {order.tableNumber})
               </span>}
             </h3>
@@ -301,10 +301,10 @@ function OrderStatusCard({ order }: { order: any }) {
         <div className="mb-2">
           <Progress 
             value={order.progress} 
-            className="h-2" 
+            className="h-2 bg-neutral-700" 
             indicatorColor={statusColor}
           />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+          <div className="flex justify-between text-xs text-neutral-400 mt-1">
             <span>Order Placed</span>
             <span>Preparing</span>
             <span>Ready</span>
@@ -314,19 +314,27 @@ function OrderStatusCard({ order }: { order: any }) {
         
         <div className="flex justify-between items-center mt-4 text-sm">
           <div>
-            <p className="font-medium">
-              {order.useAIAutomation ? "🤖 AI-Managed" : "👤 Manually Managed"}
+            <p className="font-medium text-white">
+              {order.useAIAutomation ? (
+                <span className="flex items-center gap-1">
+                  <span className="text-purple-400">🤖</span> AI-Managed
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <span>👤</span> Manually Managed
+                </span>
+              )}
             </p>
-            <p className="text-muted-foreground">
+            <p className="text-neutral-400">
               ₹{order.totalAmount.toFixed(2)} 
               {order.bill && <span className="ml-2">• Bill #{order.bill.billNumber}</span>}
             </p>
           </div>
           <div className="text-right">
-            <p className="font-medium">
+            <p className="font-medium text-white">
               {order.kitchenToken ? `Token: ${order.kitchenToken.tokenNumber}` : 'No Token'}
             </p>
-            <p className="text-muted-foreground">
+            <p className="text-neutral-400">
               Created {formatRelativeTime(new Date(order.createdAt))}
             </p>
           </div>
