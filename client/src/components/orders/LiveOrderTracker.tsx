@@ -28,12 +28,54 @@ type OrderStatus = "pending" | "preparing" | "ready" | "completed" | "delivered"
 
 // Status configuration with colors and icons
 const STATUS_CONFIG = {
-  pending: { color: "bg-yellow-500", textColor: "text-yellow-700", label: "Pending", icon: Clock },
-  preparing: { color: "bg-blue-500", textColor: "text-blue-700", label: "Preparing", icon: ChefHat },
-  ready: { color: "bg-green-500", textColor: "text-green-700", label: "Ready", icon: CheckCircle2 },
-  completed: { color: "bg-purple-500", textColor: "text-purple-700", label: "Completed", icon: CheckCircle2 },
-  delivered: { color: "bg-indigo-500", textColor: "text-indigo-700", label: "Delivered", icon: Truck },
-  billed: { color: "bg-gray-500", textColor: "text-gray-700", label: "Billed", icon: Receipt }
+  pending: { 
+    color: "bg-amber-500", 
+    textColor: "text-amber-700", 
+    bgColor: "bg-amber-50", 
+    borderColor: "border-amber-200", 
+    label: "Pending", 
+    icon: Clock 
+  },
+  preparing: { 
+    color: "bg-blue-500", 
+    textColor: "text-blue-700", 
+    bgColor: "bg-blue-50", 
+    borderColor: "border-blue-200", 
+    label: "Preparing", 
+    icon: ChefHat 
+  },
+  ready: { 
+    color: "bg-emerald-500", 
+    textColor: "text-emerald-700", 
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-200", 
+    label: "Ready", 
+    icon: CheckCircle2 
+  },
+  completed: { 
+    color: "bg-indigo-500", 
+    textColor: "text-indigo-700", 
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-200", 
+    label: "Completed", 
+    icon: CheckCircle2 
+  },
+  delivered: { 
+    color: "bg-violet-500", 
+    textColor: "text-violet-700", 
+    bgColor: "bg-violet-50",
+    borderColor: "border-violet-200", 
+    label: "Delivered", 
+    icon: Truck 
+  },
+  billed: { 
+    color: "bg-slate-500", 
+    textColor: "text-slate-700", 
+    bgColor: "bg-slate-50",
+    borderColor: "border-slate-200", 
+    label: "Billed", 
+    icon: Receipt 
+  }
 };
 
 // Calculate progress percentage based on status
@@ -223,11 +265,13 @@ function OrderStatusCard({ order }: { order: any }) {
   const StatusIcon = STATUS_CONFIG[order.status as OrderStatus]?.icon || Clock;
   const statusColor = STATUS_CONFIG[order.status as OrderStatus]?.color || "bg-gray-500";
   const textColor = STATUS_CONFIG[order.status as OrderStatus]?.textColor || "text-gray-700";
+  const bgColor = STATUS_CONFIG[order.status as OrderStatus]?.bgColor || "bg-gray-50";
+  const borderColor = STATUS_CONFIG[order.status as OrderStatus]?.borderColor || "border-gray-200";
   const statusLabel = STATUS_CONFIG[order.status as OrderStatus]?.label || "Unknown";
   
   return (
-    <Card className="overflow-hidden">
-      <div className={`h-1 ${statusColor} w-full`}></div>
+    <Card className={`overflow-hidden border-l-4 ${borderColor} ${bgColor} transition-all hover:shadow-md`}>
+      <div className={`h-2 ${statusColor} w-full`}></div>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -255,26 +299,36 @@ function OrderStatusCard({ order }: { order: any }) {
         </div>
         
         <div className="mb-2">
-          <Progress value={order.progress} className="h-2" />
+          <Progress 
+            value={order.progress} 
+            className="h-2" 
+            indicatorColor={statusColor}
+          />
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>Order Placed</span>
-            <span>Preparing</span>
-            <span>Ready</span>
-            <span>Completed</span>
+            <span className={order.status === 'pending' ? textColor : ''}>Order Placed</span>
+            <span className={order.status === 'preparing' ? textColor : ''}>Preparing</span>
+            <span className={order.status === 'ready' ? textColor : ''}>Ready</span>
+            <span className={['completed', 'delivered', 'billed'].includes(order.status) ? textColor : ''}>Completed</span>
           </div>
         </div>
         
         <div className="flex justify-between items-center mt-4 text-sm">
           <div>
-            <p className="font-medium">{order.useAIAutomation ? "🤖 AI-Managed" : "👤 Manually Managed"}</p>
+            <p className={`font-medium ${order.useAIAutomation ? 'text-blue-700' : ''}`}>
+              {order.useAIAutomation ? "🤖 AI-Managed" : "👤 Manually Managed"}
+            </p>
             <p className="text-muted-foreground">
               ₹{order.totalAmount.toFixed(2)} 
-              {order.bill && <span className="ml-2">• Bill #{order.bill.billNumber}</span>}
+              {order.bill && <span className="ml-2 font-medium text-emerald-700">• Bill #{order.bill.billNumber}</span>}
             </p>
           </div>
           <div className="text-right">
             <p className="font-medium">
-              {order.kitchenToken ? `Token: ${order.kitchenToken.tokenNumber}` : 'No Token'}
+              {order.kitchenToken ? (
+                <span className={`${order.kitchenToken.status === 'ready' ? 'text-emerald-700' : textColor}`}>
+                  Token: {order.kitchenToken.tokenNumber}
+                </span>
+              ) : 'No Token'}
             </p>
             <p className="text-muted-foreground">
               Created {formatRelativeTime(new Date(order.createdAt))}
