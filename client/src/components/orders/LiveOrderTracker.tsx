@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Clock, CheckCircle2, ChefHat, AlertCircle, Truck, Receipt } from "lucide-react";
+import { Clock, CheckCircle2, ChefHat, AlertCircle, Truck, Receipt, Wifi, WifiOff } from "lucide-react";
 
 // Order status type
 type OrderStatus = "pending" | "preparing" | "ready" | "completed" | "delivered" | "billed";
@@ -99,7 +99,92 @@ const formatRelativeTime = (date: Date): string => {
 export function LiveOrderTracker() {
   // Track active filter
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
-  const [refreshInterval, setRefreshInterval] = useState<number>(5000); // 5 seconds refresh
+  const [refreshInterval, setRefreshInterval] = useState<number>(10000); // 10 seconds as fallback
+  const [websocketConnected, setWebsocketConnected] = useState<boolean>(false);
+  const webSocketRef = useRef<WebSocket | null>(null);
+  const queryClient = useQueryClient();
+
+  // Setup WebSocket connection
+  useEffect(() => {
+    // Create WebSocket connection
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    const socket = new WebSocket(wsUrl);
+    webSocketRef.current = socket;
+    
+    // Connection opened
+    socket.addEventListener('open', (event) => {
+      console.log('WebSocket connected');
+      setWebsocketConnected(true);
+      // Turn off frequent polling when WebSocket is connected
+      setRefreshInterval(30000); // 30 seconds as a fallback
+    });
+    
+    // Listen for messages
+    socket.addEventListener('message', (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('WebSocket message received:', data);
+        
+        // Handle different event types
+        switch (data.type) {
+          case 'order_updated':
+          case 'new_order':
+            // Invalidate the orders cache to trigger a refetch
+            queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+            break;
+            
+          case 'kitchen_token_updated':
+          case 'new_kitchen_token':
+            // Invalidate the kitchen tokens cache
+            queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
+            break;
+            
+          case 'bill_updated':
+          case 'new_bill':
+            // Invalidate the bills cache
+            queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
+            break;
+            
+          case 'ping':
+            // Respond to server ping
+            if (socket.readyState === WebSocket.OPEN) {
+              socket.send(JSON.stringify({ type: 'pong' }));
+            }
+            break;
+            
+          case 'connect':
+            console.log('WebSocket client ID:', data.clientId);
+            break;
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    });
+    
+    // Connection closed or error
+    socket.addEventListener('close', () => {
+      console.log('WebSocket disconnected');
+      setWebsocketConnected(false);
+      // Increase polling frequency when WebSocket is disconnected
+      setRefreshInterval(5000);
+    });
+    
+    socket.addEventListener('error', (error) => {
+      console.error('WebSocket error:', error);
+      setWebsocketConnected(false);
+      setRefreshInterval(5000);
+    });
+    
+    // Clean up on unmount
+    return () => {
+      console.log('Closing WebSocket connection');
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.close();
+      }
+    };
+  }, [queryClient]);
 
   // Query orders
   const { data: orders = [], isLoading, refetch } = useQuery({

@@ -28,9 +28,15 @@ import {
   simulateIncomingCall 
 } from "./services/telephony";
 import { processChatbotRequest } from "./services/chatbot";
+import { WebSocketServer } from 'ws';
+import { initializeRealTimeService } from './services/realtime';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket server for real-time updates
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  initializeRealTimeService(wss);
 
   // Error handling middleware
   const errorHandler = (err: any, res: Response) => {
