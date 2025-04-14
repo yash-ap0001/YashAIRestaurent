@@ -181,7 +181,10 @@ export function OrderForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>New Order</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <span>Order Details</span>
+            </CardTitle>
+            <p className="text-sm text-neutral-500 mt-1">Fill in the order details manually or use AI to process natural language orders</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
@@ -220,7 +223,9 @@ export function OrderForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <FormLabel>Add Menu Items</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <span>Manual Selection</span>
+                </FormLabel>
                 <div className="flex mt-2">
                   <Select
                     disabled={menuLoading}

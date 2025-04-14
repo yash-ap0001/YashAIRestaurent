@@ -60,15 +60,25 @@ export function NaturalLanguageOrderInput({ onOrderProcessed }: NaturalLanguageO
   return (
     <div className="space-y-4">
       <div className="flex flex-col space-y-2">
-        <label className="text-sm font-medium">AI-Powered Order Input</label>
-        <Textarea
-          placeholder="Enter order in natural language, e.g., 'Two chicken biryanis, one paneer butter masala with extra butter, and three plain naans.'"
-          className="min-h-[120px] resize-none"
-          value={orderText}
-          onChange={(e) => setOrderText(e.target.value)}
-        />
-        <p className="text-xs text-neutral-500">
-          Describe the order naturally as you would hear it from a customer.
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <Wand2 className="h-4 w-4 text-primary-500" />
+          <span>AI-Powered Order Input</span>
+        </label>
+        
+        <div className="p-3 bg-primary-50 rounded-md border border-primary-100">
+          <p className="text-xs text-primary-700 mb-2">
+            <strong>Try saying:</strong> "Two chicken biryanis, one paneer butter masala with extra butter, and three plain naans."
+          </p>
+          <Textarea
+            placeholder="Enter order in natural language as you would hear it from a customer..."
+            className="min-h-[100px] resize-none bg-white"
+            value={orderText}
+            onChange={(e) => setOrderText(e.target.value)}
+          />
+        </div>
+        
+        <p className="text-xs text-neutral-500 italic">
+          Our AI will automatically detect menu items, quantities and special instructions from natural language input.
         </p>
       </div>
 
@@ -85,6 +95,7 @@ export function NaturalLanguageOrderInput({ onOrderProcessed }: NaturalLanguageO
         onClick={handleProcessOrder}
         disabled={processOrderMutation.isPending || !orderText.trim()}
         className="w-full"
+        variant="default"
       >
         {processOrderMutation.isPending ? (
           <>
