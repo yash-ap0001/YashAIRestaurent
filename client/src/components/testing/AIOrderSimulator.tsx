@@ -112,7 +112,7 @@ export function AIOrderSimulator() {
       console.log("Making API request to create kitchen token");
       const kitchenTokenResponse = await apiRequest(
         "POST",
-        "/api/kitchen-tokens",
+        "/api/simulator/create-kitchen-token",
         {
           orderId: orderResult.id,
           status: "pending",
@@ -174,7 +174,7 @@ export function AIOrderSimulator() {
       console.log("Creating bill for order:", orderResult.id);
       const billResponse = await apiRequest(
         "POST",
-        "/api/bills",
+        "/api/simulator/create-bill",
         {
           orderId: orderResult.id,
           amount: orderResult.totalAmount,

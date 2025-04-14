@@ -196,6 +196,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       errorHandler(err, res);
     }
   });
+  
+  // Special endpoint for the AI simulator to avoid routing conflicts with Vite
+  // Special endpoints for AI simulator
+app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Response) => {
+    try {
+      console.log("AI Simulator - Creating kitchen token:", req.body);
+      
+      const tokenData = {
+        ...req.body,
+        tokenNumber: generateTokenNumber()
+      };
+      
+      const parsedToken = insertKitchenTokenSchema.parse(tokenData);
+      const kitchenToken = await storage.createKitchenToken(parsedToken);
+      
+      console.log("AI Simulator - Created kitchen token:", kitchenToken);
+      res.setHeader('Content-Type', 'application/json');
+      res.status(201).json(kitchenToken);
+    } catch (err) {
+      console.error("AI Simulator - Kitchen token creation error:", err);
+      errorHandler(err, res);
+    }
+  });
 
   app.patch("/api/kitchen-tokens/:id", async (req: Request, res: Response) => {
     try {
@@ -273,6 +296,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(bill);
     } catch (err) {
       console.error("Bill creation error:", err);
+      errorHandler(err, res);
+    }
+  });
+  
+  // Special endpoint for the AI simulator to avoid routing conflicts
+  app.post("/api/simulator/create-bill", async (req: Request, res: Response) => {
+    try {
+      console.log("AI Simulator - Creating bill:", req.body);
+      
+      // Verify that the order exists
+      const orderId = req.body.orderId;
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      // Create a bill
+      const billData = {
+        ...req.body,
+        billNumber: generateBillNumber()
+      };
+      
+      const parsedBill = insertBillSchema.parse(billData);
+      const bill = await storage.createBill(parsedBill);
+      
+      // Update order status
+      await storage.updateOrder(orderId, { status: "billed" });
+      
+      console.log("AI Simulator - Created bill:", bill);
+      res.setHeader('Content-Type', 'application/json');
+      res.status(201).json(bill);
+    } catch (err) {
+      console.error("AI Simulator - Bill creation error:", err);
       errorHandler(err, res);
     }
   });
