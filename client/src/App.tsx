@@ -9,6 +9,7 @@ import KitchenTokens from "@/pages/KitchenTokens";
 import Billing from "@/pages/Billing";
 import HealthAdvisor from "@/pages/HealthAdvisor";
 import WhatsApp from "@/pages/WhatsApp";
+import PhoneOrders from "@/pages/PhoneOrders";
 import { AppShell } from "@/components/layouts/AppShell";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/billing" component={Billing} />
       <Route path="/health-advisor" component={HealthAdvisor} />
       <Route path="/whatsapp" component={WhatsApp} />
+      <Route path="/phone-orders" component={PhoneOrders} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
