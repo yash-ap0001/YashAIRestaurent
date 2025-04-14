@@ -14,6 +14,10 @@ import AICallCenter from "@/pages/AICallCenter";
 import TestAIOrder from "@/pages/TestAIOrder";
 import LiveTracking from "@/pages/LiveTracking";
 import TrackOrder from "@/pages/TrackOrder";
+import Inventory from "@/pages/Inventory";
+import Customers from "@/pages/Customers";
+import MenuItems from "@/pages/MenuItems";
+import Reports from "@/pages/Reports";
 import { AppShell } from "@/components/layouts/AppShell";
 
 function Router() {
@@ -30,6 +34,13 @@ function Router() {
       <Route path="/test-ai-order" component={TestAIOrder} />
       <Route path="/live-tracking" component={LiveTracking} />
       <Route path="/track-order/:orderNumber" component={TrackOrder} />
+      
+      {/* Management Routes */}
+      <Route path="/inventory" component={Inventory} />
+      <Route path="/customers" component={Customers} />
+      <Route path="/menu-items" component={MenuItems} />
+      <Route path="/reports" component={Reports} />
+      
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
