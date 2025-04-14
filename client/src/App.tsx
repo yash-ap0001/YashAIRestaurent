@@ -18,6 +18,7 @@ import Inventory from "@/pages/Inventory";
 import Customers from "@/pages/Customers";
 import MenuItems from "@/pages/MenuItems";
 import Reports from "@/pages/Reports";
+import ExternalIntegration from "@/pages/ExternalIntegration";
 import { AppShell } from "@/components/layouts/AppShell";
 
 function Router() {
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/customers" component={Customers} />
       <Route path="/menu-items" component={MenuItems} />
       <Route path="/reports" component={Reports} />
+      <Route path="/external-integration" component={ExternalIntegration} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
