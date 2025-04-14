@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
-  Menu, Bell, HandPlatter, ChevronDown, HeartPulse
+  Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +21,7 @@ const mainNavItems: NavItem[] = [
   { label: "Kitchen Tokens", href: "/kitchen-tokens", icon: <Receipt className="w-5 h-5" /> },
   { label: "Billing", href: "/billing", icon: <CreditCard className="w-5 h-5" /> },
   { label: "Health Advisor", href: "/health-advisor", icon: <HeartPulse className="w-5 h-5" /> },
+  { label: "WhatsApp", href: "/whatsapp", icon: <MessageCircle className="w-5 h-5" /> },
 ];
 
 const managementNavItems: NavItem[] = [
@@ -257,6 +258,15 @@ export function AppShell({ children }: AppShellProps) {
             )}>
               <span className="text-xl"><HeartPulse className="w-5 h-5" /></span>
               <span className="text-xs mt-1">Health</span>
+            </a>
+          </Link>
+          <Link href="/whatsapp">
+            <a className={cn(
+              "flex flex-col items-center px-2 py-1",
+              location === "/whatsapp" ? "text-primary-500" : "text-neutral-500"
+            )}>
+              <span className="text-xl"><MessageCircle className="w-5 h-5" /></span>
+              <span className="text-xs mt-1">WhatsApp</span>
             </a>
           </Link>
         </div>
