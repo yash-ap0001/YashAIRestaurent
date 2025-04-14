@@ -575,7 +575,6 @@ export default function Reports() {
                       />
                       <Line 
                         type="monotone" 
-                        dataKey="orders"
                         name="Returning Customers" 
                         stroke="#8884d8" 
                         strokeWidth={2}
