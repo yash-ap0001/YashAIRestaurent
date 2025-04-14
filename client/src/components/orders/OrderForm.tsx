@@ -139,29 +139,54 @@ export function OrderForm() {
   });
 
   const onSubmit = (data: FormValues) => {
+    console.log("Form submit triggered with data:", data);
+    
+    // Validate required field
+    if (!data.tableNumber) {
+      toast({
+        title: "Missing table number",
+        description: "Please select a table before submitting",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Make sure we have items
+    if (selectedItems.length === 0) {
+      toast({ 
+        title: "No items selected",
+        description: "Please add at least one menu item to the order", 
+        variant: "destructive" 
+      });
+      return;
+    }
+    
     // Calculate total amount from selected items
     const totalAmount = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
     // Map items to the format the API expects
-    data.items = selectedItems.map(item => ({
+    const formattedItems = selectedItems.map(item => ({
       menuItemId: item.menuItemId,
       quantity: item.quantity,
       price: item.price,
-      notes: item.notes
+      notes: item.notes || ""
     }));
     
-    // Set the order source to "manual" to identify orders created through the form
-    data.orderSource = "manual";
-    
-    // Add required fields - we need status and totalAmount
+    // Create final order data
     const orderData = {
-      ...data,
+      tableNumber: data.tableNumber,
       status: "pending",
-      totalAmount: totalAmount
+      totalAmount: totalAmount,
+      notes: data.notes || "",
+      isUrgent: !!data.isUrgent,
+      orderSource: "manual",
+      items: formattedItems
     };
     
-    console.log("Form submission - Full order data:", orderData);
-    createOrderMutation.mutate(orderData as any);
+    console.log("Form submission - Final order data to submit:", orderData);
+    
+    // Submit to API
+    createOrderMutation.mutate(orderData);
   };
 
   const addMenuItem = (menuItemId: number) => {
