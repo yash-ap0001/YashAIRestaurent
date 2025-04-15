@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
-  Radio, Signal, Globe, ExternalLink, Mic
+  Radio, Signal, Globe, ExternalLink, Mic, Workflow
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,6 +40,7 @@ const testingNavItems: NavItem[] = [
   { label: "AI Order Simulator", href: "/test-ai-order", icon: <Cpu className="w-5 h-5" /> },
   { label: "External Integration", href: "/external-integration", icon: <ExternalLink className="w-5 h-5" /> },
   { label: "Voice Assistant", href: "/voice-assistant", icon: <Mic className="w-5 h-5" /> },
+  { label: "n8n Integration", href: "/n8n-integration", icon: <Workflow className="w-5 h-5" /> },
 ];
 
 interface AppShellProps {
