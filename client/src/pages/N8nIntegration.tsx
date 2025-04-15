@@ -501,45 +501,50 @@ export default function N8nIntegration() {
               </CardContent>
             </Card>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Updated</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {workflows.map((workflow: N8nWorkflow) => (
-                  <TableRow key={workflow.id}>
-                    <TableCell className="font-medium">{workflow.name}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={workflow.active ? "default" : "outline"}
-                        className={workflow.active ? "bg-green-600" : ""}
-                      >
-                        {workflow.active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{new Date(workflow.updated).toLocaleString()}</TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          setSelectedWorkflow(workflow);
-                          setWorkflowRunData("");
-                          setIsRunWorkflowOpen(true);
-                        }}
-                      >
-                        Execute
-                      </Button>
-                    </TableCell>
+            <div>
+              <div className="mb-2 text-xs text-muted-foreground">
+                Found {workflows.length} workflows
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Updated</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {workflows.map((workflow: any) => (
+                    <TableRow key={workflow.id}>
+                      <TableCell className="font-medium">{workflow.name}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={workflow.active ? "default" : "outline"}
+                          className={workflow.active ? "bg-emerald-600" : ""}
+                        >
+                          {workflow.active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{new Date(workflow.updated).toLocaleString()}</TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedWorkflow(workflow);
+                            setWorkflowRunData("");
+                            setIsRunWorkflowOpen(true);
+                          }}
+                        >
+                          Execute
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </TabsContent>
         
