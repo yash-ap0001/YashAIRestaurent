@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
+import CustomerDashboard from "@/pages/CustomerDashboard";
 import NewOrder from "@/pages/NewOrder";
 import KitchenTokens from "@/pages/KitchenTokens";
 import Billing from "@/pages/Billing";
@@ -29,17 +30,25 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 function Router() {
+  const { user } = useAuth();
+  
+  // Determine which component to use for the home route based on user role
+  const HomeComponent = user?.role === "customer" ? CustomerDashboard : Dashboard;
+  
   return (
     <Switch>
       {/* Authentication Routes */}
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={CustomerRegistration} />
       
-      {/* Protected Routes */}
-      <ProtectedRoute path="/" component={Dashboard} />
+      {/* Protected Routes - Home page based on role */}
+      <ProtectedRoute path="/" component={HomeComponent} />
+      
+      {/* Customer specific routes */}
+      <ProtectedRoute path="/customer-dashboard" component={CustomerDashboard} allowedRoles={["customer"]} />
       
       {/* Waiter, Admin, Manager Routes */}
-      <ProtectedRoute path="/new-order" component={NewOrder} allowedRoles={["waiter", "admin", "manager"]} />
+      <ProtectedRoute path="/new-order" component={NewOrder} allowedRoles={["waiter", "admin", "manager", "customer"]} />
       
       {/* Kitchen Staff Routes */}
       <ProtectedRoute path="/kitchen-tokens" component={KitchenTokens} allowedRoles={["kitchen", "admin", "manager"]} />
