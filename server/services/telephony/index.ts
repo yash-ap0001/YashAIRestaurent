@@ -214,7 +214,7 @@ export async function processSpeech(req: Request, res: Response) {
       twiml.hangup();
       
       // Update call status
-      completeCall(callSid);
+      await completeCall(callSid);
     } else {
       // Process as an order
       // In a real implementation, we would extract menu items from the speech text
@@ -424,7 +424,7 @@ export function retryOrder(req: Request, res: Response) {
  * Complete a call and update its status
  * @param callSid Twilio Call SID
  */
-function completeCall(callSid: string) {
+async function completeCall(callSid: string) {
   if (activeCalls[callSid]) {
     activeCalls[callSid].status = 'completed';
     activeCalls[callSid].endTime = new Date().toISOString();
@@ -436,10 +436,83 @@ function completeCall(callSid: string) {
       historyCall.endTime = activeCalls[callSid].endTime;
     }
     
+    // Create an actual order in the system if this is a simulated call
+    // and there's an orderId assigned
+    if (callSid.startsWith('SIM') && activeCalls[callSid].orderId) {
+      try {
+        // Parse the transcript to extract order details
+        const transcript = activeCalls[callSid].transcript || '';
+        
+        // Create the order using AI service
+        await createOrderFromCall(activeCalls[callSid]);
+        
+        console.log(`Created order from completed call ${callSid}`);
+      } catch (error) {
+        console.error('Error creating order from call:', error);
+      }
+    }
+    
     // Remove from active calls after a delay
     setTimeout(() => {
       delete activeCalls[callSid];
     }, 60000); // Keep in memory for 1 minute
+  }
+}
+
+// Function to create an order from a call
+async function createOrderFromCall(call: CallData) {
+  if (!call.orderId) return;
+  
+  try {
+    // Extract order details from the transcript
+    const transcript = call.transcript || '';
+    const customerLines = transcript
+      .split('\n')
+      .filter(line => line.startsWith('Customer:'))
+      .map(line => line.replace('Customer:', '').trim());
+    
+    // Combine all customer inputs into a single natural language order
+    const orderText = customerLines.join(' ');
+    
+    // Create a payload for the AI order processing
+    const orderData = {
+      orderSource: 'phone',
+      phoneNumber: call.phoneNumber,
+      naturalLanguageOrder: orderText,
+      callId: call.id,
+      simulatedCall: true
+    };
+    
+    // Call the AI order processing endpoint
+    const response = await fetch('http://localhost:5000/api/ai/create-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to create order: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    
+    // Update the call with the actual order ID from the created order
+    if (result.id) {
+      call.orderId = result.id;
+      
+      // Also update in history
+      const historyCall = callHistory.find(c => c.id === call.id);
+      if (historyCall) {
+        historyCall.orderId = result.id;
+      }
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error creating order from call transcript:', error);
+    throw error;
   }
 }
 
@@ -629,7 +702,7 @@ async function simulateCallConversation(callSid: string) {
   }
   
   // Complete the call after a delay
-  setTimeout(() => {
-    completeCall(callSid);
+  setTimeout(async () => {
+    await completeCall(callSid);
   }, 1500);
 }
