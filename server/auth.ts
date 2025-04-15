@@ -91,7 +91,10 @@ export function setupAuth(app: Express) {
     }),
   );
 
-  passport.serializeUser((user: AuthUser, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    const authUser = user as AuthUser;
+    done(null, authUser.id);
+  });
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);
