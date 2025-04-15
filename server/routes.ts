@@ -677,6 +677,235 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       errorHandler(err, res);
     }
   });
+  
+  // Scheduled Orders CRUD endpoints
+  app.get("/api/scheduled-orders", async (req: Request, res: Response) => {
+    try {
+      const activeOnly = req.query.active === 'true';
+      const dueOnly = req.query.due === 'true';
+      
+      if (dueOnly) {
+        // Get orders that need to be executed now
+        const dueOrders = await storage.getDueScheduledOrders();
+        res.json(dueOrders);
+      } else if (activeOnly) {
+        // Get all active orders
+        const activeOrders = await storage.getActiveScheduledOrders();
+        res.json(activeOrders);
+      } else {
+        // Get all orders by customer ID if provided
+        const customerId = req.query.customerId ? parseInt(req.query.customerId as string) : null;
+        
+        if (customerId) {
+          const customerOrders = await storage.getScheduledOrdersByCustomerId(customerId);
+          res.json(customerOrders);
+        } else {
+          // Default - get all active orders
+          const activeOrders = await storage.getActiveScheduledOrders();
+          res.json(activeOrders);
+        }
+      }
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.get("/api/scheduled-orders/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const scheduledOrder = await storage.getScheduledOrder(id);
+      
+      if (!scheduledOrder) {
+        return res.status(404).json({ error: `Scheduled order with ID ${id} not found` });
+      }
+      
+      res.json(scheduledOrder);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.post("/api/scheduled-orders", async (req: Request, res: Response) => {
+    try {
+      const { customerId, menuItemIds, quantities, recurrencePattern, startDate, endDate, specialInstructions, dietPlanName } = req.body;
+      
+      if (!customerId || !menuItemIds || !quantities || !recurrencePattern || !startDate) {
+        return res.status(400).json({ 
+          error: "Missing required fields: customerId, menuItemIds, quantities, recurrencePattern, startDate" 
+        });
+      }
+      
+      // Ensure customer exists
+      const customer = await storage.getCustomer(customerId);
+      if (!customer) {
+        return res.status(404).json({ error: `Customer with ID ${customerId} not found` });
+      }
+      
+      // Ensure all menu items exist
+      for (const menuItemId of menuItemIds) {
+        const menuItem = await storage.getMenuItem(menuItemId);
+        if (!menuItem) {
+          return res.status(404).json({ error: `Menu item with ID ${menuItemId} not found` });
+        }
+      }
+      
+      const scheduledOrder = await storage.createScheduledOrder({
+        customerId,
+        menuItemIds,
+        quantities,
+        recurrencePattern,
+        startDate: new Date(startDate),
+        endDate: endDate ? new Date(endDate) : null,
+        specialInstructions: specialInstructions || null,
+        isActive: true,
+        lastExecuted: null,
+        dietPlanName: dietPlanName || null,
+        totalAmount: 0, // Will be calculated when executed
+        healthNotes: null
+      });
+      
+      // Log activity
+      await storage.createActivity({
+        type: 'diet_plan_created',
+        description: `New diet plan "${dietPlanName || 'Unnamed'}" created for customer ${customerId}`,
+        entityId: scheduledOrder.id,
+        entityType: 'scheduled_order'
+      });
+      
+      res.status(201).json(scheduledOrder);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.patch("/api/scheduled-orders/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { isActive, endDate, specialInstructions, healthNotes, dietPlanName } = req.body;
+      
+      const existingOrder = await storage.getScheduledOrder(id);
+      if (!existingOrder) {
+        return res.status(404).json({ error: `Scheduled order with ID ${id} not found` });
+      }
+      
+      const updatedOrder = await storage.updateScheduledOrder(id, {
+        isActive: isActive !== undefined ? isActive : existingOrder.isActive,
+        endDate: endDate !== undefined ? new Date(endDate) : existingOrder.endDate,
+        specialInstructions: specialInstructions !== undefined ? specialInstructions : existingOrder.specialInstructions,
+        healthNotes: healthNotes !== undefined ? healthNotes : existingOrder.healthNotes,
+        dietPlanName: dietPlanName !== undefined ? dietPlanName : existingOrder.dietPlanName
+      });
+      
+      res.json(updatedOrder);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.delete("/api/scheduled-orders/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const existingOrder = await storage.getScheduledOrder(id);
+      if (!existingOrder) {
+        return res.status(404).json({ error: `Scheduled order with ID ${id} not found` });
+      }
+      
+      const success = await storage.deleteScheduledOrder(id);
+      
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(500).json({ error: `Failed to delete scheduled order with ID ${id}` });
+      }
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.post("/api/scheduled-orders/:id/execute", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const scheduledOrder = await storage.getScheduledOrder(id);
+      if (!scheduledOrder) {
+        return res.status(404).json({ error: `Scheduled order with ID ${id} not found` });
+      }
+      
+      if (!scheduledOrder.isActive) {
+        return res.status(400).json({ error: "Cannot execute inactive scheduled order" });
+      }
+      
+      // Create new order from scheduled order
+      const { generateOrderNumber } = await import('./utils');
+      const orderNumber = generateOrderNumber();
+      
+      // Calculate total amount based on current menu prices
+      let totalAmount = 0;
+      const orderItems = [];
+      
+      for (let i = 0; i < scheduledOrder.menuItemIds.length; i++) {
+        const menuItemId = scheduledOrder.menuItemIds[i];
+        const quantity = scheduledOrder.quantities[i] || 1;
+        
+        const menuItem = await storage.getMenuItem(menuItemId);
+        if (!menuItem) continue;
+        
+        totalAmount += menuItem.price * quantity;
+        
+        orderItems.push({
+          menuItemId,
+          quantity,
+          price: menuItem.price,
+          notes: scheduledOrder.specialInstructions || 'From scheduled diet plan'
+        });
+      }
+      
+      // Create the order
+      const order = await storage.createOrder({
+        orderNumber,
+        status: 'pending',
+        tableNumber: null,
+        totalAmount,
+        notes: `Auto-generated from diet plan "${scheduledOrder.dietPlanName || 'Unnamed'}"`,
+        orderSource: 'diet_plan',
+        useAIAutomation: true,
+        customerId: scheduledOrder.customerId
+      });
+      
+      // Create order items
+      for (const item of orderItems) {
+        await storage.createOrderItem({
+          orderId: order.id,
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          price: item.price,
+          notes: item.notes
+        });
+      }
+      
+      // Update the scheduled order's last executed timestamp
+      await storage.updateScheduledOrder(id, {
+        lastExecuted: new Date()
+      });
+      
+      // Log activity
+      await storage.createActivity({
+        type: 'scheduled_order_executed',
+        description: `Scheduled diet plan "${scheduledOrder.dietPlanName || 'Unnamed'}" automatically executed`,
+        entityId: order.id,
+        entityType: 'order'
+      });
+      
+      res.status(201).json({
+        success: true,
+        message: "Scheduled order executed successfully",
+        order
+      });
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
 
   // Activities (for dashboard)
   app.get("/api/activities", async (req: Request, res: Response) => {
