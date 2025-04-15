@@ -564,12 +564,40 @@ export class MemStorage implements IStorage {
   
   // Initialize sample data for the application
   private initSampleData() {
-    // Sample admin user (keep this for authentication)
+    // Sample users with different roles
     this.createUser({
       username: "admin",
       password: "admin123",
       fullName: "Yash Sharma",
       role: "admin"
+    });
+    
+    this.createUser({
+      username: "kitchen",
+      password: "kitchen123",
+      fullName: "Chef Ravi Kumar",
+      role: "kitchen"
+    });
+    
+    this.createUser({
+      username: "waiter",
+      password: "waiter123",
+      fullName: "Anil Patel",
+      role: "waiter"
+    });
+    
+    this.createUser({
+      username: "manager",
+      password: "manager123",
+      fullName: "Priya Verma",
+      role: "manager"
+    });
+    
+    this.createUser({
+      username: "delivery",
+      password: "delivery123",
+      fullName: "Suresh Singh",
+      role: "delivery"
     });
     
     // Sample menu items (required for orders to reference)

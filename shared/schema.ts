@@ -8,7 +8,14 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   fullName: text("full_name").notNull(),
-  role: text("role").notNull().default("staff"),
+  // Extended roles to include additional user types:
+  // - admin: Full access to all system features
+  // - kitchen: Food preparation staff
+  // - waiter: Order taking and table service
+  // - manager: Reporting and analytics focused
+  // - delivery: External order delivery staff
+  // - customer: End users of hotel services
+  role: text("role").notNull().default("waiter"),
   createdAt: timestamp("created_at").defaultNow()
 });
 
