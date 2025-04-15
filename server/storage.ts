@@ -627,7 +627,8 @@ export class MemStorage implements IStorage {
         category: "Rice and Biryani - Veg", 
         description: "Fragrant basmati rice cooked with mixed vegetables and aromatic spices", 
         isAvailable: true,
-        dietaryTags: ["vegetarian"]
+        dietaryTags: ["vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=987&auto=format&fit=crop"
       },
       { 
         name: "Jeera Rice", 
@@ -653,7 +654,8 @@ export class MemStorage implements IStorage {
         category: "Rice and Biryani - Non-Veg", 
         description: "Fragrant basmati rice cooked with tender chicken and aromatic spices", 
         isAvailable: true,
-        dietaryTags: ["non-vegetarian"]
+        dietaryTags: ["non-vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=2070&auto=format&fit=crop"
       },
       { 
         name: "Mutton Biryani", 
@@ -679,7 +681,8 @@ export class MemStorage implements IStorage {
         category: "Curries - Veg", 
         description: "Cottage cheese cubes in rich, creamy tomato gravy", 
         isAvailable: true,
-        dietaryTags: ["vegetarian"] 
+        dietaryTags: ["vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1631452180539-96aca7d48617?q=80&w=2070&auto=format&fit=crop"
       },
       { 
         name: "Dal Makhani", 
@@ -849,7 +852,8 @@ export class MemStorage implements IStorage {
         category: "Dessert", 
         description: "Sweet milk solids with sugar syrup", 
         isAvailable: true,
-        dietaryTags: ["vegetarian"] 
+        dietaryTags: ["vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1601303516361-9e9375f1f7bd?q=80&w=2012&auto=format&fit=crop"
       },
       { 
         name: "Rasmalai", 
