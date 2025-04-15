@@ -567,11 +567,11 @@ export class MemStorage implements IStorage {
   
   // Initialize sample data for the application
   private initSampleData() {
-    // Sample users with different roles - passwords already pre-hashed with salt
+    // Sample users with different roles using simple passwords
     this.users.set(1, {
       id: 1,
       username: "admin",
-      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
+      password: "password123",
       fullName: "Yash Sharma",
       role: "admin",
       createdAt: new Date()
@@ -581,7 +581,7 @@ export class MemStorage implements IStorage {
     this.users.set(2, {
       id: 2,
       username: "kitchen",
-      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
+      password: "password123",
       fullName: "Chef Ravi Kumar",
       role: "kitchen",
       createdAt: new Date()
@@ -591,7 +591,7 @@ export class MemStorage implements IStorage {
     this.users.set(3, {
       id: 3,
       username: "waiter",
-      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
+      password: "password123",
       fullName: "Anil Patel",
       role: "waiter",
       createdAt: new Date()
@@ -601,7 +601,7 @@ export class MemStorage implements IStorage {
     this.users.set(4, {
       id: 4,
       username: "manager",
-      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
+      password: "password123",
       fullName: "Priya Verma",
       role: "manager",
       createdAt: new Date()
@@ -611,7 +611,7 @@ export class MemStorage implements IStorage {
     this.users.set(5, {
       id: 5,
       username: "delivery",
-      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
+      password: "password123",
       fullName: "Suresh Singh",
       role: "delivery",
       createdAt: new Date()

@@ -26,6 +26,13 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
+  // Check if stored password contains a salt
+  if (!stored.includes('.')) {
+    // For existing users (who don't have a salt), direct comparison
+    return supplied === stored;
+  }
+  
+  // For new users with a salt, use secure comparison
   const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
