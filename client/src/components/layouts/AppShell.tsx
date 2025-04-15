@@ -3,13 +3,22 @@ import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
-  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple
+  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ChatInterface, MinimizedChatButton } from "@/components/chatbot/ChatInterface";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface NavItem {
   label: string;
@@ -58,7 +67,8 @@ export function AppShell({ children }: AppShellProps) {
                       { label: "Dashboard" };
                       
   // State for current user role
-  const [userRole, setUserRole] = useState<string>("admin");
+  type UserRole = "admin" | "manager" | "waiter" | "kitchen" | "delivery" | "customer";
+  const [userRole, setUserRole] = useState<UserRole>("admin");
   
   // Determine the user type based on the current role or location
   const getUserType = () => {
@@ -116,7 +126,7 @@ export function AppShell({ children }: AppShellProps) {
             <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Main</p>
           </div>
           <ul>
-            {mainNavItems.map((item) => (
+            {getFilteredNavItems(mainNavItems, userRole).map((item) => (
               <li key={item.href}>
                 <Link 
                   href={item.href}
@@ -134,61 +144,137 @@ export function AppShell({ children }: AppShellProps) {
             ))}
           </ul>
           
-          <div className="px-3 mb-2 mt-6">
-            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Management</p>
-          </div>
-          <ul>
-            {managementNavItems.map((item) => (
-              <li key={item.href}>
-                <Link 
-                  href={item.href}
-                  className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                    location === item.href 
-                      ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                      : "text-neutral-400 hover:bg-neutral-800"
-                  )}
-                >
-                  <span className="mr-3 text-current">{item.icon}</span>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {getFilteredNavItems(managementNavItems, userRole).length > 0 && (
+            <>
+              <div className="px-3 mb-2 mt-6">
+                <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Management</p>
+              </div>
+              <ul>
+                {getFilteredNavItems(managementNavItems, userRole).map((item) => (
+                  <li key={item.href}>
+                    <Link 
+                      href={item.href}
+                      className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                        location === item.href 
+                          ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                          : "text-neutral-400 hover:bg-neutral-800"
+                      )}
+                    >
+                      <span className="mr-3 text-current">{item.icon}</span>
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
           
-          <div className="px-3 mb-2 mt-6">
-            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Testing</p>
-          </div>
-          <ul>
-            {testingNavItems.map((item) => (
-              <li key={item.href}>
-                <Link 
-                  href={item.href}
-                  className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                    location === item.href 
-                      ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                      : "text-neutral-400 hover:bg-neutral-800"
-                  )}
-                >
-                  <span className="mr-3 text-current">{item.icon}</span>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {(userRole === "admin" || userRole === "manager") && (
+            <>
+              <div className="px-3 mb-2 mt-6">
+                <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Testing</p>
+              </div>
+              <ul>
+                {getFilteredNavItems(testingNavItems, userRole).map((item) => (
+                  <li key={item.href}>
+                    <Link 
+                      href={item.href}
+                      className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                        location === item.href 
+                          ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                          : "text-neutral-400 hover:bg-neutral-800"
+                      )}
+                    >
+                      <span className="mr-3 text-current">{item.icon}</span>
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </nav>
         
         <div className="p-4 border-t border-neutral-800">
           <div className="flex items-center">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" />
-              <AvatarFallback>YS</AvatarFallback>
-            </Avatar>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-neutral-200">Yash Sharma</p>
-              <p className="text-xs text-neutral-400">Admin</p>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center cursor-pointer">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" />
+                    <AvatarFallback>YS</AvatarFallback>
+                  </Avatar>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-neutral-200">Yash Sharma</p>
+                    <div className="flex items-center">
+                      <Badge 
+                        variant="outline" 
+                        className={cn(
+                          "px-2 py-0 text-xs capitalize",
+                          userRole === "admin" ? "bg-purple-900/20 text-purple-300 border-purple-800" :
+                          userRole === "manager" ? "bg-blue-900/20 text-blue-300 border-blue-800" :
+                          userRole === "waiter" ? "bg-green-900/20 text-green-300 border-green-800" :
+                          userRole === "kitchen" ? "bg-orange-900/20 text-orange-300 border-orange-800" :
+                          userRole === "delivery" ? "bg-yellow-900/20 text-yellow-300 border-yellow-800" :
+                          "bg-gray-900/20 text-gray-300 border-gray-800"
+                        )}
+                      >
+                        {userRole}
+                      </Badge>
+                      <ChevronDown className="h-3 w-3 ml-1 text-neutral-400" />
+                    </div>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-neutral-900 border-neutral-800">
+                <DropdownMenuLabel className="text-neutral-400">Switch Role</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-neutral-800" />
+                <DropdownMenuItem 
+                  className={cn("cursor-pointer", userRole === "admin" && "bg-purple-900/20 text-purple-300")} 
+                  onClick={() => setUserRole("admin")}
+                >
+                  <UserCog className="mr-2 h-4 w-4" />
+                  <span>Admin</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className={cn("cursor-pointer", userRole === "manager" && "bg-blue-900/20 text-blue-300")} 
+                  onClick={() => setUserRole("manager")}
+                >
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  <span>Manager</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className={cn("cursor-pointer", userRole === "waiter" && "bg-green-900/20 text-green-300")} 
+                  onClick={() => setUserRole("waiter")}
+                >
+                  <HandPlatter className="mr-2 h-4 w-4" />
+                  <span>Waiter/Server</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className={cn("cursor-pointer", userRole === "kitchen" && "bg-orange-900/20 text-orange-300")}
+                  onClick={() => setUserRole("kitchen")}
+                >
+                  <Salad className="mr-2 h-4 w-4" />
+                  <span>Kitchen Staff</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className={cn("cursor-pointer", userRole === "delivery" && "bg-yellow-900/20 text-yellow-300")}
+                  onClick={() => setUserRole("delivery")}
+                >
+                  <Package2 className="mr-2 h-4 w-4" />
+                  <span>Delivery Staff</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className={cn("cursor-pointer", userRole === "customer" && "bg-gray-900/20 text-gray-300")}
+                  onClick={() => setUserRole("customer")}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  <span>Customer</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="ghost" size="icon" className="ml-auto">
               <LogOut className="h-4 w-4 text-neutral-400 hover:text-purple-400" />
             </Button>
@@ -258,7 +344,7 @@ export function AppShell({ children }: AppShellProps) {
               <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Main</p>
             </div>
             <ul>
-              {mainNavItems.map((item) => (
+              {getFilteredNavItems(mainNavItems, userRole).map((item) => (
                 <li key={item.href}>
                   <Link 
                     href={item.href}
@@ -277,51 +363,59 @@ export function AppShell({ children }: AppShellProps) {
               ))}
             </ul>
             
-            <div className="px-3 mb-2 mt-6">
-              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Management</p>
-            </div>
-            <ul>
-              {managementNavItems.map((item) => (
-                <li key={item.href}>
-                  <Link 
-                    href={item.href}
-                    className={cn(
-                      "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                      location === item.href 
-                        ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                        : "text-neutral-400 hover:bg-neutral-800"
-                    )}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span className="mr-3 text-current">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {getFilteredNavItems(managementNavItems, userRole).length > 0 && (
+              <>
+                <div className="px-3 mb-2 mt-6">
+                  <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Management</p>
+                </div>
+                <ul>
+                  {getFilteredNavItems(managementNavItems, userRole).map((item) => (
+                    <li key={item.href}>
+                      <Link 
+                        href={item.href}
+                        className={cn(
+                          "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                          location === item.href 
+                            ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                            : "text-neutral-400 hover:bg-neutral-800"
+                        )}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <span className="mr-3 text-current">{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             
-            <div className="px-3 mb-2 mt-6">
-              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Testing</p>
-            </div>
-            <ul>
-              {testingNavItems.map((item) => (
-                <li key={item.href}>
-                  <Link 
-                    href={item.href}
-                    className={cn(
-                      "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                      location === item.href 
-                        ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                        : "text-neutral-400 hover:bg-neutral-800"
-                    )}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span className="mr-3 text-current">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {(userRole === "admin" || userRole === "manager") && (
+              <>
+                <div className="px-3 mb-2 mt-6">
+                  <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Testing</p>
+                </div>
+                <ul>
+                  {getFilteredNavItems(testingNavItems, userRole).map((item) => (
+                    <li key={item.href}>
+                      <Link 
+                        href={item.href}
+                        className={cn(
+                          "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                          location === item.href 
+                            ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                            : "text-neutral-400 hover:bg-neutral-800"
+                        )}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <span className="mr-3 text-current">{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </nav>
           
           {/* Footer section with app version */}
@@ -337,7 +431,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Mobile Bottom Navigation - visible only on small screens */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-neutral-800 px-4 py-2 z-10">
         <div className="flex justify-around">
-          {mainNavItems.slice(0, 4).map((item) => (
+          {getFilteredNavItems(mainNavItems, userRole).slice(0, 4).map((item) => (
             <Link 
               key={item.href} 
               href={item.href}
@@ -350,53 +444,79 @@ export function AppShell({ children }: AppShellProps) {
               <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
             </Link>
           ))}
-          <Link 
-            href="/test-ai-order"
-            className={cn(
-              "flex flex-col items-center px-2 py-1",
-              location === "/test-ai-order" ? "text-purple-400" : "text-neutral-400"
-            )}
-          >
-            <span className="text-xl"><Cpu className="w-5 h-5" /></span>
-            <span className="text-xs mt-1">Test AI</span>
-          </Link>
-          <Link 
-            href="/whatsapp"
-            className={cn(
-              "flex flex-col items-center px-2 py-1",
-              location === "/whatsapp" ? "text-purple-400" : "text-neutral-400"
-            )}
-          >
-            <span className="text-xl"><MessageCircle className="w-5 h-5" /></span>
-            <span className="text-xs mt-1">WhatsApp</span>
-          </Link>
-          <Link 
-            href="/phone-orders"
-            className={cn(
-              "flex flex-col items-center px-2 py-1",
-              location === "/phone-orders" ? "text-purple-400" : "text-neutral-400"
-            )}
-          >
-            <span className="text-xl"><Phone className="w-5 h-5" /></span>
-            <span className="text-xs mt-1">Phone</span>
-          </Link>
-          <Link 
-            href="/ai-call-center"
-            className={cn(
-              "flex flex-col items-center px-2 py-1",
-              location === "/ai-call-center" ? "text-purple-400" : "text-neutral-400"
-            )}
-          >
-            <span className="text-xl"><PhoneCall className="w-5 h-5" /></span>
-            <span className="text-xs mt-1">AI Call</span>
-          </Link>
+          
+          {routePermissions["/test-ai-order"].includes(userRole) && (
+            <Link 
+              href="/test-ai-order"
+              className={cn(
+                "flex flex-col items-center px-2 py-1",
+                location === "/test-ai-order" ? "text-purple-400" : "text-neutral-400"
+              )}
+            >
+              <span className="text-xl"><Cpu className="w-5 h-5" /></span>
+              <span className="text-xs mt-1">Test AI</span>
+            </Link>
+          )}
+          
+          {routePermissions["/whatsapp"].includes(userRole) && (
+            <Link 
+              href="/whatsapp"
+              className={cn(
+                "flex flex-col items-center px-2 py-1",
+                location === "/whatsapp" ? "text-purple-400" : "text-neutral-400"
+              )}
+            >
+              <span className="text-xl"><MessageCircle className="w-5 h-5" /></span>
+              <span className="text-xs mt-1">WhatsApp</span>
+            </Link>
+          )}
+          
+          {routePermissions["/phone-orders"].includes(userRole) && (
+            <Link 
+              href="/phone-orders"
+              className={cn(
+                "flex flex-col items-center px-2 py-1",
+                location === "/phone-orders" ? "text-purple-400" : "text-neutral-400"
+              )}
+            >
+              <span className="text-xl"><Phone className="w-5 h-5" /></span>
+              <span className="text-xs mt-1">Phone</span>
+            </Link>
+          )}
+          
+          {routePermissions["/ai-call-center"].includes(userRole) && (
+            <Link 
+              href="/ai-call-center"
+              className={cn(
+                "flex flex-col items-center px-2 py-1",
+                location === "/ai-call-center" ? "text-purple-400" : "text-neutral-400"
+              )}
+            >
+              <span className="text-xl"><PhoneCall className="w-5 h-5" /></span>
+              <span className="text-xs mt-1">AI Call</span>
+            </Link>
+          )}
+          
+          {/* Always show the Live Tracking option for all roles */}
+          {getFilteredNavItems(mainNavItems, userRole).length < 4 && routePermissions["/live-tracking"].includes(userRole) && (
+            <Link 
+              href="/live-tracking"
+              className={cn(
+                "flex flex-col items-center px-2 py-1",
+                location === "/live-tracking" ? "text-purple-400" : "text-neutral-400"
+              )}
+            >
+              <span className="text-xl"><Activity className="w-5 h-5" /></span>
+              <span className="text-xs mt-1">Tracking</span>
+            </Link>
+          )}
         </div>
       </nav>
       
       {/* Chatbot UI */}
       {chatVisible ? (
         <ChatInterface 
-          userType={getUserType()}
+          userType={userRole}
           minimized={false}
           onMinimize={() => setChatVisible(false)}
         />
