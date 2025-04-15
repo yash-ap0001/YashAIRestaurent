@@ -19,6 +19,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { useAuth, UserRole } from "@/hooks/useAuth";
+import UserMenu from "@/components/auth/UserMenu";
+import { RoleBasedContent } from "@/components/auth/ProtectedRoute";
 
 interface NavItem {
   label: string;

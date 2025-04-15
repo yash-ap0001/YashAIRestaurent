@@ -1,57 +1,62 @@
 import { ReactNode } from "react";
-import { Route, useLocation } from "wouter";
-import NotFound from "@/pages/not-found";
-
-// Define the allowed user roles for each path
-export const routePermissions: Record<string, string[]> = {
-  // Main routes
-  "/": ["admin", "manager", "waiter", "kitchen", "delivery", "customer"],
-  "/new-order": ["admin", "manager", "waiter"],
-  "/kitchen-tokens": ["admin", "kitchen", "manager"],
-  "/billing": ["admin", "manager", "waiter"],
-  "/health-advisor": ["admin", "customer"],
-  "/whatsapp": ["admin", "manager", "waiter"],
-  "/phone-orders": ["admin", "manager", "waiter"],
-  "/ai-call-center": ["admin", "manager"],
-  "/test-ai-order": ["admin", "manager", "waiter"],
-  "/live-tracking": ["admin", "manager", "kitchen", "waiter", "delivery", "customer"],
-  "/track-order": ["admin", "manager", "kitchen", "waiter", "delivery", "customer"],
-  
-  // Management routes
-  "/inventory": ["admin", "manager", "kitchen"],
-  "/customers": ["admin", "manager"],
-  "/menu-items": ["admin", "manager", "kitchen"],
-  "/reports": ["admin", "manager"],
-  "/external-integration": ["admin", "manager"],
-  "/voice-assistant": ["admin", "manager"],
-  "/n8n-integration": ["admin", "manager"],
-  "/diet-plan": ["admin", "manager", "customer"]
-};
+import { Route, Redirect } from "wouter";
+import { useAuth, UserRole } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   path: string;
-  userRole: string;
-  component: React.ComponentType;
-  children?: ReactNode;
+  component: React.FC;
+  allowedRoles?: UserRole[];
 }
 
-export function ProtectedRoute({ path, userRole, component: Component, children }: ProtectedRouteProps) {
-  const [_, setLocation] = useLocation();
-  
-  // Get the allowed roles for this path
-  const allowedRoles = routePermissions[path] || [];
-  
-  // If the path starts with /track-order/, extract the base path
-  const basePath = path.startsWith("/track-order/") ? "/track-order" : path;
-  const baseAllowedRoles = routePermissions[basePath] || [];
-  
-  // Check if the user role is allowed to access this path
-  const isAllowed = allowedRoles.includes(userRole) || baseAllowedRoles.includes(userRole);
-  
+export const ProtectedRoute = ({ path, component: Component, allowedRoles }: ProtectedRouteProps) => {
+  const { user, isLoading, currentRole } = useAuth();
+
   return (
     <Route path={path}>
-      {isAllowed ? <Component /> : <NotFound />}
-      {children}
+      {() => {
+        if (isLoading) {
+          return (
+            <div className="flex h-screen w-full items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          );
+        }
+
+        // If user is not logged in, redirect to login page
+        if (!user) {
+          return <Redirect to="/login" />;
+        }
+
+        // If there are allowed roles and the user's role is not in the allowed roles
+        if (allowedRoles && !allowedRoles.includes(currentRole as UserRole)) {
+          return (
+            <div className="flex h-screen w-full flex-col items-center justify-center p-4 text-center">
+              <h1 className="text-3xl font-bold">Access Denied</h1>
+              <p className="mt-4 text-lg text-muted-foreground">
+                You don't have permission to access this page.
+              </p>
+            </div>
+          );
+        }
+
+        return <Component />;
+      }}
     </Route>
   );
+};
+
+interface RoleBasedContentProps {
+  children: ReactNode;
+  allowedRoles: UserRole[];
 }
+
+export const RoleBasedContent = ({ children, allowedRoles }: RoleBasedContentProps) => {
+  const { currentRole } = useAuth();
+
+  if (!allowedRoles.includes(currentRole as UserRole)) {
+    return null;
+  }
+
+  return <>{children}</>;
+};
