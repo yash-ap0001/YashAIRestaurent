@@ -479,6 +479,39 @@ export default function MenuItems() {
                   />
                   <FormField
                     control={form.control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Image URL</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="https://example.com/image.jpg"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the URL of an image for this menu item
+                        </FormDescription>
+                        {field.value && (
+                          <div className="mt-2 relative w-full h-40 bg-gray-100 rounded-md overflow-hidden">
+                            <img 
+                              src={field.value} 
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '';
+                                (e.target as HTMLImageElement).alt = 'Error loading image';
+                              }}
+                            />
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="isAvailable"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
@@ -637,10 +670,29 @@ export default function MenuItems() {
                     onClick={() => toggleSelectItem(item.id)}
                   ></div>
                   <div className={`h-1 w-full ${item.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  
+                  {/* Image Display Section */}
+                  <div className="relative h-48 overflow-hidden bg-gray-100">
+                    {item.imageUrl ? (
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full bg-gray-100">
+                        <MenuSquare className="h-12 w-12 text-gray-400" />
+                        <p className="text-xs text-gray-500 mt-2">No image available</p>
+                      </div>
+                    )}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                      <span className="text-xl font-semibold text-white">₹{item.price.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <CardTitle className="mr-8">{item.name}</CardTitle>
-                      <span className="text-xl font-semibold">₹{item.price.toFixed(2)}</span>
                     </div>
                     <CardDescription>
                       <Badge variant="outline">{item.category}</Badge>
