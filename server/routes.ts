@@ -1273,7 +1273,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     try {
       const workflows = await n8nService.fetchWorkflows();
       res.json(workflows);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching n8n workflows:", err);
       res.status(500).json({
         success: false,
@@ -1293,7 +1293,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         success: true,
         result
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Error executing n8n workflow ${req.params.id}:`, err);
       res.status(500).json({
         success: false,
