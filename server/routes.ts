@@ -1106,16 +1106,26 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // AI-driven Automatic Order Creation and Management
   app.post("/api/ai/create-order", async (req: Request, res: Response) => {
     try {
-      const { orderText, orderSource = "ai", tableNumber = null } = req.body;
+      const { 
+        orderText, 
+        orderSource = "ai", 
+        tableNumber = null,
+        phoneNumber = null,
+        naturalLanguageOrder = null,
+        simulatedCall = false 
+      } = req.body;
       
-      if (!orderText) {
+      // Allow natural language order as alternative to orderText
+      const orderContent = orderText || naturalLanguageOrder;
+      
+      if (!orderContent) {
         return res.status(400).json({ error: "Order text is required" });
       }
       
-      console.log(`AI-driven order creation received for text: "${orderText}"`);
+      console.log(`AI-driven order creation received for text: "${orderContent}" (source: ${orderSource})`);
       
       // Use the new AI service to process natural language orders
-      const result = await aiService.processNaturalLanguageOrder(orderText, orderSource);
+      const result = await aiService.processNaturalLanguageOrder(orderContent, orderSource);
       
       if (!result.success) {
         return res.status(400).json({
