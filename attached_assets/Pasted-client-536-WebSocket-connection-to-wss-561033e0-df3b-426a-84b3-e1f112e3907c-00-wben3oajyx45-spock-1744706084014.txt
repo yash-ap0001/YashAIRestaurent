@@ -1,0 +1,37 @@
+client:536 WebSocket connection to 'wss://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.dev/?token=dQX6OsPCRzuR' failed: 
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=dQX6OsPCRzuR' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+chunk-RPCDYKBN.js?v=b2692db2:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+CustomerDashboard.tsx:468 Uncaught TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at CustomerDashboard.tsx:468:81
+    at Array.map (<anonymous>)
+    at CustomerDashboard (CustomerDashboard.tsx:452:32)
+CustomerDashboard.tsx:468 Uncaught TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at CustomerDashboard.tsx:468:81
+    at Array.map (<anonymous>)
+    at CustomerDashboard (CustomerDashboard.tsx:452:32)
+chunk-RPCDYKBN.js?v=b2692db2:14032 The above error occurred in the <CustomerDashboard> component:
+
+    at CustomerDashboard (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.dev/src/pages/CustomerDashboard.tsx:100:20)
+    at Route (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b2692db2:323:16)
+    at ProtectedRoute (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.dev/src/components/auth/ProtectedRoute.tsx:21:34)
+    at Switch (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b2692db2:379:17)
+    at Router (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.dev/src/App.tsx?v=amZum37bj5pNN8W5BYTZs:50:20)
+    at div
+    at main
+    at div
+    at AppShell (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.dev/src/components/layouts/AppShell.tsx:145:28)
+    at AppContent (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.dev/src/App.tsx?v=amZum37bj5pNN8W5BYTZs:203:31)
+    at AuthProvider (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.dev/src/hooks/useAuth.tsx:23:32)
+    at QueryClientProvider (https://561033e0-df3b-426a-84b3-e1f112e3907c-00-wben3oajyx45.spock.replit.d…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=b2692db2:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-RPCDYKBN.js?v=b2692db2:9129 Uncaught TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at CustomerDashboard.tsx:468:81
+    at Array.map (<anonymous>)
+    at CustomerDashboard (CustomerDashboard.tsx:452:32)
+﻿

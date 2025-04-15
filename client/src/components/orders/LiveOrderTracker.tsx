@@ -108,79 +108,88 @@ export function LiveOrderTracker() {
   useEffect(() => {
     // Create WebSocket connection
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    // Explicitly use the hostname without port, as the server already handles the WebSocket
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
-    const socket = new WebSocket(wsUrl);
-    webSocketRef.current = socket;
+    let socket: WebSocket | null = null;
     
-    // Connection opened
-    socket.addEventListener('open', (event) => {
-      console.log('WebSocket connected');
-      setWebsocketConnected(true);
-      // Turn off frequent polling when WebSocket is connected
-      setRefreshInterval(30000); // 30 seconds as a fallback
-    });
+    try {
+      socket = new WebSocket(wsUrl);
+      webSocketRef.current = socket;
     
-    // Listen for messages
-    socket.addEventListener('message', (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log('WebSocket message received:', data);
-        
-        // Handle different event types
-        switch (data.type) {
-          case 'order_updated':
-          case 'new_order':
-            // Invalidate the orders cache to trigger a refetch
-            queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-            break;
-            
-          case 'kitchen_token_updated':
-          case 'new_kitchen_token':
-            // Invalidate the kitchen tokens cache
-            queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
-            break;
-            
-          case 'bill_updated':
-          case 'new_bill':
-            // Invalidate the bills cache
-            queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
-            break;
-            
-          case 'ping':
-            // Respond to server ping
-            if (socket.readyState === WebSocket.OPEN) {
-              socket.send(JSON.stringify({ type: 'pong' }));
-            }
-            break;
-            
-          case 'connect':
-            console.log('WebSocket client ID:', data.clientId);
-            break;
+      // Connection opened
+      socket.addEventListener('open', (event) => {
+        console.log('WebSocket connected');
+        setWebsocketConnected(true);
+        // Turn off frequent polling when WebSocket is connected
+        setRefreshInterval(30000); // 30 seconds as a fallback
+      });
+    
+      // Listen for messages
+      socket.addEventListener('message', (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('WebSocket message received:', data);
+          
+          // Handle different event types
+          switch (data.type) {
+            case 'order_updated':
+            case 'new_order':
+              // Invalidate the orders cache to trigger a refetch
+              queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+              break;
+              
+            case 'kitchen_token_updated':
+            case 'new_kitchen_token':
+              // Invalidate the kitchen tokens cache
+              queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
+              break;
+              
+            case 'bill_updated':
+            case 'new_bill':
+              // Invalidate the bills cache
+              queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
+              break;
+              
+            case 'ping':
+              // Respond to server ping
+              if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: 'pong' }));
+              }
+              break;
+              
+            case 'connect':
+              console.log('WebSocket client ID:', data.clientId);
+              break;
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
         }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    });
-    
-    // Connection closed or error
-    socket.addEventListener('close', () => {
-      console.log('WebSocket disconnected');
+      });
+      
+      // Connection closed or error
+      socket.addEventListener('close', () => {
+        console.log('WebSocket disconnected');
+        setWebsocketConnected(false);
+        // Increase polling frequency when WebSocket is disconnected
+        setRefreshInterval(5000);
+      });
+      
+      socket.addEventListener('error', (error) => {
+        console.error('WebSocket error:', error);
+        setWebsocketConnected(false);
+        setRefreshInterval(5000);
+      });
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error);
       setWebsocketConnected(false);
-      // Increase polling frequency when WebSocket is disconnected
-      setRefreshInterval(5000);
-    });
-    
-    socket.addEventListener('error', (error) => {
-      console.error('WebSocket error:', error);
-      setWebsocketConnected(false);
-      setRefreshInterval(5000);
-    });
+      setRefreshInterval(5000); // Fallback to frequent polling
+    }
     
     // Clean up on unmount
     return () => {
       console.log('Closing WebSocket connection');
-      if (socket.readyState === WebSocket.OPEN) {
+      if (socket && socket.readyState === WebSocket.OPEN) {
         socket.close();
       }
     };
@@ -205,12 +214,12 @@ export function LiveOrderTracker() {
   });
 
   // Process and combine data
-  const processedOrders = orders.map((order: any) => {
+  const processedOrders = (orders as any[]).map((order: any) => {
     // Find associated kitchen token
-    const kitchenToken = kitchenTokens.find((token: any) => token.orderId === order.id);
+    const kitchenToken = (kitchenTokens as any[]).find((token: any) => token.orderId === order.id);
     
     // Find associated bill
-    const bill = bills.find((bill: any) => bill.orderId === order.id);
+    const bill = (bills as any[]).find((bill: any) => bill.orderId === order.id);
     
     // Calculate time in current status
     const updatedAt = new Date(order.updatedAt);

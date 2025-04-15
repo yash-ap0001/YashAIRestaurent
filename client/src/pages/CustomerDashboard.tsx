@@ -465,7 +465,7 @@ export default function CustomerDashboard() {
                                   <span className="text-muted-foreground">Unknown</span>
                                 )}
                               </td>
-                              <td className="p-3 text-right">₹{bill.totalAmount.toFixed(2)}</td>
+                              <td className="p-3 text-right">₹{bill.totalAmount ? bill.totalAmount.toFixed(2) : '0.00'}</td>
                               <td className="p-3 text-right">
                                 <Badge variant={bill.isPaid ? "outline" : "secondary"}>
                                   {bill.isPaid ? "Paid" : "Pending"}
@@ -491,7 +491,7 @@ export default function CustomerDashboard() {
                 <div className="flex justify-between mb-2">
                   <span className="text-muted-foreground">Total Spent:</span>
                   <span className="font-semibold">
-                    ₹{bills.reduce((total: number, bill: any) => total + bill.totalAmount, 0).toFixed(2)}
+                    ₹{bills.reduce((total: number, bill: any) => total + (bill.totalAmount || 0), 0).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -529,9 +529,11 @@ export default function CustomerDashboard() {
           ) : menuItems && (
             <div className="space-y-8">
               {/* Group items by category */}
-              {Array.from(new Set(menuItems.map((item: any) => item.category))).map((category: string) => (
-                <div key={category} className="space-y-4">
-                  <h3 className="text-lg font-medium capitalize">{category}</h3>
+              {Array.from(new Set(menuItems.map((item: any) => item.category))).map((category) => {
+                const categoryString = String(category);
+                return (
+                <div key={categoryString} className="space-y-4">
+                  <h3 className="text-lg font-medium capitalize">{categoryString}</h3>
                   <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     {menuItems
                       .filter((item: any) => item.category === category)
@@ -580,7 +582,8 @@ export default function CustomerDashboard() {
                       ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </TabsContent>
