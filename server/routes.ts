@@ -27,7 +27,9 @@ import {
   getCallStatistics, 
   getAIVoiceSettings, 
   updateAIVoiceSettings, 
-  simulateIncomingCall 
+  simulateIncomingCall,
+  makeOutboundCall,
+  CallData 
 } from "./services/telephony";
 import { processChatbotRequest } from "./services/chatbot";
 import { WebSocketServer } from 'ws';

@@ -222,7 +222,7 @@ export default function AICallCenter() {
     onSuccess: (data: any) => {
       toast({
         title: 'Incoming Call',
-        description: `Receiving call from ${data.phoneNumber}`,
+        description: `Receiving call from ${data.callData?.phoneNumber || 'unknown'}. Order will be created at the end.`,
       });
       
       // Refresh calls data
@@ -238,9 +238,49 @@ export default function AICallCenter() {
     }
   });
   
+  // Handle creating an immediate order from a call
+  const createImmediateOrderMutation = useMutation({
+    mutationFn: (orderText: string = '') => apiRequest('POST', '/api/telephony/create-immediate-order', { 
+      phoneNumber: '+91' + Math.floor(Math.random() * 9000000000 + 1000000000),
+      orderText
+    }),
+    onSuccess: (data: any) => {
+      toast({
+        title: 'Order Created',
+        description: `Immediate order created from call ${data.callData?.id || 'unknown'}`,
+      });
+      
+      // Refresh calls and orders data
+      queryClient.invalidateQueries({ queryKey: ['/api/telephony/calls'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to create immediate order',
+        variant: 'destructive',
+      });
+      console.error('Failed to create immediate order:', error);
+    }
+  });
+  
   // Handle simulating a new incoming call
   const simulateIncomingCall = () => {
     simulateCallMutation.mutate();
+  };
+  
+  // Handle creating an immediate order
+  const createImmediateOrder = () => {
+    // Random order text to simulate different orders
+    const orderOptions = [
+      "I'd like to order butter chicken with 3 garlic naan",
+      "Can I get a vegetarian thali with raita",
+      "We need a family meal with paneer tikka, dal, rice and 4 rotis",
+      "Two chicken biryani and one mushroom curry please"
+    ];
+    const orderText = orderOptions[Math.floor(Math.random() * orderOptions.length)];
+    
+    createImmediateOrderMutation.mutate(orderText);
   };
 
   // Handle toggling the AI system
@@ -377,6 +417,23 @@ export default function AICallCenter() {
               <CardDescription>Common tasks for AI call management</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              <Button
+                className="w-full flex justify-between items-center bg-green-600 hover:bg-green-700 text-white" 
+                onClick={createImmediateOrder}
+                disabled={createImmediateOrderMutation.isPending}
+              >
+                {createImmediateOrderMutation.isPending ? (
+                  <span className="flex items-center">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating Order...
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <span>Create Immediate Order</span>
+                    <span>→</span>
+                  </span>
+                )}
+              </Button>
               <Button className="w-full flex justify-between items-center" variant="outline">
                 <span>Export Call Logs</span>
                 <span>↓</span>
@@ -387,10 +444,6 @@ export default function AICallCenter() {
               </Button>
               <Button className="w-full flex justify-between items-center" variant="outline">
                 <span>Menu Updates</span>
-                <span>→</span>
-              </Button>
-              <Button className="w-full flex justify-between items-center" variant="outline">
-                <span>Notification Settings</span>
                 <span>→</span>
               </Button>
             </CardContent>
