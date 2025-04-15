@@ -562,7 +562,7 @@ export class MemStorage implements IStorage {
     return this.scheduledOrders.delete(id);
   }
   
-  // Initialize only the menu items for the application to work properly
+  // Initialize sample data for the application
   private initSampleData() {
     // Sample admin user (keep this for authentication)
     this.createUser({
@@ -583,8 +583,129 @@ export class MemStorage implements IStorage {
     
     menuItemsToCreate.forEach(item => this.createMenuItem(item));
     
-    // No more sample orders, kitchen tokens, inventory, customers or bills
-    // These will be created dynamically by the application when needed
+    // Sample customers for orders
+    const customers = [
+      { name: "Rahul Gupta", phone: "9876543210", email: "rahul@example.com", visitCount: 3 },
+      { name: "Priya Sharma", phone: "9876543211", email: "priya@example.com", visitCount: 5 },
+      { name: "Amit Singh", phone: "9876543212", email: "amit@example.com", visitCount: 2 }
+    ];
+    
+    customers.forEach(customer => this.createCustomer(customer));
+    
+    // Create some sample orders to populate dashboard
+    const today = new Date();
+    
+    // Active pending order
+    this.createOrder({
+      orderNumber: "ORD-1001",
+      tableNumber: "T1",
+      status: "pending",
+      totalAmount: 650,
+      notes: "Extra spicy",
+      orderSource: "manual",
+      useAIAutomation: false,
+      createdAt: today
+    });
+    
+    // Active preparing order
+    this.createOrder({
+      orderNumber: "ORD-1002",
+      tableNumber: "T2",
+      status: "preparing",
+      totalAmount: 450,
+      notes: null,
+      orderSource: "whatsapp",
+      useAIAutomation: true,
+      createdAt: today
+    });
+    
+    // Completed order
+    this.createOrder({
+      orderNumber: "ORD-1003",
+      tableNumber: "T3",
+      status: "completed",
+      totalAmount: 820,
+      notes: "No onions",
+      orderSource: "manual",
+      useAIAutomation: false,
+      createdAt: today
+    });
+    
+    // Order items
+    this.createOrderItem({
+      orderId: 1,
+      menuItemId: 1,
+      quantity: 1,
+      price: 320,
+      notes: null
+    });
+    
+    this.createOrderItem({
+      orderId: 1,
+      menuItemId: 2,
+      quantity: 1,
+      price: 280,
+      notes: "Extra spicy"
+    });
+    
+    this.createOrderItem({
+      orderId: 1,
+      menuItemId: 4,
+      quantity: 1,
+      price: 50,
+      notes: null
+    });
+    
+    // Kitchen tokens
+    this.createKitchenToken({
+      tokenNumber: "T01",
+      orderId: 1,
+      status: "pending",
+      isUrgent: false,
+      startTime: today
+    });
+    
+    this.createKitchenToken({
+      tokenNumber: "T02",
+      orderId: 2,
+      status: "preparing",
+      isUrgent: true,
+      startTime: today
+    });
+    
+    // Sample bill
+    this.createBill({
+      billNumber: "BILL-1001",
+      orderId: 3,
+      subtotal: 750,
+      tax: 70,
+      discount: 0,
+      total: 820,
+      paymentStatus: "paid",
+      paymentMethod: "card"
+    });
+    
+    // Sample activities
+    this.createActivity({
+      type: "order_created",
+      description: "New order ORD-1001 created",
+      entityId: 1,
+      entityType: "order"
+    });
+    
+    this.createActivity({
+      type: "kitchen_update",
+      description: "Kitchen token T02 marked as urgent",
+      entityId: 2,
+      entityType: "kitchen_token"
+    });
+    
+    this.createActivity({
+      type: "payment_received",
+      description: "Payment of ₹820 received for order ORD-1003",
+      entityId: 3,
+      entityType: "bill"
+    });
   }
 }
 
