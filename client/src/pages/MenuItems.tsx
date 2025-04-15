@@ -849,7 +849,10 @@ export default function MenuItems() {
                                 alt={item.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).src = '';
+                                  console.log('Image load error:', item.imageUrl);
+                                  // Set a fallback or just hide the broken image
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                  (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="flex items-center justify-center h-full"><svg class="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="20" x="2" y="2" rx="2" ry="2"/><path d="M9 8h10M9 12h10M9 16h10M5 8h.01M5 12h.01M5 16h.01"/></svg></div>';
                                 }}
                               />
                             ) : (
@@ -970,7 +973,10 @@ export default function MenuItems() {
                                       alt={item.name}
                                       className="w-full h-full object-cover"
                                       onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '';
+                                        console.log('Image load error:', item.imageUrl);
+                                        // Set a fallback or just hide the broken image
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="flex items-center justify-center h-full"><svg class="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="20" x="2" y="2" rx="2" ry="2"/><path d="M9 8h10M9 12h10M9 16h10M5 8h.01M5 12h.01M5 16h.01"/></svg></div>';
                                       }}
                                     />
                                   ) : (
@@ -1200,7 +1206,10 @@ export default function MenuItems() {
                       alt={itemToDelete.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '';
+                        console.log('Image load error:', itemToDelete.imageUrl);
+                        // Set a fallback or just hide the broken image
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="flex items-center justify-center h-full"><svg class="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="20" x="2" y="2" rx="2" ry="2"/><path d="M9 8h10M9 12h10M9 16h10M5 8h.01M5 12h.01M5 16h.01"/></svg></div>';
                       }}
                     />
                   </div>

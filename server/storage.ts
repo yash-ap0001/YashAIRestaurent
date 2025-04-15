@@ -861,7 +861,8 @@ export class MemStorage implements IStorage {
         category: "Dessert", 
         description: "Soft cottage cheese patties in sweet, flavored milk", 
         isAvailable: true,
-        dietaryTags: ["vegetarian"] 
+        dietaryTags: ["vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1589916048140-103d241f16f8?q=80&w=1974&auto=format&fit=crop"
       },
       { 
         name: "Kheer", 
