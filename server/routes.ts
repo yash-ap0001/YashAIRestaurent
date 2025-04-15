@@ -17,19 +17,21 @@ import {
   getWhatsAppClient,
   handleSendBillWithHealthTips
 } from "./services/whatsapp";
-import { 
-  initializeTelephonyService, 
-  handleIncomingCall, 
-  processSpeech, 
-  confirmOrder, 
-  retryOrder, 
+
+import {
+  initializeTelephonyService,
+  handleIncomingCall,
+  processSpeech,
+  confirmOrder,
+  retryOrder,
+  selectLanguage,
   getCalls, 
   getCallStatistics, 
   getAIVoiceSettings, 
   updateAIVoiceSettings, 
   simulateIncomingCall,
   makeOutboundCall,
-  CallData 
+  CallData
 } from "./services/telephony";
 import { processChatbotRequest } from "./services/chatbot";
 import { WebSocketServer } from 'ws';
@@ -1343,9 +1345,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   app.post("/api/telephony/retry-order", retryOrder);
   
   // Handle language selection for voice calls
-  app.post("/api/telephony/select-language", (req: Request, res: Response) => {
-    telephonyService.selectLanguage(req, res);
-  });
+  app.post("/api/telephony/select-language", selectLanguage);
   
   // Get call history
   app.get("/api/telephony/calls", async (req: Request, res: Response) => {
