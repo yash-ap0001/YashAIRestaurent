@@ -870,7 +870,8 @@ export class MemStorage implements IStorage {
         category: "Dessert", 
         description: "Rice pudding with nuts and flavored with cardamom", 
         isAvailable: true,
-        dietaryTags: ["vegetarian"] 
+        dietaryTags: ["vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1605197548693-d9f0b02896c7?q=80&w=1974&auto=format&fit=crop"
       },
       { 
         name: "Ice Cream", 
@@ -878,7 +879,8 @@ export class MemStorage implements IStorage {
         category: "Dessert", 
         description: "Choice of vanilla, chocolate, or strawberry", 
         isAvailable: true,
-        dietaryTags: ["vegetarian"] 
+        dietaryTags: ["vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=2012&auto=format&fit=crop"
       },
       
       // GRILLED SANDWICHES
@@ -888,7 +890,8 @@ export class MemStorage implements IStorage {
         category: "Grilled Sandwiches", 
         description: "Grilled sandwich with mixed vegetables and cheese", 
         isAvailable: true,
-        dietaryTags: ["vegetarian"] 
+        dietaryTags: ["vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1539252554935-80918f560c6e?q=80&w=1964&auto=format&fit=crop"
       },
       { 
         name: "Paneer Tikka Sandwich", 
@@ -946,7 +949,8 @@ export class MemStorage implements IStorage {
         category: "Beverage", 
         description: "Chilled yogurt drink with mango flavor", 
         isAvailable: true,
-        dietaryTags: ["vegetarian"] 
+        dietaryTags: ["vegetarian"],
+        imageUrl: "https://images.unsplash.com/photo-1589733955941-5eeaf752f6dd?q=80&w=1974&auto=format&fit=crop"
       }
     ];
     

@@ -679,6 +679,12 @@ export default function MenuItems() {
                         src={item.imageUrl} 
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform hover:scale-105"
+                        onError={(e) => {
+                          console.log('Grid image load error:', item.imageUrl);
+                          // Set a fallback or just hide the broken image
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="flex items-center justify-center h-full"><svg class="h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="20" x="2" y="2" rx="2" ry="2"/><path d="M9 8h10M9 12h10M9 16h10M5 8h.01M5 12h.01M5 16h.01"/></svg><p class="text-xs text-gray-500 mt-2">Image not available</p></div>';
+                        }}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full bg-gray-100">
@@ -1140,8 +1146,10 @@ export default function MenuItems() {
                           alt="Preview"
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '';
-                            (e.target as HTMLImageElement).alt = 'Error loading image';
+                            console.log('Image preview load error:', field.value);
+                            // Set a fallback or just hide the broken image
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="flex items-center justify-center h-full"><svg class="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="20" x="2" y="2" rx="2" ry="2"/><path d="M9 8h10M9 12h10M9 16h10M5 8h.01M5 12h.01M5 16h.01"/></svg></div>';
                           }}
                         />
                       </div>
