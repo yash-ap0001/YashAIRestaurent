@@ -405,8 +405,9 @@ export function AppShell({ children }: AppShellProps) {
       {chatVisible ? (
         <div className="fixed bottom-16 md:bottom-4 right-4 z-20">
           <ChatInterface 
-            onClose={() => setChatVisible(false)} 
             userType={getUserType()}
+            minimized={false}
+            onMinimize={() => setChatVisible(false)}
           />
         </div>
       ) : (
