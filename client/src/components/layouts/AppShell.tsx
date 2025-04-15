@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
-  Radio, Signal, Globe, ExternalLink, Mic, Workflow
+  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,6 +33,7 @@ const managementNavItems: NavItem[] = [
   { label: "Inventory", href: "/inventory", icon: <Package2 className="w-5 h-5" /> },
   { label: "Customers", href: "/customers", icon: <Users className="w-5 h-5" /> },
   { label: "Menu Items", href: "/menu-items", icon: <MenuSquare className="w-5 h-5" /> },
+  { label: "Diet Plan", href: "/diet-plan", icon: <Apple className="w-5 h-5" /> },
   { label: "Reports", href: "/reports", icon: <BarChart3 className="w-5 h-5" /> },
 ];
 
@@ -62,7 +63,7 @@ export function AppShell({ children }: AppShellProps) {
       return "kitchen";
     }
     
-    const adminRoutes = ["/inventory", "/customers", "/menu-items", "/reports"];
+    const adminRoutes = ["/inventory", "/customers", "/menu-items", "/diet-plan", "/reports"];
     if (adminRoutes.some(route => location === route)) {
       return "admin";
     }

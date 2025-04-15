@@ -21,6 +21,7 @@ import Reports from "@/pages/Reports";
 import ExternalIntegration from "@/pages/ExternalIntegration";
 import VoiceAssistant from "@/pages/VoiceAssistant";
 import N8nIntegration from "@/pages/N8nIntegration";
+import DietPlan from "@/pages/DietPlan";
 import { AppShell } from "@/components/layouts/AppShell";
 
 function Router() {
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/external-integration" component={ExternalIntegration} />
       <Route path="/voice-assistant" component={VoiceAssistant} />
       <Route path="/n8n-integration" component={N8nIntegration} />
+      <Route path="/diet-plan" component={DietPlan} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
