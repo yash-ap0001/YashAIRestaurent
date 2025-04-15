@@ -241,6 +241,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST - Create new menu item
+  app.post("/api/menu-items", async (req: Request, res: Response) => {
+    try {
+      // Check role permission
+      if (!req.isAuthenticated() || !["admin", "manager"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
+      }
+
+      const newMenuItem = await storage.createMenuItem(req.body);
+      
+      // Log activity
+      await storage.createActivity({
+        type: "menu_item_created",
+        description: `Menu item "${newMenuItem.name}" has been created`,
+        entityId: newMenuItem.id,
+        entityType: "menu_item"
+      });
+      
+      res.status(201).json(newMenuItem);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+
+  // PATCH - Update menu item
+  app.patch("/api/menu-items/:id", async (req: Request, res: Response) => {
+    try {
+      // Check role permission
+      if (!req.isAuthenticated() || !["admin", "manager"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
+      }
+
+      const id = parseInt(req.params.id);
+      const menuItem = await storage.getMenuItem(id);
+      
+      if (!menuItem) {
+        return res.status(404).json({ error: "Menu item not found" });
+      }
+      
+      const updatedMenuItem = await storage.updateMenuItem(id, req.body);
+      
+      // Log activity
+      await storage.createActivity({
+        type: "menu_item_updated",
+        description: `Menu item "${updatedMenuItem.name}" has been updated`,
+        entityId: updatedMenuItem.id,
+        entityType: "menu_item"
+      });
+      
+      res.json(updatedMenuItem);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+
+  // DELETE - Delete menu item
+  app.delete("/api/menu-items/:id", async (req: Request, res: Response) => {
+    try {
+      // Check role permission
+      if (!req.isAuthenticated() || !["admin", "manager"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
+      }
+
+      const id = parseInt(req.params.id);
+      const menuItem = await storage.getMenuItem(id);
+      
+      if (!menuItem) {
+        return res.status(404).json({ error: "Menu item not found" });
+      }
+      
+      // We need to add the deleteMenuItem method to storage
+      const success = await storage.deleteMenuItem(id);
+      
+      if (success) {
+        // Log activity
+        await storage.createActivity({
+          type: "menu_item_deleted",
+          description: `Menu item "${menuItem.name}" has been deleted`,
+          entityId: id,
+          entityType: "menu_item"
+        });
+        
+        res.status(204).end();
+      } else {
+        res.status(500).json({ error: "Failed to delete menu item" });
+      }
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+
   // Orders
   app.get("/api/orders", async (req: Request, res: Response) => {
     try {

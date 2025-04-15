@@ -24,6 +24,7 @@ export interface IStorage {
   getMenuItemsByDietaryTags(tags: string[]): Promise<MenuItem[]>;
   createMenuItem(item: InsertMenuItem): Promise<MenuItem>;
   updateMenuItem(id: number, item: Partial<InsertMenuItem>): Promise<MenuItem | undefined>;
+  deleteMenuItem(id: number): Promise<boolean>;
   
   // Order operations
   getOrder(id: number): Promise<Order | undefined>;
