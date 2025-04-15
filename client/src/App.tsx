@@ -25,9 +25,11 @@ import N8nIntegration from "@/pages/N8nIntegration";
 import DietPlan from "@/pages/DietPlan";
 import LoginPage from "@/pages/LoginPage";
 import CustomerRegistration from "@/pages/CustomerRegistration";
+import LoadingDemo from "@/pages/LoadingDemo";
 import { AppShell } from "@/components/layouts/AppShell";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import LoadingIndicator from "@/components/ui/LoadingIndicator";
 
 function Router() {
   const { user } = useAuth();
@@ -94,11 +96,15 @@ function App() {
 function AppContent() {
   const { user, isLoading } = useAuth();
   
-  // If loading, show a loading spinner
+  // If loading, show our custom animated mascot loading indicator
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-900">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-background">
+        <LoadingIndicator 
+          size="lg" 
+          message="Welcome to Yash Hotel! Loading your experience..." 
+          fullScreen={true}
+        />
       </div>
     );
   }
