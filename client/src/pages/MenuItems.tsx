@@ -784,6 +784,7 @@ export default function MenuItems() {
                           />
                         </div>
                       </TableHead>
+                      <TableHead className="w-16">Image</TableHead>
                       <TableHead 
                         className="cursor-pointer"
                         onClick={() => handleSort("name")}
@@ -838,6 +839,24 @@ export default function MenuItems() {
                               checked={selectedItems.includes(item.id)}
                               onChange={() => toggleSelectItem(item.id)}
                             />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="w-12 h-12 rounded-md overflow-hidden border bg-gray-100">
+                            {item.imageUrl ? (
+                              <img 
+                                src={item.imageUrl} 
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = '';
+                                }}
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full">
+                                <MenuSquare className="h-4 w-4 text-gray-400" />
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="font-medium">{item.name}</TableCell>
@@ -943,18 +962,36 @@ export default function MenuItems() {
                               key={item.id}
                               className="flex justify-between items-center p-3 border rounded-md hover:bg-muted"
                             >
-                              <div>
-                                <h3 className="font-medium flex items-center">
-                                  {item.name}
-                                  {!item.isAvailable && (
-                                    <XCircle className="h-3.5 w-3.5 ml-2 text-red-500" />
+                              <div className="flex gap-3 items-center">
+                                <div className="w-14 h-14 rounded-md overflow-hidden border bg-gray-100 flex-shrink-0">
+                                  {item.imageUrl ? (
+                                    <img 
+                                      src={item.imageUrl}
+                                      alt={item.name}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '';
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="flex items-center justify-center h-full">
+                                      <MenuSquare className="h-4 w-4 text-gray-400" />
+                                    </div>
                                   )}
-                                </h3>
-                                {item.description && (
-                                  <p className="text-xs text-muted-foreground line-clamp-1">
-                                    {item.description}
-                                  </p>
-                                )}
+                                </div>
+                                <div>
+                                  <h3 className="font-medium flex items-center">
+                                    {item.name}
+                                    {!item.isAvailable && (
+                                      <XCircle className="h-3.5 w-3.5 ml-2 text-red-500" />
+                                    )}
+                                  </h3>
+                                  {item.description && (
+                                    <p className="text-xs text-muted-foreground line-clamp-1">
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className="font-medium">₹{item.price.toFixed(2)}</span>
@@ -1155,18 +1192,32 @@ export default function MenuItems() {
           </DialogHeader>
           <div className="py-4">
             {itemToDelete && (
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between">
-                  <span className="font-medium">Name:</span>
-                  <span>{itemToDelete.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Category:</span>
-                  <span>{itemToDelete.category}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Price:</span>
-                  <span>₹{itemToDelete.price.toFixed(2)}</span>
+              <div className="flex flex-col gap-4">
+                {itemToDelete.imageUrl && (
+                  <div className="w-full h-40 rounded-md overflow-hidden border bg-gray-100">
+                    <img 
+                      src={itemToDelete.imageUrl}
+                      alt={itemToDelete.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '';
+                      }}
+                    />
+                  </div>
+                )}
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <span className="font-medium">Name:</span>
+                    <span>{itemToDelete.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Category:</span>
+                    <span>{itemToDelete.category}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Price:</span>
+                    <span>₹{itemToDelete.price.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             )}
