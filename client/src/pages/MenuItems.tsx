@@ -275,6 +275,7 @@ export default function MenuItems() {
       price: item.price,
       category: item.category,
       description: item.description || "",
+      imageUrl: item.imageUrl || "",
       isAvailable: item.isAvailable,
     });
     setIsEditDialogOpen(true);
@@ -1069,6 +1070,39 @@ export default function MenuItems() {
                         value={field.value || ""}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image URL</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/image.jpg"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter the URL of an image for this menu item
+                    </FormDescription>
+                    {field.value && (
+                      <div className="mt-2 relative w-full h-40 bg-gray-100 rounded-md overflow-hidden">
+                        <img 
+                          src={field.value} 
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '';
+                            (e.target as HTMLImageElement).alt = 'Error loading image';
+                          }}
+                        />
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
