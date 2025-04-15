@@ -544,7 +544,6 @@ export async function confirmOrder(req: Request, res: Response) {
   console.log(`Confirmation received from call ${callSid}: "${speechResult}" (digits: ${digits})`);
   
   // Get the detected language from the call data or use default
-  // @ts-ignore - language field might not exist on type
   const detectedLanguage = (activeCalls[callSid]?.language as SupportedLanguage) || aiVoiceSettings.defaultLanguage;
   
   // Update call transcript
