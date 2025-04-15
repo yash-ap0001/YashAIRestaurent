@@ -618,13 +618,331 @@ export class MemStorage implements IStorage {
     });
     this.userId++;
     
-    // Sample menu items (required for orders to reference)
+    // Sample menu items with comprehensive categories and variety
     const menuItemsToCreate = [
-      { name: "Butter Chicken", price: 320, category: "Main Course", description: "Tender chicken cooked in creamy tomato sauce", isAvailable: true },
-      { name: "Paneer Tikka", price: 280, category: "Appetizer", description: "Grilled cottage cheese with spices", isAvailable: true },
-      { name: "Veg Biryani", price: 250, category: "Rice", description: "Aromatic rice with mixed vegetables", isAvailable: true },
-      { name: "Masala Chai", price: 50, category: "Beverage", description: "Spiced Indian tea", isAvailable: true },
-      { name: "Gulab Jamun", price: 120, category: "Dessert", description: "Sweet milk solids with sugar syrup", isAvailable: true }
+      // RICE AND BIRYANI - VEGETARIAN
+      { 
+        name: "Veg Biryani", 
+        price: 250, 
+        category: "Rice and Biryani - Veg", 
+        description: "Fragrant basmati rice cooked with mixed vegetables and aromatic spices", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"]
+      },
+      { 
+        name: "Jeera Rice", 
+        price: 180, 
+        category: "Rice and Biryani - Veg", 
+        description: "Steamed basmati rice tempered with cumin seeds", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"]
+      },
+      { 
+        name: "Kashmiri Pulao", 
+        price: 220, 
+        category: "Rice and Biryani - Veg", 
+        description: "Fragrant rice with dried fruits, nuts and mild spices", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"]
+      },
+      
+      // RICE AND BIRYANI - NON-VEGETARIAN
+      { 
+        name: "Chicken Biryani", 
+        price: 320, 
+        category: "Rice and Biryani - Non-Veg", 
+        description: "Fragrant basmati rice cooked with tender chicken and aromatic spices", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"]
+      },
+      { 
+        name: "Mutton Biryani", 
+        price: 380, 
+        category: "Rice and Biryani - Non-Veg", 
+        description: "Fragrant basmati rice cooked with tender mutton pieces and aromatic spices", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      { 
+        name: "Prawn Biryani", 
+        price: 350, 
+        category: "Rice and Biryani - Non-Veg", 
+        description: "Fragrant basmati rice cooked with marinated prawns and aromatic spices", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian", "seafood"] 
+      },
+      
+      // CURRIES - VEGETARIAN
+      { 
+        name: "Paneer Butter Masala", 
+        price: 290, 
+        category: "Curries - Veg", 
+        description: "Cottage cheese cubes in rich, creamy tomato gravy", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Dal Makhani", 
+        price: 250, 
+        category: "Curries - Veg", 
+        description: "Black lentils and kidney beans simmered with butter and cream", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Palak Paneer", 
+        price: 280, 
+        category: "Curries - Veg", 
+        description: "Cottage cheese cubes in spinach gravy", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Malai Kofta", 
+        price: 300, 
+        category: "Curries - Veg", 
+        description: "Soft potato and paneer dumplings in rich cream sauce", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      
+      // CURRIES - NON-VEGETARIAN
+      { 
+        name: "Butter Chicken", 
+        price: 320, 
+        category: "Curries - Non-Veg", 
+        description: "Tender chicken cooked in creamy tomato sauce", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      { 
+        name: "Chicken Tikka Masala", 
+        price: 330, 
+        category: "Curries - Non-Veg", 
+        description: "Grilled chicken pieces in spiced tomato gravy", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      { 
+        name: "Mutton Rogan Josh", 
+        price: 380, 
+        category: "Curries - Non-Veg", 
+        description: "Tender mutton in aromatic Kashmiri gravy", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      { 
+        name: "Fish Curry", 
+        price: 350, 
+        category: "Curries - Non-Veg", 
+        description: "Fish fillets in tangy and spicy coconut gravy", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian", "seafood"] 
+      },
+      
+      // STARTERS
+      { 
+        name: "Paneer Tikka", 
+        price: 280, 
+        category: "Starters", 
+        description: "Grilled cottage cheese with spices", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Veg Pakora", 
+        price: 180, 
+        category: "Starters", 
+        description: "Assorted vegetables dipped in spiced gram flour batter and deep-fried", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Chicken Tikka", 
+        price: 320, 
+        category: "Starters", 
+        description: "Grilled chicken pieces marinated in yogurt and spices", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      { 
+        name: "Seekh Kebab", 
+        price: 340, 
+        category: "Starters", 
+        description: "Minced meat mixed with spices and grilled on skewers", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      
+      // MAIN COURSE
+      { 
+        name: "Veg Kofta", 
+        price: 280, 
+        category: "Main Course", 
+        description: "Mixed vegetable dumplings in rich gravy", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Chole Bhature", 
+        price: 260, 
+        category: "Main Course", 
+        description: "Spicy chickpea curry served with fried bread", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Tandoori Chicken", 
+        price: 380, 
+        category: "Main Course", 
+        description: "Whole chicken marinated in yogurt and spices, cooked in clay oven", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      { 
+        name: "Lamb Chops", 
+        price: 450, 
+        category: "Main Course", 
+        description: "Marinated lamb chops grilled to perfection", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      
+      // FRIED RICE AND NOODLES
+      { 
+        name: "Veg Fried Rice", 
+        price: 220, 
+        category: "Fried Rice and Noodles", 
+        description: "Rice stir-fried with mixed vegetables", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Chicken Fried Rice", 
+        price: 260, 
+        category: "Fried Rice and Noodles", 
+        description: "Rice stir-fried with chicken and vegetables", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      { 
+        name: "Veg Hakka Noodles", 
+        price: 220, 
+        category: "Fried Rice and Noodles", 
+        description: "Noodles stir-fried with mixed vegetables", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Chicken Noodles", 
+        price: 260, 
+        category: "Fried Rice and Noodles", 
+        description: "Noodles stir-fried with chicken and vegetables", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      
+      // DESSERTS
+      { 
+        name: "Gulab Jamun", 
+        price: 120, 
+        category: "Dessert", 
+        description: "Sweet milk solids with sugar syrup", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Rasmalai", 
+        price: 150, 
+        category: "Dessert", 
+        description: "Soft cottage cheese patties in sweet, flavored milk", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Kheer", 
+        price: 130, 
+        category: "Dessert", 
+        description: "Rice pudding with nuts and flavored with cardamom", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Ice Cream", 
+        price: 120, 
+        category: "Dessert", 
+        description: "Choice of vanilla, chocolate, or strawberry", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      
+      // GRILLED SANDWICHES
+      { 
+        name: "Veg Grilled Sandwich", 
+        price: 180, 
+        category: "Grilled Sandwiches", 
+        description: "Grilled sandwich with mixed vegetables and cheese", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Paneer Tikka Sandwich", 
+        price: 200, 
+        category: "Grilled Sandwiches", 
+        description: "Grilled sandwich with spiced paneer tikka filling", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Chicken Tikka Sandwich", 
+        price: 220, 
+        category: "Grilled Sandwiches", 
+        description: "Grilled sandwich with spiced chicken tikka filling", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      { 
+        name: "Club Sandwich", 
+        price: 240, 
+        category: "Grilled Sandwiches", 
+        description: "Triple-decker sandwich with chicken, egg, vegetables and cheese", 
+        isAvailable: true,
+        dietaryTags: ["non-vegetarian"] 
+      },
+      
+      // BEVERAGES
+      { 
+        name: "Masala Chai", 
+        price: 50, 
+        category: "Beverage", 
+        description: "Spiced Indian tea", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Cold Coffee", 
+        price: 120, 
+        category: "Beverage", 
+        description: "Chilled coffee with ice cream", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      },
+      { 
+        name: "Fresh Lime Soda", 
+        price: 80, 
+        category: "Beverage", 
+        description: "Refreshing lime juice with soda, sweet or salty", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian", "vegan"] 
+      },
+      { 
+        name: "Mango Lassi", 
+        price: 120, 
+        category: "Beverage", 
+        description: "Chilled yogurt drink with mango flavor", 
+        isAvailable: true,
+        dietaryTags: ["vegetarian"] 
+      }
     ];
     
     menuItemsToCreate.forEach(item => this.createMenuItem(item));

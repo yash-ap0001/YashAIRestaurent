@@ -439,8 +439,8 @@ export async function processSpeech(req: Request, res: Response) {
     const hasDietaryRestrictions = intentPatterns.dietary[detectedLanguage].test(orderText);
     
     // 2. ENTITY EXTRACTION - Extract quantities and menu items
-    // More robust pattern to extract quantity-item pairs
-    const quantityItemPattern = /(\d+)\s*(x|\*|×)?\s*(butter chicken|chicken tikka|paneer tikka|naan|roti|biryani|dal makhani|palak paneer|malai kofta|samosa|curry|rice|thali|masala|pakora|raita|lassi|vegetable|tandoori|garlic naan|plain naan|paratha|chapati|gulab jamun)/gi;
+    // Enhanced pattern to extract quantity-item pairs matching all our menu categories
+    const quantityItemPattern = /(\d+)\s*(x|\*|×)?\s*(veg biryani|jeera rice|kashmiri pulao|chicken biryani|mutton biryani|prawn biryani|paneer butter masala|dal makhani|palak paneer|malai kofta|butter chicken|chicken tikka masala|mutton rogan josh|fish curry|paneer tikka|veg pakora|chicken tikka|seekh kebab|veg kofta|chole bhature|tandoori chicken|lamb chops|veg fried rice|chicken fried rice|veg hakka noodles|chicken noodles|gulab jamun|rasmalai|kheer|ice cream|veg grilled sandwich|paneer tikka sandwich|chicken tikka sandwich|club sandwich|masala chai|cold coffee|fresh lime soda|mango lassi|naan|roti|biryani|curry|rice|thali|masala|pakora|raita|lassi|vegetable|tandoori|garlic naan|plain naan|paratha|chapati)/gi;
     
     // Extract all quantity-item matches
     const matches = orderText.matchAll(quantityItemPattern);
@@ -506,12 +506,15 @@ export async function processSpeech(req: Request, res: Response) {
       spanish: ['cancelar', 'detener', 'no', 'parar']
     };
     
-    // Menu items in different languages - Enhanced with more options
+    // Enhanced menu categories in different languages
     const menuItems = {
-      english: 'Our popular items include butter chicken, paneer tikka masala, vegetable biryani, garlic naan, tandoori chicken, and dal makhani. We also have vegan and gluten-free options. What would you like to order?',
-      hindi: 'हमारे लोकप्रिय व्यंजनों में बटर चिकन, पनीर टिक्का मसाला, वेजिटेबल बिरयानी, गार्लिक नान, तंदूरी चिकन और दाल मखनी शामिल हैं। हमारे पास वीगन और ग्लूटेन-फ्री विकल्प भी हैं। आप क्या ऑर्डर करना चाहेंगे?',
-      telugu: 'మా ప్రజాదరణ పొందిన వంటకాలలో బటర్ చికెన్, పనీర్ టిక్కా మసాలా, వెజిటబుల్ బిర్యానీ, గార్లిక్ నాన్, తందూరి చికెన్ మరియు దాల్ మఖని ఉన్నాయి. మాకు వీగన్ మరియు గ్లూటెన్-ఫ్రీ ఆప్షన్లు కూడా ఉన్నాయి. మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారు?',
-      spanish: 'Nuestros platos populares incluyen pollo con mantequilla, paneer tikka masala, biryani de verduras, naan de ajo, pollo tandoori y dal makhani. También tenemos opciones veganas y sin gluten. ¿Qué te gustaría ordenar?'
+      english: 'We have several menu categories: For Rice and Biryani, we offer vegetarian options like Veg Biryani and Jeera Rice, and non-vegetarian options like Chicken and Mutton Biryani. Our curry selection includes vegetarian dishes like Paneer Butter Masala and Dal Makhani, and non-vegetarian options like Butter Chicken and Mutton Rogan Josh. We also have starters, main courses, fried rice and noodles, desserts, and grilled sandwiches. What would you like to order?',
+      
+      hindi: 'हमारे पास कई मेनू श्रेणियां हैं: चावल और बिरयानी के लिए, हम वेज बिरयानी और जीरा राइस जैसे शाकाहारी विकल्प, और चिकन और मटन बिरयानी जैसे मांसाहारी विकल्प प्रदान करते हैं। हमारे करी में शाकाहारी व्यंजन जैसे पनीर बटर मसाला और दाल मखनी, और मांसाहारी विकल्प जैसे बटर चिकन और मटन रोगन जोश शामिल हैं। हमारे पास स्टार्टर्स, मेन कोर्स, फ्राइड राइस और नूडल्स, डेसर्ट और ग्रिल्ड सैंडविच भी हैं। आप क्या ऑर्डर करना चाहेंगे?',
+      
+      telugu: 'మాకు అనేక మెనూ వర్గాలు ఉన్నాయి: అన్నం మరియు బిర్యానీ కోసం, మేము వెజ్ బిర్యానీ మరియు జీరా రైస్ వంటి శాఖాహార ఎంపికలు, మరియు చికెన్ మరియు మటన్ బిర్యానీ వంటి మాంసాహార ఎంపికలను అందిస్తున్నాము. మా కూర సెలక్షన్లో పనీర్ బటర్ మసాలా మరియు దాల్ మఖని వంటి శాఖాహార వంటకాలు, మరియు బటర్ చికెన్ మరియు మటన్ రోగన్ జోష్ వంటి మాంసాహార ఎంపికలు ఉన్నాయి. మాకు స్టార్టర్స్, మెయిన్ కోర్సెస్, ఫ్రైడ్ రైస్ మరియు నూడుల్స్, డెజర్ట్స్ మరియు గ్రిల్డ్ శాండ్విచ్లు కూడా ఉన్నాయి. మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారు?',
+      
+      spanish: 'Tenemos varias categorías de menú: Para arroz y biryani, ofrecemos opciones vegetarianas como Biryani Vegetariano y Arroz Jeera, y opciones no vegetarianas como Biryani de Pollo y Cordero. Nuestra selección de curry incluye platos vegetarianos como Paneer Butter Masala y Dal Makhani, y opciones no vegetarianas como Pollo a la Mantequilla y Cordero Rogan Josh. También tenemos entrantes, platos principales, arroz frito y fideos, postres y sándwiches a la parrilla. ¿Qué te gustaría ordenar?'
     };
     
     // Cancel messages in different languages
