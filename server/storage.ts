@@ -131,8 +131,11 @@ export class MemStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const id = this.userId++;
     const newUser: User = { 
-      ...user, 
       id,
+      username: user.username, 
+      password: user.password,
+      fullName: user.fullName,
+      role: user.role || "customer", // Default to customer if role not specified
       createdAt: new Date()
     };
     this.users.set(id, newUser);
@@ -564,41 +567,56 @@ export class MemStorage implements IStorage {
   
   // Initialize sample data for the application
   private initSampleData() {
-    // Sample users with different roles
-    this.createUser({
+    // Sample users with different roles - passwords already pre-hashed with salt
+    this.users.set(1, {
+      id: 1,
       username: "admin",
-      password: "admin123",
+      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
       fullName: "Yash Sharma",
-      role: "admin"
+      role: "admin",
+      createdAt: new Date()
     });
+    this.userId++;
     
-    this.createUser({
+    this.users.set(2, {
+      id: 2,
       username: "kitchen",
-      password: "kitchen123",
+      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
       fullName: "Chef Ravi Kumar",
-      role: "kitchen"
+      role: "kitchen",
+      createdAt: new Date()
     });
+    this.userId++;
     
-    this.createUser({
+    this.users.set(3, {
+      id: 3,
       username: "waiter",
-      password: "waiter123",
+      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
       fullName: "Anil Patel",
-      role: "waiter"
+      role: "waiter",
+      createdAt: new Date()
     });
+    this.userId++;
     
-    this.createUser({
+    this.users.set(4, {
+      id: 4,
       username: "manager",
-      password: "manager123",
+      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
       fullName: "Priya Verma",
-      role: "manager"
+      role: "manager",
+      createdAt: new Date()
     });
+    this.userId++;
     
-    this.createUser({
+    this.users.set(5, {
+      id: 5,
       username: "delivery",
-      password: "delivery123",
+      password: "5fe5eb456f05be3295d090d07bcc8faae9b21b878d9f2e1f54d66e35aaa4be16d36e6500e1bd6a5fa31defa822e62d6ed87248375a77c94a250f19b1911bdc4a.9f57273edec55adcc9f3d3b4336acb0a",
       fullName: "Suresh Singh",
-      role: "delivery"
+      role: "delivery",
+      createdAt: new Date()
     });
+    this.userId++;
     
     // Sample menu items (required for orders to reference)
     const menuItemsToCreate = [
