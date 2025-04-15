@@ -1167,7 +1167,8 @@ export function simulateIncomingCall(phoneNumber: string = ''): CallData {
     phoneNumber,
     startTime: new Date().toISOString(),
     status: 'active',
-    transcript: `AI: ${aiVoiceSettings.greeting}\n`
+    language: 'english', // Default to English for simulated calls
+    transcript: `AI: ${aiVoiceSettings.greeting.english}\n`
   };
   
   activeCalls[callSid] = callData;
@@ -1208,7 +1209,8 @@ async function simulateCallConversation(callSid: string) {
   
   // Add AI confirmation
   if (activeCalls[callSid]) {
-    activeCalls[callSid].transcript += `AI: I heard you order: ${response}. ${aiVoiceSettings.confirmationPrompt}\n`;
+    const language = activeCalls[callSid].language || 'english';
+    activeCalls[callSid].transcript += `AI: I heard you order: ${response}. ${aiVoiceSettings.confirmationPrompt[language]}\n`;
     
     // Also update in history
     const historyCall = callHistory.find(call => call.id === callSid);
@@ -1236,7 +1238,8 @@ async function simulateCallConversation(callSid: string) {
   
   if (activeCalls[callSid]) {
     activeCalls[callSid].orderId = orderId;
-    activeCalls[callSid].transcript += `AI: Your order has been confirmed! Your order number is ${orderId}. ${aiVoiceSettings.farewell}\n`;
+    const language = activeCalls[callSid].language || 'english';
+    activeCalls[callSid].transcript += `AI: Your order has been confirmed! Your order number is ${orderId}. ${aiVoiceSettings.farewell[language]}\n`;
     
     // Also update in history
     const historyCall = callHistory.find(call => call.id === callSid);
