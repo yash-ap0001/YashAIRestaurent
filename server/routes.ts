@@ -1063,6 +1063,29 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     }
   });
   
+  // Diet Plan Creation
+  app.post("/api/ai/create-diet-plan", async (req: Request, res: Response) => {
+    try {
+      const { customerPhone, dietGoal, durationDays = 7 } = req.body;
+      
+      if (!customerPhone) {
+        return res.status(400).json({ error: "Customer phone number is required" });
+      }
+      
+      if (!dietGoal) {
+        return res.status(400).json({ error: "Diet goal is required" });
+      }
+      
+      // Create personalized diet plan
+      const result = await aiService.createDietPlan(customerPhone, dietGoal, durationDays);
+      
+      res.json(result);
+    } catch (err) {
+      console.error("Diet plan creation error:", err);
+      errorHandler(err, res);
+    }
+  });
+  
   // Chatbot endpoint - process requests for user, client, or admin
   app.post("/api/ai/chatbot", async (req: Request, res: Response) => {
     try {

@@ -292,6 +292,206 @@ export async function processNaturalLanguageOrder(
 }
 
 // Generate personalized menu suggestions based on order history and dietary preferences
+export async function createDietPlan(
+  customerPhone: string,
+  dietGoal: string,
+  durationDays: number = 7
+): Promise<{ success: boolean, message: string, dietPlan?: any, scheduledOrder?: any }> {
+  try {
+    // Get customer information by phone
+    let customer = null;
+    let customerPreferences = null;
+    let dietaryRestrictions: string[] = [];
+    
+    if (customerPhone) {
+      customer = await storage.getCustomerByPhone(customerPhone);
+    }
+    
+    if (!customer) {
+      return {
+        success: false,
+        message: `Customer with phone ${customerPhone} not found`
+      };
+    }
+    
+    // Get customer's dietary preferences
+    if (customer.dietaryPreferences) {
+      customerPreferences = customer.dietaryPreferences;
+      
+      // Get dietary restrictions
+      if (customerPreferences.restrictions && customerPreferences.restrictions.length > 0) {
+        dietaryRestrictions = [...dietaryRestrictions, ...customerPreferences.restrictions];
+      }
+      
+      // Add allergens as restrictions
+      if (customerPreferences.allergens && customerPreferences.allergens.length > 0) {
+        dietaryRestrictions = [...dietaryRestrictions, ...customerPreferences.allergens];
+      }
+    }
+    
+    // Get menu items suitable for diet plan based on restrictions
+    const menuItems = await storage.getMenuItems();
+    const suitableMenuItems = menuItems.filter(item => 
+      !dietaryRestrictions.some(r => 
+        // Ensure no restricted items are included
+        item.dietaryTags?.includes(r.toLowerCase())
+      )
+    );
+    
+    // Format menu items for the AI
+    const formattedItems = suitableMenuItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      category: item.category,
+      price: item.price,
+      nutritionalInfo: item.nutritionalInfo || null,
+      dietaryTags: item.dietaryTags || [],
+      healthBenefits: item.healthBenefits || null
+    }));
+    
+    const menuItemsString = JSON.stringify(formattedItems);
+    const customerPrefsString = customerPreferences 
+      ? JSON.stringify(customerPreferences) 
+      : 'No specific preferences';
+    
+    // Get health profile if available
+    const healthProfileString = customer.healthProfile 
+      ? JSON.stringify(customer.healthProfile)
+      : 'No health profile available';
+    
+    console.log(`Creating diet plan for customer ${customer.name} (${customerPhone}) with goal: ${dietGoal}`);
+    
+    // Create a personalized diet plan
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are a professional nutritionist creating personalized diet plans. Create a detailed diet plan that meets nutritional requirements while accommodating the customer's dietary restrictions, preferences, and health goals."
+        },
+        {
+          role: "user",
+          content: 
+            `Create a ${durationDays}-day diet plan for a customer with the following information:
+             
+             Customer dietary preferences: ${customerPrefsString}
+             Dietary restrictions: ${dietaryRestrictions.join(", ")}
+             Health profile: ${healthProfileString}
+             Health goal: ${dietGoal}
+             
+             Available menu items: ${menuItemsString}
+             
+             Create a balanced diet plan using these menu items that will help achieve the health goal.
+             
+             Format your response as a JSON object with this structure: 
+             { 
+               "dietPlan": {
+                 "name": "Name of diet plan",
+                 "description": "Description of the diet plan and how it helps with the goal",
+                 "schedule": [
+                   {
+                     "day": 1,
+                     "meals": [
+                       {"mealType": "Breakfast", "menuItemIds": [1, 2], "quantities": [1, 1], "notes": "Explanation"},
+                       {"mealType": "Lunch", "menuItemIds": [3, 4], "quantities": [1, 1], "notes": "Explanation"},
+                       {"mealType": "Dinner", "menuItemIds": [5, 6], "quantities": [1, 1], "notes": "Explanation"}
+                     ]
+                   }
+                   // Repeat for each day of the plan
+                 ],
+                 "healthBenefits": "Expected health benefits from following the plan",
+                 "nutritionalSummary": "Summary of the nutritional profile",
+                 "tips": "Additional dietary and lifestyle tips"
+               }
+             }`
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    const content = response.choices[0].message.content || "{}";
+    const result = JSON.parse(content) as { dietPlan: any };
+    
+    if (!result.dietPlan) {
+      return {
+        success: false,
+        message: "Failed to generate diet plan"
+      };
+    }
+    
+    // Create a scheduled order based on the diet plan
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + durationDays);
+    
+    // Extract unique menu items across all days
+    const allMenuItems = new Set<number>();
+    const allQuantities = new Map<number, number>();
+    
+    // Process the diet plan to extract menu items and quantities
+    result.dietPlan.schedule.forEach(day => {
+      day.meals.forEach(meal => {
+        meal.menuItemIds.forEach((id, idx) => {
+          allMenuItems.add(id);
+          allQuantities.set(id, (allQuantities.get(id) || 0) + meal.quantities[idx]);
+        });
+      });
+    });
+    
+    // Convert to arrays for storage
+    const menuItemIds = Array.from(allMenuItems);
+    const quantities = menuItemIds.map(id => allQuantities.get(id) || 1);
+    
+    // Create the scheduled order
+    try {
+      const scheduledOrder = await storage.createScheduledOrder({
+        customerId: customer.id,
+        recurrencePattern: "once", // For now, just create a one-time scheduled order
+        startDate,
+        endDate,
+        menuItemIds,
+        quantities,
+        specialInstructions: `Diet plan: ${result.dietPlan.name}`,
+        isActive: true,
+        lastExecuted: null,
+        healthNotes: result.dietPlan.healthBenefits,
+        dietPlanName: result.dietPlan.name
+      } as InsertScheduledOrder);
+      
+      // Log activity
+      await storage.createActivity({
+        type: "diet_plan_created",
+        description: `Diet plan "${result.dietPlan.name}" created for customer ${customer.name}`,
+        entityId: scheduledOrder.id,
+        entityType: "scheduled_order"
+      });
+      
+      console.log(`Successfully created diet plan "${result.dietPlan.name}" for customer ${customer.name}`);
+      
+      return {
+        success: true,
+        message: `Diet plan "${result.dietPlan.name}" created successfully`,
+        dietPlan: result.dietPlan,
+        scheduledOrder
+      };
+    } catch (error) {
+      console.error("Error creating scheduled order for diet plan:", error);
+      return {
+        success: true,
+        message: "Diet plan created but failed to schedule orders",
+        dietPlan: result.dietPlan
+      };
+    }
+  } catch (error) {
+    console.error("Error creating diet plan:", error);
+    return {
+      success: false,
+      message: `Failed to create diet plan: ${error.message}`
+    };
+  }
+}
+
 export async function getPersonalizedRecommendations(
   customerPhone: string
 ): Promise<{ recommendations: any[], reasoning: string }> {
