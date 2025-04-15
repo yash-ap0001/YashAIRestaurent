@@ -79,9 +79,20 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Register API routes
+  // Register API routes - only accessible to admin users
   app.post("/api/auth/register", async (req, res) => {
     try {
+      // Check if the current user is authenticated and is an admin
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: "You must be logged in to register new users" });
+      }
+      
+      const currentUser = req.user as AuthUser;
+      if (currentUser.role !== "admin") {
+        return res.status(403).json({ error: "Only admin users can register new staff accounts" });
+      }
+
+      // Validate and parse user data
       const userData = insertUserSchema.parse(req.body);
       
       // Check if user already exists
@@ -105,13 +116,7 @@ export function setupAuth(app: Express) {
         role: user.role,
       };
 
-      // Login the user after registration
-      req.login(user, (err) => {
-        if (err) {
-          return res.status(500).json({ error: "Failed to log in after registration" });
-        }
-        return res.status(201).json(userResponse);
-      });
+      return res.status(201).json(userResponse);
     } catch (error: any) {
       if (error.name === "ZodError") {
         return res.status(400).json({ error: "Invalid input data", details: error.errors });
