@@ -197,7 +197,10 @@ export function AppShell({ children }: AppShellProps) {
         </nav>
         
         <div className="p-4 border-t border-neutral-800">
-          <UserMenu />
+          <div className="text-xs text-neutral-400 text-center">
+            <p>YashHotelBot v1.2.0</p>
+            <p className="mt-1">© 2025 Yash Solutions</p>
+          </div>
         </div>
       </aside>
       
@@ -230,9 +233,8 @@ export function AppShell({ children }: AppShellProps) {
               </Button>
             </div>
             
-            <div className="md:hidden">
-              <UserMenu />
-            </div>
+            {/* User menu - always visible in top right corner */}
+            <UserMenu />
           </div>
         </header>
         
