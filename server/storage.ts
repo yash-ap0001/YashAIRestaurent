@@ -180,6 +180,22 @@ export class MemStorage implements IStorage {
     return updatedItem;
   }
   
+  async deleteMenuItem(id: number): Promise<boolean> {
+    if (!this.menuItems.has(id)) return false;
+    
+    const menuItem = this.menuItems.get(id);
+    
+    // Log activity
+    await this.createActivity({
+      type: 'menu_item_deleted',
+      description: `Menu item "${menuItem?.name}" was deleted`,
+      entityId: id,
+      entityType: 'menu_item'
+    });
+    
+    return this.menuItems.delete(id);
+  }
+  
   // Order operations
   async getOrder(id: number): Promise<Order | undefined> {
     return this.orders.get(id);
