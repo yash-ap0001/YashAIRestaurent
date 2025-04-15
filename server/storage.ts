@@ -853,7 +853,7 @@ export class MemStorage implements IStorage {
         description: "Sweet milk solids with sugar syrup", 
         isAvailable: true,
         dietaryTags: ["vegetarian"],
-        imageUrl: "https://images.unsplash.com/photo-1601303516361-9e9375f1f7bd?q=80&w=2012&auto=format&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1582716401301-b2407dc7563d?q=80&w=2075&auto=format&fit=crop"
       },
       { 
         name: "Rasmalai", 
@@ -862,7 +862,7 @@ export class MemStorage implements IStorage {
         description: "Soft cottage cheese patties in sweet, flavored milk", 
         isAvailable: true,
         dietaryTags: ["vegetarian"],
-        imageUrl: "https://images.unsplash.com/photo-1589916048140-103d241f16f8?q=80&w=1974&auto=format&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1611095210561-67f0e131a360?q=80&w=2070&auto=format&fit=crop"
       },
       { 
         name: "Kheer", 
@@ -871,7 +871,7 @@ export class MemStorage implements IStorage {
         description: "Rice pudding with nuts and flavored with cardamom", 
         isAvailable: true,
         dietaryTags: ["vegetarian"],
-        imageUrl: "https://images.unsplash.com/photo-1605197548693-d9f0b02896c7?q=80&w=1974&auto=format&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1615744455856-d363164144c0?q=80&w=1974&auto=format&fit=crop"
       },
       { 
         name: "Ice Cream", 
@@ -891,7 +891,7 @@ export class MemStorage implements IStorage {
         description: "Grilled sandwich with mixed vegetables and cheese", 
         isAvailable: true,
         dietaryTags: ["vegetarian"],
-        imageUrl: "https://images.unsplash.com/photo-1539252554935-80918f560c6e?q=80&w=1964&auto=format&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1554433607-66b5efe9d304?q=80&w=2070&auto=format&fit=crop"
       },
       { 
         name: "Paneer Tikka Sandwich", 
