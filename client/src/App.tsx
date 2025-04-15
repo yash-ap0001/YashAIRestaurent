@@ -74,6 +74,7 @@ function Router() {
       <ProtectedRoute path="/voice-assistant" component={VoiceAssistant} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/n8n-integration" component={N8nIntegration} allowedRoles={["admin"]} />
       <ProtectedRoute path="/diet-plan" component={DietPlan} allowedRoles={["admin", "manager", "waiter", "customer"]} />
+      <ProtectedRoute path="/loading-demo" component={LoadingDemo} allowedRoles={["admin", "manager"]} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />

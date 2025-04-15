@@ -1,118 +1,167 @@
 import React from 'react';
 
-interface MascotProps {
+interface HotelMascotProps {
   size?: number;
-  className?: string;
   animated?: boolean;
+  className?: string;
 }
 
-export const HotelMascot: React.FC<MascotProps> = ({ 
+/**
+ * A cute chef mascot for our hotel application
+ * Used in loading indicators and branding elements
+ */
+const HotelMascot: React.FC<HotelMascotProps> = ({ 
   size = 100, 
+  animated = false,
   className = '',
-  animated = false
 }) => {
+  // Animation classes
+  const animationClasses = animated 
+    ? 'animate-bounce [animation-duration:2s] hover:animate-none transition-transform' 
+    : '';
+    
+  // Face animation for the eyes (blinking)
+  const eyeAnimation = animated 
+    ? 'animate-pulse [animation-duration:3s]' 
+    : '';
+  
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 200 200"
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
+    <div 
+      className={`relative select-none ${animationClasses} ${className}`}
+      style={{ width: size, height: size }}
     >
-      {/* Animation definitions */}
-      {animated && (
-        <defs>
-          <style>
-            {`
-              @keyframes float {
-                0% { transform: translateY(0px); }
-                50% { transform: translateY(-10px); }
-                100% { transform: translateY(0px); }
-              }
-              @keyframes wiggle {
-                0% { transform: rotate(0deg); }
-                25% { transform: rotate(5deg); }
-                75% { transform: rotate(-5deg); }
-                100% { transform: rotate(0deg); }
-              }
-              @keyframes blink {
-                0% { transform: scaleY(1); }
-                10% { transform: scaleY(0.1); }
-                20% { transform: scaleY(1); }
-                100% { transform: scaleY(1); }
-              }
-              @keyframes wave {
-                0% { transform: rotate(0deg); }
-                20% { transform: rotate(-20deg); }
-                40% { transform: rotate(10deg); }
-                60% { transform: rotate(-10deg); }
-                80% { transform: rotate(5deg); }
-                100% { transform: rotate(0deg); }
-              }
-              @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-              }
-            `}
-          </style>
-        </defs>
-      )}
-
-      {/* Body Group (floating animation) */}
-      <g style={animated ? { animation: 'float 3s ease-in-out infinite' } : {}}>
-        {/* Chef Hat */}
-        <ellipse cx="100" cy="60" rx="35" ry="25" fill="white" />
-        <rect x="65" y="60" width="70" height="20" fill="white" />
+      {/* Chef hat */}
+      <div 
+        className="absolute bg-white rounded-t-full"
+        style={{
+          width: size * 0.7,
+          height: size * 0.4,
+          top: 0,
+          left: size * 0.15,
+          border: `${size * 0.03}px solid #e2e2e2`,
+        }}
+      >
+        {/* Hat band */}
+        <div 
+          className="absolute bg-primary/20 rounded-full"
+          style={{
+            width: size * 0.7,
+            height: size * 0.1,
+            bottom: size * 0.05,
+          }}
+        />
         
-        {/* Head */}
-        <circle cx="100" cy="95" r="35" fill="#FFD7B5" />
+        {/* Hat top puff */}
+        <div 
+          className="absolute bg-white rounded-full"
+          style={{
+            width: size * 0.25,
+            height: size * 0.25,
+            top: -size * 0.15,
+            left: size * 0.22,
+            border: `${size * 0.02}px solid #e2e2e2`,
+          }}
+        />
+      </div>
+      
+      {/* Face - circular with skin tone */}
+      <div 
+        className="absolute rounded-full bg-amber-200"
+        style={{
+          width: size * 0.6,
+          height: size * 0.6,
+          top: size * 0.35,
+          left: size * 0.2,
+        }}
+      >
+        {/* Eyes */}
+        <div 
+          className={`absolute rounded-full bg-black ${eyeAnimation}`}
+          style={{
+            width: size * 0.08,
+            height: size * 0.08,
+            top: size * 0.15,
+            left: size * 0.15,
+          }}
+        />
+        <div 
+          className={`absolute rounded-full bg-black ${eyeAnimation}`}
+          style={{
+            width: size * 0.08,
+            height: size * 0.08,
+            top: size * 0.15,
+            right: size * 0.15,
+          }}
+        />
         
-        {/* Face */}
-        <g style={animated ? { animation: 'blink 4s infinite' } : {}}>
-          <ellipse cx="85" cy="85" rx="5" ry="3" fill="#333" /> {/* Left Eye */}
-          <ellipse cx="115" cy="85" rx="5" ry="3" fill="#333" /> {/* Right Eye */}
-        </g>
+        {/* Smile */}
+        <div 
+          className="absolute bg-transparent"
+          style={{
+            width: size * 0.3,
+            height: size * 0.15,
+            bottom: size * 0.15,
+            left: size * 0.15,
+            borderBottomLeftRadius: size * 0.2,
+            borderBottomRightRadius: size * 0.2,
+            border: 'none',
+            borderBottom: `${size * 0.04}px solid black`,
+          }}
+        />
         
-        {/* Smiling Mouth */}
-        <path d="M85,105 Q100,120 115,105" fill="none" stroke="#333" strokeWidth="2" />
-        
-        {/* Chef Uniform Body */}
-        <rect x="70" y="130" width="60" height="50" rx="5" fill="#FFFFFF" />
-        <rect x="85" y="130" width="30" height="50" fill="#FFFFFF" />
-        
+        {/* Rosy cheeks */}
+        <div 
+          className="absolute rounded-full bg-red-300/60"
+          style={{
+            width: size * 0.1,
+            height: size * 0.05,
+            top: size * 0.25,
+            left: size * 0.05,
+          }}
+        />
+        <div 
+          className="absolute rounded-full bg-red-300/60"
+          style={{
+            width: size * 0.1,
+            height: size * 0.05,
+            top: size * 0.25,
+            right: size * 0.05,
+          }}
+        />
+      </div>
+      
+      {/* Chef coat/uniform */}
+      <div 
+        className="absolute bg-white rounded-b-full"
+        style={{
+          width: size * 0.7,
+          height: size * 0.4,
+          top: size * 0.6,
+          left: size * 0.15,
+          borderTop: `${size * 0.03}px solid #e2e2e2`,
+        }}
+      >
         {/* Buttons */}
-        <circle cx="100" cy="140" r="3" fill="#333" />
-        <circle cx="100" cy="155" r="3" fill="#333" />
-        <circle cx="100" cy="170" r="3" fill="#333" />
-        
-        {/* Left Arm waving */}
-        <g style={animated ? { animation: 'wave 2s infinite', transformOrigin: '75px 140px' } : {}}>
-          <rect x="55" y="135" width="20" height="45" rx="10" fill="#FFFFFF" />
-        </g>
-        
-        {/* Right Arm with Spoon */}
-        <g style={animated ? { animation: 'wiggle 3s infinite' } : {}}>
-          <rect x="125" y="135" width="20" height="45" rx="10" fill="#FFFFFF" />
-          <rect x="142" y="135" width="5" height="30" rx="2" fill="#A0522D" />
-          <ellipse cx="145" cy="170" rx="10" ry="5" fill="#A0522D" />
-        </g>
-        
-        {/* Neck/Collar */}
-        <rect x="90" y="125" width="20" height="10" rx="5" fill="#FFFFFF" />
-        
-        {/* Hotel Name Badge */}
-        <rect x="85" y="135" width="30" height="10" rx="2" fill="#FF6347" />
-        <text x="100" y="142.5" fontSize="8" textAnchor="middle" fill="white" fontWeight="bold">YASH</text>
-      </g>
-
-      {/* Optional Spinning Plate/Dish for loading animation */}
-      {animated && (
-        <g style={{ animation: 'spin 2s linear infinite', transformOrigin: 'center' }}>
-          <circle cx="100" cy="200" r="15" fill="#E6E6FA" opacity="0.8" />
-          <circle cx="100" cy="200" r="10" fill="#FF6347" opacity="0.6" />
-        </g>
-      )}
-    </svg>
+        <div 
+          className="absolute rounded-full bg-primary"
+          style={{
+            width: size * 0.08,
+            height: size * 0.08,
+            top: size * 0.1,
+            left: size * 0.2,
+          }}
+        />
+        <div 
+          className="absolute rounded-full bg-primary"
+          style={{
+            width: size * 0.08,
+            height: size * 0.08,
+            top: size * 0.1,
+            right: size * 0.2,
+          }}
+        />
+      </div>
+    </div>
   );
 };
 
