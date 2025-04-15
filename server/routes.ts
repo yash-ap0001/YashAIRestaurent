@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import PDFDocument from "pdfkit";
@@ -34,9 +34,30 @@ import { initializeRealTimeService } from './services/realtime';
 import { generateOrderNumber, generateTokenNumber, generateBillNumber, handleError } from './utils';
 import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
 import { handleVoiceCommand } from './services/voiceAssistant';
+import { setupAuth } from './auth';
+
+// Role-based access control middleware
+export function checkRole(allowedRoles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    
+    const userRole = req.user?.role;
+    
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      return res.status(403).json({ error: "Access forbidden: insufficient permissions" });
+    }
+    
+    next();
+  };
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+  
+  // Setup authentication
+  setupAuth(app);
   
   // Initialize WebSocket server for real-time updates
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
