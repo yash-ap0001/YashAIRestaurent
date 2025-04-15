@@ -341,7 +341,7 @@ export async function processSpeech(req: Request, res: Response) {
   
   console.log(`Speech received from call ${callSid}: "${speechResult}" (confidence: ${confidence})`);
   
-  // Detect language from the speech
+  // Detect language from the speech using our enhanced detection algorithm
   const detectedLanguage = detectLanguage(speechResult);
   console.log(`Using language: ${detectedLanguage} for call ${callSid}`);
   
@@ -385,10 +385,111 @@ export async function processSpeech(req: Request, res: Response) {
   const languageCode = languageCodeMap[detectedLanguage] || 'en-US';
   
   try {
-    // Process the speech with our AI service
-    // In a real implementation, this would call OpenAI or another NLP service
-    const orderText = speechResult;
+    // Process the speech result - normalize and prepare for analysis
+    const orderText = speechResult?.trim() || '';
     
+    // ENHANCED ORDER ANALYSIS
+    // Extract key information from the order using advanced pattern matching
+    
+    // 1. INTENT CLASSIFICATION - Identify the primary intent of the user
+    const intentPatterns = {
+      help: {
+        english: /what.*(?:menu|options|available|recommend|suggestions|dishes|specials)/i,
+        hindi: /क्या.*(?:मेन्यू|विकल्प|उपलब्ध|सिफारिश|सुझाव|व्यंजन|विशेष)/i,
+        telugu: /ఏమి.*(?:మెనూ|ఎంపికలు|అందుబాటులో|సిఫార్సు|సూచనలు|వంటకాలు|ప్రత్యేకతలు)/i,
+        spanish: /qué.*(?:menú|opciones|disponible|recomienda|sugerencias|platos|especiales)/i
+      },
+      cancel: {
+        english: /(?:cancel|stop|abort|end|quit|nevermind|goodbye)/i,
+        hindi: /(?:रद्द|बंद|समाप्त|अलविदा|छोड़ो)/i,
+        telugu: /(?:రద్దు|ఆపు|ముగింపు|వీడ్కోలు|వదిలివేయండి)/i,
+        spanish: /(?:cancelar|parar|abortar|terminar|salir|adiós)/i
+      },
+      delivery: {
+        english: /(?:deliver|delivery|take away|takeaway|take-away|bring|send)/i,
+        hindi: /(?:डिलिवरी|भेजें|पहुंचाएं|होम)/i,
+        telugu: /(?:డెలివరీ|పంపండి|ఇంటికి)/i,
+        spanish: /(?:entregar|entrega|llevar|enviar|domicilio)/i
+      },
+      dineIn: {
+        english: /(?:dine in|dining|table|reservation|reserve)/i,
+        hindi: /(?:डाइन इन|टेबल|आरक्षण|रिजर्व)/i,
+        telugu: /(?:డైన్ ఇన్|టేబుల్|రిజర్వేషన్)/i,
+        spanish: /(?:comer aquí|reserva|mesa|comedor)/i
+      },
+      dietary: {
+        english: /(?:vegetarian|vegan|gluten[ -]free|allergy|allergic)/i,
+        hindi: /(?:शाकाहारी|वेजिटेरियन|वीगन|एलर्जी)/i,
+        telugu: /(?:శాఖాహారి|వెజిటేరియన్|వేగన్|అలెర్జీ)/i,
+        spanish: /(?:vegetariano|vegano|sin gluten|alergia|alérgico)/i
+      }
+    };
+    
+    // Check the various intents
+    const isAskingForHelp = helpKeywords[detectedLanguage].some(keyword => 
+      orderText.toLowerCase().includes(keyword.toLowerCase())
+    ) || intentPatterns.help[detectedLanguage].test(orderText);
+    
+    const isAskingToCancel = cancelKeywords[detectedLanguage].some(keyword => 
+      orderText.toLowerCase().includes(keyword.toLowerCase())
+    ) || intentPatterns.cancel[detectedLanguage].test(orderText);
+    
+    const isRequestingDelivery = intentPatterns.delivery[detectedLanguage].test(orderText);
+    const isRequestingDineIn = intentPatterns.dineIn[detectedLanguage].test(orderText);
+    const hasDietaryRestrictions = intentPatterns.dietary[detectedLanguage].test(orderText);
+    
+    // 2. ENTITY EXTRACTION - Extract quantities and menu items
+    // More robust pattern to extract quantity-item pairs
+    const quantityItemPattern = /(\d+)\s*(x|\*|×)?\s*(butter chicken|chicken tikka|paneer tikka|naan|roti|biryani|dal makhani|palak paneer|malai kofta|samosa|curry|rice|thali|masala|pakora|raita|lassi|vegetable|tandoori|garlic naan|plain naan|paratha|chapati|gulab jamun)/gi;
+    
+    // Extract all quantity-item matches
+    const matches = orderText.matchAll(quantityItemPattern);
+    const quantityItemMatches = Array.from(matches).map(match => ({
+      quantity: parseInt(match[1], 10),
+      item: match[3].trim()
+    }));
+    
+    // 3. MODIFIER EXTRACTION - Extract any modifiers for the dishes
+    const modifierPattern = /(spicy|mild|medium|hot|extra spicy|less spicy|no garlic|no onion|no salt|less salt|extra|without|gluten[ -]free|dairy[ -]free|vegan|vegetarian)/gi;
+    
+    const modifierMatches = orderText.matchAll(modifierPattern);
+    const modifiers = Array.from(modifierMatches).map(match => match[1].trim());
+    
+    // 4. SPECIAL INSTRUCTIONS IDENTIFICATION
+    const specialInstructionsPatterns = [
+      /allerg(?:y|ic)\s+to\s+([a-zA-Z\s]+)/i,
+      /no\s+([a-zA-Z\s]+)/i,
+      /extra\s+([a-zA-Z\s]+)/i,
+      /without\s+([a-zA-Z\s]+)/i,
+      /please\s+([a-zA-Z\s]+)/i
+    ];
+    
+    let specialInstructions = [];
+    for (const pattern of specialInstructionsPatterns) {
+      const match = orderText.match(pattern);
+      if (match && match[1]) {
+        specialInstructions.push(`${match[0]}`);
+      }
+    }
+    
+    // 5. CREATE A STRUCTURED ORDER SUMMARY
+    const orderSummary = {
+      items: quantityItemMatches,
+      modifiers: modifiers,
+      specialInstructions: specialInstructions,
+      isDelivery: isRequestingDelivery,
+      isDineIn: isRequestingDineIn,
+      hasDietaryRestrictions: hasDietaryRestrictions
+    };
+    
+    console.log('Order summary:', JSON.stringify(orderSummary, null, 2));
+    
+    // Store the structured order data with the call
+    if (activeCalls[callSid]) {
+      // @ts-ignore - adding dynamic property
+      activeCalls[callSid].orderData = orderSummary;
+    }
+        
     // Keywords in different languages for help/menu
     const helpKeywords = {
       english: ['help', 'menu', 'options', 'what', 'recommend'],
@@ -405,46 +506,36 @@ export async function processSpeech(req: Request, res: Response) {
       spanish: ['cancelar', 'detener', 'no', 'parar']
     };
     
-    // Check for help/menu keywords in the detected language
-    const isAskingForHelp = helpKeywords[detectedLanguage].some(keyword => 
-      orderText.toLowerCase().includes(keyword.toLowerCase())
-    );
-    
-    // Check for cancel keywords in the detected language
-    const isAskingToCancel = cancelKeywords[detectedLanguage].some(keyword => 
-      orderText.toLowerCase().includes(keyword.toLowerCase())
-    );
-    
-    // Menu items in different languages
+    // Menu items in different languages - Enhanced with more options
     const menuItems = {
-      english: 'Our popular items include butter chicken, paneer tikka, and various types of naan. What would you like to order?',
-      hindi: 'हमारे लोकप्रिय व्यंजनों में बटर चिकन, पनीर टिक्का और विभिन्न प्रकार के नान शामिल हैं। आप क्या ऑर्डर करना चाहेंगे?',
-      telugu: 'మా ప్రజాదరణ పొందిన వంటకాలలో బటర్ చికెన్, పనీర్ టిక్కా మరియు వివిధ రకాల నాన్ ఉన్నాయి. మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారు?',
-      spanish: 'Nuestros platos populares incluyen pollo con mantequilla, paneer tikka y varios tipos de naan. ¿Qué te gustaría ordenar?'
+      english: 'Our popular items include butter chicken, paneer tikka masala, vegetable biryani, garlic naan, tandoori chicken, and dal makhani. We also have vegan and gluten-free options. What would you like to order?',
+      hindi: 'हमारे लोकप्रिय व्यंजनों में बटर चिकन, पनीर टिक्का मसाला, वेजिटेबल बिरयानी, गार्लिक नान, तंदूरी चिकन और दाल मखनी शामिल हैं। हमारे पास वीगन और ग्लूटेन-फ्री विकल्प भी हैं। आप क्या ऑर्डर करना चाहेंगे?',
+      telugu: 'మా ప్రజాదరణ పొందిన వంటకాలలో బటర్ చికెన్, పనీర్ టిక్కా మసాలా, వెజిటబుల్ బిర్యానీ, గార్లిక్ నాన్, తందూరి చికెన్ మరియు దాల్ మఖని ఉన్నాయి. మాకు వీగన్ మరియు గ్లూటెన్-ఫ్రీ ఆప్షన్లు కూడా ఉన్నాయి. మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారు?',
+      spanish: 'Nuestros platos populares incluyen pollo con mantequilla, paneer tikka masala, biryani de verduras, naan de ajo, pollo tandoori y dal makhani. También tenemos opciones veganas y sin gluten. ¿Qué te gustaría ordenar?'
     };
     
     // Cancel messages in different languages
     const cancelMessages = {
-      english: 'Your order has been cancelled. Thank you for calling. Goodbye!',
-      hindi: 'आपका ऑर्डर रद्द कर दिया गया है। कॉल करने के लिए धन्यवाद। अलविदा!',
-      telugu: 'మీ ఆర్డర్ రద్దు చేయబడింది. కాల్ చేసినందుకు ధన్యవాదాలు. వీడ్కోలు!',
-      spanish: 'Tu pedido ha sido cancelado. Gracias por llamar. ¡Adiós!'
+      english: 'Your order has been cancelled. Thank you for calling Yash Hotel. Goodbye!',
+      hindi: 'आपका ऑर्डर रद्द कर दिया गया है। यश होटल को कॉल करने के लिए धन्यवाद। अलविदा!',
+      telugu: 'మీ ఆర్డర్ రద్దు చేయబడింది. యష్ హోటల్‌కి కాల్ చేసినందుకు ధన్యవాదాలు. వీడ్కోలు!',
+      spanish: 'Tu pedido ha sido cancelado. Gracias por llamar a Yash Hotel. ¡Adiós!'
     };
     
     // Confirmation instructions in different languages
     const confirmInstructions = {
-      english: 'Please say yes or press 1 to confirm, or say no or press 2 to cancel.',
-      hindi: 'पुष्टि करने के लिए कृपया हां कहें या 1 दबाएं, या रद्द करने के लिए नहीं कहें या 2 दबाएं।',
-      telugu: 'దయచేసి అవును అని చెప్పండి లేదా నిర్ధారించడానికి 1 నొక్కండి, లేదా రద్దు చేయడానికి లేదు అని చెప్పండి లేదా 2 నొక్కండి.',
-      spanish: 'Por favor diga sí o presione 1 para confirmar, o diga no o presione 2 para cancelar.'
+      english: 'Please say yes or press 1 to confirm your order, or say no or press 2 to try again.',
+      hindi: 'अपने ऑर्डर की पुष्टि के लिए कृपया हां कहें या 1 दबाएं, या फिर से प्रयास करने के लिए ना कहें या 2 दबाएं।',
+      telugu: 'దయచేసి మీ ఆర్డర్‌ని నిర్ధారించడానికి అవును అని చెప్పండి లేదా 1 నొక్కండి, లేదా మళ్లీ ప్రయత్నించడానికి లేదు అని చెప్పండి లేదా 2 నొక్కండి.',
+      spanish: 'Por favor, di sí o presiona 1 para confirmar tu pedido, o di no o presiona 2 para intentarlo de nuevo.'
     };
     
     // No input messages in different languages
     const noInputMessages = {
-      english: 'I didn\'t receive your order. Please call again later. Goodbye!',
-      hindi: 'मुझे आपका ऑर्डर नहीं मिला। कृपया बाद में फिर से कॉल करें। अलविदा!',
-      telugu: 'నేను మీ ఆర్డర్‌ని స్వీకరించలేదు. దయచేసి తర్వాత మళ్లీ కాల్ చేయండి. వీడ్కోలు!',
-      spanish: 'No recibí tu pedido. Por favor llama más tarde. ¡Adiós!'
+      english: 'I didn\'t receive your response. Please call again later. Goodbye!',
+      hindi: 'मुझे आपका जवाब नहीं मिला। कृपया बाद में फिर से कॉल करें। अलविदा!',
+      telugu: 'నేను మీ ప్రతిస్పందనను స్వీకరించలేదు. దయచేసి తర్వాత మళ్లీ కాల్ చేయండి. వీడ్కోలు!',
+      spanish: 'No recibí tu respuesta. Por favor llama más tarde. ¡Adiós!'
     };
     
     // Error messages in different languages
@@ -455,6 +546,7 @@ export async function processSpeech(req: Request, res: Response) {
       spanish: 'Lo siento, tuve problemas para procesar tu pedido. Por favor intenta de nuevo más tarde.'
     };
     
+    // Process based on the detected intent
     if (isAskingForHelp) {
       // Customer asked for help or menu options
       twiml.say({ voice: voiceOption }, menuItems[detectedLanguage]);
@@ -479,14 +571,48 @@ export async function processSpeech(req: Request, res: Response) {
       // Update call status
       await completeCall(callSid);
     } else {
-      // Process as an order
-      // In a real implementation, we would extract menu items from the speech text
-      // For demo purposes, we'll just echo back what we think we heard
+      // Process as an order - Generate a natural-sounding summary of what we heard
+      let orderSummaryText = '';
       
-      // Get confirmation
-      twiml.say({ voice: voiceOption }, 
-        `${aiVoiceSettings.confirmationPrompt[detectedLanguage]} ${orderText}.`
-      );
+      // Format the items for readability
+      if (orderSummary.items.length > 0) {
+        const itemsFormatted = orderSummary.items.map(item => 
+          `${item.quantity} ${item.item}`
+        ).join(', ');
+        
+        orderSummaryText += itemsFormatted;
+      } else {
+        // If we didn't extract specific items, use the original text
+        orderSummaryText = orderText;
+      }
+      
+      // Add modifiers summary if any
+      if (orderSummary.modifiers.length > 0) {
+        orderSummaryText += ` with ${orderSummary.modifiers.join(', ')}`;
+      }
+      
+      // Add special instructions if any
+      if (orderSummary.specialInstructions.length > 0) {
+        orderSummaryText += `. Special instructions: ${orderSummary.specialInstructions.join(', ')}`;
+      }
+      
+      // Add delivery/dine-in info
+      if (orderSummary.isDelivery) {
+        orderSummaryText += `. This will be a delivery order.`;
+      } else if (orderSummary.isDineIn) {
+        orderSummaryText += `. This will be for dine-in.`;
+      }
+      
+      // Get confirmation by reading back what we heard
+      const confirmationText = {
+        english: `I heard you'd like to order: ${orderSummaryText}`,
+        hindi: `मैंने सुना कि आप ऑर्डर करना चाहते हैं: ${orderSummaryText}`,
+        telugu: `మీరు ఆర్డర్ చేయాలనుకుంటున్నారని నేను విన్నాను: ${orderSummaryText}`,
+        spanish: `He escuchado que te gustaría pedir: ${orderSummaryText}`
+      };
+      
+      twiml.say({ voice: voiceOption }, confirmationText[detectedLanguage]);
+      twiml.say({ voice: voiceOption }, aiVoiceSettings.confirmationPrompt[detectedLanguage]);
       
       const gather = twiml.gather({
         input: 'speech dtmf',
@@ -507,23 +633,41 @@ export async function processSpeech(req: Request, res: Response) {
   } catch (error) {
     console.error('Error processing speech:', error);
     
-    // Error handling
-    twiml.say({ voice: voiceOption }, errorMessages[detectedLanguage]);
+    // Error handling - default message in case the detectedLanguage isn't available
+    const defaultErrorMessage = "I'm sorry, I had trouble processing your order. Please try again later.";
+    
+    const errorMessages = {
+      english: 'I\'m sorry, I had trouble processing your order. Please try again later.',
+      hindi: 'क्षमा करें, मुझे आपके ऑर्डर को प्रोसेस करने में परेशानी हुई। कृपया बाद में पुन: प्रयास करें।',
+      telugu: 'క్షమించండి, మీ ఆర్డర్‌ని ప్రాసెస్ చేయడంలో నాకు సమస్య ఉంది. దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి.',
+      spanish: 'Lo siento, tuve problemas para procesar tu pedido. Por favor intenta de nuevo más tarde.'
+    };
+    
+    twiml.say(
+      { voice: voiceOption }, 
+      errorMessages[detectedLanguage] || defaultErrorMessage
+    );
     twiml.hangup();
     
     // Update call status
-    completeCall(callSid);
+    completeCall(callSid).catch(err => 
+      console.error(`Error completing call after processing error: ${err.message}`)
+    );
   }
   
   // Update call transcript with AI response
   if (activeCalls[callSid]) {
-    const aiResponse = twiml.toString().replace(/<[^>]*>/g, '');
-    activeCalls[callSid].transcript += `AI: ${aiResponse}\n`;
-    
-    // Also update in history
-    const historyCall = callHistory.find(call => call.id === callSid);
-    if (historyCall) {
-      historyCall.transcript = activeCalls[callSid].transcript;
+    try {
+      const aiResponse = twiml.toString().replace(/<[^>]*>/g, '');
+      activeCalls[callSid].transcript += `AI: ${aiResponse}\n`;
+      
+      // Also update in history
+      const historyCall = callHistory.find(call => call.id === callSid);
+      if (historyCall) {
+        historyCall.transcript = activeCalls[callSid].transcript;
+      }
+    } catch (error) {
+      console.error('Error updating transcript:', error);
     }
   }
   
