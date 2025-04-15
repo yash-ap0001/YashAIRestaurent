@@ -19,6 +19,7 @@ export interface CallData {
   status: 'active' | 'completed' | 'missed';
   transcript?: string;
   orderId?: number;
+  language?: SupportedLanguage;
 }
 
 const activeCalls: Record<string, CallData> = {};
@@ -40,24 +41,72 @@ export type SupportedLanguage = 'english' | 'hindi' | 'telugu' | 'spanish';
 // Language detection patterns
 const languagePatterns = {
   hindi: [
+    // Greetings and common phrases
     /नमस्ते|नमस्कार|धन्यवाद|खाना|भोजन|चाहिए|मेन्यू|ऑर्डर|कृपया|मिलेगा/i,
+    // Food items and descriptors
     /हिंदी|भारतीय|शाकाहारी|मांसाहारी|स्वादिष्ट|मसालेदार|मिर्च|पनीर|चावल|रोटी|दाल/i,
-    /मैं|चाहता|चाहती|हूँ|चाहते|चाय|बिरयानी|पकौड़ा/i
+    // Personal expressions and food items
+    /मैं|चाहता|चाहती|हूँ|चाहते|चाय|बिरयानी|पकौड़ा/i,
+    // North Indian dishes
+    /बटर चिकन|दाल मखनी|पनीर टिक्का|नान|कुल्चा|छोले|राजमा/i,
+    // Quantities and variations
+    /एक|दो|तीन|चार|पांच|थोड़ा|ज्यादा|कम|मीठा|तीखा|गरम/i,
+    // Question patterns
+    /क्या|कौन|कैसे|किसको|कितना|कहां/i,
+    // Order modifiers
+    /अतिरिक्त|बिना|साथ में|पैक करके|खाने के लिए/i
   ],
   telugu: [
+    // Greetings and common phrases
     /నమస్కారం|ధన్యవాదాలు|ఆహారం|భోజనం|కావాలి|మెనూ|ఆర్డర్|దయచేసి|లభిస్తుంది/i,
+    // Food items and descriptors
     /తెలుగు|భారతీయ|శాఖాహారి|మాంసాహారి|రుచికరమైన|మసాలా|మిరప|పనీర్|బియ్యం|రొట్టి|పప్పు/i,
-    /నాకు|వేడి|చల్లని|అన్నం|కూర|దోసె|ఇడ్లీ|సాంబార్|చట్నీ/i
+    // Personal expressions and food items
+    /నాకు|వేడి|చల్లని|అన్నం|కూర|దోసె|ఇడ్లీ|సాంబార్|చట్నీ/i,
+    // South Indian dishes
+    /గుంటూరు|హైదరాబాదీ|బిర్యాని|పులాव్|ఆవకాయ|పచ్చడి|చికెన్|కర్రీ|చెట్టినాడు/i,
+    // Quantities and variations
+    /ఒకటి|రెండు|మూడు|నాలుగు|ఐదు|కొంచెం|ఎక్కువ|తక్కువ|తీపి|కారం|వేడి/i,
+    // Question patterns
+    /ఏమిటి|ఎవరు|ఎలా|ఎవరికి|ఎంత|ఎక్కడ/i,
+    // Order modifiers
+    /అదనంగా|లేకుండా|తో పాటు|ప్యాక్|తినడానికి/i
   ],
   spanish: [
+    // Greetings and common phrases
     /hola|gracias|comida|menú|ordenar|por favor|quiero|necesito|tienen|puedo/i,
+    // Food types and descriptors
     /español|mexicano|vegetariano|carne|delicioso|picante|queso|arroz|tortilla|frijoles/i,
-    /bebida|plato|pollo|pan|sopa/i
+    // Food and drink items
+    /bebida|plato|pollo|pan|sopa/i,
+    // Spanish cuisine dishes
+    /paella|tapas|gazpacho|tortilla española|calamares|churros|patatas bravas/i,
+    // Indian dishes in Spanish
+    /curry|tikka masala|tandoori|naan|roti|biryani|tandoor/i,
+    // Quantities and variations
+    /uno|dos|tres|cuatro|cinco|poco|mucho|menos|dulce|picante|caliente/i,
+    // Question patterns
+    /qué|quién|cómo|para quién|cuánto|dónde/i,
+    // Order modifiers
+    /extra|sin|con|para llevar|para comer aquí/i
   ],
   english: [
+    // Greetings and common phrases
     /hello|hi|thanks|thank you|food|menu|order|please|want|need|have|can|get/i,
+    // Food types and descriptors
     /english|indian|vegetarian|non-vegetarian|delicious|spicy|cheese|rice|bread|curry/i,
-    /speak|understand/i
+    // Communication phrases
+    /speak|understand|would like|may I have|give me|bring|deliver/i,
+    // Indian dishes in English
+    /butter chicken|paneer|tikka|masala|naan|roti|biryani|tandoori|samosa|pakora/i,
+    // Quantities and numbers
+    /one|two|three|four|five|six|seven|eight|nine|ten|little|more|less|extra/i,
+    // Question patterns
+    /what|who|how|for whom|how much|where|when|which/i,
+    // Order modifiers
+    /additional|without|with|takeaway|dine in|to go|eat here/i,
+    // Common food preparation terms
+    /grilled|fried|baked|roasted|steamed|raw|well done|medium|mild|hot|medium spicy/i
   ]
 };
 
@@ -167,11 +216,9 @@ export function handleIncomingCall(req: Request, res: Response) {
     id: callSid,
     phoneNumber: callFrom,
     startTime: new Date().toISOString(),
-    status: 'active'
+    status: 'active',
+    language: aiVoiceSettings.defaultLanguage
   };
-  
-  // @ts-ignore - add language field to the call data
-  callData.language = aiVoiceSettings.defaultLanguage;
   
   activeCalls[callSid] = callData;
   callHistory.unshift(callData);
@@ -275,7 +322,6 @@ export function handleIncomingCall(req: Request, res: Response) {
   }
   
   // Add initial AI greeting to transcript
-  // @ts-ignore - access language field that might not exist in type
   const language = callData.language || aiVoiceSettings.defaultLanguage;
   callData.transcript = `AI: ${aiVoiceSettings.greeting[language]}\n`;
   
@@ -301,7 +347,6 @@ export async function processSpeech(req: Request, res: Response) {
   
   // Store the detected language with the call data
   if (activeCalls[callSid]) {
-    // @ts-ignore - add language field to the call data
     activeCalls[callSid].language = detectedLanguage;
     
     // Update call transcript
@@ -311,7 +356,6 @@ export async function processSpeech(req: Request, res: Response) {
     // Also update in history
     const historyCall = callHistory.find(call => call.id === callSid);
     if (historyCall) {
-      // @ts-ignore - add language field to the call data
       historyCall.language = detectedLanguage;
       historyCall.transcript = activeCalls[callSid].transcript;
     }
