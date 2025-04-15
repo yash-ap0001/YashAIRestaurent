@@ -1421,7 +1421,6 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       
       console.log(`Creating immediate order from call ${callSid} with text: ${orderText || "default order text"}`);
       
-      // Create a new direct order instead of using the imported function which has issues
       // Create a payload for the AI order processing directly
       const orderPayload = {
         orderText: orderText || "I'd like to order butter chicken and garlic naan",
@@ -1433,11 +1432,28 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         tableNumber: null // For phone orders, no table number
       };
       
+      // Use the AI order processing endpoint directly
+      console.log("Sending order to AI processing endpoint:", orderPayload);
+      
+      const aiResponse = await fetch('http://localhost:5000/api/ai/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderPayload)
+      });
+      
+      if (!aiResponse.ok) {
+        throw new Error(`Failed to create order (${aiResponse.status}): ${await aiResponse.text()}`);
+      }
+      
+      const aiResult = await aiResponse.json();
+      
       res.json({
         success: true,
         message: "Immediate order created successfully from simulated call",
         callData,
-        orderResult: result
+        orderResult: aiResult
       });
     } catch (err) {
       console.error("Error creating immediate order:", err);
