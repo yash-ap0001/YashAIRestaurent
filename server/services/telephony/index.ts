@@ -34,21 +34,63 @@ interface CallStatistics {
   conversionRate: number; // percentage of calls that result in orders
 }
 
-// AI Voice settings
+// Supported languages
+export type SupportedLanguage = 'english' | 'hindi' | 'telugu' | 'spanish';
+
+// Language detection patterns
+const languagePatterns = {
+  hindi: [
+    /नमस्ते|धन्यवाद|खाना|भोजन|मैं|चाहता|चाहती|हूँ|चाहते/i,
+    /भारतीय|पनीर|मसाला|चाय|रोटी|नान|दाल|बिरयानी|पकौड़ा/i
+  ],
+  telugu: [
+    /నమస్కారం|ధన్యవాదాలు|భోజనం|కావాలి|నాకు|వేడి|చల్లని/i,
+    /తెలుగు|అన్నం|పప్పు|కూర|మసాలా|దోసె|ఇడ్లీ|సాంబార్|చట్నీ/i
+  ],
+  spanish: [
+    /hola|gracias|comida|quiero|ordenar|por favor|menú/i,
+    /español|comida|bebida|plato|pollo|arroz|pan|sopa/i
+  ],
+  // English is default, but can detect explicit English request
+  english: [
+    /hello|hi|thanks|english|speak|understand|food|order/i
+  ]
+};
+
+// AI Voice settings with multi-language support
 interface AIVoiceSettings {
-  greeting: string;
-  confirmationPrompt: string;
-  farewell: string;
+  greeting: {[key in SupportedLanguage]: string};
+  confirmationPrompt: {[key in SupportedLanguage]: string};
+  farewell: {[key in SupportedLanguage]: string};
   maxRetries: number;
   autoAnswerCalls: boolean;
+  defaultLanguage: SupportedLanguage;
+  autoDetectLanguage: boolean;
 }
 
 let aiVoiceSettings: AIVoiceSettings = {
-  greeting: "Hello! Thank you for calling Yash Hotel. I'm your AI assistant. What would you like to order today?",
-  confirmationPrompt: "Let me confirm your order. Is that correct?",
-  farewell: "Thank you for your order! It will be ready in approximately 20 minutes. Have a great day!",
+  greeting: {
+    english: "Hello! Thank you for calling Yash Hotel. I'm your AI assistant. What would you like to order today?",
+    hindi: "नमस्ते! यश होटल को कॉल करने के लिए धन्यवाद। मैं आपका AI सहायक हूँ। आज आप क्या ऑर्डर करना चाहेंगे?",
+    telugu: "నమస్కారం! యష్ హోటల్‌కి కాల్ చేసినందుకు ధన్యవాదాలు. నేను మీ AI అసిస్టెంట్‌ని. ఈరోజు మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారు?",
+    spanish: "¡Hola! Gracias por llamar a Yash Hotel. Soy tu asistente de IA. ¿Qué te gustaría ordenar hoy?"
+  },
+  confirmationPrompt: {
+    english: "Let me confirm your order. Is that correct?",
+    hindi: "मुझे आपके ऑर्डर की पुष्टि करने दें। क्या यह सही है?",
+    telugu: "మీ ఆర్డర్‌ని నిర్ధారించనివ్వండి. అది సరైనదేనా?",
+    spanish: "Permíteme confirmar tu orden. ¿Es correcto?"
+  },
+  farewell: {
+    english: "Thank you for your order! It will be ready in approximately 20 minutes. Have a great day!",
+    hindi: "आपके ऑर्डर के लिए धन्यवाद! यह लगभग 20 मिनट में तैयार हो जाएगा। आपका दिन शुभ हो!",
+    telugu: "మీ ఆర్డర్‌కు ధన్యవాదాలు! ఇది సుమారు 20 నిమిషాల్లో సిద్ధంగా ఉంటుంది. మీ రోజు శుభంగా ఉండాలి!",
+    spanish: "¡Gracias por tu pedido! Estará listo en aproximadamente 20 minutos. ¡Que tengas un buen día!"
+  },
   maxRetries: 3,
-  autoAnswerCalls: true
+  autoAnswerCalls: true,
+  defaultLanguage: 'english',
+  autoDetectLanguage: true
 };
 
 /**
@@ -172,14 +214,24 @@ export async function processSpeech(req: Request, res: Response) {
   
   console.log(`Speech received from call ${callSid}: "${speechResult}" (confidence: ${confidence})`);
   
-  // Update call transcript
+  // Detect language from the speech
+  const detectedLanguage = detectLanguage(speechResult);
+  console.log(`Using language: ${detectedLanguage} for call ${callSid}`);
+  
+  // Store the detected language with the call data
   if (activeCalls[callSid]) {
+    // @ts-ignore - add language field to the call data
+    activeCalls[callSid].language = detectedLanguage;
+    
+    // Update call transcript
     activeCalls[callSid].transcript = activeCalls[callSid].transcript || '';
     activeCalls[callSid].transcript += `Customer: ${speechResult}\n`;
     
     // Also update in history
     const historyCall = callHistory.find(call => call.id === callSid);
     if (historyCall) {
+      // @ts-ignore - add language field to the call data
+      historyCall.language = detectedLanguage;
       historyCall.transcript = activeCalls[callSid].transcript;
     }
   }
@@ -187,30 +239,116 @@ export async function processSpeech(req: Request, res: Response) {
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
   
+  // Map languages to Twilio voice options
+  const voiceMap = {
+    english: 'Polly.Joanna',
+    hindi: 'Polly.Aditi', // Hindi voice
+    telugu: 'Polly.Aditi', // Use Hindi voice for Telugu as Twilio doesn't have Telugu
+    spanish: 'Polly.Lupe'  // Spanish voice
+  };
+  
+  // Map languages to Twilio language code for speech recognition
+  const languageCodeMap = {
+    english: 'en-US',
+    hindi: 'hi-IN',
+    telugu: 'te-IN',
+    spanish: 'es-ES'
+  };
+  
+  // Set voice based on detected language
+  const voiceOption = voiceMap[detectedLanguage] || 'Polly.Joanna';
+  const languageCode = languageCodeMap[detectedLanguage] || 'en-US';
+  
   try {
     // Process the speech with our AI service
     // In a real implementation, this would call OpenAI or another NLP service
     const orderText = speechResult;
     
-    // For demonstration, we'll use a simple approach
-    if (orderText.includes('help') || orderText.includes('menu')) {
+    // Keywords in different languages for help/menu
+    const helpKeywords = {
+      english: ['help', 'menu', 'options', 'what', 'recommend'],
+      hindi: ['मदद', 'मेनू', 'विकल्प', 'क्या', 'सिफारिश'],
+      telugu: ['సహాయం', 'మెనూ', 'ఎంపికలు', 'ఏమి', 'సిఫార్సు'],
+      spanish: ['ayuda', 'menú', 'opciones', 'qué', 'recomendar']
+    };
+    
+    // Keywords in different languages for cancel
+    const cancelKeywords = {
+      english: ['cancel', 'stop', 'no', 'don\'t'],
+      hindi: ['रद्द', 'बंद', 'नहीं', 'मत'],
+      telugu: ['రద్దు', 'ఆపు', 'లేదు', 'వద్దు'],
+      spanish: ['cancelar', 'detener', 'no', 'parar']
+    };
+    
+    // Check for help/menu keywords in the detected language
+    const isAskingForHelp = helpKeywords[detectedLanguage].some(keyword => 
+      orderText.toLowerCase().includes(keyword.toLowerCase())
+    );
+    
+    // Check for cancel keywords in the detected language
+    const isAskingToCancel = cancelKeywords[detectedLanguage].some(keyword => 
+      orderText.toLowerCase().includes(keyword.toLowerCase())
+    );
+    
+    // Menu items in different languages
+    const menuItems = {
+      english: 'Our popular items include butter chicken, paneer tikka, and various types of naan. What would you like to order?',
+      hindi: 'हमारे लोकप्रिय व्यंजनों में बटर चिकन, पनीर टिक्का और विभिन्न प्रकार के नान शामिल हैं। आप क्या ऑर्डर करना चाहेंगे?',
+      telugu: 'మా ప్రజాదరణ పొందిన వంటకాలలో బటర్ చికెన్, పనీర్ టిక్కా మరియు వివిధ రకాల నాన్ ఉన్నాయి. మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారు?',
+      spanish: 'Nuestros platos populares incluyen pollo con mantequilla, paneer tikka y varios tipos de naan. ¿Qué te gustaría ordenar?'
+    };
+    
+    // Cancel messages in different languages
+    const cancelMessages = {
+      english: 'Your order has been cancelled. Thank you for calling. Goodbye!',
+      hindi: 'आपका ऑर्डर रद्द कर दिया गया है। कॉल करने के लिए धन्यवाद। अलविदा!',
+      telugu: 'మీ ఆర్డర్ రద్దు చేయబడింది. కాల్ చేసినందుకు ధన్యవాదాలు. వీడ్కోలు!',
+      spanish: 'Tu pedido ha sido cancelado. Gracias por llamar. ¡Adiós!'
+    };
+    
+    // Confirmation instructions in different languages
+    const confirmInstructions = {
+      english: 'Please say yes or press 1 to confirm, or say no or press 2 to cancel.',
+      hindi: 'पुष्टि करने के लिए कृपया हां कहें या 1 दबाएं, या रद्द करने के लिए नहीं कहें या 2 दबाएं।',
+      telugu: 'దయచేసి అవును అని చెప్పండి లేదా నిర్ధారించడానికి 1 నొక్కండి, లేదా రద్దు చేయడానికి లేదు అని చెప్పండి లేదా 2 నొక్కండి.',
+      spanish: 'Por favor diga sí o presione 1 para confirmar, o diga no o presione 2 para cancelar.'
+    };
+    
+    // No input messages in different languages
+    const noInputMessages = {
+      english: 'I didn\'t receive your order. Please call again later. Goodbye!',
+      hindi: 'मुझे आपका ऑर्डर नहीं मिला। कृपया बाद में फिर से कॉल करें। अलविदा!',
+      telugu: 'నేను మీ ఆర్డర్‌ని స్వీకరించలేదు. దయచేసి తర్వాత మళ్లీ కాల్ చేయండి. వీడ్కోలు!',
+      spanish: 'No recibí tu pedido. Por favor llama más tarde. ¡Adiós!'
+    };
+    
+    // Error messages in different languages
+    const errorMessages = {
+      english: 'I\'m sorry, I had trouble processing your order. Please try again later.',
+      hindi: 'क्षमा करें, मुझे आपके ऑर्डर को प्रोसेस करने में परेशानी हुई। कृपया बाद में पुन: प्रयास करें।',
+      telugu: 'క్షమించండి, మీ ఆర్డర్‌ని ప్రాసెస్ చేయడంలో నాకు సమస్య ఉంది. దయచేసి తర్వాత మళ్లీ ప్రయత్నించండి.',
+      spanish: 'Lo siento, tuve problemas para procesar tu pedido. Por favor intenta de nuevo más tarde.'
+    };
+    
+    if (isAskingForHelp) {
       // Customer asked for help or menu options
-      twiml.say({ voice: 'Polly.Joanna' }, 'Our popular items include butter chicken, paneer tikka, and various types of naan. What would you like to order?');
+      twiml.say({ voice: voiceOption }, menuItems[detectedLanguage]);
       
       const gather = twiml.gather({
         input: 'speech',
         speechTimeout: 'auto',
         speechModel: 'phone_call',
         action: '/api/telephony/process-speech',
-        method: 'POST'
+        method: 'POST',
+        language: languageCode
       });
       
       // If no input is received
-      twiml.say({ voice: 'Polly.Joanna' }, 'I didn\'t receive your order. Please call again later. Goodbye!');
+      twiml.say({ voice: voiceOption }, noInputMessages[detectedLanguage]);
       twiml.hangup();
-    } else if (orderText.includes('cancel') || orderText.includes('stop')) {
+    } else if (isAskingToCancel) {
       // Customer wants to cancel
-      twiml.say({ voice: 'Polly.Joanna' }, 'Your order has been cancelled. Thank you for calling. Goodbye!');
+      twiml.say({ voice: voiceOption }, cancelMessages[detectedLanguage]);
       twiml.hangup();
       
       // Update call status
@@ -221,7 +359,9 @@ export async function processSpeech(req: Request, res: Response) {
       // For demo purposes, we'll just echo back what we think we heard
       
       // Get confirmation
-      twiml.say({ voice: 'Polly.Joanna' }, `I heard you order: ${orderText}. ${aiVoiceSettings.confirmationPrompt}`);
+      twiml.say({ voice: voiceOption }, 
+        `${aiVoiceSettings.confirmationPrompt[detectedLanguage]} ${orderText}.`
+      );
       
       const gather = twiml.gather({
         input: 'speech dtmf',
@@ -229,20 +369,21 @@ export async function processSpeech(req: Request, res: Response) {
         speechModel: 'phone_call',
         numDigits: 1,
         action: '/api/telephony/confirm-order',
-        method: 'POST'
+        method: 'POST',
+        language: languageCode
       });
       
-      gather.say({ voice: 'Polly.Joanna' }, 'Please say yes or press 1 to confirm, or say no or press 2 to cancel.');
+      gather.say({ voice: voiceOption }, confirmInstructions[detectedLanguage]);
       
       // If no input is received
-      twiml.say({ voice: 'Polly.Joanna' }, 'I didn\'t receive your confirmation. Please call again later. Goodbye!');
+      twiml.say({ voice: voiceOption }, noInputMessages[detectedLanguage]);
       twiml.hangup();
     }
   } catch (error) {
     console.error('Error processing speech:', error);
     
     // Error handling
-    twiml.say({ voice: 'Polly.Joanna' }, 'I\'m sorry, I had trouble processing your order. Please try again later.');
+    twiml.say({ voice: voiceOption }, errorMessages[detectedLanguage]);
     twiml.hangup();
     
     // Update call status
@@ -277,6 +418,10 @@ export async function confirmOrder(req: Request, res: Response) {
   
   console.log(`Confirmation received from call ${callSid}: "${speechResult}" (digits: ${digits})`);
   
+  // Get the detected language from the call data or use default
+  // @ts-ignore - language field might not exist on type
+  const detectedLanguage = (activeCalls[callSid]?.language as SupportedLanguage) || aiVoiceSettings.defaultLanguage;
+  
   // Update call transcript
   if (activeCalls[callSid]) {
     activeCalls[callSid].transcript = activeCalls[callSid].transcript || '';
@@ -286,11 +431,64 @@ export async function confirmOrder(req: Request, res: Response) {
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
   
-  // Check confirmation (1 or yes = confirm, 2 or no = cancel)
-  const isConfirmed = digits === '1' || 
-                     speechResult.toLowerCase().includes('yes') || 
-                     speechResult.toLowerCase().includes('confirm') ||
-                     speechResult.toLowerCase().includes('correct');
+  // Map languages to Twilio voice options
+  const voiceMap = {
+    english: 'Polly.Joanna',
+    hindi: 'Polly.Aditi', // Hindi voice
+    telugu: 'Polly.Aditi', // Use Hindi voice for Telugu as Twilio doesn't have Telugu
+    spanish: 'Polly.Lupe'  // Spanish voice
+  };
+  
+  // Map languages to Twilio language code for speech recognition
+  const languageCodeMap = {
+    english: 'en-US',
+    hindi: 'hi-IN',
+    telugu: 'te-IN',
+    spanish: 'es-ES'
+  };
+  
+  // Set voice based on detected language
+  const voiceOption = voiceMap[detectedLanguage] || 'Polly.Joanna';
+  const languageCode = languageCodeMap[detectedLanguage] || 'en-US';
+  
+  // Confirmation words in different languages
+  const confirmationWords = {
+    english: ['yes', 'confirm', 'correct', 'right', 'okay'],
+    hindi: ['हां', 'हाँ', 'सही', 'ठीक', 'ठीक है'],
+    telugu: ['అవును', 'సరే', 'సరైనది', 'ఒప్పు', 'సరి'],
+    spanish: ['sí', 'confirmar', 'correcto', 'bien', 'vale']
+  };
+  
+  // Check for confirmation in the detected language or by digit
+  const isConfirmed = 
+    digits === '1' || 
+    confirmationWords[detectedLanguage].some(word => 
+      speechResult.toLowerCase().includes(word.toLowerCase())
+    );
+  
+  // Order confirmed messages in different languages
+  const orderConfirmedMessages = {
+    english: (orderId: number) => `Your order has been confirmed! Your order number is ${orderId}. ${aiVoiceSettings.farewell.english}`,
+    hindi: (orderId: number) => `आपका ऑर्डर पुष्टि हो गया है! आपका ऑर्डर नंबर ${orderId} है। ${aiVoiceSettings.farewell.hindi}`,
+    telugu: (orderId: number) => `మీ ఆర్డర్ నిర్ధారించబడింది! మీ ఆర్డర్ నంబర్ ${orderId}. ${aiVoiceSettings.farewell.telugu}`,
+    spanish: (orderId: number) => `¡Tu pedido ha sido confirmado! Tu número de pedido es ${orderId}. ${aiVoiceSettings.farewell.spanish}`
+  };
+  
+  // Order cancelled messages in different languages
+  const orderCancelledMessages = {
+    english: 'I\'ve cancelled your order. Would you like to try again?',
+    hindi: 'मैंने आपका ऑर्डर रद्द कर दिया है। क्या आप फिर से प्रयास करना चाहेंगे?',
+    telugu: 'నేను మీ ఆర్డర్‌ని రద్దు చేసాను. మీరు మళ్లీ ప్రయత్నించాలనుకుంటున్నారా?',
+    spanish: 'He cancelado tu pedido. ¿Te gustaría intentarlo de nuevo?'
+  };
+  
+  // No input messages in different languages
+  const noInputMessages = {
+    english: 'I didn\'t hear from you. Thank you for calling. Goodbye!',
+    hindi: 'मैंने आपसे कुछ नहीं सुना। कॉल करने के लिए धन्यवाद। अलविदा!',
+    telugu: 'నేను మీ నుండి వినలేదు. కాల్ చేసినందుకు ధన్యవాదాలు. వీడ్కోలు!',
+    spanish: 'No te escuché. Gracias por llamar. ¡Adiós!'
+  };
   
   if (isConfirmed) {
     // Order confirmed
@@ -308,24 +506,23 @@ export async function confirmOrder(req: Request, res: Response) {
       }
     }
     
-    twiml.say({ voice: 'Polly.Joanna' }, 
-      `Your order has been confirmed! Your order number is ${orderId}. ${aiVoiceSettings.farewell}`
-    );
+    twiml.say({ voice: voiceOption }, orderConfirmedMessages[detectedLanguage](orderId));
     twiml.hangup();
   } else {
     // Order cancelled
-    twiml.say({ voice: 'Polly.Joanna' }, 'I\'ve cancelled your order. Would you like to try again?');
+    twiml.say({ voice: voiceOption }, orderCancelledMessages[detectedLanguage]);
     
     const gather = twiml.gather({
       input: 'speech',
       speechTimeout: 'auto',
       speechModel: 'phone_call',
       action: '/api/telephony/retry-order',
-      method: 'POST'
+      method: 'POST',
+      language: languageCode
     });
     
     // If no input is received
-    twiml.say({ voice: 'Polly.Joanna' }, 'I didn\'t hear from you. Thank you for calling. Goodbye!');
+    twiml.say({ voice: voiceOption }, noInputMessages[detectedLanguage]);
     twiml.hangup();
   }
   
@@ -568,6 +765,30 @@ export function getCalls() {
  */
 export function getActiveCalls() {
   return Object.values(activeCalls);
+}
+
+/**
+ * Detect language from text
+ * @param text User speech text to analyze
+ * @returns Detected language or default language
+ */
+export function detectLanguage(text: string): SupportedLanguage {
+  if (!text || !aiVoiceSettings.autoDetectLanguage) {
+    return aiVoiceSettings.defaultLanguage;
+  }
+  
+  // Check each language's patterns
+  for (const [language, patterns] of Object.entries(languagePatterns)) {
+    for (const pattern of patterns) {
+      if (pattern.test(text)) {
+        console.log(`Detected language: ${language} from text: "${text}"`);
+        return language as SupportedLanguage;
+      }
+    }
+  }
+  
+  // Default to the configured default language
+  return aiVoiceSettings.defaultLanguage;
 }
 
 /**

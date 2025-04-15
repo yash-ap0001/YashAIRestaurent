@@ -1410,7 +1410,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       const callSid = 'SIM-IMMEDIATE-' + Date.now().toString();
       
       // Create a call data object with the phone number and transcript
-      const callData: CallData = {
+      const callData = {
         id: callSid,
         phoneNumber: phoneNumber || '+919876543210',
         startTime: new Date().toISOString(),
@@ -1432,22 +1432,14 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         tableNumber: null // For phone orders, no table number
       };
       
-      // Use the AI order processing endpoint directly
-      console.log("Sending order to AI processing endpoint:", orderPayload);
+      // Process the order directly with the AI service
+      console.log("Processing order with AI service:", orderPayload);
       
-      const aiResponse = await fetch('http://localhost:5000/api/ai/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(orderPayload)
-      });
-      
-      if (!aiResponse.ok) {
-        throw new Error(`Failed to create order (${aiResponse.status}): ${await aiResponse.text()}`);
-      }
-      
-      const aiResult = await aiResponse.json();
+      // Call the AI service directly instead of using fetch
+      const aiResult = await aiService.processNaturalLanguageOrder(
+        orderPayload.orderText, 
+        orderPayload.orderSource
+      );
       
       res.json({
         success: true,
