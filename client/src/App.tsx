@@ -23,15 +23,17 @@ import VoiceAssistant from "@/pages/VoiceAssistant";
 import N8nIntegration from "@/pages/N8nIntegration";
 import DietPlan from "@/pages/DietPlan";
 import LoginPage from "@/pages/LoginPage";
+import CustomerRegistration from "@/pages/CustomerRegistration";
 import { AppShell } from "@/components/layouts/AppShell";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 function Router() {
   return (
     <Switch>
-      {/* Authentication Route */}
+      {/* Authentication Routes */}
       <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={CustomerRegistration} />
       
       {/* Protected Routes */}
       <ProtectedRoute path="/" component={Dashboard} />
@@ -72,12 +74,36 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AppShell>
-          <Router />
-        </AppShell>
+        <AppContent />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+// AppContent component to conditionally render AppShell based on authentication
+function AppContent() {
+  const { user, isLoading } = useAuth();
+  
+  // If loading, show a loading spinner
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-900">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+  
+  // If user is not logged in, render router without AppShell
+  if (!user) {
+    return <Router />;
+  }
+  
+  // If user is logged in, render router with AppShell
+  return (
+    <AppShell>
+      <Router />
+    </AppShell>
   );
 }
 

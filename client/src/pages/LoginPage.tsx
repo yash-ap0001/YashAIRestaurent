@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Redirect } from "wouter";
+import { Redirect, Link } from "wouter";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -183,8 +183,13 @@ export default function LoginPage() {
               </TabsContent>
             </Tabs>
           </CardContent>
-          <CardFooter className="flex justify-center text-center text-sm text-muted-foreground">
-            <p>Please contact an administrator if you need access</p>
+          <CardFooter className="flex flex-col space-y-3 justify-center text-center text-sm">
+            <p className="text-muted-foreground">Staff accounts can only be created by an administrator</p>
+            <div className="flex justify-center">
+              <Button variant="outline" asChild>
+                <Link href="/register">Register as a Customer</Link>
+              </Button>
+            </div>
           </CardFooter>
         </Card>
       </div>
