@@ -859,17 +859,48 @@ export async function createOrderFromCall(call: CallData) {
       orderText = "I'd like to order butter chicken with naan";
     }
     
-    console.log(`Creating order with text: "${orderText}"`);
+    // Extract key information from orderText using patterns
+    const quantityPattern = /(\d+)\s+(butter chicken|chicken|naan|rice|biryani|paneer|roti|samosa|pakora|curry|dal|tandoori|tikka)/gi;
+    const matches = [...orderText.matchAll(quantityPattern)];
+    const extractedItems = matches.length > 0 ? 
+      matches.map(match => `${match[1]} ${match[2]}`).join(', ') : 
+      null;
     
-    // Create a payload for the AI order processing
+    // Detect special requests
+    const specialRequestPattern = /(extra|spicy|mild|no|without|allergy|vegan|vegetarian)/i;
+    const hasSpecialRequests = specialRequestPattern.test(orderText);
+    
+    // Detect delivery requests
+    const deliveryPattern = /(deliver|delivery|take away|takeaway|take-away|home)/i;
+    const isDeliveryRequest = deliveryPattern.test(orderText);
+    
+    console.log(`Creating order with text: "${orderText}"`);
+    if (extractedItems) {
+      console.log(`Extracted items: ${extractedItems}`);
+    }
+    if (hasSpecialRequests) {
+      console.log(`Special requests detected`);
+    }
+    if (isDeliveryRequest) {
+      console.log(`Delivery request detected`);
+    }
+    
+    // Determine customer language preference for future interactions
+    const language = call.language || 'english';
+    
+    // Create an enhanced payload for the AI order processing
     const orderData = {
       orderText: orderText,
+      extractedItems: extractedItems,
+      hasSpecialRequests: hasSpecialRequests,
+      isDeliveryRequest: isDeliveryRequest,
       orderSource: 'phone',
       phoneNumber: call.phoneNumber || '9876543210',
       callId: call.id,
-      simulatedCall: true,
+      simulatedCall: call.id.startsWith('SIM'),
       useAIAutomation: true,
-      tableNumber: null // For phone orders, no table number
+      tableNumber: null, // For phone orders, no table number
+      preferredLanguage: language
     };
     
     // Call the AI order processing endpoint
@@ -949,7 +980,7 @@ export function getActiveCalls() {
 }
 
 /**
- * Detect language from text
+ * Detect language from text with confidence scoring
  * @param text User speech text to analyze
  * @returns Detected language or default language
  */
@@ -958,18 +989,90 @@ export function detectLanguage(text: string): SupportedLanguage {
     return aiVoiceSettings.defaultLanguage;
   }
   
-  // Check each language's patterns
+  // Normalize text: lowercase and remove punctuation
+  const normalizedText = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ").replace(/\s+/g, " ").trim();
+  
+  // Early language detection by checking for unique character sets
+  // Check for Devanagari script (Hindi)
+  if (/[\u0900-\u097F]/.test(text)) {
+    console.log(`Detected Hindi language by script`);
+    return 'hindi';
+  }
+  
+  // Check for Telugu script
+  if (/[\u0C00-\u0C7F]/.test(text)) {
+    console.log(`Detected Telugu language by script`);
+    return 'telugu';
+  }
+  
+  // Calculate confidence scores for each language
+  const scores: Record<SupportedLanguage, number> = {
+    english: 0,
+    hindi: 0,
+    telugu: 0,
+    spanish: 0
+  };
+  
+  // Check pattern matches for each language and increment score
   for (const [language, patterns] of Object.entries(languagePatterns)) {
+    let matchCount = 0;
+    let totalPatterns = patterns.length;
+    
     for (const pattern of patterns) {
-      if (pattern.test(text)) {
-        console.log(`Detected language: ${language} from text: "${text}"`);
-        return language as SupportedLanguage;
+      if (pattern.test(normalizedText)) {
+        matchCount++;
       }
+    }
+    
+    // Calculate percentage match
+    if (totalPatterns > 0) {
+      const languageKey = language as SupportedLanguage;
+      scores[languageKey] = (matchCount / totalPatterns) * 100;
     }
   }
   
-  // Default to the configured default language
-  return aiVoiceSettings.defaultLanguage;
+  // Add contextual analysis for common food items and numbers that might appear
+  // in multiple languages but with different frequencies in each language context
+  const foodItems = [
+    { term: "chicken", language: "english", weight: 3 },
+    { term: "pollo", language: "spanish", weight: 3 },
+    { term: "मुर्गी", language: "hindi", weight: 3 },
+    { term: "కోడి", language: "telugu", weight: 3 },
+    { term: "naan", language: "english", weight: 2 }, // Also common in Hindi transliteration
+    { term: "नान", language: "hindi", weight: 3 },
+    { term: "रोटी", language: "hindi", weight: 3 },
+    { term: "arroz", language: "spanish", weight: 3 },
+    { term: "rice", language: "english", weight: 2 },
+    { term: "curry", language: "english", weight: 2 },
+    { term: "paneer", language: "english", weight: 1 }, // Borrowed from Hindi
+    { term: "पनीर", language: "hindi", weight: 3 },
+    { term: "vegetarian", language: "english", weight: 3 },
+    { term: "vegetariano", language: "spanish", weight: 3 },
+    { term: "शाकाहारी", language: "hindi", weight: 3 },
+  ];
+  
+  // Check for these terms and boost the respective language scores
+  for (const item of foodItems) {
+    if (normalizedText.includes(item.term.toLowerCase())) {
+      const languageKey = item.language as SupportedLanguage;
+      scores[languageKey] += item.weight;
+    }
+  }
+  
+  // Find the language with the highest score
+  const detectedLanguage = Object.entries(scores).reduce((max, [language, score]) => {
+    return score > max.score ? { language: language as SupportedLanguage, score } : max;
+  }, { language: aiVoiceSettings.defaultLanguage, score: 0 });
+  
+  // If score is too low, default to configured language
+  const CONFIDENCE_THRESHOLD = 10; // Minimum confidence needed
+  if (detectedLanguage.score < CONFIDENCE_THRESHOLD) {
+    console.log(`Language detection confidence too low (${detectedLanguage.score}), defaulting to ${aiVoiceSettings.defaultLanguage}`);
+    return aiVoiceSettings.defaultLanguage;
+  }
+  
+  console.log(`Detected language: ${detectedLanguage.language} with confidence score: ${detectedLanguage.score.toFixed(2)}`);
+  return detectedLanguage.language;
 }
 
 /**
@@ -1184,73 +1287,152 @@ export function simulateIncomingCall(phoneNumber: string = ''): CallData {
  * Simulate a call conversation for testing
  */
 async function simulateCallConversation(callSid: string) {
-  const responseOptions = [
-    "I'd like to order 2 butter chicken, 3 naan, and a paneer tikka",
-    "Can I get a vegetarian thali?",
-    "I want to order a family meal for 4 people",
-    "What are your specials today?"
-  ];
-  
-  const response = responseOptions[Math.floor(Math.random() * responseOptions.length)];
-  
-  // Wait 2 seconds
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  // Add customer response
-  if (activeCalls[callSid]) {
-    activeCalls[callSid].transcript += `Customer: ${response}\n`;
+  try {
+    const language = activeCalls[callSid]?.language || 'english';
     
-    // Also update in history
-    const historyCall = callHistory.find(call => call.id === callSid);
-    if (historyCall) {
-      historyCall.transcript = activeCalls[callSid].transcript;
+    // Enhanced response options with more realistic and varied order patterns
+    // Including special requests, quantity variations, and questions
+    const responseOptions = {
+      english: [
+        "I'd like to order 2 butter chicken, 3 naan, and a paneer tikka",
+        "Can I get a vegetarian thali with extra raita?",
+        "I want to order a family meal for 4 people with chicken biryani and garlic naan",
+        "What are your specials today? I'd like something spicy",
+        "I have a dairy allergy, what vegan options do you have?",
+        "I'd like to order takeaway - 1 butter chicken, 2 naan, and 1 dal makhani",
+        "Could I get the chicken tikka masala but make it mild please?"
+      ],
+      hindi: [
+        "मैं 2 बटर चिकन, 3 नान और एक पनीर टिक्का ऑर्डर करना चाहूंगा",
+        "क्या मुझे अतिरिक्त रायता के साथ वेजिटेरियन थाली मिल सकती है?",
+        "मैं चिकन बिरयानी और लहसुन नान के साथ 4 लोगों के लिए फैमिली मील ऑर्डर करना चाहता हूं",
+        "आज आपके स्पेशल क्या हैं? मुझे कुछ मसालेदार चाहिए",
+        "मुझे डेयरी एलर्जी है, आपके पास क्या वीगन विकल्प हैं?"
+      ],
+      telugu: [
+        "నేను 2 బటర్ చికెన్, 3 నాన్ మరియు పనీర్ టిక్కా ఆర్డర్ చేయాలనుకుంటున్నాను",
+        "నాకు అదనపు రైతా తో కూడిన వెజిటేరియన్ థాలీ లభిస్తుందా?",
+        "నేను చికెన్ బిర్యానీ మరియు వెల్లుల్లి నాన్ తో 4 మంది కోసం ఫ్యామిలీ భోజనం ఆర్డర్ చేయాలనుకుంటున్నాను",
+        "ఈరోజు మీ ప్రత్యేకతలు ఏమిటి? నాకు స్పైసీగా ఉండేది కావాలి",
+        "నాకు పాల అలెర్జీ ఉంది, మీ దగ్గర వీగన్ ఆప్షన్లు ఏమి ఉన్నాయి?"
+      ],
+      spanish: [
+        "Me gustaría pedir 2 butter chicken, 3 naan y un paneer tikka",
+        "¿Puedo conseguir un thali vegetariano con raita extra?",
+        "Quiero pedir una comida familiar para 4 personas con biryani de pollo y naan de ajo",
+        "¿Cuáles son sus especialidades hoy? Me gustaría algo picante",
+        "Tengo alergia a los lácteos, ¿qué opciones veganas tienen?"
+      ]
+    };
+    
+    // Select response based on language
+    const availableResponses = responseOptions[language] || responseOptions.english;
+    const response = availableResponses[Math.floor(Math.random() * availableResponses.length)];
+    
+    // Wait 2 seconds for more realistic timing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Add customer response
+    if (activeCalls[callSid]) {
+      activeCalls[callSid].transcript += `Customer: ${response}\n`;
+      
+      // Also update in history
+      const historyCall = callHistory.find(call => call.id === callSid);
+      if (historyCall) {
+        historyCall.transcript = activeCalls[callSid].transcript;
+      }
+    }
+    
+    // Add AI confirmation with detailed order parsing
+    if (activeCalls[callSid]) {
+      // Extract items from response to make the AI confirmation more realistic
+      const itemPattern = /(butter chicken|chicken|naan|rice|biryani|paneer|roti|samosa|pakora|curry|dal|tandoori|tikka|thali)/gi;
+      const items = response.match(itemPattern) || [];
+      const extractedItems = items.length > 0 ? 
+        `I heard you want to order ${items.join(', ')}. ` : '';
+      
+      activeCalls[callSid].transcript += `AI: ${extractedItems}${aiVoiceSettings.confirmationPrompt[language]}\n`;
+      
+      // Also update in history
+      const historyCall = callHistory.find(call => call.id === callSid);
+      if (historyCall) {
+        historyCall.transcript = activeCalls[callSid].transcript;
+      }
+    }
+    
+    // Random variations in customer confirmation to make it more realistic
+    const confirmationOptions = {
+      english: ["Yes, that's correct", "Yes, please proceed", "That's right", "Sounds good"],
+      hindi: ["हां, यह सही है", "हां, कृपया आगे बढ़ें", "बिलकुल सही", "अच्छा लगता है"],
+      telugu: ["అవును, అది సరైనది", "అవును, దయచేసి కొనసాగండి", "అది నిజమే", "బాగుంది"],
+      spanish: ["Sí, es correcto", "Sí, por favor continúe", "Así es", "Suena bien"]
+    };
+    
+    // Wait 1.5 seconds for more realistic timing
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Add customer confirmation
+    if (activeCalls[callSid]) {
+      const availableConfirmations = confirmationOptions[language] || confirmationOptions.english;
+      const confirmation = availableConfirmations[Math.floor(Math.random() * availableConfirmations.length)];
+      
+      activeCalls[callSid].transcript += `Customer: ${confirmation}\n`;
+      
+      // Also update in history
+      const historyCall = callHistory.find(call => call.id === callSid);
+      if (historyCall) {
+        historyCall.transcript = activeCalls[callSid].transcript;
+      }
+    }
+    
+    // Create a more realistic order ID
+    const timestamp = new Date().getTime().toString().slice(-5);
+    const orderId = parseInt(`${Math.floor(100 + Math.random() * 900)}${timestamp}`);
+    
+    // Deliver final confirmation with order details
+    if (activeCalls[callSid]) {
+      activeCalls[callSid].orderId = orderId;
+      
+      // Create a delivery time estimate
+      const deliveryTimeMinutes = Math.floor(25 + Math.random() * 20);
+      
+      // Final confirmation messages with estimated time
+      const finalConfirmations = {
+        english: `Your order #${orderId} has been confirmed! It will be ready in approximately ${deliveryTimeMinutes} minutes.`,
+        hindi: `आपका ऑर्डर #${orderId} पुष्टि हो गया है! यह लगभग ${deliveryTimeMinutes} मिनट में तैयार हो जाएगा।`,
+        telugu: `మీ ఆర్డర్ #${orderId} నిర్ధారించబడింది! ఇది సుమారుగా ${deliveryTimeMinutes} నిమిషాలలో సిద్ధంగా ఉంటుంది.`,
+        spanish: `¡Su pedido #${orderId} ha sido confirmado! Estará listo en aproximadamente ${deliveryTimeMinutes} minutos.`
+      };
+      
+      activeCalls[callSid].transcript += `AI: ${finalConfirmations[language]} ${aiVoiceSettings.farewell[language]}\n`;
+      
+      // Also update in history
+      const historyCall = callHistory.find(call => call.id === callSid);
+      if (historyCall) {
+        historyCall.orderId = orderId;
+        historyCall.transcript = activeCalls[callSid].transcript;
+      }
+      
+      // Actually create an order through the API
+      try {
+        await createOrderFromCall(activeCalls[callSid]);
+      } catch (error) {
+        console.error('Failed to create order from simulated call:', error);
+      }
+    }
+    
+    // Complete the call after a delay
+    setTimeout(async () => {
+      await completeCall(callSid);
+    }, 1500);
+  } catch (error) {
+    console.error('Error in simulated call conversation:', error);
+    
+    // Make sure to complete the call even if there's an error
+    if (activeCalls[callSid]) {
+      setTimeout(async () => {
+        await completeCall(callSid);
+      }, 1000);
     }
   }
-  
-  // Add AI confirmation
-  if (activeCalls[callSid]) {
-    const language = activeCalls[callSid].language || 'english';
-    activeCalls[callSid].transcript += `AI: I heard you order: ${response}. ${aiVoiceSettings.confirmationPrompt[language]}\n`;
-    
-    // Also update in history
-    const historyCall = callHistory.find(call => call.id === callSid);
-    if (historyCall) {
-      historyCall.transcript = activeCalls[callSid].transcript;
-    }
-  }
-  
-  // Wait 1.5 seconds
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Add customer confirmation
-  if (activeCalls[callSid]) {
-    activeCalls[callSid].transcript += `Customer: Yes, that's correct\n`;
-    
-    // Also update in history
-    const historyCall = callHistory.find(call => call.id === callSid);
-    if (historyCall) {
-      historyCall.transcript = activeCalls[callSid].transcript;
-    }
-  }
-  
-  // Create order and complete call
-  const orderId = Math.floor(10000 + Math.random() * 90000);
-  
-  if (activeCalls[callSid]) {
-    activeCalls[callSid].orderId = orderId;
-    const language = activeCalls[callSid].language || 'english';
-    activeCalls[callSid].transcript += `AI: Your order has been confirmed! Your order number is ${orderId}. ${aiVoiceSettings.farewell[language]}\n`;
-    
-    // Also update in history
-    const historyCall = callHistory.find(call => call.id === callSid);
-    if (historyCall) {
-      historyCall.orderId = orderId;
-      historyCall.transcript = activeCalls[callSid].transcript;
-    }
-  }
-  
-  // Complete the call after a delay
-  setTimeout(async () => {
-    await completeCall(callSid);
-  }, 1500);
 }
