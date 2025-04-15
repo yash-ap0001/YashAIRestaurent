@@ -8,6 +8,7 @@ import { fromZodError } from "zod-validation-error";
 import { getHealthRecommendations, processNaturalLanguageOrder, getPersonalizedRecommendations } from "./services/aiService";
 import { aiService, centralAIController, notificationSystem } from "./services";
 import { n8nService } from "./services/n8nService";
+import { hashPassword } from "./auth";
 import { 
   initializeWhatsAppService, 
   handleSendMessage, 
@@ -695,6 +696,81 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       const scheduledOrders = await storage.getScheduledOrdersByCustomerId(customerId);
       res.json(scheduledOrders);
     } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Customer Registration API - used for self-service registration
+  app.post("/api/customers/register", async (req: Request, res: Response) => {
+    try {
+      const { username, password, fullName, phone, email, dietaryPreferences, allergies } = req.body;
+      
+      // Basic validation
+      if (!username || !password || !fullName || !phone || !email) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ error: "Username already exists" });
+      }
+      
+      // Check if phone number already exists
+      const existingCustomer = await storage.getCustomerByPhone(phone);
+      if (existingCustomer) {
+        return res.status(400).json({ error: "Phone number already registered" });
+      }
+      
+      // Hash the password
+      const hashedPassword = await hashPassword(password);
+      
+      // Create user account with 'customer' role
+      const user = await storage.createUser({
+        username,
+        password: hashedPassword,
+        fullName,
+        role: "customer",
+      });
+      
+      // Prepare dietary preferences in the correct format
+      const formattedDietaryPreferences = {
+        restrictions: allergies ? allergies.split(',').map((a: string) => a.trim()) : [],
+        allergens: allergies ? allergies.split(',').map((a: string) => a.trim()) : [],
+        healthGoals: [] as string[],
+        favoriteItems: [] as number[]
+      };
+      
+      // Create customer profile linked to user account
+      const customer = await storage.createCustomer({
+        name: fullName,
+        phone,
+        email,
+        dietaryPreferences: formattedDietaryPreferences,
+        preferences: dietaryPreferences ? dietaryPreferences.split(',').map((p: string) => p.trim()) : []
+      });
+      
+      // Log activity
+      await storage.createActivity({
+        type: "customer_created",
+        description: `New customer account created: ${fullName}`,
+        entityId: customer.id,
+        entityType: "customer"
+      });
+      
+      // Return success without sensitive data
+      res.status(201).json({
+        success: true,
+        message: "Customer account created successfully",
+        customer: {
+          id: customer.id,
+          name: customer.name,
+          phone: customer.phone,
+          email: customer.email
+        }
+      });
+    } catch (err) {
+      console.error("Customer registration error:", err);
       errorHandler(err, res);
     }
   });
