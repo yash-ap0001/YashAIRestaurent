@@ -1272,6 +1272,10 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   app.get("/api/n8n/workflows", async (req: Request, res: Response) => {
     try {
       const workflows = await n8nService.fetchWorkflows();
+      
+      // Log the workflows for debugging
+      console.log("Fetched workflows:", workflows);
+      
       res.json(workflows);
     } catch (err: any) {
       console.error("Error fetching n8n workflows:", err);

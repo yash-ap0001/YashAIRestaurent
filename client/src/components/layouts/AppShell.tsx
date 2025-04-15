@@ -195,11 +195,14 @@ export function AppShell({ children }: AppShellProps) {
               </Button>
             </div>
             
-            <div className="md:hidden">
+            <div className="flex items-center">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" />
                 <AvatarFallback>YS</AvatarFallback>
               </Avatar>
+              <Button variant="ghost" size="icon" className="ml-2" title="Logout">
+                <LogOut className="h-4 w-4 text-neutral-400 hover:text-purple-400" />
+              </Button>
             </div>
           </div>
         </header>
@@ -291,19 +294,11 @@ export function AppShell({ children }: AppShellProps) {
             </ul>
           </nav>
           
+          {/* Footer section with app version */}
           <div className="p-4 border-t border-neutral-800">
-            <div className="flex items-center">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" />
-                <AvatarFallback>YS</AvatarFallback>
-              </Avatar>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-neutral-200">Yash Sharma</p>
-                <p className="text-xs text-neutral-400">Admin</p>
-              </div>
-              <Button variant="ghost" size="icon" className="ml-auto">
-                <LogOut className="h-4 w-4 text-neutral-400 hover:text-purple-400" />
-              </Button>
+            <div className="text-xs text-neutral-400 text-center">
+              <p>YashHotelBot v1.2.0</p>
+              <p className="mt-1">© 2025 Yash Solutions</p>
             </div>
           </div>
         </SheetContent>
