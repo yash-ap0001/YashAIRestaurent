@@ -653,8 +653,26 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Customers
   app.get("/api/customers", async (req: Request, res: Response) => {
     try {
-      const customers = await storage.getCustomers();
-      res.json(customers);
+      const dietaryPrefs = req.query.dietaryPreferences as string;
+      
+      if (dietaryPrefs) {
+        const preferences = dietaryPrefs.split(',');
+        const customers = await storage.getCustomersByDietaryPreferences(preferences);
+        res.json(customers);
+      } else {
+        const customers = await storage.getCustomers();
+        res.json(customers);
+      }
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  app.get("/api/customers/:id/diet-plan", async (req: Request, res: Response) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      const scheduledOrders = await storage.getScheduledOrdersByCustomerId(customerId);
+      res.json(scheduledOrders);
     } catch (err) {
       errorHandler(err, res);
     }

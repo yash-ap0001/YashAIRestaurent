@@ -7,7 +7,8 @@ import {
   Bill, InsertBill, bills,
   Inventory, InsertInventory, inventory,
   Customer, InsertCustomer, customers,
-  Activity, InsertActivity, activities
+  Activity, InsertActivity, activities,
+  ScheduledOrder, InsertScheduledOrder, scheduledOrders
 } from "@shared/schema";
 
 // Interface for storage operations
@@ -89,6 +90,7 @@ export class MemStorage implements IStorage {
   private inventoryItems: Map<number, Inventory>;
   private customers: Map<number, Customer>;
   private activities: Map<number, Activity>;
+  private scheduledOrders: Map<number, ScheduledOrder>;
   
   private userId: number = 1;
   private menuItemId: number = 1;
@@ -99,6 +101,7 @@ export class MemStorage implements IStorage {
   private inventoryId: number = 1;
   private customerId: number = 1;
   private activityId: number = 1;
+  private scheduledOrderId: number = 1;
   
   constructor() {
     this.users = new Map();
@@ -110,6 +113,7 @@ export class MemStorage implements IStorage {
     this.inventoryItems = new Map();
     this.customers = new Map();
     this.activities = new Map();
+    this.scheduledOrders = new Map();
     
     // Initialize with sample data
     this.initSampleData();
@@ -142,6 +146,18 @@ export class MemStorage implements IStorage {
   
   async getMenuItems(): Promise<MenuItem[]> {
     return Array.from(this.menuItems.values());
+  }
+  
+  async getMenuItemsByDietaryTags(tags: string[]): Promise<MenuItem[]> {
+    if (!tags || tags.length === 0) {
+      return this.getMenuItems();
+    }
+    
+    return Array.from(this.menuItems.values())
+      .filter(item => {
+        if (!item.dietaryTags) return false;
+        return tags.some(tag => item.dietaryTags?.includes(tag));
+      });
   }
   
   async createMenuItem(item: InsertMenuItem): Promise<MenuItem> {
@@ -379,6 +395,21 @@ export class MemStorage implements IStorage {
     return Array.from(this.customers.values());
   }
   
+  async getCustomersByDietaryPreferences(preferences: string[]): Promise<Customer[]> {
+    if (!preferences || preferences.length === 0) {
+      return this.getCustomers();
+    }
+    
+    return Array.from(this.customers.values())
+      .filter(customer => {
+        if (!customer.dietaryPreferences?.restrictions) return false;
+        return preferences.some(pref => 
+          customer.dietaryPreferences?.restrictions.includes(pref) || 
+          customer.dietaryPreferences?.healthGoals.includes(pref)
+        );
+      });
+  }
+  
   async createCustomer(customer: InsertCustomer): Promise<Customer> {
     const id = this.customerId++;
     const newCustomer: Customer = { 
@@ -425,6 +456,110 @@ export class MemStorage implements IStorage {
     };
     this.activities.set(id, newActivity);
     return newActivity;
+  }
+  
+  // Scheduled order operations
+  async getScheduledOrder(id: number): Promise<ScheduledOrder | undefined> {
+    return this.scheduledOrders.get(id);
+  }
+  
+  async getScheduledOrdersByCustomerId(customerId: number): Promise<ScheduledOrder[]> {
+    return Array.from(this.scheduledOrders.values())
+      .filter(order => order.customerId === customerId)
+      .sort((a, b) => {
+        // Sort by startDate in ascending order (soonest first)
+        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+        return dateA - dateB;
+      });
+  }
+  
+  async getActiveScheduledOrders(): Promise<ScheduledOrder[]> {
+    const now = new Date();
+    return Array.from(this.scheduledOrders.values())
+      .filter(order => {
+        if (!order.isActive) return false;
+        if (order.endDate && new Date(order.endDate) < now) return false;
+        return true;
+      });
+  }
+  
+  async getDueScheduledOrders(): Promise<ScheduledOrder[]> {
+    const now = new Date();
+    // Get all active orders that need to be executed now
+    return Array.from(this.scheduledOrders.values())
+      .filter(order => {
+        // Check if the order is active and not ended
+        if (!order.isActive) return false;
+        if (order.endDate && new Date(order.endDate) < now) return false;
+        
+        // Check if it's due according to the recurrence pattern
+        const lastExecuted = order.lastExecuted ? new Date(order.lastExecuted) : null;
+        
+        if (!lastExecuted) {
+          // If it hasn't been executed yet, check if the start date is in the past
+          return new Date(order.startDate) <= now;
+        }
+        
+        // Check based on recurrence pattern
+        switch (order.recurrencePattern) {
+          case 'daily':
+            // Check if 24 hours have passed since last execution
+            return (now.getTime() - lastExecuted.getTime()) >= 24 * 60 * 60 * 1000;
+          case 'weekly':
+            // Check if 7 days have passed since last execution
+            return (now.getTime() - lastExecuted.getTime()) >= 7 * 24 * 60 * 60 * 1000;
+          case 'monthly':
+            // Check if at least 28 days have passed since last execution
+            return (now.getTime() - lastExecuted.getTime()) >= 28 * 24 * 60 * 60 * 1000;
+          default:
+            // For custom patterns, just check if a day has passed (simplification)
+            return (now.getTime() - lastExecuted.getTime()) >= 24 * 60 * 60 * 1000;
+        }
+      });
+  }
+  
+  async createScheduledOrder(scheduledOrder: InsertScheduledOrder): Promise<ScheduledOrder> {
+    const id = this.scheduledOrderId++;
+    const newScheduledOrder: ScheduledOrder = {
+      ...scheduledOrder,
+      id,
+      createdAt: new Date()
+    };
+    this.scheduledOrders.set(id, newScheduledOrder);
+    
+    // Log activity
+    await this.createActivity({
+      type: 'scheduled_order_created',
+      description: `New scheduled order created for customer ${scheduledOrder.customerId}`,
+      entityId: id,
+      entityType: 'scheduled_order'
+    });
+    
+    return newScheduledOrder;
+  }
+  
+  async updateScheduledOrder(id: number, scheduledOrder: Partial<InsertScheduledOrder>): Promise<ScheduledOrder | undefined> {
+    const existingOrder = this.scheduledOrders.get(id);
+    if (!existingOrder) return undefined;
+    
+    const updatedOrder = { ...existingOrder, ...scheduledOrder };
+    this.scheduledOrders.set(id, updatedOrder);
+    return updatedOrder;
+  }
+  
+  async deleteScheduledOrder(id: number): Promise<boolean> {
+    if (!this.scheduledOrders.has(id)) return false;
+    
+    // Log activity
+    await this.createActivity({
+      type: 'scheduled_order_deleted',
+      description: `Scheduled order ${id} was deleted`,
+      entityId: id,
+      entityType: 'scheduled_order'
+    });
+    
+    return this.scheduledOrders.delete(id);
   }
   
   // Initialize only the menu items for the application to work properly
