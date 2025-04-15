@@ -1386,8 +1386,51 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       const { phoneNumber } = req.body;
       
       const callData = simulateIncomingCall(phoneNumber);
-      res.json(callData);
+      console.log(`Simulated incoming call initiated: ${callData.id}`);
+      res.json({
+        success: true,
+        message: "Simulated call started and automatic order creation process begun",
+        callData
+      });
     } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Create an immediate order from a simulated call (for testing only)
+  app.post("/api/telephony/create-immediate-order", async (req: Request, res: Response) => {
+    try {
+      const { phoneNumber, orderText } = req.body;
+      
+      // Create a simulated call with the specified order text
+      const callSid = 'SIM-IMMEDIATE-' + Date.now().toString();
+      const callData: CallData = {
+        id: callSid,
+        phoneNumber: phoneNumber || '+919876543210',
+        startTime: new Date().toISOString(),
+        status: 'active',
+        transcript: `AI: Welcome to our restaurant! How can I help you today?\nCustomer: ${orderText || "I'd like to order butter chicken and garlic naan"}\nAI: Your order has been confirmed!`,
+        endTime: new Date().toISOString() // Already completed
+      };
+      
+      // Add to active calls and history
+      activeCalls[callSid] = callData;
+      callHistory.unshift(callData);
+      
+      // Set status to completed and trigger order creation
+      activeCalls[callSid].status = 'completed';
+      
+      // Create the order directly
+      const result = await createOrderFromCall(callData);
+      
+      res.json({
+        success: true,
+        message: "Immediate order created successfully from simulated call",
+        callData,
+        orderResult: result
+      });
+    } catch (err) {
+      console.error("Error creating immediate order:", err);
       errorHandler(err, res);
     }
   });

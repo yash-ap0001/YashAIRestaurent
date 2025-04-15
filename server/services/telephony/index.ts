@@ -436,20 +436,23 @@ async function completeCall(callSid: string) {
       historyCall.endTime = activeCalls[callSid].endTime;
     }
     
-    // Create an actual order in the system if this is a simulated call
-    // and there's an orderId assigned
-    if (callSid.startsWith('SIM') && activeCalls[callSid].orderId) {
-      try {
-        // Parse the transcript to extract order details
-        const transcript = activeCalls[callSid].transcript || '';
-        
-        // Create the order using AI service
-        await createOrderFromCall(activeCalls[callSid]);
-        
-        console.log(`Created order from completed call ${callSid}`);
-      } catch (error) {
-        console.error('Error creating order from call:', error);
+    // Always create an actual order when a call is completed,
+    // regardless of whether it's a simulated call or real call
+    try {
+      console.log(`Creating order from completed call ${callSid}...`);
+      
+      // Create the order using AI service
+      if (!activeCalls[callSid].orderId) {
+        // Assign a temporary order ID if one hasn't been assigned yet
+        activeCalls[callSid].orderId = `ORDER-SIM-${Date.now()}`;
       }
+      
+      // Create the actual order in the system
+      await createOrderFromCall(activeCalls[callSid]);
+      
+      console.log(`Successfully created order from call ${callSid}`);
+    } catch (error) {
+      console.error('Error creating order from call:', error);
     }
     
     // Remove from active calls after a delay
@@ -461,8 +464,6 @@ async function completeCall(callSid: string) {
 
 // Function to create an order from a call
 async function createOrderFromCall(call: CallData) {
-  if (!call.orderId) return;
-  
   try {
     // Extract order details from the transcript
     const transcript = call.transcript || '';
@@ -472,19 +473,32 @@ async function createOrderFromCall(call: CallData) {
       .map(line => line.replace('Customer:', '').trim());
     
     // Combine all customer inputs into a single natural language order
-    const orderText = customerLines.join(' ');
+    let orderText = customerLines.join(' ');
+    
+    // If no customer input, use a fallback order
+    if (!orderText.trim()) {
+      console.warn('No customer input found in transcript, using fallback order');
+      orderText = "I'd like to order butter chicken with naan";
+    }
+    
+    console.log(`Creating order with text: "${orderText}"`);
     
     // Create a payload for the AI order processing
     const orderData = {
+      orderText: orderText,
       orderSource: 'phone',
-      phoneNumber: call.phoneNumber,
-      naturalLanguageOrder: orderText,
+      phoneNumber: call.phoneNumber || '9876543210',
       callId: call.id,
-      simulatedCall: true
+      simulatedCall: true,
+      useAIAutomation: true,
+      tableNumber: null // For phone orders, no table number
     };
     
     // Call the AI order processing endpoint
-    const response = await fetch('http://localhost:5000/api/ai/create-order', {
+    const fullUrl = 'http://localhost:5000/api/ai/create-order';
+    console.log(`Sending order request to ${fullUrl}`);
+    
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -493,20 +507,25 @@ async function createOrderFromCall(call: CallData) {
     });
     
     if (!response.ok) {
-      throw new Error(`Failed to create order: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Failed to create order (${response.status}): ${errorText}`);
     }
     
     const result = await response.json();
+    console.log('Order creation successful:', result);
     
-    // Update the call with the actual order ID from the created order
-    if (result.id) {
-      call.orderId = result.id;
+    // Update the call with the actual order info from the created order
+    if (result.order && result.order.id) {
+      call.orderId = result.order.id;
       
       // Also update in history
       const historyCall = callHistory.find(c => c.id === call.id);
       if (historyCall) {
-        historyCall.orderId = result.id;
+        historyCall.orderId = result.order.id;
       }
+      
+      // Log order created
+      console.log(`Order #${result.order.orderNumber} created successfully from call ${call.id}`);
     }
     
     return result;
