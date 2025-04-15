@@ -57,18 +57,47 @@ export function AppShell({ children }: AppShellProps) {
                       managementNavItems.find(item => item.href === location) ||
                       { label: "Dashboard" };
                       
-  // Determine the user type based on the current location
+  // State for current user role
+  const [userRole, setUserRole] = useState<string>("admin");
+  
+  // Determine the user type based on the current role or location
   const getUserType = () => {
-    if (location.includes("kitchen")) {
-      return "kitchen";
-    }
+    // For chatbot, we can use the current role directly
+    return userRole;
+  };
+  
+  // Filter navigation items based on user role and route permissions
+  const getFilteredNavItems = (items: NavItem[], role: string) => {
+    return items.filter(item => {
+      const allowedRoles = routePermissions[item.href] || [];
+      return allowedRoles.includes(role);
+    });
+  };
+  
+  // Import routePermissions from the ProtectedRoute component
+  const routePermissions: Record<string, string[]> = {
+    // Main routes
+    "/": ["admin", "manager", "waiter", "kitchen", "delivery", "customer"],
+    "/new-order": ["admin", "manager", "waiter"],
+    "/kitchen-tokens": ["admin", "kitchen", "manager"],
+    "/billing": ["admin", "manager", "waiter"],
+    "/health-advisor": ["admin", "customer"],
+    "/whatsapp": ["admin", "manager", "waiter"],
+    "/phone-orders": ["admin", "manager", "waiter"],
+    "/ai-call-center": ["admin", "manager"],
+    "/test-ai-order": ["admin", "manager", "waiter"],
+    "/live-tracking": ["admin", "manager", "kitchen", "waiter", "delivery", "customer"],
+    "/track-order": ["admin", "manager", "kitchen", "waiter", "delivery", "customer"],
     
-    const adminRoutes = ["/inventory", "/customers", "/menu-items", "/diet-plan", "/reports"];
-    if (adminRoutes.some(route => location === route)) {
-      return "admin";
-    }
-    
-    return "customer";
+    // Management routes
+    "/inventory": ["admin", "manager", "kitchen"],
+    "/customers": ["admin", "manager"],
+    "/menu-items": ["admin", "manager", "kitchen"],
+    "/reports": ["admin", "manager"],
+    "/external-integration": ["admin", "manager"],
+    "/voice-assistant": ["admin", "manager"],
+    "/n8n-integration": ["admin", "manager"],
+    "/diet-plan": ["admin", "manager", "customer"]
   };
 
   return (
