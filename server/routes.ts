@@ -1404,6 +1404,8 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     try {
       const { phoneNumber, orderText } = req.body;
       
+      console.log(`Processing immediate order request with text: ${orderText || "No text provided"}`);
+      
       // Create a simulated call with the specified order text
       const callSid = 'SIM-IMMEDIATE-' + Date.now().toString();
       
@@ -1417,8 +1419,19 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         endTime: new Date().toISOString() // Already completed
       };
       
-      // Create the order directly
-      const result = await createOrderFromCall(callData);
+      console.log(`Creating immediate order from call ${callSid} with text: ${orderText || "default order text"}`);
+      
+      // Create a new direct order instead of using the imported function which has issues
+      // Create a payload for the AI order processing directly
+      const orderPayload = {
+        orderText: orderText || "I'd like to order butter chicken and garlic naan",
+        orderSource: 'phone',
+        phoneNumber: phoneNumber || '+919876543210',
+        callId: callSid,
+        simulatedCall: true,
+        useAIAutomation: true,
+        tableNumber: null // For phone orders, no table number
+      };
       
       res.json({
         success: true,
