@@ -1,6 +1,13 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { storage } from '../storage';
 
+// Extend WebSocket interface with isAlive property
+declare module 'ws' {
+  interface WebSocket {
+    isAlive: boolean;
+  }
+}
+
 // Event types for WebSocket messages
 const WS_EVENTS = {
   CONNECT: 'connect',
