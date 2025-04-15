@@ -30,6 +30,16 @@ export const menuItems = pgTable("menu_items", {
   category: text("category").notNull(),
   description: text("description"),
   isAvailable: boolean("is_available").notNull().default(true),
+  imageUrl: text("image_url"),
+  nutritionalInfo: json("nutritional_info").$type<{
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber: number;
+  }>(),
+  healthBenefits: text("health_benefits"),
+  dietaryTags: json("dietary_tags").$type<string[]>().default([]),
 });
 
 export const insertMenuItemSchema = createInsertSchema(menuItems).pick({
@@ -38,6 +48,10 @@ export const insertMenuItemSchema = createInsertSchema(menuItems).pick({
   category: true,
   description: true,
   isAvailable: true,
+  imageUrl: true,
+  nutritionalInfo: true,
+  healthBenefits: true,
+  dietaryTags: true,
 });
 
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
@@ -171,6 +185,19 @@ export const customers = pgTable("customers", {
   visitCount: integer("visit_count").notNull().default(0),
   lastVisit: timestamp("last_visit").defaultNow(),
   preferences: json("preferences").$type<string[]>().default([]),
+  dietaryPreferences: json("dietary_preferences").$type<{
+    restrictions: string[];
+    allergens: string[];
+    healthGoals: string[];
+    favoriteItems: number[];
+  }>(),
+  healthProfile: json("health_profile").$type<{
+    height?: number;
+    weight?: number;
+    activityLevel?: string;
+    conditions?: string[];
+    targetCalories?: number;
+  }>(),
 });
 
 export const insertCustomerSchema = createInsertSchema(customers).pick({
@@ -179,6 +206,8 @@ export const insertCustomerSchema = createInsertSchema(customers).pick({
   email: true,
   visitCount: true,
   preferences: true,
+  dietaryPreferences: true,
+  healthProfile: true,
 });
 
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
@@ -203,3 +232,38 @@ export const insertActivitySchema = createInsertSchema(activities).pick({
 
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
+
+// Scheduled diet orders model
+export const scheduledOrders = pgTable("scheduled_orders", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull(),
+  recurrencePattern: text("recurrence_pattern").notNull(), // daily, weekly, monthly, or cron expression
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  menuItemIds: json("menu_item_ids").$type<number[]>().notNull(),
+  quantities: json("quantities").$type<number[]>().notNull(),
+  specialInstructions: text("special_instructions"),
+  deliveryAddress: text("delivery_address"),
+  deliveryTime: text("delivery_time").notNull(), // Time of day for delivery in HH:MM format
+  isActive: boolean("is_active").notNull().default(true),
+  lastExecuted: timestamp("last_executed"),
+  dietPlanName: text("diet_plan_name"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertScheduledOrderSchema = createInsertSchema(scheduledOrders).pick({
+  customerId: true,
+  recurrencePattern: true,
+  startDate: true,
+  endDate: true, 
+  menuItemIds: true,
+  quantities: true,
+  specialInstructions: true,
+  deliveryAddress: true,
+  deliveryTime: true,
+  isActive: true,
+  dietPlanName: true,
+});
+
+export type InsertScheduledOrder = z.infer<typeof insertScheduledOrderSchema>;
+export type ScheduledOrder = typeof scheduledOrders.$inferSelect;

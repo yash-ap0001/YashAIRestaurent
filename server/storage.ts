@@ -20,6 +20,7 @@ export interface IStorage {
   // Menu item operations
   getMenuItem(id: number): Promise<MenuItem | undefined>;
   getMenuItems(): Promise<MenuItem[]>;
+  getMenuItemsByDietaryTags(tags: string[]): Promise<MenuItem[]>;
   createMenuItem(item: InsertMenuItem): Promise<MenuItem>;
   updateMenuItem(id: number, item: Partial<InsertMenuItem>): Promise<MenuItem | undefined>;
   
@@ -59,12 +60,22 @@ export interface IStorage {
   getCustomer(id: number): Promise<Customer | undefined>;
   getCustomerByPhone(phone: string): Promise<Customer | undefined>;
   getCustomers(): Promise<Customer[]>;
+  getCustomersByDietaryPreferences(preferences: string[]): Promise<Customer[]>;
   createCustomer(customer: InsertCustomer): Promise<Customer>;
   updateCustomer(id: number, customer: Partial<InsertCustomer>): Promise<Customer | undefined>;
   
   // Activity operations
   getActivities(limit?: number): Promise<Activity[]>;
   createActivity(activity: InsertActivity): Promise<Activity>;
+
+  // Scheduled order operations
+  getScheduledOrder(id: number): Promise<ScheduledOrder | undefined>;
+  getScheduledOrdersByCustomerId(customerId: number): Promise<ScheduledOrder[]>;
+  getActiveScheduledOrders(): Promise<ScheduledOrder[]>;
+  getDueScheduledOrders(): Promise<ScheduledOrder[]>;
+  createScheduledOrder(scheduledOrder: InsertScheduledOrder): Promise<ScheduledOrder>;
+  updateScheduledOrder(id: number, scheduledOrder: Partial<InsertScheduledOrder>): Promise<ScheduledOrder | undefined>;
+  deleteScheduledOrder(id: number): Promise<boolean>;
 }
 
 // In-memory storage implementation
