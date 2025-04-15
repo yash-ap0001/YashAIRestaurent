@@ -45,6 +45,26 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Type definitions for our data
+interface OrderItem {
+  menuItemId: number;
+  name: string;
+  quantity: number;
+  price: number;
+  notes?: string;
+}
+
+interface Order {
+  id: number;
+  orderNumber: string;
+  status: string;
+  totalAmount: number;
+  notes: string | null;
+  orderSource: string;
+  createdAt: string;
+  updatedAt: string;
+  items?: OrderItem[];
+}
+
 interface PhoneCall {
   id: string;
   phoneNumber: string;
@@ -399,7 +419,7 @@ export default function AICallCenter() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentCalls.map((call) => (
+                    {recentCalls.map((call: PhoneCall) => (
                       <TableRow key={call.id}>
                         <TableCell className="font-medium whitespace-nowrap">
                           {formatTime(call.startTime)}
@@ -448,8 +468,34 @@ export default function AICallCenter() {
               </TabsList>
               
               <TabsContent value="transcript" className="space-y-4">
-                <div className="border rounded-md p-4 bg-gray-50 whitespace-pre-wrap max-h-96 overflow-auto">
-                  {selectedCall.transcript || 'No transcript available'}
+                <div className="border rounded-md p-4 bg-gray-50 max-h-96 overflow-auto">
+                  {selectedCall.transcript ? (
+                    <div className="space-y-2">
+                      {selectedCall.transcript.split('\n').map((line, index) => {
+                        // Determine if it's the AI or customer speaking
+                        const isAI = line.startsWith('AI:');
+                        const isCustomer = line.startsWith('Customer:');
+                        
+                        // Apply appropriate styling based on speaker
+                        return (
+                          <div 
+                            key={index} 
+                            className={`p-2 rounded-lg ${
+                              isAI 
+                                ? 'bg-primary/10 text-primary border-l-4 border-primary' 
+                                : isCustomer 
+                                  ? 'bg-gray-200 ml-8' 
+                                  : ''
+                            }`}
+                          >
+                            {line}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    'No transcript available'
+                  )}
                 </div>
                 
                 <div className="flex justify-between">
@@ -467,55 +513,7 @@ export default function AICallCenter() {
               
               <TabsContent value="order">
                 {selectedCall.orderId ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium mb-1">Order Number</h4>
-                        <p>#{selectedCall.orderId}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-1">Customer</h4>
-                        <p>{selectedCall.phoneNumber}</p>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium mb-2">Order Items</h4>
-                      <div className="border rounded-md">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Item</TableHead>
-                              <TableHead>Quantity</TableHead>
-                              <TableHead className="text-right">Price</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {/* Sample order items - in a real app, fetch these */}
-                            <TableRow>
-                              <TableCell>Butter Chicken</TableCell>
-                              <TableCell>2</TableCell>
-                              <TableCell className="text-right">₹640</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Naan</TableCell>
-                              <TableCell>3</TableCell>
-                              <TableCell className="text-right">₹120</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Paneer Tikka</TableCell>
-                              <TableCell>1</TableCell>
-                              <TableCell className="text-right">₹280</TableCell>
-                            </TableRow>
-                            <TableRow className="border-t">
-                              <TableCell colSpan={2} className="font-bold">Total</TableCell>
-                              <TableCell className="text-right font-bold">₹1,040</TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  </div>
+                  <OrderDetails orderId={selectedCall.orderId} phoneNumber={selectedCall.phoneNumber} />
                 ) : (
                   <div className="py-8 text-center text-gray-500">
                     No order was placed during this call
@@ -628,6 +626,131 @@ export default function AICallCenter() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+// Order Details Component
+interface OrderDetailsProps {
+  orderId: number;
+  phoneNumber: string;
+}
+
+function OrderDetails({ orderId, phoneNumber }: OrderDetailsProps) {
+  // Fetch order data
+  const { data: order, isLoading } = useQuery<Order>({
+    queryKey: ['/api/orders', orderId],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/orders/${orderId}`);
+      return await response.json();
+    },
+    enabled: !!orderId
+  });
+
+  // Fetch order items
+  const { data: items = [] } = useQuery<OrderItem[]>({
+    queryKey: ['/api/orders', orderId, 'items'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/orders/${orderId}/items`);
+      return await response.json();
+    },
+    enabled: !!orderId
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="py-8 text-center text-gray-500">
+        Order details not found
+      </div>
+    );
+  }
+
+  // Calculate order total
+  const orderTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-medium mb-1">Order Number</h4>
+          <p className="text-lg font-semibold">{order.orderNumber}</p>
+        </div>
+        <div>
+          <h4 className="font-medium mb-1">Customer</h4>
+          <p>{phoneNumber}</p>
+        </div>
+        <div>
+          <h4 className="font-medium mb-1">Status</h4>
+          <Badge className={
+            order.status === 'pending' ? 'bg-amber-500' :
+            order.status === 'preparing' ? 'bg-blue-500' :
+            order.status === 'ready' ? 'bg-emerald-500' :
+            order.status === 'completed' ? 'bg-indigo-500' :
+            order.status === 'delivered' ? 'bg-violet-500' :
+            order.status === 'billed' ? 'bg-slate-500' :
+            'bg-gray-500'
+          }>
+            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+          </Badge>
+        </div>
+        <div>
+          <h4 className="font-medium mb-1">Created At</h4>
+          <p>{new Date(order.createdAt).toLocaleString()}</p>
+        </div>
+      </div>
+      
+      {order.notes && (
+        <div>
+          <h4 className="font-medium mb-1">Notes</h4>
+          <p className="text-gray-700 bg-gray-50 p-2 rounded-md">{order.notes}</p>
+        </div>
+      )}
+      
+      <div>
+        <h4 className="font-medium mb-2">Order Items</h4>
+        <div className="border rounded-md">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Item</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead className="text-right">Price</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.length > 0 ? (
+                <>
+                  {items.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell className="text-right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="border-t">
+                    <TableCell colSpan={2} className="font-bold">Total</TableCell>
+                    <TableCell className="text-right font-bold">₹{orderTotal.toFixed(2)}</TableCell>
+                  </TableRow>
+                </>
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-4 text-gray-500">
+                    No items available
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
     </div>
   );
 }
