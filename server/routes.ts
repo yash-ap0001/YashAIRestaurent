@@ -1406,21 +1406,16 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       
       // Create a simulated call with the specified order text
       const callSid = 'SIM-IMMEDIATE-' + Date.now().toString();
+      
+      // Create a call data object with the phone number and transcript
       const callData: CallData = {
         id: callSid,
         phoneNumber: phoneNumber || '+919876543210',
         startTime: new Date().toISOString(),
-        status: 'active',
+        status: 'completed',
         transcript: `AI: Welcome to our restaurant! How can I help you today?\nCustomer: ${orderText || "I'd like to order butter chicken and garlic naan"}\nAI: Your order has been confirmed!`,
         endTime: new Date().toISOString() // Already completed
       };
-      
-      // Add to active calls and history
-      activeCalls[callSid] = callData;
-      callHistory.unshift(callData);
-      
-      // Set status to completed and trigger order creation
-      activeCalls[callSid].status = 'completed';
       
       // Create the order directly
       const result = await createOrderFromCall(callData);

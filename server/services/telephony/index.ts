@@ -11,7 +11,7 @@ const twilioClient = twilio(
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
 // Maintain call data in memory (in production, use a database)
-interface CallData {
+export interface CallData {
   id: string;
   phoneNumber: string;
   startTime: string;
@@ -463,7 +463,7 @@ async function completeCall(callSid: string) {
 }
 
 // Function to create an order from a call
-async function createOrderFromCall(call: CallData) {
+export async function createOrderFromCall(call: CallData) {
   try {
     // Extract order details from the transcript
     const transcript = call.transcript || '';
