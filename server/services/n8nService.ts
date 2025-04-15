@@ -69,7 +69,8 @@ export class N8nIntegrationService {
   async triggerWebhook(event: string, payload: any): Promise<boolean> {
     let success = true;
     
-    for (const [id, config] of this.webhooks.entries()) {
+    // Convert Map entries to array to avoid iterator issues
+    for (const [id, config] of Array.from(this.webhooks.entries())) {
       if (config.active && config.events.includes(event)) {
         try {
           // Add webhook ID and secret to the payload
@@ -98,8 +99,7 @@ export class N8nIntegrationService {
           // Create activity entry
           await storage.createActivity({
             type: 'webhook',
-            details: `Triggered webhook ${id} for event ${event}`,
-            timestamp: new Date()
+            description: `Triggered webhook ${id} for event ${event}`
           });
         } catch (error) {
           console.error(`Error triggering webhook ${id} for event ${event}:`, error);
@@ -108,8 +108,7 @@ export class N8nIntegrationService {
           // Log the failed webhook trigger
           await storage.createActivity({
             type: 'error',
-            details: `Failed to trigger webhook ${id} for event ${event}`,
-            timestamp: new Date()
+            description: `Failed to trigger webhook ${id} for event ${event}`
           });
         }
       }
