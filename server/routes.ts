@@ -1342,6 +1342,11 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Retry order webhook (for Twilio)
   app.post("/api/telephony/retry-order", retryOrder);
   
+  // Handle language selection for voice calls
+  app.post("/api/telephony/select-language", (req: Request, res: Response) => {
+    telephonyService.selectLanguage(req, res);
+  });
+  
   // Get call history
   app.get("/api/telephony/calls", async (req: Request, res: Response) => {
     try {
