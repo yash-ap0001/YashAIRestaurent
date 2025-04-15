@@ -1097,8 +1097,8 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         return res.status(400).json({ error: "Message is required" });
       }
       
-      if (!userType || !["customer", "admin", "kitchen"].includes(userType)) {
-        return res.status(400).json({ error: "Valid userType is required (customer, admin, or kitchen)" });
+      if (!userType || !["customer", "admin", "kitchen", "waiter", "manager", "delivery"].includes(userType)) {
+        return res.status(400).json({ error: "Valid userType is required (customer, admin, kitchen, waiter, manager, or delivery)" });
       }
       
       // Process the chatbot request

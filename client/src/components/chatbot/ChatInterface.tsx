@@ -18,7 +18,7 @@ interface ChatMessage {
 }
 
 interface ChatInterfaceProps {
-  userType: "customer" | "admin" | "kitchen";
+  userType: "customer" | "admin" | "kitchen" | "waiter" | "manager" | "delivery";
   userName?: string;
   minimized?: boolean;
   onMinimize?: () => void;
@@ -53,6 +53,15 @@ export function ChatInterface({
         break;
       case "kitchen":
         initialMessage = `Kitchen dashboard assistant ready. I can help prioritize orders, update item availability, or provide prep instructions. How can I help?`;
+        break;
+      case "waiter":
+        initialMessage = `Waiter assistant ready. I can help with taking orders, checking table status, or providing menu information. How can I assist you?`;
+        break;
+      case "manager":
+        initialMessage = `Manager dashboard assistant ready. I can help with sales analytics, staff management, or operational reports. What would you like to know?`;
+        break;
+      case "delivery":
+        initialMessage = `Delivery assistant ready. I can help with tracking external orders, optimizing delivery routes, or managing delivery status. How can I assist you?`;
         break;
       default:
         initialMessage = `Hello! How can I assist you today?`;
@@ -163,6 +172,15 @@ export function ChatInterface({
       case "kitchen":
         initialMessage = `Kitchen dashboard assistant ready. I can help prioritize orders, update item availability, or provide prep instructions. How can I help?`;
         break;
+      case "waiter":
+        initialMessage = `Waiter assistant ready. I can help with taking orders, checking table status, or providing menu information. How can I assist you?`;
+        break;
+      case "manager":
+        initialMessage = `Manager dashboard assistant ready. I can help with sales analytics, staff management, or operational reports. What would you like to know?`;
+        break;
+      case "delivery":
+        initialMessage = `Delivery assistant ready. I can help with tracking external orders, optimizing delivery routes, or managing delivery status. How can I assist you?`;
+        break;
       default:
         initialMessage = `Hello! How can I assist you today?`;
     }
@@ -198,7 +216,13 @@ export function ChatInterface({
                   ? "Customer Support" 
                   : userType === "admin" 
                     ? "Admin Assistant" 
-                    : "Kitchen Helper"}
+                    : userType === "kitchen" 
+                      ? "Kitchen Helper"
+                      : userType === "waiter"
+                        ? "Waiter Assistant"
+                        : userType === "manager"
+                          ? "Manager Assistant"
+                          : "Delivery Assistant"}
               </Badge>
             </div>
           </CardTitle>
