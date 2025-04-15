@@ -26,17 +26,39 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  // Check if stored password contains a salt
-  if (!stored.includes('.')) {
-    // For existing users (who don't have a salt), direct comparison
-    return supplied === stored;
+  try {
+    // Handle undefined or empty passwords
+    if (!stored || !supplied) {
+      console.log("Invalid password comparison: empty passwords");
+      return false;
+    }
+    
+    // Check if stored password contains a salt
+    if (!stored.includes('.')) {
+      // For existing users (who don't have a salt), direct comparison
+      return supplied === stored;
+    }
+    
+    // For new users with a salt, use secure comparison
+    const parts = stored.split(".");
+    if (parts.length !== 2) {
+      console.log("Invalid stored password format, expected hash.salt");
+      return false;
+    }
+    
+    const [hashed, salt] = parts;
+    if (!hashed || !salt) {
+      console.log("Invalid hashed password parts");
+      return false;
+    }
+    
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (err) {
+    console.error("Password comparison error:", err);
+    return false;
   }
-  
-  // For new users with a salt, use secure comparison
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
 export function setupAuth(app: Express) {
