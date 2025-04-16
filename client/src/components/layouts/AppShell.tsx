@@ -56,6 +56,7 @@ const testingNavItems: NavItem[] = [
   { label: "External Integration", href: "/external-integration", icon: <ExternalLink className="w-5 h-5" /> },
   { label: "Voice Assistant", href: "/voice-assistant", icon: <Mic className="w-5 h-5" /> },
   { label: "n8n Integration", href: "/n8n-integration", icon: <Workflow className="w-5 h-5" /> },
+  { label: "Notification Test", href: "/notification-test", icon: <Bell className="w-5 h-5" /> },
 ];
 
 interface AppShellProps {
@@ -110,7 +111,8 @@ export function AppShell({ children }: AppShellProps) {
     "/external-integration": ["admin", "manager"],
     "/voice-assistant": ["admin", "manager"],
     "/n8n-integration": ["admin", "manager"],
-    "/diet-plan": ["admin", "manager", "customer"]
+    "/diet-plan": ["admin", "manager", "customer"],
+    "/notification-test": ["admin", "manager"]
   };
 
   return (

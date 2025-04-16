@@ -82,6 +82,7 @@ function Router() {
       <ProtectedRoute path="/diet-plan" component={DietPlan} allowedRoles={["admin", "manager", "waiter", "customer"]} />
       <ProtectedRoute path="/ar-menu-preview" component={ARMenuPreview} allowedRoles={["admin", "manager", "waiter", "customer"]} />
       <ProtectedRoute path="/loading-demo" component={LoadingDemo} allowedRoles={["admin", "manager"]} />
+      <ProtectedRoute path="/notification-test" component={NotificationTest} allowedRoles={["admin", "manager"]} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
