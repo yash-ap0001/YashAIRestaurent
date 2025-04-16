@@ -1,4 +1,4 @@
-import { useEffect, ReactNode } from "react";
+import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, ChefHat, Utensils, CircleCheck, Receipt } from "lucide-react";
@@ -110,11 +110,25 @@ export function OrderTrackingToasts() {
     const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
     const socket = new WebSocket(wsUrl);
     
+    // Add connection event handlers
+    socket.onopen = () => {
+      console.log("Toast notification WebSocket connection established");
+    };
+    
+    socket.onerror = (error) => {
+      console.error("Toast notification WebSocket error:", error);
+    };
+    
+    socket.onclose = (event) => {
+      console.log(`Toast notification WebSocket closed: ${event.code} ${event.reason}`);
+    };
+    
     // Track previous order statuses to prevent duplicate notifications
     const orderStatusMap = new Map<number, string>();
     
     socket.onmessage = (event) => {
       try {
+        console.log("WebSocket message for toast notification:", event.data);
         const wsEvent = JSON.parse(event.data) as WebSocketEvent;
         
         // Handle new order created

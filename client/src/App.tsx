@@ -28,6 +28,7 @@ import ARMenuPreview from "@/pages/ARMenuPreview";
 import LoginPage from "@/pages/LoginPage";
 import CustomerRegistration from "@/pages/CustomerRegistration";
 import LoadingDemo from "@/pages/LoadingDemo";
+import NotificationTest from "@/pages/NotificationTest";
 import { AppShell } from "@/components/layouts/AppShell";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -135,6 +136,7 @@ function AppContent() {
     <AppShell>
       <Router />
       <OrderTrackingToasts />
+      {/* Toast display for notifications */}
     </AppShell>
   );
 }
