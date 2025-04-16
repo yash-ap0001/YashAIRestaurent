@@ -109,11 +109,21 @@ import {
 // Order status colors
 const statusColors = {
   pending: "bg-amber-500",
-  preparing: "bg-blue-500",
+  preparing: "bg-blue-600",
   ready: "bg-emerald-500",
   completed: "bg-indigo-500",
   delivered: "bg-violet-500",
   billed: "bg-slate-500",
+};
+
+// Order status card background colors
+const statusCardColors = {
+  pending: "bg-amber-100 border-amber-400",
+  preparing: "bg-blue-100 border-blue-400",
+  ready: "bg-emerald-100 border-emerald-400",
+  completed: "bg-indigo-100 border-indigo-400",
+  delivered: "bg-violet-100 border-violet-400",
+  billed: "bg-slate-100 border-slate-400",
 };
 
 // Order status text
@@ -134,7 +144,7 @@ export default function SimplifiedDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
   const [isCreateOrderDialogOpen, setIsCreateOrderDialogOpen] = useState(false);
-  const ordersPerPage = 8; // Number of orders to display per page
+  const ordersPerPage = 20; // Number of orders to display per page - increased to fit more orders on screen
 
   // Fetch orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
@@ -716,48 +726,53 @@ export default function SimplifiedDashboard() {
                 No orders found. Try a different filter or create a new order.
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {paginatedOrders.map((order: Order) => (
                   <div 
                     key={order.id} 
-                    className="border rounded-lg p-4 space-y-3 hover:border-primary transition-colors"
+                    className={`border-2 rounded-lg p-3 hover:shadow-md transition-all ${statusCardColors[order.status as keyof typeof statusCardColors]}`}
                   >
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${statusColors[order.status as keyof typeof statusColors]}`}></div>
-                        <h3 className="font-medium">Order #{order.orderNumber}</h3>
-                        <Badge variant="outline" className="text-xs">
-                          <span className="flex items-center space-x-1">
-                            <span className="flex items-center">
-                              {getSourceIcon(order.orderSource)}
-                            </span>
-                            <span>{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
-                          </span>
-                        </Badge>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                        <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
                       </div>
-                      <div className="text-sm text-neutral-500">
+                      <Badge variant="outline" className="text-xs">
+                        <span className="flex items-center space-x-1">
+                          <span className="flex items-center">
+                            {getSourceIcon(order.orderSource)}
+                          </span>
+                          <span>{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                        </span>
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${statusColors[order.status as keyof typeof statusColors]}`}></div>
+                        <span className="text-xs font-medium">{statusText[order.status as keyof typeof statusText]}</span>
+                      </div>
+                      <div className="text-xs text-neutral-500">
                         {format(new Date(order.createdAt), "h:mm a")}
                       </div>
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-sm text-neutral-500">Table {order.tableNumber}</div>
-                        <div className="font-medium">{formatCurrency(order.totalAmount)}</div>
-                      </div>
+                      <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
                       
                       <Button
-                        variant={order.status === "billed" ? "outline" : "default"}
+                        variant="secondary"
                         size="sm"
                         disabled={updateOrderMutation.isPending || order.status === "billed"}
                         onClick={() => progressOrder(order)}
+                        className="h-8 px-2"
                       >
                         {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                         ) : (
                           getActionIcon(order.status)
                         )}
-                        {getActionText(order.status)}
+                        <span className="text-xs">{getActionText(order.status)}</span>
                       </Button>
                     </div>
                   </div>
