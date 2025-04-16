@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -123,6 +123,7 @@ const getStatusColor = (status: string) => {
 
 export default function SimplifiedDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [orderSourceFilter, setOrderSourceFilter] = useState<string | null>(null);
   const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [bulkActionAnchor, setBulkActionAnchor] = useState<HTMLElement | null>(null);
@@ -344,13 +345,24 @@ export default function SimplifiedDashboard() {
     });
   };
 
-  // Filter orders by search term
+  // Get unique order sources for filtering
+  const orderSources = useMemo(() => {
+    const sources = [...new Set(orders.map(order => order.orderSource))];
+    return sources.sort();
+  }, [orders]);
+
+  // Filter orders by search term and selected filters
   const filteredOrders = orders.filter((order: Order) => {
-    return (
+    // Filter by search term
+    const matchesSearch = 
       order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.tableNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.orderSource.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      order.orderSource.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filter by order source
+    const matchesOrderSource = !orderSourceFilter || order.orderSource === orderSourceFilter;
+    
+    return matchesSearch && matchesOrderSource;
   }).sort((a: Order, b: Order) => {
     // Sort by timestamp, most recent first
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -393,14 +405,44 @@ export default function SimplifiedDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <div className="relative">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search order or table..."
-              className="pl-10 w-64"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search order or table..."
+                className="pl-10 w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Globe className="h-4 w-4 mr-1" />
+                  <span>{orderSourceFilter || "All Sources"}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Filter by Source</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setOrderSourceFilter(null)}>
+                  <Globe className="h-4 w-4 mr-2" />
+                  <span>All Sources</span>
+                </DropdownMenuItem>
+                {orderSources.map(source => (
+                  <DropdownMenuItem 
+                    key={source} 
+                    onClick={() => setOrderSourceFilter(source)}
+                  >
+                    <span className="flex items-center">
+                      {getSourceIcon(source)}
+                      <span className="ml-2">{source.charAt(0).toUpperCase() + source.slice(1)}</span>
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -428,15 +470,31 @@ export default function SimplifiedDashboard() {
               </Button>
               {isSelectMode && (
                 <div className="ml-4 flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={selectAllOrders}
-                    className="flex items-center gap-1"
-                  >
-                    <CheckSquare className="h-4 w-4" />
-                    <span>Select All Orders</span>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={selectAllOrders}
+                      className="flex items-center gap-1"
+                    >
+                      <CheckSquare className="h-4 w-4" />
+                      <span>Select All Orders</span>
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedOrders([])}
+                      className="flex items-center gap-1"
+                    >
+                      <X className="h-4 w-4" />
+                      <span>Clear Selection</span>
+                    </Button>
+                  </div>
+                  
+                  <Badge variant="outline">
+                    Total Orders: {orders.length}
+                  </Badge>
                   
                   {selectedOrders.length > 0 && (
                     <>
