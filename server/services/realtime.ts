@@ -17,6 +17,7 @@ const WS_EVENTS = {
   NEW_ORDER: 'new_order',
   NEW_KITCHEN_TOKEN: 'new_kitchen_token',
   NEW_BILL: 'new_bill',
+  STATS_UPDATED: 'stats_updated', // Added event for dashboard stats
   ERROR: 'error',
   PING: 'ping',
   PONG: 'pong'
