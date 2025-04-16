@@ -23,7 +23,7 @@ const COMMAND_PATTERNS = {
   ORDER_STATUS: /(?:status|info|details).*(?:order|id).*(\w+-\d+|\d+)/i,
   TABLE_STATUS: /(?:status|info|details).*(?:table|number).*(\d+)/i,
   KITCHEN_STATUS: /(?:status|info|details).*(?:kitchen)/i,
-  CREATE_ORDER: /(?:create|make|new|add).*(?:order|takeaway)/i,
+  CREATE_ORDER: /(?:create|make|new|add|place|want|get|give|bring|send).*(?:order|takeaway|food)/i,
   UPDATE_ORDER: /(?:update|change|mark|set).*(?:order|id).*(\w+-\d+|\d+).*(?:as|to).*(\w+)/i,
   GET_ORDERS: /(?:show|list|get|display).*(?:orders)/i,
   GET_MENU: /(?:show|list|get|display).*(?:menu|items)/i,
@@ -154,27 +154,113 @@ function processCommand(command: string): ProcessedCommand {
 function extractOrderItems(command: string): { name: string, quantity: number }[] {
   const items: { name: string, quantity: number }[] = [];
   
-  // Define common menu items to match against
-  const menuItems = [
-    "butter chicken", "naan", "tandoori chicken", "biryani", "paneer tikka",
-    "dal makhani", "chicken curry", "roti", "paratha", "samosa", "pakora",
-    "chicken biryani", "veg biryani", "masala dosa", "idli", "vada",
-    "chicken tikka", "malai kofta", "palak paneer", "chana masala",
-    "gulab jamun", "rasmalai", "kheer", "jalebi", "lassi", "chai", 
-    "mango lassi", "soda", "water", "beer", "wine", "whiskey"
-  ];
+  // Define common menu items and their accent/pronunciation variants
+  const menuItemMap: Record<string, string[]> = {
+    "butter chicken": ["bata chicken", "butter chickan", "butter chicken", "butar chicken", "batter chicken"],
+    "naan": ["naan", "nan", "narn", "nah", "naa"],
+    "tandoori chicken": ["tandoori chicken", "tandori chicken", "tanduri chicken", "thundoori chicken"],
+    "biryani": ["biryani", "briyani", "beriani", "bee ryani", "beeriyani"],
+    "paneer tikka": ["paneer tikka", "panir tikka", "puneer tikka", "paneer tika", "panner tikka"],
+    "dal makhani": ["dal makhani", "dal makni", "dal makani", "daal makhani", "dal makhni"],
+    "chicken curry": ["chicken curry", "chickan curry", "chicken kari", "chicken karry"],
+    "roti": ["roti", "rotee", "rotti", "rooti", "rootie"],
+    "paratha": ["paratha", "paratha", "parota", "puratha", "parotta"],
+    "samosa": ["samosa", "samosaa", "samossa", "sumosa"],
+    "pakora": ["pakora", "pakoda", "pakodi", "pakora", "pukora"],
+    "chicken biryani": ["chicken biryani", "chicken briyani", "chickan biryani", "chicken beriani"],
+    "veg biryani": ["veg biryani", "vej biryani", "vegetable biryani", "vege biryani", "veg briyani"],
+    "masala dosa": ["masala dosa", "masala dosai", "masala dhosa", "masala thosai", "masala dosa"],
+    "idli": ["idli", "idly", "iddly", "idaly", "idlee"],
+    "vada": ["vada", "wada", "vadai", "voda", "vaddai"],
+    "chicken tikka": ["chicken tikka", "chickan tikka", "chicken tika", "chicken tikaa"],
+    "malai kofta": ["malai kofta", "malai kopta", "mallai kofta", "malai koftha"],
+    "palak paneer": ["palak paneer", "palack paneer", "palak panir", "palak panner", "palak puneer"],
+    "chana masala": ["chana masala", "channa masala", "chole masala", "choley", "chana masala"],
+    "gulab jamun": ["gulab jamun", "gulaab jamun", "gulab jaman", "gulub jamun", "gulab jamoon"],
+    "rasmalai": ["rasmalai", "ras malai", "rasmalai", "ras malay", "rasmallai"],
+    "kheer": ["kheer", "keer", "khir", "kheir", "kir"],
+    "jalebi": ["jalebi", "jilebi", "julebi", "jalaybee", "jalabi"],
+    "lassi": ["lassi", "lassee", "lasee", "lussie"],
+    "chai": ["chai", "cha", "chay", "chaai", "chah"],
+    "mango lassi": ["mango lassi", "mango lassee", "aaam lassi", "mango lasee", "mango shake"],
+    "soda": ["soda", "soft drink", "cool drink", "cold drink", "soda water"],
+    "water": ["water", "watar", "wartar", "waater", "aqua"],
+    "beer": ["beer", "bier", "beeyar", "beear"],
+    "wine": ["wine", "vino", "vine", "waain"],
+    "whiskey": ["whiskey", "whisky", "wisky", "viskee"]
+  };
   
-  // Look for menu items in the command
-  for (const menuItem of menuItems) {
-    const regex = new RegExp(`(\\d+)\\s+${menuItem}|${menuItem}\\s+(\\d+)|${menuItem}`, "i");
-    const match = command.match(regex);
+  // Clean and normalize the command
+  const normalizedCommand = command.toLowerCase()
+    .replace(/[.,;:!?]/g, ' ') // Replace punctuation with spaces
+    .replace(/\\s+/g, ' ')     // Replace multiple spaces with a single space
+    .trim();
+  
+  // Look for quantity words and convert them to numbers
+  const quantityWords: Record<string, number> = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "couple": 2, "few": 3, "several": 4, "many": 5, "dozen": 12,
+    "once": 1, "twice": 2, "double": 2, "triple": 3, "single": 1
+  };
+  
+  // Search for each menu item and its variations in the command
+  for (const [menuItem, variations] of Object.entries(menuItemMap)) {
+    // Create a regex pattern that matches any of the variations
+    const variationPattern = variations.map(v => v.replace(/\s+/g, '\\s+')).join('|');
     
-    if (match) {
-      const quantity = parseInt(match[1] || match[2]) || 1;
-      items.push({
-        name: menuItem,
-        quantity
-      });
+    // Look for patterns with a number before or after the menu item, or quantity words
+    const regexWithNumber = new RegExp(`(\\d+)\\s+(${variationPattern})|(${variationPattern})\\s+(\\d+)`, "i");
+    const regexWithWord = new RegExp(`(${Object.keys(quantityWords).join('|')})\\s+(${variationPattern})|(${variationPattern})\\s+(${Object.keys(quantityWords).join('|')})`, "i");
+    const regexJustItem = new RegExp(`(${variationPattern})`, "i");
+    
+    // Check for items with numeric quantities
+    const matchNumber = normalizedCommand.match(regexWithNumber);
+    if (matchNumber) {
+      const quantity = parseInt(matchNumber[1] || matchNumber[4]) || 1;
+      // Check if this item is already in our list
+      const existingItem = items.find(item => item.name === menuItem);
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        items.push({
+          name: menuItem,
+          quantity
+        });
+      }
+      continue; // Skip to next item
+    }
+    
+    // Check for items with word quantities
+    const matchWord = normalizedCommand.match(regexWithWord);
+    if (matchWord) {
+      const quantityWord = (matchWord[1] || matchWord[4]).toLowerCase();
+      const quantity = quantityWords[quantityWord] || 1;
+      // Check if this item is already in our list
+      const existingItem = items.find(item => item.name === menuItem);
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        items.push({
+          name: menuItem,
+          quantity
+        });
+      }
+      continue; // Skip to next item
+    }
+    
+    // Check for just the item name
+    if (regexJustItem.test(normalizedCommand)) {
+      // Check if this item is already in our list
+      const existingItem = items.find(item => item.name === menuItem);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        items.push({
+          name: menuItem,
+          quantity: 1
+        });
+      }
     }
   }
   
@@ -265,7 +351,7 @@ export async function handleVoiceCommand(command: string): Promise<{
           error: "Unrecognized command"
         };
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error handling voice command:", error);
     return {
       success: false,
@@ -525,7 +611,7 @@ async function handleCreateOrderCommand(params: Record<string, any>): Promise<{
       response,
       invalidateQueries: ['/api/orders', '/api/kitchen-tokens']
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating order:", error);
     return {
       success: false,
