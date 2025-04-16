@@ -118,12 +118,12 @@ const statusColors = {
 
 // Order status card background colors
 const statusCardColors = {
-  pending: "bg-amber-100 border-amber-400",
-  preparing: "bg-blue-100 border-blue-400",
-  ready: "bg-emerald-100 border-emerald-400",
-  completed: "bg-indigo-100 border-indigo-400",
-  delivered: "bg-violet-100 border-violet-400",
-  billed: "bg-slate-100 border-slate-400",
+  pending: "bg-amber-100 border-amber-400 hover:bg-amber-200",
+  preparing: "bg-blue-100 border-blue-400 hover:bg-blue-200",
+  ready: "bg-emerald-100 border-emerald-400 hover:bg-emerald-200",
+  completed: "bg-indigo-100 border-indigo-400 hover:bg-indigo-200",
+  delivered: "bg-violet-100 border-violet-400 hover:bg-violet-200",
+  billed: "bg-slate-100 border-slate-400 hover:bg-slate-200",
 };
 
 // Order status text
@@ -681,7 +681,6 @@ export default function SimplifiedDashboard() {
 
       {/* Order Management */}
       <Card className="overflow-hidden">
-        <Tabs defaultValue="all" className="w-full" onValueChange={(value) => setStatusFilter(value)}>
           <CardHeader className="pb-0">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <CardTitle>All Orders</CardTitle>
@@ -710,104 +709,299 @@ export default function SimplifiedDashboard() {
                 </Select>
               </div>
             </div>
-            <TabsList className="mt-2">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="preparing">Preparing</TabsTrigger>
-              <TabsTrigger value="ready">Ready</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
-              <TabsTrigger value="billed">Billed</TabsTrigger>
-            </TabsList>
           </CardHeader>
 
           <CardContent className="pt-6">
-            {paginatedOrders.length === 0 ? (
+            {orders.length === 0 ? (
               <div className="text-center py-10 text-neutral-500">
-                No orders found. Try a different filter or create a new order.
+                No orders found. Create a new order to get started.
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {paginatedOrders.map((order: Order) => (
-                  <div 
-                    key={order.id} 
-                    className={`border-2 rounded-lg p-3 hover:shadow-md transition-all ${statusCardColors[order.status as keyof typeof statusCardColors]}`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
-                        <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        <span className="flex items-center space-x-1">
-                          <span className="flex items-center">
-                            {getSourceIcon(order.orderSource)}
-                          </span>
-                          <span>{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
-                        </span>
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="flex items-center space-x-2">
-                        <div className={`w-3 h-3 rounded-full ${statusColors[order.status as keyof typeof statusColors]}`}></div>
-                        <span className="text-xs font-medium">{statusText[order.status as keyof typeof statusText]}</span>
-                      </div>
-                      <div className="text-xs text-neutral-500">
-                        {format(new Date(order.createdAt), "h:mm a")}
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
-                      
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        disabled={updateOrderMutation.isPending || order.status === "billed"}
-                        onClick={() => progressOrder(order)}
-                        className="h-8 px-2"
-                      >
-                        {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                        ) : (
-                          getActionIcon(order.status)
-                        )}
-                        <span className="text-xs">{getActionText(order.status)}</span>
-                      </Button>
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {/* Pending Orders Column */}
+                <div className="flex flex-col space-y-3">
+                  <div className="bg-amber-500 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                    Pending Orders
                   </div>
-                ))}
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-amber-300 rounded-b-md">
+                    {orders.filter(order => order.status === "pending").length === 0 ? (
+                      <div className="text-center p-4 text-neutral-500 text-sm">No pending orders</div>
+                    ) : (
+                      orders
+                        .filter(order => order.status === "pending")
+                        .map((order) => (
+                          <div 
+                            key={order.id} 
+                            className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-amber-100 border-amber-400"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                <span className="flex items-center">
+                                  {getSourceIcon(order.orderSource)}
+                                  <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                </span>
+                              </Badge>
+                            </div>
+                            
+                            <div className="text-xs text-neutral-500 mb-2">
+                              {format(new Date(order.createdAt), "h:mm a")}
+                            </div>
+                            
+                            <div className="flex justify-between items-center mt-2">
+                              <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                              
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={updateOrderMutation.isPending}
+                                onClick={() => progressOrder(order)}
+                                className="h-7 px-2"
+                              >
+                                {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <ChefHat className="h-3 w-3 mr-1" />
+                                )}
+                                <span className="text-xs">Start</span>
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
+                
+                {/* Preparing Orders Column */}
+                <div className="flex flex-col space-y-3">
+                  <div className="bg-blue-600 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                    Preparing
+                  </div>
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-blue-300 rounded-b-md">
+                    {orders.filter(order => order.status === "preparing").length === 0 ? (
+                      <div className="text-center p-4 text-neutral-500 text-sm">No orders in preparation</div>
+                    ) : (
+                      orders
+                        .filter(order => order.status === "preparing")
+                        .map((order) => (
+                          <div 
+                            key={order.id} 
+                            className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-blue-100 border-blue-400"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                <span className="flex items-center">
+                                  {getSourceIcon(order.orderSource)}
+                                  <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                </span>
+                              </Badge>
+                            </div>
+                            
+                            <div className="text-xs text-neutral-500 mb-2">
+                              {format(new Date(order.createdAt), "h:mm a")}
+                            </div>
+                            
+                            <div className="flex justify-between items-center mt-2">
+                              <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                              
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={updateOrderMutation.isPending}
+                                onClick={() => progressOrder(order)}
+                                className="h-7 px-2"
+                              >
+                                {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <ClipboardCheck className="h-3 w-3 mr-1" />
+                                )}
+                                <span className="text-xs">Ready</span>
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
+                
+                {/* Ready Orders Column */}
+                <div className="flex flex-col space-y-3">
+                  <div className="bg-emerald-500 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                    Ready to Serve
+                  </div>
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-emerald-300 rounded-b-md">
+                    {orders.filter(order => order.status === "ready").length === 0 ? (
+                      <div className="text-center p-4 text-neutral-500 text-sm">No ready orders</div>
+                    ) : (
+                      orders
+                        .filter(order => order.status === "ready")
+                        .map((order) => (
+                          <div 
+                            key={order.id} 
+                            className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-emerald-100 border-emerald-400"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                <span className="flex items-center">
+                                  {getSourceIcon(order.orderSource)}
+                                  <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                </span>
+                              </Badge>
+                            </div>
+                            
+                            <div className="text-xs text-neutral-500 mb-2">
+                              {format(new Date(order.createdAt), "h:mm a")}
+                            </div>
+                            
+                            <div className="flex justify-between items-center mt-2">
+                              <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                              
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={updateOrderMutation.isPending}
+                                onClick={() => progressOrder(order)}
+                                className="h-7 px-2"
+                              >
+                                {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <CircleCheck className="h-3 w-3 mr-1" />
+                                )}
+                                <span className="text-xs">Complete</span>
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
+                
+                {/* Completed Orders Column */}
+                <div className="flex flex-col space-y-3">
+                  <div className="bg-indigo-500 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                    Completed
+                  </div>
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-indigo-300 rounded-b-md">
+                    {orders.filter(order => order.status === "completed").length === 0 ? (
+                      <div className="text-center p-4 text-neutral-500 text-sm">No completed orders</div>
+                    ) : (
+                      orders
+                        .filter(order => order.status === "completed")
+                        .map((order) => (
+                          <div 
+                            key={order.id} 
+                            className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-indigo-100 border-indigo-400"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                <span className="flex items-center">
+                                  {getSourceIcon(order.orderSource)}
+                                  <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                </span>
+                              </Badge>
+                            </div>
+                            
+                            <div className="text-xs text-neutral-500 mb-2">
+                              {format(new Date(order.createdAt), "h:mm a")}
+                            </div>
+                            
+                            <div className="flex justify-between items-center mt-2">
+                              <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                              
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={updateOrderMutation.isPending}
+                                onClick={() => progressOrder(order)}
+                                className="h-7 px-2"
+                              >
+                                {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <ReceiptText className="h-3 w-3 mr-1" />
+                                )}
+                                <span className="text-xs">Bill</span>
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
+                
+                {/* Billed Orders Column */}
+                <div className="flex flex-col space-y-3">
+                  <div className="bg-slate-500 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                    Billed
+                  </div>
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-slate-300 rounded-b-md">
+                    {orders.filter(order => order.status === "billed").length === 0 ? (
+                      <div className="text-center p-4 text-neutral-500 text-sm">No billed orders</div>
+                    ) : (
+                      orders
+                        .filter(order => order.status === "billed")
+                        .map((order) => (
+                          <div 
+                            key={order.id} 
+                            className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-slate-100 border-slate-400"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                <span className="flex items-center">
+                                  {getSourceIcon(order.orderSource)}
+                                  <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                </span>
+                              </Badge>
+                            </div>
+                            
+                            <div className="text-xs text-neutral-500 mb-2">
+                              {format(new Date(order.createdAt), "h:mm a")}
+                            </div>
+                            
+                            <div className="flex justify-between items-center mt-2">
+                              <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={true}
+                                className="h-7 px-2"
+                              >
+                                <CircleCheck className="h-3 w-3 mr-1" />
+                                <span className="text-xs">Done</span>
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
               </div>
             )}
             
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-2 mt-6">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                <div className="text-sm">
-                  Page {currentPage} of {totalPages}
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+            {/* Pagination - removed since we're now displaying all orders by status */}
           </CardContent>
-        </Tabs>
       </Card>
     </div>
   );
