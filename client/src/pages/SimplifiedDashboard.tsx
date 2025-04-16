@@ -422,10 +422,7 @@ export default function SimplifiedDashboard() {
                 Enter order details below to create a new order in the system.
               </DialogDescription>
             </DialogHeader>
-            <OrderForm 
-              onSubmit={(data: any) => createOrderMutation.mutate(data)} 
-              isSubmitting={createOrderMutation.isPending}
-            />
+            <OrderForm />
           </DialogContent>
         </Dialog>
       </div>
