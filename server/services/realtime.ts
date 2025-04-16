@@ -113,6 +113,10 @@ function setupDataChangeListeners() {
       type: WS_EVENTS.ORDER_UPDATED,
       data: result
     });
+    
+    // Broadcast updated stats when orders change
+    broadcastStatsUpdate();
+    
     return result;
   };
   
@@ -123,6 +127,10 @@ function setupDataChangeListeners() {
       type: WS_EVENTS.KITCHEN_TOKEN_UPDATED,
       data: result
     });
+    
+    // Broadcast updated stats when kitchen tokens change
+    broadcastStatsUpdate();
+    
     return result;
   };
   
@@ -133,6 +141,10 @@ function setupDataChangeListeners() {
       type: WS_EVENTS.BILL_UPDATED,
       data: result
     });
+    
+    // Broadcast updated stats when bills change
+    broadcastStatsUpdate();
+    
     return result;
   };
   
@@ -143,6 +155,10 @@ function setupDataChangeListeners() {
       type: WS_EVENTS.NEW_ORDER,
       data: result
     });
+    
+    // Broadcast updated stats when new orders are created
+    broadcastStatsUpdate();
+    
     return result;
   };
   
@@ -153,6 +169,10 @@ function setupDataChangeListeners() {
       type: WS_EVENTS.NEW_KITCHEN_TOKEN,
       data: result
     });
+    
+    // Broadcast updated stats when new kitchen tokens are created
+    broadcastStatsUpdate();
+    
     return result;
   };
   
@@ -163,6 +183,10 @@ function setupDataChangeListeners() {
       type: WS_EVENTS.NEW_BILL,
       data: result
     });
+    
+    // Broadcast updated stats when new bills are created
+    broadcastStatsUpdate();
+    
     return result;
   };
 }
@@ -180,6 +204,66 @@ function broadcastToAllClients(data: any) {
   activeClients.forEach(client => {
     sendToClient(client, data);
   });
+}
+
+// Generate dashboard stats from storage data
+async function getDashboardStats() {
+  const orders = await storage.getOrders();
+  const bills = await storage.getBills();
+  const kitchenTokens = await storage.getKitchenTokens();
+  
+  // Get current date
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Filter for today's data
+  const todaysOrders = orders.filter(order => {
+    if (order.createdAt) {
+      return new Date(order.createdAt).getTime() >= today.getTime();
+    }
+    return false;
+  });
+  
+  const todaysSales = todaysOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+  
+  // Count active tables (tables with in-progress orders)
+  const activeTableNumbers = new Set(
+    orders
+      .filter(order => order.status === "pending" || order.status === "in-progress")
+      .map(order => order.tableNumber)
+      .filter(Boolean)
+  );
+  
+  // Count kitchen queue items
+  const kitchenQueue = kitchenTokens.filter(token => 
+    token.status === "pending" || token.status === "preparing" || token.status === "delayed"
+  );
+  
+  const urgentTokens = kitchenTokens.filter(token => token.isUrgent);
+  
+  return {
+    todaysSales,
+    ordersCount: todaysOrders.length,
+    activeTables: activeTableNumbers.size,
+    totalTables: 20, // Hardcoded for now
+    kitchenQueueCount: kitchenQueue.length,
+    urgentTokensCount: urgentTokens.length
+  };
+}
+
+// Export function to broadcast stats updates
+export async function broadcastStatsUpdate() {
+  try {
+    const stats = await getDashboardStats();
+    broadcastToAllClients({
+      type: WS_EVENTS.STATS_UPDATED,
+      data: stats
+    });
+    return stats;
+  } catch (error) {
+    console.error('Error broadcasting stats update:', error);
+    return null;
+  }
 }
 
 // Generate a unique ID for clients

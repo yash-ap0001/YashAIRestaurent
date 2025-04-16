@@ -42,13 +42,24 @@ export function DashboardStats({ className }: DashboardStatsProps) {
     // Listen for real-time updates that should trigger a stats refresh
     socket.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        // If we receive any of these events, refresh the stats
-        if (
-          data.type === 'order_created' || 
-          data.type === 'order_updated' || 
-          data.type === 'bill_created' || 
-          data.type === 'kitchen_token_updated'
+        const message = JSON.parse(event.data);
+        console.log("WebSocket message received:", message);
+        
+        // Directly update stats if we receive a stats_updated event
+        if (message.type === 'stats_updated' && message.data) {
+          // Directly update the cache with the new stats
+          queryClient.setQueryData(['/api/dashboard/stats'], message.data);
+          console.log("Dashboard stats updated via WebSocket:", message.data);
+        } 
+        // Otherwise, trigger a refetch for these events
+        else if (
+          message.type === 'order_created' || 
+          message.type === 'order_updated' || 
+          message.type === 'bill_created' || 
+          message.type === 'kitchen_token_updated' ||
+          message.type === 'new_order' ||
+          message.type === 'new_bill' ||
+          message.type === 'new_kitchen_token'
         ) {
           refetch();
         }
