@@ -207,7 +207,19 @@ export default function SimplifiedDashboard() {
     // Determine new status based on destination droppable
     let newStatus = destination.droppableId;
     
-    // Update order with new status
+    // Apply optimistic update to the client-side cache
+    queryClient.setQueryData(["/api/orders"], (oldData: Order[] | undefined) => {
+      if (!oldData) return oldData;
+      
+      return oldData.map(item => {
+        if (item.id === orderId) {
+          return { ...item, status: newStatus };
+        }
+        return item;
+      });
+    });
+    
+    // Then send update to the server
     updateOrderMutation.mutate({ id: orderId, status: newStatus });
   };
 
@@ -230,6 +242,20 @@ export default function SimplifiedDashboard() {
   // Progress an order to the next status
   const progressOrder = (order: Order) => {
     const nextStatus = getNextStatus(order.status);
+    
+    // Apply optimistic update to the client-side cache
+    queryClient.setQueryData(["/api/orders"], (oldData: Order[] | undefined) => {
+      if (!oldData) return oldData;
+      
+      return oldData.map(item => {
+        if (item.id === order.id) {
+          return { ...item, status: nextStatus };
+        }
+        return item;
+      });
+    });
+    
+    // Then send update to the server
     updateOrderMutation.mutate({ id: order.id, status: nextStatus });
   };
 
