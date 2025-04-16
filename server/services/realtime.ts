@@ -201,7 +201,7 @@ function sendToClient(client: ExtendedWebSocket | WebSocket, data: any) {
 }
 
 // Broadcast to all active clients
-function broadcastToAllClients(data: any) {
+export function broadcastToAllClients(data: any) {
   console.log(`Broadcasting to ${activeClients.size} clients:`, data.type, 
     data.type === WS_EVENTS.NEW_ORDER ? 'New order ID: ' + (data.data?.id || 'unknown') : '');
   

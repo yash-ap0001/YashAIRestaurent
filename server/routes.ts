@@ -35,7 +35,8 @@ import {
 } from "./services/telephony";
 import { processChatbotRequest } from "./services/chatbot";
 import { WebSocketServer } from 'ws';
-import { initializeRealTimeService, broadcastStatsUpdate, broadcastToAllClients } from './services/realtime';
+import { initializeRealTimeService, broadcastStatsUpdate } from './services/realtime';
+import { broadcastNewOrder } from './orderEnhancement';
 import { generateOrderNumber, generateTokenNumber, generateBillNumber, initializeCounters, handleError } from './utils';
 import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
 import { handleVoiceCommand } from './services/voiceAssistant';
@@ -431,6 +432,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         setupAIAutomatedOrderProcessing(order);
       }
       
+      // Broadcast the new order immediately for real-time updates
+      broadcastNewOrder(order);
+      
       res.setHeader('Content-Type', 'application/json');
       res.status(201).json(order);
     } catch (err) {
@@ -493,6 +497,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (order.useAIAutomation) {
         setupAIAutomatedOrderProcessing(order);
       }
+      
+      // Broadcast the new order immediately for real-time updates
+      broadcastNewOrder(order);
       
       res.setHeader('Content-Type', 'application/json');
       res.status(201).json(order);
