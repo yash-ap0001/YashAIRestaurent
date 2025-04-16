@@ -365,7 +365,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
                     >
                       {orders
                           .filter(order => order.status === "pending")
@@ -439,7 +439,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
                     >
                       {orders
                           .filter(order => order.status === "preparing")
@@ -513,7 +513,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
                     >
                       {orders
                           .filter(order => order.status === "ready")
@@ -587,7 +587,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
                     >
                       {orders
                           .filter(order => order.status === "completed")
@@ -661,7 +661,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
                     >
                       {orders
                           .filter(order => order.status === "billed")
