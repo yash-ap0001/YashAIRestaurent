@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth, UserRole } from "@/hooks/useAuth";
 import UserMenu from "@/components/auth/UserMenu";
 import { RoleBasedContent } from "@/components/auth/ProtectedRoute";
+import { ConnectionStatus } from "@/components/ui/ConnectionStatus";
 
 interface NavItem {
   label: string;
@@ -278,6 +279,11 @@ export function AppShell({ children }: AppShellProps) {
                 <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-purple-500"></span>
                 <span className="sr-only">Notifications</span>
               </Button>
+            </div>
+            
+            {/* WebSocket connection status indicator */}
+            <div className="relative">
+              <ConnectionStatus />
             </div>
             
             {/* User menu - always visible in top right corner */}

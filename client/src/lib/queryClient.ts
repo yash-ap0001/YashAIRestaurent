@@ -1,11 +1,21 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Define types for the window object to access the WebSocket
+declare global {
+  interface Window {
+    appSocket: WebSocket | null;
+  }
+}
+
 // WebSocket connection for real-time updates
 let socket: WebSocket | null = null;
 let isConnecting = false;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000;
+
+// Expose the socket instance globally for the ConnectionStatus component
+window.appSocket = null;
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -84,10 +94,22 @@ export function initializeWebSocket() {
     
     socket = new WebSocket(wsUrl);
     
+    // Update the global reference to the socket
+    window.appSocket = socket;
+    
+    // Dispatch a custom event to indicate connection in progress
+    window.dispatchEvent(new CustomEvent('ws:connecting'));
+    
     socket.onopen = () => {
       console.log('WebSocket connection established');
       isConnecting = false;
       reconnectAttempts = 0;
+      
+      // Update the global reference again (redundant but safe)
+      window.appSocket = socket;
+      
+      // Dispatch a custom event that the connection is open
+      window.dispatchEvent(new CustomEvent('ws:open'));
       
       // Send ping to keep the connection alive
       setInterval(() => {
@@ -172,6 +194,12 @@ export function initializeWebSocket() {
       console.log('WebSocket connection closed:', event.code, event.reason);
       socket = null;
       isConnecting = false;
+      
+      // Update the global reference
+      window.appSocket = null;
+      
+      // Dispatch a custom event that the connection is closed
+      window.dispatchEvent(new CustomEvent('ws:close'));
       
       // Attempt to reconnect unless max attempts reached
       if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
