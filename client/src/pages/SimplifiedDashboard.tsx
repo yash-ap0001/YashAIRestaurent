@@ -329,8 +329,8 @@ export default function SimplifiedDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
               
               {/* Pending Orders Column */}
-              <div className="flex flex-col space-y-3 w-full">
-                <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md w-full">
+              <div className="flex flex-col w-full">
+                <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
                   <ClipboardList className="h-5 w-5 mr-2" />
                   Pending Orders
                 </div>
@@ -403,8 +403,8 @@ export default function SimplifiedDashboard() {
               </div>
               
               {/* Preparing Orders Column */}
-              <div className="flex flex-col space-y-3 w-full">
-                <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md w-full">
+              <div className="flex flex-col w-full">
+                <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
                   <ChefHat className="h-5 w-5 mr-2" />
                   Preparing
                 </div>
@@ -477,8 +477,8 @@ export default function SimplifiedDashboard() {
               </div>
               
               {/* Ready Orders Column */}
-              <div className="flex flex-col space-y-3 w-full">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md w-full">
+              <div className="flex flex-col w-full">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
                   <Utensils className="h-5 w-5 mr-2" />
                   Ready to Serve
                 </div>
@@ -551,8 +551,8 @@ export default function SimplifiedDashboard() {
               </div>
               
               {/* Completed Orders Column */}
-              <div className="flex flex-col space-y-3 w-full">
-                <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md w-full">
+              <div className="flex flex-col w-full">
+                <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
                   <CircleCheck className="h-5 w-5 mr-2" />
                   Completed
                 </div>
@@ -625,8 +625,8 @@ export default function SimplifiedDashboard() {
               </div>
               
               {/* Billed Orders Column */}
-              <div className="flex flex-col space-y-3 w-full">
-                <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md w-full">
+              <div className="flex flex-col w-full">
+                <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
                   <CreditCard className="h-5 w-5 mr-2" />
                   Billed
                 </div>
