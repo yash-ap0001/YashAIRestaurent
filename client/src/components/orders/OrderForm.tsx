@@ -333,21 +333,6 @@ export function OrderForm() {
             </CardTitle>
             <p className="text-sm text-neutral-500 mt-1">Fill in the order details manually or use AI to process natural language orders</p>
             
-            {/* Debug Info */}
-            <div className="bg-neutral-800 p-2 mt-2 rounded text-xs text-white">
-              <p>Form Status: {form.formState.isValid ? '✅ Valid' : '❌ Invalid'}</p>
-              {Object.keys(form.formState.errors).length > 0 && (
-                <div className="mt-1">
-                  <p>Errors:</p>
-                  <ul className="list-disc pl-5">
-                    {Object.entries(form.formState.errors).map(([field, error]) => (
-                      <li key={field}>{field}: {error?.message}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <p>Items: {selectedItems.length}</p>
-            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
