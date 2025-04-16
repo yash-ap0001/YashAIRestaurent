@@ -681,7 +681,7 @@ export default function SimplifiedDashboard() {
                   
                   {/* Ready Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-[#F768A1] text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <Utensils className="h-5 w-5 mr-2" />
                       Ready to Serve
                     </div>
@@ -690,7 +690,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#F768A1]"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-blue-600 to-blue-800"
                         >
                           {orders.filter(order => order.status === "ready").length === 0 ? (
                             <></>
@@ -704,7 +704,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#f98fc3] to-[#ffc2db] order-card-text"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-600 to-blue-800 order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#ff87b9' : undefined,
@@ -759,7 +759,7 @@ export default function SimplifiedDashboard() {
                   
                   {/* Completed Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-[#C51B8A] text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                    <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <CircleCheck className="h-5 w-5 mr-2" />
                       Completed
                     </div>
@@ -768,7 +768,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#C51B8A]"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-purple-600 to-purple-800"
                         >
                           {orders.filter(order => order.status === "completed").length === 0 ? (
                             <></>
@@ -782,7 +782,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#d95db0] to-[#f3c1dd] order-card-text"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-600 to-purple-800 order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
@@ -837,7 +837,7 @@ export default function SimplifiedDashboard() {
                   
                   {/* Billed Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-[#7A0177] text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                    <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <ReceiptText className="h-5 w-5 mr-2" />
                       Billed
                     </div>
@@ -846,7 +846,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#7A0177]"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-gray-600 to-gray-800"
                         >
                           {orders.filter(order => order.status === "billed").length === 0 ? (
                             <></>
@@ -860,7 +860,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#9a2ca0] to-[#e1c4e4] order-card-text"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-gray-600 to-gray-800 order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#80008a' : undefined,
