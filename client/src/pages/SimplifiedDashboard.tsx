@@ -704,7 +704,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#f98fc3] to-[#ffc2db] text-white"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#f98fc3] to-[#ffc2db] order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#ff87b9' : undefined,
@@ -713,8 +713,8 @@ export default function SimplifiedDashboard() {
                                     >
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
-                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                          <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                          <h3>#{order.orderNumber}</h3>
+                                          <div className="table-number">Table {order.tableNumber}</div>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
                                           <span className="flex items-center">
@@ -724,12 +724,12 @@ export default function SimplifiedDashboard() {
                                         </Badge>
                                       </div>
                                       
-                                      <div className="text-xs text-neutral-500 mb-2">
+                                      <div className="time mb-2">
                                         {format(new Date(order.createdAt), "h:mm a")}
                                       </div>
                                       
                                       <div className="flex justify-between items-center mt-2">
-                                        <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                                        <div className="amount">{formatCurrency(order.totalAmount)}</div>
                                         
                                         <Button
                                           variant="secondary"
@@ -782,7 +782,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#d95db0] to-[#f3c1dd] text-white"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#d95db0] to-[#f3c1dd] order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
@@ -791,8 +791,8 @@ export default function SimplifiedDashboard() {
                                     >
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
-                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                          <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                          <h3>#{order.orderNumber}</h3>
+                                          <div className="table-number">Table {order.tableNumber}</div>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
                                           <span className="flex items-center">
@@ -802,12 +802,12 @@ export default function SimplifiedDashboard() {
                                         </Badge>
                                       </div>
                                       
-                                      <div className="text-xs text-neutral-500 mb-2">
+                                      <div className="time mb-2">
                                         {format(new Date(order.createdAt), "h:mm a")}
                                       </div>
                                       
                                       <div className="flex justify-between items-center mt-2">
-                                        <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                                        <div className="amount">{formatCurrency(order.totalAmount)}</div>
                                         
                                         <Button
                                           variant="secondary"

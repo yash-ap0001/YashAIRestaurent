@@ -45,4 +45,21 @@
   tr:hover {
     @apply bg-neutral-800;
   }
+  
+  /* Order card styles */
+  .order-card-text {
+    @apply text-white;
+  }
+  
+  .order-card-text h3 {
+    @apply font-bold text-lg text-white;
+  }
+  
+  .order-card-text .time, .order-card-text .table-number {
+    @apply text-xs text-white opacity-80;
+  }
+  
+  .order-card-text .amount {
+    @apply font-bold text-white;
+  }
 }
