@@ -359,7 +359,7 @@ const ARMenuPreview: React.FC<ARMenuPreviewProps> = ({ menuItem, onClose }) => {
         
         <div className="p-4">
           <h3 className="font-bold text-lg mb-2">{menuItem.name}</h3>
-          <p className="text-muted-foreground mb-3">{menuItem.description}</p>
+          <p className="text-muted-foreground mb-3">{menuItem.description || 'No description available'}</p>
           <div className="flex justify-between items-center">
             <div className="text-lg font-bold">₹{menuItem.price.toFixed(2)}</div>
             <Button variant="default">Add to Order</Button>
