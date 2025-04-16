@@ -202,9 +202,17 @@ function sendToClient(client: ExtendedWebSocket | WebSocket, data: any) {
 
 // Broadcast to all active clients
 function broadcastToAllClients(data: any) {
-  console.log(`Broadcasting to ${activeClients.size} clients:`, data.type);
+  console.log(`Broadcasting to ${activeClients.size} clients:`, data.type, 
+    data.type === WS_EVENTS.NEW_ORDER ? 'New order ID: ' + (data.data?.id || 'unknown') : '');
+  
+  // Add timestamp to help with debugging and caching issues
+  const enhancedData = {
+    ...data,
+    timestamp: Date.now()
+  };
+  
   activeClients.forEach(client => {
-    sendToClient(client, data);
+    sendToClient(client, enhancedData);
   });
 }
 

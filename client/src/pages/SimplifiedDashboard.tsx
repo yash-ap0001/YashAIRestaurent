@@ -148,18 +148,34 @@ export default function SimplifiedDashboard() {
       try {
         const data = JSON.parse(event.data);
         
-        // For new orders, we need to ensure a complete refresh of the data
+        // For new orders, we need to handle them specially to ensure they show up immediately
         if (data.type === 'new_order') {
           console.log('New order received via WebSocket:', data);
+          
+          // Immediately update the orders query data with the new order
+          if (data.data && data.data.id) {
+            // Try to optimistically add the new order to the existing query data
+            queryClient.setQueryData(['/api/orders'], (oldData: Order[] | undefined) => {
+              if (!oldData) return [data.data];
+              
+              // Check if this order already exists to avoid duplicates
+              const orderExists = oldData.some(order => order.id === data.data.id);
+              if (orderExists) return oldData;
+              
+              // Add the new order at the beginning of the array
+              return [data.data, ...oldData];
+            });
+          }
+          
+          // Then invalidate all related queries for consistency
           queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
           queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
           queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
           
-          // Force a data refetch after a short delay to ensure up-to-date data
+          // Force a refetch after a short delay to ensure data is synchronized with server
           setTimeout(() => {
             queryClient.refetchQueries({ queryKey: ['/api/orders'] });
-            queryClient.refetchQueries({ queryKey: ['/api/kitchen-tokens'] });
-          }, 300);
+          }, 500);
         }
         // Invalidate queries based on the type of update
         else if (data.type === 'order_created' || data.type === 'order_updated') {
@@ -175,8 +191,10 @@ export default function SimplifiedDashboard() {
           queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
         }
         
-        // For any activity, refresh stats
-        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+        // For stats updates, just apply them directly
+        if (data.type === 'stats_updated' && data.data) {
+          queryClient.setQueryData(['/api/dashboard/stats'], data.data);
+        }
         
         console.log('WebSocket message received:', data);
       } catch (error) {
