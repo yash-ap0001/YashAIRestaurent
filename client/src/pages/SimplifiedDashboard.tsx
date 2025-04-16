@@ -537,7 +537,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#feebe2]"
                         >
                           {orders.filter(order => order.status === "pending").length === 0 ? (
-                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No pending orders</div>
+                            <></>
                           ) : (
                             orders
                               .filter(order => order.status === "pending")
@@ -615,7 +615,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#FBB4B9]"
                         >
                           {orders.filter(order => order.status === "preparing").length === 0 ? (
-                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No orders in preparation</div>
+                            <></>
                           ) : (
                             orders
                               .filter(order => order.status === "preparing")
@@ -693,7 +693,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#F768A1]"
                         >
                           {orders.filter(order => order.status === "ready").length === 0 ? (
-                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No ready orders</div>
+                            <></>
                           ) : (
                             orders
                               .filter(order => order.status === "ready")
@@ -704,7 +704,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#f98fc3] to-[#ffc2db]"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#f98fc3] to-[#ffc2db] text-white"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#ff87b9' : undefined,
@@ -771,7 +771,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#C51B8A]"
                         >
                           {orders.filter(order => order.status === "completed").length === 0 ? (
-                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No completed orders</div>
+                            <></>
                           ) : (
                             orders
                               .filter(order => order.status === "completed")
@@ -782,7 +782,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#d95db0] to-[#f3c1dd]"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#d95db0] to-[#f3c1dd] text-white"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
@@ -849,7 +849,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#7A0177]"
                         >
                           {orders.filter(order => order.status === "billed").length === 0 ? (
-                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No billed orders</div>
+                            <></>
                           ) : (
                             orders
                               .filter(order => order.status === "billed")
@@ -860,7 +860,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#9a2ca0] to-[#e1c4e4]"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#9a2ca0] to-[#e1c4e4] text-white"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#80008a' : undefined,
