@@ -525,7 +525,7 @@ export default function SimplifiedDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {/* Pending Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-[#feebe2] text-[#7A0177] font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                    <div className="bg-[#ffd700] text-[#7A0177] font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <Clock className="h-5 w-5 mr-2" />
                       Pending Orders
                     </div>
@@ -534,7 +534,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#feebe2]"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#ffd700]"
                         >
                           {orders.filter(order => order.status === "pending").length === 0 ? (
                             <></>
@@ -548,10 +548,10 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#feebe2] to-[#fff4ee] order-card-text"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#ffd700] to-[#ffb347] order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#ffd2c0' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#ffc107' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >

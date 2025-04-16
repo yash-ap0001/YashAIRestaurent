@@ -64,13 +64,11 @@
   }
   
   /* Apply these styles to all text elements in cards, regardless of class names */
-  /* Target all order cards in the columns */
-  [droppableId="pending"] .rounded-lg .text-xs,
+  /* Target prepare/ready/completed order cards with white text */
   [droppableId="preparing"] .rounded-lg .text-xs,
   [droppableId="ready"] .rounded-lg .text-xs,
   [droppableId="completed"] .rounded-lg .text-xs,
   [droppableId="billed"] .rounded-lg .text-xs,
-  [droppableId="pending"] .rounded-lg .text-neutral-500,
   [droppableId="preparing"] .rounded-lg .text-neutral-500,
   [droppableId="ready"] .rounded-lg .text-neutral-500,
   [droppableId="completed"] .rounded-lg .text-neutral-500,
@@ -79,7 +77,14 @@
     opacity: 0.8;
   }
   
-  [droppableId="pending"] .rounded-lg .font-bold,
+  /* Target pending order cards with dark text for better contrast on gold */
+  [droppableId="pending"] .rounded-lg .text-xs,
+  [droppableId="pending"] .rounded-lg .text-neutral-500 {
+    color: #7A0177 !important;
+    opacity: 1;
+  }
+  
+  /* Font bold handling for non-pending cards */
   [droppableId="preparing"] .rounded-lg .font-bold,
   [droppableId="ready"] .rounded-lg .font-bold,
   [droppableId="completed"] .rounded-lg .font-bold,
@@ -87,17 +92,30 @@
     color: white !important;
   }
   
-  [droppableId="pending"] .rounded-lg h3,
+  /* Font bold handling for pending cards */
+  [droppableId="pending"] .rounded-lg .font-bold {
+    color: #7A0177 !important;
+  }
+  
+  /* Headings for non-pending cards */
   [droppableId="preparing"] .rounded-lg h3,
   [droppableId="ready"] .rounded-lg h3,
   [droppableId="completed"] .rounded-lg h3,
   [droppableId="billed"] .rounded-lg h3,
-  [droppableId="pending"] .rounded-lg .text-\[\#7A0177\],
   [droppableId="preparing"] .rounded-lg .text-\[\#7A0177\],
   [droppableId="ready"] .rounded-lg .text-\[\#7A0177\],
   [droppableId="completed"] .rounded-lg .text-\[\#7A0177\],
   [droppableId="billed"] .rounded-lg .text-\[\#7A0177\] {
     color: white !important;
+    font-weight: 700;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  
+  /* Headings for pending cards */
+  [droppableId="pending"] .rounded-lg h3,
+  [droppableId="pending"] .rounded-lg .text-\[\#7A0177\] {
+    color: #7A0177 !important;
     font-weight: 700;
     font-size: 1.125rem;
     line-height: 1.75rem;
