@@ -720,10 +720,11 @@ export default function SimplifiedDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {/* Pending Orders Column */}
                 <div className="flex flex-col space-y-3">
-                  <div className="bg-amber-500 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                  <div className="bg-amber-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
+                    <Clock className="h-4 w-4 mr-2" />
                     Pending Orders
                   </div>
-                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-amber-300 rounded-b-md">
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-amber-300 rounded-b-md shadow-md bg-amber-50">
                     {orders.filter(order => order.status === "pending").length === 0 ? (
                       <div className="text-center p-4 text-neutral-500 text-sm">No pending orders</div>
                     ) : (
@@ -777,10 +778,11 @@ export default function SimplifiedDashboard() {
                 
                 {/* Preparing Orders Column */}
                 <div className="flex flex-col space-y-3">
-                  <div className="bg-blue-600 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                  <div className="bg-blue-600 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
+                    <ChefHat className="h-4 w-4 mr-2" />
                     Preparing
                   </div>
-                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-blue-300 rounded-b-md">
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-blue-300 rounded-b-md shadow-md bg-blue-50">
                     {orders.filter(order => order.status === "preparing").length === 0 ? (
                       <div className="text-center p-4 text-neutral-500 text-sm">No orders in preparation</div>
                     ) : (
@@ -834,10 +836,11 @@ export default function SimplifiedDashboard() {
                 
                 {/* Ready Orders Column */}
                 <div className="flex flex-col space-y-3">
-                  <div className="bg-emerald-500 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                  <div className="bg-emerald-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
+                    <HandPlatter className="h-4 w-4 mr-2" />
                     Ready to Serve
                   </div>
-                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-emerald-300 rounded-b-md">
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-emerald-300 rounded-b-md shadow-md bg-emerald-50">
                     {orders.filter(order => order.status === "ready").length === 0 ? (
                       <div className="text-center p-4 text-neutral-500 text-sm">No ready orders</div>
                     ) : (
@@ -891,10 +894,11 @@ export default function SimplifiedDashboard() {
                 
                 {/* Completed Orders Column */}
                 <div className="flex flex-col space-y-3">
-                  <div className="bg-indigo-500 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                  <div className="bg-indigo-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
+                    <CircleCheck className="h-4 w-4 mr-2" />
                     Completed
                   </div>
-                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-indigo-300 rounded-b-md">
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-indigo-300 rounded-b-md shadow-md bg-indigo-50">
                     {orders.filter(order => order.status === "completed").length === 0 ? (
                       <div className="text-center p-4 text-neutral-500 text-sm">No completed orders</div>
                     ) : (

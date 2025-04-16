@@ -52,7 +52,7 @@ export function DashboardStats({ className }: DashboardStatsProps) {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-neutral-400">Today's Sales</p>
-              <h3 className="text-2xl font-semibold text-white mt-1">₹{data.todaysSales.toLocaleString()}</h3>
+              <h3 className="text-2xl font-semibold text-white mt-1">₹{data.todaysSales ? data.todaysSales.toLocaleString() : '0'}</h3>
             </div>
             <div className="rounded-full bg-purple-900 bg-opacity-60 p-2">
               <CreditCard className="h-5 w-5 text-purple-400" />
