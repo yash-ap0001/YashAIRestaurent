@@ -120,8 +120,8 @@ export function RecentOrders({ className }: RecentOrdersProps) {
                       ₹{(order.totalAmount ?? 0).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(order.status || 'pending')}`}>
+                        {order.status ? (order.status.charAt(0).toUpperCase() + order.status.slice(1)) : 'Pending'}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
