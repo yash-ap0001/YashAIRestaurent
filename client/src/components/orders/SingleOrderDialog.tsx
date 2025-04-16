@@ -208,7 +208,18 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
         price: item.price,
         specialInstructions: item.specialInstructions || "",
       })),
+      // Also include items array for compatibility (some endpoints might expect this format)
+      items: orderItems.map(item => ({
+        menuItemId: item.menuItemId,
+        quantity: item.quantity,
+        price: item.price,
+        specialInstructions: item.specialInstructions || "",
+      })),
       notes: notes || undefined,
+      orderSource: "manual_dialog", // Help with identifying order source
+      status: "pending",
+      totalAmount: totalAmount,
+      useAIAutomation: false
     };
 
     // Log the order being created for debugging
