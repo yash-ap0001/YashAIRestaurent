@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import CustomerDashboard from "@/pages/CustomerDashboard";
+import SimplifiedDashboard from "@/pages/SimplifiedDashboard";
 import NewOrder from "@/pages/NewOrder";
 import KitchenTokens from "@/pages/KitchenTokens";
 import Billing from "@/pages/Billing";
@@ -66,6 +67,7 @@ function Router() {
       <ProtectedRoute path="/track-order/:orderNumber" component={TrackOrder} allowedRoles={["admin", "manager", "kitchen", "waiter", "delivery", "customer"]} />
       
       {/* Admin, Manager Routes */}
+      <ProtectedRoute path="/simplified-dashboard" component={SimplifiedDashboard} allowedRoles={["admin", "manager", "waiter", "kitchen"]} />
       <ProtectedRoute path="/inventory" component={Inventory} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/customers" component={Customers} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/menu-items" component={MenuItems} allowedRoles={["admin", "manager"]} />
