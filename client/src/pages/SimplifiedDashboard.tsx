@@ -547,10 +547,10 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#feebe2] to-[#fff4ee]"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#fff4ee' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#ffd2c0' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
@@ -625,10 +625,10 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#FBB4B9] to-[#ffd6dd]"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#fff1f2' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#ffa4b0' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
@@ -703,10 +703,10 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#f98fc3] to-[#ffc2db]"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#fff1f5' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#ff87b9' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
@@ -781,10 +781,10 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#d95db0] to-[#f3c1dd]"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#fcf1f7' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
@@ -859,10 +859,10 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#9a2ca0] to-[#e1c4e4]"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#f1eef6' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#80008a' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
