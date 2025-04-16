@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, ChefHat, Utensils, CircleCheck, Receipt } from "lucide-react";
@@ -129,7 +129,6 @@ export function OrderTrackingToasts() {
             title: "New Order Created",
             description: `Order #${orderNumber} for Table ${tableNumber} has been received.`,
             variant: "default",
-            icon: <ClipboardList className="h-4 w-4" />,
           });
           
           // Invalidate orders query to refresh data
@@ -163,7 +162,6 @@ export function OrderTrackingToasts() {
             title: `Order ${status.charAt(0).toUpperCase() + status.slice(1)}`,
             description: getStatusDescription(status, orderNumber, tableNumber),
             variant: getToastVariant(status) as any,
-            icon: getStatusIcon(status),
           });
           
           // Invalidate orders query to refresh data

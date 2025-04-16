@@ -33,6 +33,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LoadingIndicator from "@/components/ui/LoadingIndicator";
 import { useEffect } from "react";
+import { OrderTrackingToasts } from "@/components/orders/OrderTrackingToasts";
 
 function Router() {
   const { user } = useAuth();
@@ -129,10 +130,11 @@ function AppContent() {
     return <Router />;
   }
   
-  // If user is logged in, render router with AppShell
+  // If user is logged in, render router with AppShell and OrderTrackingToasts
   return (
     <AppShell>
       <Router />
+      <OrderTrackingToasts />
     </AppShell>
   );
 }
