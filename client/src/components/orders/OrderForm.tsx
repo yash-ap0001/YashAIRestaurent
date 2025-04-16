@@ -29,7 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MenuItem } from "@shared/schema";
-import { Loader2, Minus, Plus, Trash2, Sparkles, Search } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2, Sparkles, Search, List } from "lucide-react";
 import { NaturalLanguageOrderInput } from "./NaturalLanguageOrderInput";
 
 const formSchema = z.object({
@@ -348,44 +348,28 @@ export function OrderForm() {
   return (
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6">
-        <Card className="bg-black rounded-xl shadow-lg overflow-hidden border-2 border-purple-700">
-          <CardHeader className="bg-gradient-to-r from-purple-700 to-pink-700 text-white pb-6">
-            <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-              <span>Create Your Order</span>
+        <Card className="bg-white rounded-xl shadow-lg overflow-hidden border-0">
+          <CardHeader className="pb-4 pt-6 px-6">
+            <CardTitle className="text-2xl font-semibold text-purple-600">
+              Create New Order
             </CardTitle>
-            <p className="text-white text-opacity-90 mt-1">Fill in the order details manually or use our AI to process natural language orders</p>
-            
+            <p className="text-gray-600 mt-1">Add delicious menu items to your customer's order.</p>
           </CardHeader>
-          <CardContent className="space-y-6 p-6 bg-black">
+          <CardContent className="space-y-6 p-6 bg-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="tableNumber"
                 render={({ field }) => (
-                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
-                    <FormLabel className="text-sm font-semibold text-white">Table Number</FormLabel>
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">Table Number</FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full mt-2 bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                          <SelectValue placeholder="Select a table" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-black border-purple-600 text-white">
-                          <SelectItem value="Table 1" className="text-white focus:bg-purple-800 focus:text-white">Table 1</SelectItem>
-                          <SelectItem value="Table 2" className="text-white focus:bg-purple-800 focus:text-white">Table 2</SelectItem>
-                          <SelectItem value="Table 3" className="text-white focus:bg-purple-800 focus:text-white">Table 3</SelectItem>
-                          <SelectItem value="Table 4" className="text-white focus:bg-purple-800 focus:text-white">Table 4</SelectItem>
-                          <SelectItem value="Table 5" className="text-white focus:bg-purple-800 focus:text-white">Table 5</SelectItem>
-                          <SelectItem value="Table 6" className="text-white focus:bg-purple-800 focus:text-white">Table 6</SelectItem>
-                          <SelectItem value="Table 7" className="text-white focus:bg-purple-800 focus:text-white">Table 7</SelectItem>
-                          <SelectItem value="Table 8" className="text-white focus:bg-purple-800 focus:text-white">Table 8</SelectItem>
-                          <SelectItem value="Table 9" className="text-white focus:bg-purple-800 focus:text-white">Table 9</SelectItem>
-                          <SelectItem value="Table 10" className="text-white focus:bg-purple-800 focus:text-white">Table 10</SelectItem>
-                          <SelectItem value="Takeaway" className="text-white focus:bg-purple-800 focus:text-white">Takeaway</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Table 1"
+                        className="w-full mt-1 text-gray-700 border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -422,71 +406,51 @@ export function OrderForm() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
-                <FormLabel className="flex items-center gap-2 text-sm font-semibold text-white">
-                  <span>Add Menu Items</span>
-                </FormLabel>
-                
-                {/* Search and Category Filters */}
-                <div className="space-y-3 mb-3">
-                  {/* Search Input */}
-                  <div className="flex items-center bg-black bg-opacity-95 border-2 border-purple-600 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
-                    <Search className="h-4 w-4 text-purple-400 ml-3" />
+              <div>
+                <div className="bg-black rounded-lg mb-3">
+                  <div className="flex items-center p-2">
+                    <Search className="h-4 w-4 text-gray-400 mr-2" />
                     <Input
                       type="text"
                       placeholder="Search menu items..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-10 bg-transparent text-white placeholder:text-gray-400"
+                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-9 bg-transparent text-white placeholder:text-gray-400"
                     />
-                  </div>
-                  
-                  {/* Category Filter */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-white">Filter by category:</span>
-                    <Select
-                      value={selectedCategory}
-                      onValueChange={setSelectedCategory}
-                    >
-                      <SelectTrigger className="w-[180px] bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                        <SelectValue placeholder="All Categories" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-black border-purple-600 text-white">
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category} className="text-white focus:bg-purple-800 focus:text-white">
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
                 
-                {/* Menu Item Selector */}
-                <div className="flex mt-2">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-gray-700 font-medium">Menu Category</span>
                   <Select
-                    disabled={menuLoading}
-                    onValueChange={(value) => addMenuItem(parseInt(value))}
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
                   >
-                    <SelectTrigger className="w-full bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                      <SelectValue placeholder="Select menu item" />
+                    <SelectTrigger className="w-[180px] border-gray-300 text-gray-700 focus:ring-1 focus:ring-purple-500 focus:border-purple-500">
+                      <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[300px] bg-black border-purple-600 text-white">
-                      {filteredMenuItems.map((item) => (
-                        <SelectItem key={item.id} value={item.id.toString()} className="text-white focus:bg-purple-800 focus:text-white">
-                          <div className="flex justify-between w-full">
-                            <span>{item.name}</span>
-                            <span className="text-purple-400 font-semibold">₹{item.price}</span>
-                          </div>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                
-                {/* Display filtered items count */}
-                <div className="mt-2 text-xs text-purple-400">
-                  {filteredMenuItems.length} items found
+
+                <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-2">
+                  {filteredMenuItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-black rounded-lg p-4 cursor-pointer hover:bg-black/80 transition-colors flex flex-col"
+                      onClick={() => addMenuItem(item.id)}
+                    >
+                      <h4 className="font-medium text-white">{item.name}</h4>
+                      <p className="text-xs text-gray-400 mt-1 mb-2">{item.description?.substring(0, 40) || 'Fragrant basmati rice dish'}{(item.description && item.description.length > 40) ? '...' : ''}</p>
+                      <span className="text-purple-500 font-semibold mt-auto">₹{item.price}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -605,15 +569,20 @@ export function OrderForm() {
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
-                  <FormLabel className="text-sm font-semibold text-white">Order Notes</FormLabel>
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-gray-700">Order Notes</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Add any special instructions for the entire order..."
-                      className="resize-none mt-2 border-2 border-purple-600 bg-black text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                      rows={3}
-                      {...field}
-                    />
+                    <div className="flex items-center border rounded-md border-gray-300 p-2 focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500">
+                      <div className="text-purple-500 mr-2">
+                        <List className="h-5 w-5" />
+                      </div>
+                      <Textarea
+                        placeholder="Enter any special instructions for the entire order..."
+                        className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
+                        rows={2}
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
