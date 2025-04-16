@@ -187,7 +187,7 @@ export default function SimplifiedDashboard() {
     isLoading: isLoadingOrders,
     error: ordersError,
   } = useQuery<Order[]>({
-    queryKey: ["/api/orders"],
+    queryKey: ["/api/orders"]
   });
 
   const {
@@ -468,11 +468,13 @@ export default function SimplifiedDashboard() {
                 // Create a quick test order with minimal data
                 const newOrder = {
                   tableNumber: "T1",
+                  status: "pending",
+                  orderSource: "manual",
                   orderItems: [
                     { 
                       menuItemId: 1, 
                       quantity: 1, 
-                      price: 370, 
+                      price: 250,
                       specialInstructions: "Single-click test order" 
                     }
                   ]
