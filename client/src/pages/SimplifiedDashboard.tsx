@@ -339,7 +339,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-amber-600 to-amber-800"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
                     >
                       {orders
                           .filter(order => order.status === "pending")
@@ -413,7 +413,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-emerald-600 to-emerald-800"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
                     >
                       {orders
                           .filter(order => order.status === "preparing")
@@ -487,7 +487,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-blue-600 to-blue-800"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
                     >
                       {orders
                           .filter(order => order.status === "ready")
@@ -561,7 +561,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-purple-600 to-purple-800"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
                     >
                       {orders
                           .filter(order => order.status === "completed")
@@ -635,7 +635,7 @@ export default function SimplifiedDashboard() {
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-gray-600 to-gray-800"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900"
                     >
                       {orders
                           .filter(order => order.status === "billed")
