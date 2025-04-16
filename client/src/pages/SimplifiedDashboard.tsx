@@ -79,7 +79,8 @@ import {
   Filter,
   ArrowUpDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Utensils
 } from "lucide-react";
 import { 
   Dialog, 
@@ -837,7 +838,7 @@ export default function SimplifiedDashboard() {
                 {/* Ready Orders Column */}
                 <div className="flex flex-col space-y-3">
                   <div className="bg-emerald-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
-                    <HandPlatter className="h-4 w-4 mr-2" />
+                    <Utensils className="h-4 w-4 mr-2" />
                     Ready to Serve
                   </div>
                   <div className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-emerald-300 rounded-b-md shadow-md bg-emerald-50">
@@ -952,10 +953,11 @@ export default function SimplifiedDashboard() {
                 
                 {/* Billed Orders Column */}
                 <div className="flex flex-col space-y-3">
-                  <div className="bg-slate-500 text-white font-medium px-3 py-1 rounded-t-md text-center">
+                  <div className="bg-slate-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
+                    <ReceiptText className="h-4 w-4 mr-2" />
                     Billed
                   </div>
-                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2 border-2 border-slate-300 rounded-b-md">
+                  <div className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-slate-300 rounded-b-md shadow-md bg-slate-50">
                     {orders.filter(order => order.status === "billed").length === 0 ? (
                       <div className="text-center p-4 text-neutral-500 text-sm">No billed orders</div>
                     ) : (
