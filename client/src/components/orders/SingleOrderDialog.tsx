@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, Plus, Minus, X, Send, AlignLeft } from "lucide-react";
+import { Loader2, Plus, Minus, X, Send, AlignLeft, Search } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
@@ -60,6 +60,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [notes, setNotes] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -76,10 +77,20 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
     return acc;
   }, []);
 
-  // Filter menu items by category
-  const filteredMenuItems = selectedCategory === 'all'
-    ? menuItems
-    : menuItems.filter(item => item.category === selectedCategory);
+  // Filter menu items by category and search query
+  const filteredMenuItems = menuItems
+    .filter(item => {
+      // Apply category filter
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      
+      // Apply search filter
+      const matchesSearch = 
+        !searchQuery || 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchesCategory && matchesSearch;
+    });
 
   // Create order mutation
   const createOrderMutation = useMutation({
@@ -257,10 +268,10 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-2xl">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-950 shadow-lg">
         <DialogHeader className="pb-3 border-b border-gray-200 dark:border-gray-800">
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Create New Order</DialogTitle>
-          <DialogDescription className="text-gray-500 dark:text-gray-400">
+          <DialogTitle className="text-2xl font-bold text-purple-600 dark:text-purple-400">Create New Order</DialogTitle>
+          <DialogDescription className="text-gray-700 dark:text-gray-300">
             Add delicious menu items to your customer's order.
           </DialogDescription>
         </DialogHeader>
@@ -390,24 +401,38 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
           {/* Right Column - Menu Items */}
           <div className="space-y-4">
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center justify-between mb-4">
-                <Label htmlFor="category" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Menu Category</Label>
-                <Select
-                  value={selectedCategory}
-                  onValueChange={setSelectedCategory}
-                >
-                  <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Search and Category Controls */}
+              <div className="mb-4">
+                <div className="flex items-center mb-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
+                  <Search className="h-4 w-4 text-gray-500 ml-3" />
+                  <Input
+                    type="text"
+                    placeholder="Search menu items..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="category" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Menu Category</Label>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
+                    <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {isLoadingMenu ? (
