@@ -93,19 +93,30 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
     },
     onSuccess: (data) => {
       console.log('Order created successfully:', data);
+      console.log('Order data structure received from server:', JSON.stringify(data, null, 2));
+      
+      if (!data || !data.id || !data.orderNumber) {
+        console.error('Warning: Order data is incomplete. Missing critical fields:', data);
+      }
       
       // Optimistically update the orders cache with the new order
       queryClient.setQueryData(['/api/orders'], (oldData: any[] | undefined) => {
-        if (!oldData) return [data];
+        if (!oldData) {
+          console.log('No existing orders data, creating new array with just this order');
+          return [data];
+        }
+        console.log('Adding new order to existing orders data. New total:', oldData.length + 1);
         return [data, ...oldData];
       });
       
       // Then invalidate all related queries 
+      console.log('Invalidating orders query cache');
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
       
       // Immediately refetch the orders to ensure consistent data
+      console.log('Triggering immediate refetch of orders');
       queryClient.refetchQueries({ queryKey: ['/api/orders'] });
       
       toast({

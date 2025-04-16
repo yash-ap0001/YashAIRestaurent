@@ -151,20 +151,31 @@ export default function SimplifiedDashboard() {
         // For new orders, we need to handle them specially to ensure they show up immediately
         if (data.type === 'new_order') {
           console.log('New order received via WebSocket:', data);
+          console.log('New order data structure:', JSON.stringify(data, null, 2));
           
           // Immediately update the orders query data with the new order
           if (data.data && data.data.id) {
+            console.log('Adding new order to query cache. Order ID:', data.data.id, 'Order Number:', data.data.orderNumber);
+            
             // Try to optimistically add the new order to the existing query data
             queryClient.setQueryData(['/api/orders'], (oldData: Order[] | undefined) => {
-              if (!oldData) return [data.data];
+              if (!oldData) {
+                console.log('No existing orders data, creating new array with just this order');
+                return [data.data];
+              }
               
               // Check if this order already exists to avoid duplicates
               const orderExists = oldData.some(order => order.id === data.data.id);
+              console.log('Order exists in cache already?', orderExists);
+              
               if (orderExists) return oldData;
               
               // Add the new order at the beginning of the array
+              console.log('Adding new order to the beginning of orders array. New length:', oldData.length + 1);
               return [data.data, ...oldData];
             });
+          } else {
+            console.error('Invalid order data structure received:', data);
           }
           
           // Then invalidate all related queries for consistency
