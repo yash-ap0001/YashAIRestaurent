@@ -1,57 +1,16 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Badge } from "@/components/ui/badge";
-import { OrderForm } from "@/components/orders/OrderForm";
-
-import { 
-  Search,
-  Plus,
-  PlusCircle,
-  Clock,
-  ChefHat,
-  Utensils,
-  CircleCheck,
-  CircleDot,
-  ReceiptText,
-  Mail,
-  Phone,
-  MessageSquare,
-  Github,
-  Smartphone,
-  Loader2,
-  Filter,
-  Info,
-  ClipboardCheck,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, CircleCheck, ChefHat, Utensils, ClipboardList, ClipboardCheck, Timer, Phone, Smartphone, Search, Globe, User, UserPlus, ReceiptText, CreditCard, PanelLeft, PanelRight, Mail } from "lucide-react";
+import { SiZomato, SiSwiggy } from "react-icons/si";
+import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Order {
   id: number;
@@ -106,45 +65,90 @@ interface NewOrderFormData {
   }[];
 }
 
+// Utility function to format currency
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
+// Function to get appropriate icon for order source
+const getSourceIcon = (source: string) => {
+  switch (source.toLowerCase()) {
+    case 'zomato':
+      return <SiZomato className="h-3 w-3" />;
+    case 'swiggy':
+      return <SiSwiggy className="h-3 w-3" />;
+    case 'phone':
+      return <Phone className="h-3 w-3" />;
+    case 'whatsapp':
+      return <Smartphone className="h-3 w-3" />;
+    case 'manual':
+      return <User className="h-3 w-3" />;
+    case 'ai':
+      return <Globe className="h-3 w-3" />;
+    default:
+      return <Globe className="h-3 w-3" />;
+  }
+};
+
+// Status colors for badges
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'bg-amber-200 text-amber-800';
+    case 'preparing':
+      return 'bg-emerald-200 text-emerald-800';
+    case 'ready':
+      return 'bg-blue-200 text-blue-800';
+    case 'completed':
+      return 'bg-purple-200 text-purple-800';
+    case 'billed':
+      return 'bg-gray-200 text-gray-800';
+    default:
+      return 'bg-neutral-200 text-neutral-800';
+  }
+};
+
 export default function SimplifiedDashboard() {
-  const { toast } = useToast();
-  const [isCreateOrderOpen, setIsCreateOrderOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
-  
-  // Fetch orders
-  const { 
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Queries for data
+  const {
     data: orders = [],
-    isLoading: isOrdersLoading,
+    isLoading: isLoadingOrders,
     error: ordersError,
-  } = useQuery<Order[], Error>({
+  } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
-    refetchInterval: 15000, // Refresh every 15 seconds
   });
-  
-  // Fetch kitchen tokens
+
   const {
     data: kitchenTokens = [],
-    isLoading: isKitchenTokensLoading,
-  } = useQuery<KitchenToken[], Error>({
+    isLoading: isLoadingTokens,
+    error: tokensError,
+  } = useQuery<KitchenToken[]>({
     queryKey: ["/api/kitchen-tokens"],
-    refetchInterval: 15000,
   });
-  
-  // Fetch bills
+
   const {
     data: bills = [],
-    isLoading: isBillsLoading,
-  } = useQuery<Bill[], Error>({
+    isLoading: isLoadingBills,
+    error: billsError,
+  } = useQuery<Bill[]>({
     queryKey: ["/api/bills"],
-    refetchInterval: 15000,
   });
-  
-  // Mutation for updating order status
+
+  // Mutation to update order status
   const updateOrderMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      const res = await apiRequest("PATCH", `/api/orders/${id}`, { status });
-      return await res.json();
+    mutationFn: async (orderData: { id: number; status: string }) => {
+      const response = await apiRequest("PATCH", `/api/orders/${orderData.id}`, {
+        status: orderData.status,
+      });
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
@@ -155,71 +159,30 @@ export default function SimplifiedDashboard() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: `Failed to update order: ${error.message}`,
+        title: "Failed to update order",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
-  
-  // Mutation for creating kitchen token
-  const createKitchenTokenMutation = useMutation({
-    mutationFn: async (orderId: number) => {
-      const res = await apiRequest("POST", "/api/kitchen-tokens", { orderId });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/kitchen-tokens"] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: `Failed to create kitchen token: ${error.message}`,
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Mutation for creating bill
-  const createBillMutation = useMutation({
-    mutationFn: async (orderId: number) => {
-      const res = await apiRequest("POST", "/api/bills", { orderId });
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/bills"] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: `Failed to create bill: ${error.message}`,
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Mutation for creating a new order
+
+  // Mutation for creating new order
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: NewOrderFormData) => {
-      const res = await apiRequest("POST", "/api/orders", {
-        ...orderData,
-        status: "pending",
-        orderSource: "manual"
-      });
-      return await res.json();
+      const response = await apiRequest("POST", "/api/orders", orderData);
+      return await response.json();
     },
     onSuccess: () => {
-      setIsCreateOrderOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       toast({
         title: "Order created",
-        description: "A new order has been created successfully.",
+        description: "The new order has been created successfully.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: `Failed to create order: ${error.message}`,
+        title: "Failed to create order",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -228,687 +191,514 @@ export default function SimplifiedDashboard() {
   // Handle drag and drop
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
-    
-    // If there's no destination or the item was dropped back to its original position
-    if (!destination || 
-        (destination.droppableId === source.droppableId && 
+
+    // Dropped outside a droppable area or in the same position
+    if (!destination || (destination.droppableId === source.droppableId && 
         destination.index === source.index)) {
       return;
     }
     
     // Find the order that was dragged
     const orderId = parseInt(draggableId);
-    const order = orders.find(o => o.id === orderId);
+    const order = orders.find(order => order.id === orderId);
     
     if (!order) return;
     
-    // Determine the new status based on the destination droppableId
-    let newStatus = "";
+    // Determine new status based on destination droppable
+    let newStatus = destination.droppableId;
     
-    switch (destination.droppableId) {
+    // Update order with new status
+    updateOrderMutation.mutate({ id: orderId, status: newStatus });
+  };
+
+  // Get the next status for an order
+  const getNextStatus = (currentStatus: string) => {
+    switch (currentStatus) {
       case "pending":
-        newStatus = "pending";
-        break;
+        return "preparing";
       case "preparing":
-        newStatus = "preparing";
-        break;
+        return "ready";
       case "ready":
-        newStatus = "ready";
-        break;
+        return "completed";
       case "completed":
-        newStatus = "completed";
-        break;
-      case "billed":
-        newStatus = "billed";
-        break;
+        return "billed";
       default:
-        return;
-    }
-    
-    // If status is the same, no need to update
-    if (order.status === newStatus) return;
-    
-    // Process side effects of status change
-    const hasToken = kitchenTokens.some((token: KitchenToken) => token.orderId === order.id);
-    const hasBill = bills.some((bill: Bill) => bill.orderId === order.id);
-    
-    // Update order status and trigger any needed side effects
-    updateOrderMutation.mutate(
-      { id: order.id, status: newStatus },
-      {
-        onSuccess: () => {
-          // Create kitchen token if moving to preparing and no token exists
-          if (newStatus === "preparing" && !hasToken) {
-            createKitchenTokenMutation.mutate(order.id);
-          }
-          
-          // Create bill if moving to billed and no bill exists
-          if (newStatus === "billed" && !hasBill) {
-            createBillMutation.mutate(order.id);
-          }
-        }
-      }
-    );
-  };
-  
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
-    }).format(amount);
-  };
-  
-  // Get appropriate icon for order source
-  const getSourceIcon = (source: string) => {
-    switch (source) {
-      case "manual":
-        return <CircleDot className="h-3 w-3" />;
-      case "phone":
-        return <Phone className="h-3 w-3" />;
-      case "whatsapp":
-        return <MessageSquare className="h-3 w-3" />;
-      case "zomato":
-      case "swiggy":
-        return <Github className="h-3 w-3" />;
-      case "ai":
-      case "ai_simulator":
-        return <Info className="h-3 w-3" />;
-      default:
-        return <Smartphone className="h-3 w-3" />;
+        return currentStatus;
     }
   };
-  
-  // Function to handle order progression
+
+  // Progress an order to the next status
   const progressOrder = (order: Order) => {
-    let newStatus = "";
-    
-    switch (order.status) {
-      case "pending":
-        newStatus = "preparing";
-        break;
-      case "preparing":
-        newStatus = "ready";
-        break;
-      case "ready":
-        newStatus = "completed";
-        break;
-      case "completed":
-        newStatus = "billed";
-        break;
-      default:
-        return;
-    }
-    
-    // Check for side effects
+    const nextStatus = getNextStatus(order.status);
+    updateOrderMutation.mutate({ id: order.id, status: nextStatus });
+  };
+
+  // Check if tokens or bills are available for order
+  const getOrderTokenBillStatus = (order: Order) => {
     const hasToken = kitchenTokens.some((token: KitchenToken) => token.orderId === order.id);
     const hasBill = bills.some((bill: Bill) => bill.orderId === order.id);
     
-    updateOrderMutation.mutate(
-      { id: order.id, status: newStatus },
-      {
-        onSuccess: () => {
-          // Create kitchen token if moving to preparing and no token exists
-          if (newStatus === "preparing" && !hasToken) {
-            createKitchenTokenMutation.mutate(order.id);
-          }
-          
-          // Create bill if moving to billed and no bill exists
-          if (newStatus === "billed" && !hasBill) {
-            createBillMutation.mutate(order.id);
-          }
-        }
-      }
-    );
+    return {
+      hasToken,
+      hasBill
+    };
   };
-  
-  // Apply search and sorting
-  const filteredOrders = orders
-    .filter((order: Order) => {
-      if (!searchTerm) return true;
-      return (
-        order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.tableNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.orderSource.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    })
-    .sort((a: Order, b: Order) => {
-      switch (sortBy) {
-        case "newest":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case "oldest":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        case "amount-high":
-          return b.totalAmount - a.totalAmount;
-        case "amount-low":
-          return a.totalAmount - b.totalAmount;
-        default:
-          return 0;
-      }
-    });
-  
-  if (isOrdersLoading || isKitchenTokensLoading || isBillsLoading) {
+
+  // Filter orders by search term
+  const filteredOrders = orders.filter((order: Order) => {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.tableNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.orderSource.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }).sort((a: Order, b: Order) => {
+    // Sort by timestamp, most recent first
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  // Loading state
+  if (isLoadingOrders || isLoadingTokens || isLoadingBills) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-2 text-neutral-600">Loading orders...</p>
+        <div className="mt-4 text-muted-foreground">Loading dashboard data...</div>
       </div>
     );
   }
-  
-  if (ordersError) {
+
+  // Error state
+  if (ordersError || tokensError || billsError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <p className="text-red-500">Error loading orders: {ordersError.message}</p>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-destructive font-bold">Error loading dashboard data</div>
+        <div className="mt-4 text-muted-foreground">
+          {ordersError?.message || tokensError?.message || billsError?.message}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Simplified Dashboard</h1>
-        <Dialog open={isCreateOrderOpen} onOpenChange={setIsCreateOrderOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Order
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Order</DialogTitle>
-              <DialogDescription>
-                Enter order details below to create a new order in the system.
-              </DialogDescription>
-            </DialogHeader>
-            <OrderForm />
-          </DialogContent>
-        </Dialog>
-      </div>
-      
-      {/* Stats Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-500">Pending Orders</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-2xl font-bold">
-              {orders.filter((order: Order) => ["pending", "preparing"].includes(order.status)).length}
+    <div className="container mx-auto px-4 py-6">
+      <Tabs defaultValue="board">
+        <div className="flex items-center justify-between mb-6">
+          <TabsList>
+            <TabsTrigger value="board" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ClipboardList className="h-4 w-4 mr-2" />
+              Order Board
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Timer className="h-4 w-4 mr-2" />
+              Today's Stats
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search order or table..."
+              className="pl-10 w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <TabsContent value="board" className="space-y-6 mt-2">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold">Today's Orders</h1>
+            <div className="flex items-center text-sm">
+              <div className="flex items-center mr-4">
+                <div className="h-3 w-3 rounded-full bg-amber-600 mr-2"></div>
+                <span>Pending: </span>
+                <span className="font-bold ml-1">
+                  {orders.filter((order: Order) => ["pending", "preparing"].includes(order.status)).length}
+                </span>
+              </div>
+              <div className="flex items-center mr-4">
+                <div className="h-3 w-3 rounded-full bg-blue-600 mr-2"></div>
+                <span>Ready: </span>
+                <span className="font-bold ml-1">
+                  {orders.filter((order: Order) => order.status === "ready").length}
+                </span>
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Orders waiting to be processed
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-500">Ready Orders</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-2xl font-bold">
-              {orders.filter((order: Order) => order.status === "ready").length}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Orders ready to be served
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-neutral-500">Today's Revenue</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-2xl font-bold">
-              {formatCurrency(
-                orders
-                  .filter(order => order.status === "billed" && 
-                           new Date(order.createdAt).toDateString() === new Date().toDateString())
-                  .reduce((sum, order) => sum + order.totalAmount, 0)
-              )}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Total revenue from billed orders today
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Main Dashboard */}
-      <Card>
-          <CardHeader>
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-              <div className="relative w-full md:w-96">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search orders by number, table, or source..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+          </div>
+
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+              
+              {/* Pending Orders Column */}
+              <div className="flex flex-col space-y-3">
+                <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                  <ClipboardList className="h-5 w-5 mr-2" />
+                  Pending Orders
+                </div>
+                <Droppable droppableId="pending">
+                  {(provided) => (
+                    <div 
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-amber-600 to-amber-800"
+                    >
+                      {orders
+                          .filter(order => order.status === "pending")
+                          .map((order, index) => (
+                            <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
+                              {(provided, snapshot) => (
+                                <div 
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-amber-600 to-amber-800 order-card-text"
+                                  style={{
+                                    ...provided.draggableProps.style,
+                                    backgroundColor: snapshot.isDragging ? '#ffc107' : undefined,
+                                    transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
+                                  }}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                      <span className="flex items-center">
+                                        {getSourceIcon(order.orderSource)}
+                                        <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                      </span>
+                                    </Badge>
+                                  </div>
+                                  
+                                  <div className="text-xs text-neutral-500 mb-2">
+                                    {format(new Date(order.createdAt), "h:mm a")}
+                                  </div>
+                                  
+                                  <div className="flex justify-between items-center mt-2">
+                                    <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                                    
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      disabled={updateOrderMutation.isPending}
+                                      onClick={() => progressOrder(order)}
+                                      className="h-7 px-2"
+                                    >
+                                      {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      ) : (
+                                        <ChefHat className="h-3 w-3 mr-1" />
+                                      )}
+                                      <span className="text-xs">Start</span>
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Sort by:</span>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Sort orders" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest first</SelectItem>
-                    <SelectItem value="oldest">Oldest first</SelectItem>
-                    <SelectItem value="amount-high">Amount (high to low)</SelectItem>
-                    <SelectItem value="amount-low">Amount (low to high)</SelectItem>
-                  </SelectContent>
-                </Select>
+              {/* Preparing Orders Column */}
+              <div className="flex flex-col space-y-3">
+                <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                  <ChefHat className="h-5 w-5 mr-2" />
+                  Preparing
+                </div>
+                <Droppable droppableId="preparing">
+                  {(provided) => (
+                    <div 
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-emerald-600 to-emerald-800"
+                    >
+                      {orders
+                          .filter(order => order.status === "preparing")
+                          .map((order, index) => (
+                            <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
+                              {(provided, snapshot) => (
+                                <div 
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-600 to-emerald-800 order-card-text"
+                                  style={{
+                                    ...provided.draggableProps.style,
+                                    backgroundColor: snapshot.isDragging ? '#ffa4b0' : undefined,
+                                    transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
+                                  }}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                      <span className="flex items-center">
+                                        {getSourceIcon(order.orderSource)}
+                                        <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                      </span>
+                                    </Badge>
+                                  </div>
+                                  
+                                  <div className="text-xs text-neutral-500 mb-2">
+                                    {format(new Date(order.createdAt), "h:mm a")}
+                                  </div>
+                                  
+                                  <div className="flex justify-between items-center mt-2">
+                                    <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                                    
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      disabled={updateOrderMutation.isPending}
+                                      onClick={() => progressOrder(order)}
+                                      className="h-7 px-2"
+                                    >
+                                      {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      ) : (
+                                        <ClipboardCheck className="h-3 w-3 mr-1" />
+                                      )}
+                                      <span className="text-xs">Ready</span>
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+              
+              {/* Ready Orders Column */}
+              <div className="flex flex-col space-y-3">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                  <Utensils className="h-5 w-5 mr-2" />
+                  Ready to Serve
+                </div>
+                <Droppable droppableId="ready">
+                  {(provided) => (
+                    <div 
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-blue-600 to-blue-800"
+                    >
+                      {orders
+                          .filter(order => order.status === "ready")
+                          .map((order, index) => (
+                            <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
+                              {(provided, snapshot) => (
+                                <div 
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-600 to-blue-800 order-card-text"
+                                  style={{
+                                    ...provided.draggableProps.style,
+                                    backgroundColor: snapshot.isDragging ? '#ff87b9' : undefined,
+                                    transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
+                                  }}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                      <span className="flex items-center">
+                                        {getSourceIcon(order.orderSource)}
+                                        <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                      </span>
+                                    </Badge>
+                                  </div>
+                                  
+                                  <div className="text-xs text-neutral-500 mb-2">
+                                    {format(new Date(order.createdAt), "h:mm a")}
+                                  </div>
+                                  
+                                  <div className="flex justify-between items-center mt-2">
+                                    <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                                    
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      disabled={updateOrderMutation.isPending}
+                                      onClick={() => progressOrder(order)}
+                                      className="h-7 px-2"
+                                    >
+                                      {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      ) : (
+                                        <CircleCheck className="h-3 w-3 mr-1" />
+                                      )}
+                                      <span className="text-xs">Complete</span>
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+              
+              {/* Completed Orders Column */}
+              <div className="flex flex-col space-y-3">
+                <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                  <CircleCheck className="h-5 w-5 mr-2" />
+                  Completed
+                </div>
+                <Droppable droppableId="completed">
+                  {(provided) => (
+                    <div 
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-purple-600 to-purple-800"
+                    >
+                      {orders
+                          .filter(order => order.status === "completed")
+                          .map((order, index) => (
+                            <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
+                              {(provided, snapshot) => (
+                                <div 
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-600 to-purple-800 order-card-text"
+                                  style={{
+                                    ...provided.draggableProps.style,
+                                    backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
+                                    transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
+                                  }}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                      <span className="flex items-center">
+                                        {getSourceIcon(order.orderSource)}
+                                        <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                      </span>
+                                    </Badge>
+                                  </div>
+                                  
+                                  <div className="text-xs text-neutral-500 mb-2">
+                                    {format(new Date(order.createdAt), "h:mm a")}
+                                  </div>
+                                  
+                                  <div className="flex justify-between items-center mt-2">
+                                    <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                                    
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      disabled={updateOrderMutation.isPending}
+                                      onClick={() => progressOrder(order)}
+                                      className="h-7 px-2"
+                                    >
+                                      {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      ) : (
+                                        <ReceiptText className="h-3 w-3 mr-1" />
+                                      )}
+                                      <span className="text-xs">Bill</span>
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+              
+              {/* Billed Orders Column */}
+              <div className="flex flex-col space-y-3">
+                <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
+                  <CreditCard className="h-5 w-5 mr-2" />
+                  Billed
+                </div>
+                <Droppable droppableId="billed">
+                  {(provided) => (
+                    <div 
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-gray-600 to-gray-800"
+                    >
+                      {orders
+                          .filter(order => order.status === "billed")
+                          .map((order, index) => (
+                            <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
+                              {(provided, snapshot) => (
+                                <div 
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-gray-600 to-gray-800 order-card-text"
+                                  style={{
+                                    ...provided.draggableProps.style,
+                                    backgroundColor: snapshot.isDragging ? '#a4a4a4' : undefined,
+                                    transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
+                                  }}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                      <span className="flex items-center">
+                                        {getSourceIcon(order.orderSource)}
+                                        <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                                      </span>
+                                    </Badge>
+                                  </div>
+                                  
+                                  <div className="text-xs text-neutral-500 mb-2">
+                                    {format(new Date(order.createdAt), "h:mm a")}
+                                  </div>
+                                  
+                                  <div className="flex justify-between items-center mt-2">
+                                    <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                                    
+                                    <div className="flex items-center">
+                                      {getOrderTokenBillStatus(order).hasBill && (
+                                        <Badge className="mr-2 bg-green-700">
+                                          <ReceiptText className="h-3 w-3 mr-1" />
+                                          <span className="text-xs">Billed</span>
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               </div>
             </div>
-          </CardHeader>
+          </DragDropContext>
+        </TabsContent>
 
-          <CardContent className="pt-6">
-            {orders.length === 0 ? (
-              <div className="text-center p-8 bg-white rounded-lg shadow-sm mx-auto max-w-md">
-                <div className="text-[#7A0177] font-bold text-lg mb-2">No Orders Found</div>
-                <p className="text-neutral-600 mb-4">Create a new order to get started managing your restaurant.</p>
-                <Button variant="secondary" onClick={() => setIsCreateOrderOpen(true)} className="bg-[#F768A1] text-white hover:bg-[#C51B8A]">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Create New Order
-                </Button>
-              </div>
-            ) : (
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {/* Pending Orders Column */}
-                  <div className="flex flex-col space-y-3">
-                    <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-navy font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
-                      <Clock className="h-5 w-5 mr-2" />
-                      Pending Orders
-                    </div>
-                    <Droppable droppableId="pending">
-                      {(provided) => (
-                        <div 
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-amber-600 to-amber-800"
-                        >
-                          {orders.filter(order => order.status === "pending").length === 0 ? (
-                            <></>
-                          ) : (
-                            orders
-                              .filter(order => order.status === "pending")
-                              .map((order, index) => (
-                                <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div 
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-amber-600 to-amber-800 order-card-text"
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#ffc107' : undefined,
-                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
-                                      }}
-                                    >
-                                      <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                          <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
-                                        </div>
-                                        <Badge variant="outline" className="text-xs">
-                                          <span className="flex items-center">
-                                            {getSourceIcon(order.orderSource)}
-                                            <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
-                                          </span>
-                                        </Badge>
-                                      </div>
-                                      
-                                      <div className="text-xs text-neutral-500 mb-2">
-                                        {format(new Date(order.createdAt), "h:mm a")}
-                                      </div>
-                                      
-                                      <div className="flex justify-between items-center mt-2">
-                                        <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
-                                        
-                                        <Button
-                                          variant="secondary"
-                                          size="sm"
-                                          disabled={updateOrderMutation.isPending}
-                                          onClick={() => progressOrder(order)}
-                                          className="h-7 px-2"
-                                        >
-                                          {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
-                                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                          ) : (
-                                            <ChefHat className="h-3 w-3 mr-1" />
-                                          )}
-                                          <span className="text-xs">Start</span>
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
-                  
-                  {/* Preparing Orders Column */}
-                  <div className="flex flex-col space-y-3">
-                    <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
-                      <ChefHat className="h-5 w-5 mr-2" />
-                      Preparing
-                    </div>
-                    <Droppable droppableId="preparing">
-                      {(provided) => (
-                        <div 
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-emerald-600 to-emerald-800"
-                        >
-                          {orders.filter(order => order.status === "preparing").length === 0 ? (
-                            <></>
-                          ) : (
-                            orders
-                              .filter(order => order.status === "preparing")
-                              .map((order, index) => (
-                                <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div 
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-600 to-emerald-800 order-card-text"
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#ffa4b0' : undefined,
-                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
-                                      }}
-                                    >
-                                      <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                          <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
-                                        </div>
-                                        <Badge variant="outline" className="text-xs">
-                                          <span className="flex items-center">
-                                            {getSourceIcon(order.orderSource)}
-                                            <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
-                                          </span>
-                                        </Badge>
-                                      </div>
-                                      
-                                      <div className="text-xs text-neutral-500 mb-2">
-                                        {format(new Date(order.createdAt), "h:mm a")}
-                                      </div>
-                                      
-                                      <div className="flex justify-between items-center mt-2">
-                                        <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
-                                        
-                                        <Button
-                                          variant="secondary"
-                                          size="sm"
-                                          disabled={updateOrderMutation.isPending}
-                                          onClick={() => progressOrder(order)}
-                                          className="h-7 px-2"
-                                        >
-                                          {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
-                                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                          ) : (
-                                            <ClipboardCheck className="h-3 w-3 mr-1" />
-                                          )}
-                                          <span className="text-xs">Ready</span>
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
-                  
-                  {/* Ready Orders Column */}
-                  <div className="flex flex-col space-y-3">
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
-                      <Utensils className="h-5 w-5 mr-2" />
-                      Ready to Serve
-                    </div>
-                    <Droppable droppableId="ready">
-                      {(provided) => (
-                        <div 
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-blue-600 to-blue-800"
-                        >
-                          {orders.filter(order => order.status === "ready").length === 0 ? (
-                            <></>
-                          ) : (
-                            orders
-                              .filter(order => order.status === "ready")
-                              .map((order, index) => (
-                                <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div 
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-600 to-blue-800 order-card-text"
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#ff87b9' : undefined,
-                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
-                                      }}
-                                    >
-                                      <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                          <h3>#{order.orderNumber}</h3>
-                                          <div className="table-number">Table {order.tableNumber}</div>
-                                        </div>
-                                        <Badge variant="outline" className="text-xs">
-                                          <span className="flex items-center">
-                                            {getSourceIcon(order.orderSource)}
-                                            <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
-                                          </span>
-                                        </Badge>
-                                      </div>
-                                      
-                                      <div className="time mb-2">
-                                        {format(new Date(order.createdAt), "h:mm a")}
-                                      </div>
-                                      
-                                      <div className="flex justify-between items-center mt-2">
-                                        <div className="amount">{formatCurrency(order.totalAmount)}</div>
-                                        
-                                        <Button
-                                          variant="secondary"
-                                          size="sm"
-                                          disabled={updateOrderMutation.isPending}
-                                          onClick={() => progressOrder(order)}
-                                          className="h-7 px-2"
-                                        >
-                                          {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
-                                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                          ) : (
-                                            <CircleCheck className="h-3 w-3 mr-1" />
-                                          )}
-                                          <span className="text-xs">Complete</span>
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
-                  
-                  {/* Completed Orders Column */}
-                  <div className="flex flex-col space-y-3">
-                    <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
-                      <CircleCheck className="h-5 w-5 mr-2" />
-                      Completed
-                    </div>
-                    <Droppable droppableId="completed">
-                      {(provided) => (
-                        <div 
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-purple-600 to-purple-800"
-                        >
-                          {orders.filter(order => order.status === "completed").length === 0 ? (
-                            <></>
-                          ) : (
-                            orders
-                              .filter(order => order.status === "completed")
-                              .map((order, index) => (
-                                <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div 
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-600 to-purple-800 order-card-text"
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
-                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
-                                      }}
-                                    >
-                                      <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                          <h3>#{order.orderNumber}</h3>
-                                          <div className="table-number">Table {order.tableNumber}</div>
-                                        </div>
-                                        <Badge variant="outline" className="text-xs">
-                                          <span className="flex items-center">
-                                            {getSourceIcon(order.orderSource)}
-                                            <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
-                                          </span>
-                                        </Badge>
-                                      </div>
-                                      
-                                      <div className="time mb-2">
-                                        {format(new Date(order.createdAt), "h:mm a")}
-                                      </div>
-                                      
-                                      <div className="flex justify-between items-center mt-2">
-                                        <div className="amount">{formatCurrency(order.totalAmount)}</div>
-                                        
-                                        <Button
-                                          variant="secondary"
-                                          size="sm"
-                                          disabled={updateOrderMutation.isPending}
-                                          onClick={() => progressOrder(order)}
-                                          className="h-7 px-2"
-                                        >
-                                          {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
-                                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                          ) : (
-                                            <ReceiptText className="h-3 w-3 mr-1" />
-                                          )}
-                                          <span className="text-xs">Bill</span>
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
-                  
-                  {/* Billed Orders Column */}
-                  <div className="flex flex-col space-y-3">
-                    <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
-                      <ReceiptText className="h-5 w-5 mr-2" />
-                      Billed
-                    </div>
-                    <Droppable droppableId="billed">
-                      {(provided) => (
-                        <div 
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-gradient-to-r from-gray-600 to-gray-800"
-                        >
-                          {orders.filter(order => order.status === "billed").length === 0 ? (
-                            <></>
-                          ) : (
-                            orders
-                              .filter(order => order.status === "billed")
-                              .map((order, index) => (
-                                <Draggable key={order.id.toString()} draggableId={order.id.toString()} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div 
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-gray-600 to-gray-800 order-card-text"
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#80008a' : undefined,
-                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
-                                      }}
-                                    >
-                                      <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                          <h3>#{order.orderNumber}</h3>
-                                          <div className="table-number">Table {order.tableNumber}</div>
-                                        </div>
-                                        <Badge variant="outline" className="text-xs">
-                                          <span className="flex items-center">
-                                            {getSourceIcon(order.orderSource)}
-                                            <span className="ml-1">{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
-                                          </span>
-                                        </Badge>
-                                      </div>
-                                      
-                                      <div className="time mb-2">
-                                        {format(new Date(order.createdAt), "h:mm a")}
-                                      </div>
-                                      
-                                      <div className="flex justify-between items-center mt-2">
-                                        <div className="amount">{formatCurrency(order.totalAmount)}</div>
-                                        
-                                        <Badge variant="secondary" className="text-xs">
-                                          <span className="flex items-center">
-                                            <ReceiptText className="h-3 w-3 mr-1" />
-                                            <span className="ml-1">Paid</span>
-                                          </span>
-                                        </Badge>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
-                </div>
-              </DragDropContext>
-            )}
-          </CardContent>
-      </Card>
+        <TabsContent value="stats" className="mt-2">
+          <DashboardStats />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
