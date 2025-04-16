@@ -461,6 +461,36 @@ export default function SimplifiedDashboard() {
           </TabsList>
 
           <div className="flex items-center gap-3">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => {
+                // Create a quick test order with minimal data
+                const newOrder = {
+                  tableNumber: "T1",
+                  orderItems: [
+                    { 
+                      menuItemId: 1, 
+                      quantity: 1, 
+                      price: 370, 
+                      specialInstructions: "Single-click test order" 
+                    }
+                  ]
+                };
+                
+                createOrderMutation.mutate(newOrder);
+              }}
+              disabled={createOrderMutation.isPending}
+              className="bg-gradient-to-r from-amber-500 to-amber-700 text-white hover:from-amber-600 hover:to-amber-800"
+            >
+              {createOrderMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-1" />
+              )}
+              <span>Quick Order</span>
+            </Button>
+
             <div className="relative">
               <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -629,10 +659,10 @@ export default function SimplifiedDashboard() {
           />
 
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4 w-full max-w-full">
               
               {/* Pending Orders Column */}
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     <ClipboardList className="h-5 w-5 mr-2" />
@@ -738,7 +768,7 @@ export default function SimplifiedDashboard() {
               </div>
               
               {/* Preparing Orders Column */}
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     <ChefHat className="h-5 w-5 mr-2" />
@@ -844,7 +874,7 @@ export default function SimplifiedDashboard() {
               </div>
               
               {/* Ready Orders Column */}
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     <Utensils className="h-5 w-5 mr-2" />
@@ -950,7 +980,7 @@ export default function SimplifiedDashboard() {
               </div>
               
               {/* Completed Orders Column */}
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     <CircleCheck className="h-5 w-5 mr-2" />
@@ -1056,7 +1086,7 @@ export default function SimplifiedDashboard() {
               </div>
               
               {/* Billed Orders Column */}
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     <CreditCard className="h-5 w-5 mr-2" />
