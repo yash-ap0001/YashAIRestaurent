@@ -400,33 +400,33 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
 
           {/* Right Column - Menu Items */}
           <div className="space-y-4">
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
               {/* Search and Category Controls */}
               <div className="mb-4">
-                <div className="flex items-center mb-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
-                  <Search className="h-4 w-4 text-gray-500 ml-3" />
+                <div className="flex items-center mb-3 bg-black bg-opacity-95 border-2 border-purple-600 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
+                  <Search className="h-4 w-4 text-purple-400 ml-3" />
                   <Input
                     type="text"
                     placeholder="Search menu items..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-10 bg-transparent text-white placeholder:text-gray-400"
                   />
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="category" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Menu Category</Label>
+                  <Label htmlFor="category" className="text-sm font-semibold text-white">Menu Category</Label>
                   <Select
                     value={selectedCategory}
                     onValueChange={setSelectedCategory}
                   >
-                    <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                      <SelectValue placeholder="Select a category" />
+                    <SelectTrigger className="w-[180px] bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                      <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
+                    <SelectContent className="bg-black border-purple-600 text-white">
+                      <SelectItem value="all" className="text-white focus:bg-purple-800 focus:text-white">All Categories</SelectItem>
                       {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
+                        <SelectItem key={category} value={category} className="text-white focus:bg-purple-800 focus:text-white">
                           {category}
                         </SelectItem>
                       ))}
@@ -453,25 +453,25 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                         onClick={() => menuItem.isAvailable && addOrderItem(menuItem)}
                         className={`
                           relative cursor-pointer rounded-xl p-3 transition-all duration-200
-                          ${!menuItem.isAvailable ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-900' : 
-                            isInOrder ? 'bg-purple-50 border-2 border-purple-200 dark:bg-purple-900/30 dark:border-purple-700' : 
-                            'bg-white hover:bg-purple-50 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-md'}
+                          ${!menuItem.isAvailable ? 'opacity-50 cursor-not-allowed bg-gray-900' : 
+                            isInOrder ? 'bg-purple-900/40 border-2 border-purple-600' : 
+                            'bg-gray-900 hover:bg-purple-900/30 border border-gray-800 hover:border-purple-600 hover:shadow-md'}
                         `}
                       >
                         {isInOrder && (
-                          <div className="absolute -top-2 -right-2 bg-purple-500 text-white h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold">
+                          <div className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold">
                             {existingItem.quantity}
                           </div>
                         )}
                         
-                        <div className="font-bold text-gray-800 dark:text-gray-200">{menuItem.name}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-1">{menuItem.description}</div>
+                        <div className="font-bold text-white">{menuItem.name}</div>
+                        <div className="text-xs text-gray-400 line-clamp-1 mt-1">{menuItem.description}</div>
                         <div className="mt-2 flex justify-between items-center">
-                          <div className="text-sm font-extrabold text-purple-700 dark:text-purple-400">{formatCurrency(menuItem.price)}</div>
+                          <div className="text-sm font-extrabold text-purple-400">{formatCurrency(menuItem.price)}</div>
                           {menuItem.dietaryInfo && menuItem.dietaryInfo.length > 0 && (
                             <div className="flex space-x-1">
                               {menuItem.dietaryInfo.map((info, i) => (
-                                <span key={i} className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">
+                                <span key={i} className="text-[10px] px-1.5 py-0.5 bg-purple-900/50 text-purple-300 border border-purple-700 rounded-full">
                                   {info}
                                 </span>
                               ))}

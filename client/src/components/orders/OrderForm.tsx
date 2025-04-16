@@ -422,38 +422,38 @@ export function OrderForm() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <FormLabel className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <div className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                <FormLabel className="flex items-center gap-2 text-sm font-semibold text-white">
                   <span>Add Menu Items</span>
                 </FormLabel>
                 
                 {/* Search and Category Filters */}
                 <div className="space-y-3 mb-3">
                   {/* Search Input */}
-                  <div className="flex items-center bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
-                    <Search className="h-4 w-4 text-gray-500 ml-3" />
+                  <div className="flex items-center bg-black bg-opacity-95 border-2 border-purple-600 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
+                    <Search className="h-4 w-4 text-purple-400 ml-3" />
                     <Input
                       type="text"
                       placeholder="Search menu items..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
+                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-10 bg-transparent text-white placeholder:text-gray-400"
                     />
                   </div>
                   
                   {/* Category Filter */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Filter by category:</span>
+                    <span className="text-xs font-semibold text-white">Filter by category:</span>
                     <Select
                       value={selectedCategory}
                       onValueChange={setSelectedCategory}
                     >
-                      <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                        <SelectValue placeholder="Select a category" />
+                      <SelectTrigger className="w-[180px] bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <SelectValue placeholder="All Categories" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-black border-purple-600 text-white">
                         {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
+                          <SelectItem key={category} value={category} className="text-white focus:bg-purple-800 focus:text-white">
                             {category}
                           </SelectItem>
                         ))}
@@ -468,15 +468,15 @@ export function OrderForm() {
                     disabled={menuLoading}
                     onValueChange={(value) => addMenuItem(parseInt(value))}
                   >
-                    <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    <SelectTrigger className="w-full bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                       <SelectValue placeholder="Select menu item" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[300px]">
+                    <SelectContent className="max-h-[300px] bg-black border-purple-600 text-white">
                       {filteredMenuItems.map((item) => (
-                        <SelectItem key={item.id} value={item.id.toString()}>
+                        <SelectItem key={item.id} value={item.id.toString()} className="text-white focus:bg-purple-800 focus:text-white">
                           <div className="flex justify-between w-full">
                             <span>{item.name}</span>
-                            <span className="text-purple-600 dark:text-purple-400 font-semibold">₹{item.price}</span>
+                            <span className="text-purple-400 font-semibold">₹{item.price}</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -485,7 +485,7 @@ export function OrderForm() {
                 </div>
                 
                 {/* Display filtered items count */}
-                <div className="mt-2 text-xs text-gray-500">
+                <div className="mt-2 text-xs text-purple-400">
                   {filteredMenuItems.length} items found
                 </div>
               </div>
