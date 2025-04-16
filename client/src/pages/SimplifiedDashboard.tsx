@@ -519,8 +519,8 @@ export default function SimplifiedDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {/* Pending Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-amber-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
-                      <Clock className="h-4 w-4 mr-2" />
+                    <div className="bg-orange-600 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-orange-500">
+                      <Clock className="h-5 w-5 mr-2" />
                       Pending Orders
                     </div>
                     <Droppable droppableId="pending">
@@ -528,7 +528,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-amber-300 rounded-b-md shadow-md bg-amber-50"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-orange-400 rounded-b-md shadow-lg bg-gradient-to-b from-orange-50 to-amber-50"
                         >
                           {orders.filter(order => order.status === "pending").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No pending orders</div>
@@ -542,10 +542,11 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-amber-100 border-amber-400"
+                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-orange-100 to-amber-100 border-orange-400"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#fcd34d' : '#fef3c7'
+                                        backgroundColor: snapshot.isDragging ? '#ffb380' : undefined,
+                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
@@ -596,8 +597,8 @@ export default function SimplifiedDashboard() {
                   
                   {/* Preparing Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-blue-600 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
-                      <ChefHat className="h-4 w-4 mr-2" />
+                    <div className="bg-blue-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-blue-600">
+                      <ChefHat className="h-5 w-5 mr-2" />
                       Preparing
                     </div>
                     <Droppable droppableId="preparing">
@@ -605,7 +606,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-blue-300 rounded-b-md shadow-md bg-blue-50"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-blue-400 rounded-b-md shadow-lg bg-gradient-to-b from-blue-50 to-blue-100"
                         >
                           {orders.filter(order => order.status === "preparing").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No orders in preparation</div>
@@ -619,10 +620,11 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-blue-100 border-blue-400"
+                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-100 to-sky-100 border-blue-500"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#bfdbfe' : '#dbeafe'
+                                        backgroundColor: snapshot.isDragging ? '#93c5fd' : undefined,
+                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
@@ -673,8 +675,8 @@ export default function SimplifiedDashboard() {
                   
                   {/* Ready Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-emerald-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
-                      <Utensils className="h-4 w-4 mr-2" />
+                    <div className="bg-emerald-600 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-emerald-500">
+                      <Utensils className="h-5 w-5 mr-2" />
                       Ready to Serve
                     </div>
                     <Droppable droppableId="ready">
@@ -682,7 +684,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-emerald-300 rounded-b-md shadow-md bg-emerald-50"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-emerald-400 rounded-b-md shadow-lg bg-gradient-to-b from-emerald-50 to-emerald-100"
                         >
                           {orders.filter(order => order.status === "ready").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No ready orders</div>
@@ -696,10 +698,11 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-emerald-100 border-emerald-400"
+                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-100 to-green-100 border-emerald-500"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#a7f3d0' : '#d1fae5'
+                                        backgroundColor: snapshot.isDragging ? '#6ee7b7' : undefined,
+                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
@@ -750,8 +753,8 @@ export default function SimplifiedDashboard() {
                   
                   {/* Completed Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-indigo-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
-                      <CircleCheck className="h-4 w-4 mr-2" />
+                    <div className="bg-indigo-600 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-indigo-500">
+                      <CircleCheck className="h-5 w-5 mr-2" />
                       Completed
                     </div>
                     <Droppable droppableId="completed">
@@ -759,7 +762,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-indigo-300 rounded-b-md shadow-md bg-indigo-50"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-indigo-400 rounded-b-md shadow-lg bg-gradient-to-b from-indigo-50 to-indigo-100"
                         >
                           {orders.filter(order => order.status === "completed").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No completed orders</div>
@@ -773,10 +776,11 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-indigo-100 border-indigo-400"
+                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-indigo-100 to-violet-100 border-indigo-500"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#c7d2fe' : '#e0e7ff'
+                                        backgroundColor: snapshot.isDragging ? '#a5b4fc' : undefined,
+                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
@@ -827,8 +831,8 @@ export default function SimplifiedDashboard() {
                   
                   {/* Billed Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-slate-500 text-white font-medium px-3 py-1 rounded-t-md text-center flex items-center justify-center">
-                      <ReceiptText className="h-4 w-4 mr-2" />
+                    <div className="bg-purple-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-purple-600">
+                      <ReceiptText className="h-5 w-5 mr-2" />
                       Billed
                     </div>
                     <Droppable droppableId="billed">
@@ -836,7 +840,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-2 max-h-[70vh] overflow-y-auto p-3 border-2 border-slate-300 rounded-b-md shadow-md bg-slate-50"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-purple-400 rounded-b-md shadow-lg bg-gradient-to-b from-purple-50 to-purple-100"
                         >
                           {orders.filter(order => order.status === "billed").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No billed orders</div>
@@ -850,10 +854,11 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-md transition-all bg-slate-100 border-slate-400"
+                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-100 to-fuchsia-100 border-purple-500"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#cbd5e1' : '#f1f5f9'
+                                        backgroundColor: snapshot.isDragging ? '#d8b4fe' : undefined,
+                                        transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
