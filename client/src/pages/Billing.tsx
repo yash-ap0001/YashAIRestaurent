@@ -104,7 +104,7 @@ export default function Billing() {
             </div>
             <div className="flex-1 min-w-[200px] bg-gradient-to-r from-green-500 to-green-700 rounded-lg text-white p-4 shadow-md">
               <h3 className="text-lg font-semibold mb-1">Total Revenue</h3>
-              <p className="text-3xl font-bold">₹{bills.reduce((acc, bill) => acc + (bill.totalAmount || 0), 0).toLocaleString()}</p>
+              <p className="text-3xl font-bold">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
             </div>
           </div>
 
@@ -198,7 +198,7 @@ export default function Billing() {
                 </div>
                 <div className="bg-gradient-to-r from-green-500 to-green-700 p-4 rounded-lg text-white">
                   <h3 className="text-xl font-bold">Total Revenue</h3>
-                  <p className="text-3xl font-bold mt-2">₹{bills.reduce((acc, bill) => acc + (bill.totalAmount || 0), 0).toLocaleString()}</p>
+                  <p className="text-3xl font-bold mt-2">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
                 </div>
                 <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-4 rounded-lg text-white">
                   <h3 className="text-xl font-bold">Pending Bills</h3>
