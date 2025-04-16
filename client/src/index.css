@@ -62,4 +62,21 @@
   .order-card-text .amount {
     @apply font-bold text-white;
   }
+  
+  /* Apply these styles to all text elements in cards, regardless of class names */
+  .rounded-lg .text-xs {
+    color: white;
+    opacity: 0.8;
+  }
+  
+  .rounded-lg .font-bold {
+    color: white;
+  }
+  
+  .rounded-lg h3 {
+    color: white;
+    font-weight: 700;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
 }

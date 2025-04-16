@@ -548,7 +548,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#feebe2] to-[#fff4ee]"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#feebe2] to-[#fff4ee] order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#ffd2c0' : undefined,
@@ -626,7 +626,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#FBB4B9] to-[#ffd6dd]"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#FBB4B9] to-[#ffd6dd] order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#ffa4b0' : undefined,
@@ -860,7 +860,7 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#9a2ca0] to-[#e1c4e4] text-white"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-[#9a2ca0] to-[#e1c4e4] order-card-text"
                                       style={{
                                         ...provided.draggableProps.style,
                                         backgroundColor: snapshot.isDragging ? '#80008a' : undefined,
@@ -869,8 +869,8 @@ export default function SimplifiedDashboard() {
                                     >
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
-                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                          <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                          <h3>#{order.orderNumber}</h3>
+                                          <div className="table-number">Table {order.tableNumber}</div>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
                                           <span className="flex items-center">
@@ -880,12 +880,12 @@ export default function SimplifiedDashboard() {
                                         </Badge>
                                       </div>
                                       
-                                      <div className="text-xs text-neutral-500 mb-2">
+                                      <div className="time mb-2">
                                         {format(new Date(order.createdAt), "h:mm a")}
                                       </div>
                                       
                                       <div className="flex justify-between items-center mt-2">
-                                        <div className="font-bold">{formatCurrency(order.totalAmount)}</div>
+                                        <div className="amount">{formatCurrency(order.totalAmount)}</div>
                                         
                                         <Badge variant="secondary" className="text-xs">
                                           <span className="flex items-center">
