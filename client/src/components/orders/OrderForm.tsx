@@ -349,11 +349,11 @@ export function OrderForm() {
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6 h-full overflow-y-auto">
         <Card className="bg-black rounded-xl shadow-lg overflow-hidden border border-purple-800">
-          <CardHeader className="pb-4 pt-6 px-6 bg-gradient-to-br from-purple-600 to-pink-600">
+          <CardHeader className="pb-4 pt-6 px-6 bg-gray-900 border-b border-gray-800">
             <CardTitle className="text-2xl font-bold text-white">
               Create New Order
             </CardTitle>
-            <p className="text-purple-100 mt-1">Add delicious menu items to your customer's order.</p>
+            <p className="text-gray-400 mt-1">Add delicious menu items to your customer's order.</p>
           </CardHeader>
           <CardContent className="space-y-6 p-6 bg-gray-900 text-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -493,9 +493,9 @@ export function OrderForm() {
 
             {selectedItems.length > 0 && (
               <div className="space-y-4 mt-6">
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 text-white flex justify-between items-center rounded-t-xl">
+                <div className="bg-gray-800 p-2 text-white flex justify-between items-center rounded-t-xl border border-gray-700">
                   <h3 className="font-bold text-white">Your Order Summary</h3>
-                  <div className="text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                  <div className="text-sm bg-gray-700 px-2 py-1 rounded-full">
                     {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
                   </div>
                 </div>

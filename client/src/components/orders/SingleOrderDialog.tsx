@@ -269,9 +269,9 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-4xl h-[700px] overflow-hidden bg-black border border-purple-800 shadow-lg">
-        <DialogHeader className="pb-3 border-b border-purple-800 bg-gradient-to-br from-purple-600 to-pink-600">
+        <DialogHeader className="pb-3 border-b border-gray-800">
           <DialogTitle className="text-2xl font-bold text-white">Create New Order</DialogTitle>
-          <DialogDescription className="text-purple-100">
+          <DialogDescription className="text-gray-400">
             Add delicious menu items to your customer's order.
           </DialogDescription>
         </DialogHeader>
