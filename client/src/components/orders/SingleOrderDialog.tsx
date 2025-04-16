@@ -268,10 +268,10 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-950 shadow-lg">
-        <DialogHeader className="pb-3 border-b border-gray-200 dark:border-gray-800">
-          <DialogTitle className="text-2xl font-bold text-purple-600 dark:text-purple-400">Create New Order</DialogTitle>
-          <DialogDescription className="text-gray-700 dark:text-gray-300">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-black border border-purple-800 shadow-lg">
+        <DialogHeader className="pb-3 border-b border-purple-800 bg-gradient-to-br from-purple-600 to-pink-600">
+          <DialogTitle className="text-2xl font-bold text-white">Create New Order</DialogTitle>
+          <DialogDescription className="text-purple-100">
             Add delicious menu items to your customer's order.
           </DialogDescription>
         </DialogHeader>
@@ -279,19 +279,19 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           {/* Left Column - Order Details & Cart */}
           <div className="space-y-5">
-            <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="p-4 bg-black rounded-xl shadow-md border border-purple-800">
               <div className="space-y-3">
-                <Label htmlFor="tableNumber" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Table Number</Label>
+                <Label htmlFor="tableNumber" className="text-sm font-semibold text-white">Table Number</Label>
                 <Select
                   value={tableNumber}
                   onValueChange={(value) => setTableNumber(value)}
                 >
-                  <SelectTrigger className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                  <SelectTrigger className="bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                     <SelectValue placeholder="Select a table" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-black border-purple-600 text-white">
                     {Array.from({ length: 20 }, (_, i) => (
-                      <SelectItem key={i} value={`T${i + 1}`}>
+                      <SelectItem key={i} value={`T${i + 1}`} className="text-white focus:bg-purple-800 focus:text-white">
                         Table {i + 1}
                       </SelectItem>
                     ))}
@@ -300,8 +300,8 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <Label htmlFor="notes" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Order Notes</Label>
+            <div className="p-4 bg-black rounded-xl shadow-md border border-purple-800">
+              <Label htmlFor="notes" className="text-sm font-semibold text-white">Order Notes</Label>
               <div className="flex mt-2 items-start space-x-2">
                 <AlignLeft className="h-5 w-5 mt-2 text-purple-500 flex-shrink-0" />
                 <Textarea
@@ -309,14 +309,14 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                   placeholder="Enter any special instructions for the entire order..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="resize-none border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  className="resize-none border-2 border-purple-600 bg-black text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                   rows={3}
                 />
               </div>
             </div>
 
             {/* Order Items Summary */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div className="bg-black rounded-xl shadow-md border border-purple-800 overflow-hidden">
               <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 text-white flex justify-between items-center">
                 <h3 className="font-bold text-white">Your Order Summary</h3>
                 <div className="text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">
@@ -326,7 +326,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               
               <div className="p-3">
                 {orderItems.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <div className="text-center py-8 text-gray-400">
                     <div className="mb-2">👈 Add menu items from the right panel</div>
                     <div className="text-sm">Your order will appear here</div>
                   </div>
@@ -334,46 +334,46 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                   <div className="max-h-[300px] overflow-y-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-gray-50 dark:bg-gray-900">
-                          <TableHead className="font-bold">Item</TableHead>
-                          <TableHead className="text-center font-bold">Qty</TableHead>
-                          <TableHead className="text-right font-bold">Price</TableHead>
+                        <TableRow className="bg-gray-900 border-b border-purple-800">
+                          <TableHead className="font-bold text-white">Item</TableHead>
+                          <TableHead className="text-center font-bold text-white">Qty</TableHead>
+                          <TableHead className="text-right font-bold text-white">Price</TableHead>
                           <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                       </TableHeader>
-                      <TableBody>
+                      <TableBody className="text-white">
                         {orderItems.map((item, index) => (
-                          <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
-                            <TableCell className="font-medium">{item.menuItemName}</TableCell>
+                          <TableRow key={index} className="hover:bg-purple-900/30 border-b border-purple-800/50">
+                            <TableCell className="font-medium text-white">{item.menuItemName}</TableCell>
                             <TableCell className="text-center">
                               <div className="flex items-center justify-center space-x-1">
                                 <Button
                                   variant="outline"
                                   size="icon"
-                                  className="h-7 w-7 rounded-full border-purple-200 hover:bg-purple-100 hover:text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900"
+                                  className="h-7 w-7 rounded-full border-purple-600 text-purple-400 hover:bg-purple-900 hover:text-white"
                                   onClick={() => updateItemQuantity(index, -1)}
                                 >
                                   <Minus className="h-3 w-3" />
                                 </Button>
-                                <span className="w-6 text-center font-bold">{item.quantity}</span>
+                                <span className="w-6 text-center font-bold text-white">{item.quantity}</span>
                                 <Button
                                   variant="outline"
                                   size="icon"
-                                  className="h-7 w-7 rounded-full border-purple-200 hover:bg-purple-100 hover:text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900"
+                                  className="h-7 w-7 rounded-full border-purple-600 text-purple-400 hover:bg-purple-900 hover:text-white"
                                   onClick={() => updateItemQuantity(index, 1)}
                                 >
                                   <Plus className="h-3 w-3" />
                                 </Button>
                               </div>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right text-purple-300">
                               {formatCurrency(item.price * item.quantity)}
                             </TableCell>
                             <TableCell>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
+                                className="h-6 w-6 text-red-500 hover:bg-red-900/30 hover:text-red-300"
                                 onClick={() => removeOrderItem(index)}
                               >
                                 <X className="h-4 w-4" />
@@ -387,9 +387,9 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                 )}
                 
                 {orderItems.length > 0 && (
-                  <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg flex justify-between items-center">
-                    <span className="font-bold text-purple-900 dark:text-purple-300">Total Amount</span>
-                    <span className="text-xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <div className="mt-4 p-3 bg-purple-900/30 rounded-lg flex justify-between items-center border border-purple-600">
+                    <span className="font-bold text-purple-300">Total Amount</span>
+                    <span className="text-xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                       {formatCurrency(totalAmount)}
                     </span>
                   </div>
@@ -487,8 +487,8 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
           </div>
         </div>
 
-        <DialogFooter className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800">
-          <Button variant="outline" onClick={onClose} className="border-2">
+        <DialogFooter className="mt-6 pt-4 border-t border-purple-800">
+          <Button variant="outline" onClick={onClose} className="border-2 border-purple-600 text-purple-400 hover:bg-purple-900/30">
             Cancel
           </Button>
           <Button 
