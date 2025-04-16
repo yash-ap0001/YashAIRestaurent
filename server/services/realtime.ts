@@ -1,11 +1,9 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { storage } from '../storage';
 
-// Extend WebSocket interface with isAlive property
-declare module 'ws' {
-  interface WebSocket {
-    isAlive: boolean;
-  }
+// Custom interface for WebSocket with isAlive property
+interface ExtendedWebSocket extends WebSocket {
+  isAlive: boolean;
 }
 
 // Event types for WebSocket messages
@@ -24,42 +22,45 @@ const WS_EVENTS = {
 };
 
 // Store active clients
-let activeClients: Map<string, WebSocket> = new Map();
+let activeClients: Map<string, ExtendedWebSocket> = new Map();
 
 // Initialize the real-time service with WebSocket server
 export function initializeRealTimeService(wss: WebSocketServer) {
   console.log('Initializing real-time service with WebSocket server');
   
   wss.on('connection', (ws: WebSocket) => {
+    // Cast to our extended interface
+    const extWs = ws as ExtendedWebSocket;
+    
     // Generate a unique client ID
     const clientId = generateUniqueId();
-    activeClients.set(clientId, ws);
+    activeClients.set(clientId, extWs);
     
     console.log(`WebSocket client connected. Total clients: ${activeClients.size}`);
     
     // Send initial connection confirmation
-    sendToClient(ws, {
+    sendToClient(extWs, {
       type: WS_EVENTS.CONNECT,
       message: 'Connected to YashHotelBot real-time updates service',
       clientId
     });
     
     // Set up heartbeat check to detect disconnected clients
-    ws.isAlive = true;
-    ws.on('pong', () => {
-      ws.isAlive = true;
+    extWs.isAlive = true;
+    extWs.on('pong', () => {
+      extWs.isAlive = true;
     });
     
     // Handle incoming messages
-    ws.on('message', async (message: string) => {
+    extWs.on('message', async (message: string) => {
       try {
-        const parsedMessage = JSON.parse(message);
+        const parsedMessage = JSON.parse(message.toString());
         console.log('WebSocket received message:', parsedMessage);
         
         // Handle different message types
         switch (parsedMessage.type) {
           case WS_EVENTS.PING:
-            sendToClient(ws, { type: WS_EVENTS.PONG });
+            sendToClient(extWs, { type: WS_EVENTS.PONG });
             break;
             
           default:
@@ -67,7 +68,7 @@ export function initializeRealTimeService(wss: WebSocketServer) {
         }
       } catch (error) {
         console.error('Error processing WebSocket message:', error);
-        sendToClient(ws, {
+        sendToClient(extWs, {
           type: WS_EVENTS.ERROR,
           message: 'Invalid message format'
         });
@@ -75,7 +76,7 @@ export function initializeRealTimeService(wss: WebSocketServer) {
     });
     
     // Clean up on close
-    ws.on('close', () => {
+    extWs.on('close', () => {
       activeClients.delete(clientId);
       console.log(`WebSocket client disconnected. Remaining clients: ${activeClients.size}`);
     });
@@ -84,13 +85,14 @@ export function initializeRealTimeService(wss: WebSocketServer) {
   // Set up heartbeat interval to check for disconnected clients
   const heartbeatInterval = setInterval(() => {
     wss.clients.forEach((ws) => {
-      if (ws.isAlive === false) {
+      const extWs = ws as ExtendedWebSocket;
+      if (extWs.isAlive === false) {
         // Remove if not responding
-        return ws.terminate();
+        return extWs.terminate();
       }
       
-      ws.isAlive = false;
-      ws.ping();
+      extWs.isAlive = false;
+      extWs.ping();
     });
   }, 30000); // 30 second interval
   
@@ -192,7 +194,7 @@ function setupDataChangeListeners() {
 }
 
 // Utility to send messages to a specific client
-function sendToClient(client: WebSocket, data: any) {
+function sendToClient(client: ExtendedWebSocket | WebSocket, data: any) {
   if (client.readyState === WebSocket.OPEN) {
     client.send(JSON.stringify(data));
   }

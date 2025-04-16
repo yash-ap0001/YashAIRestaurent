@@ -36,7 +36,7 @@ import {
 import { processChatbotRequest } from "./services/chatbot";
 import { WebSocketServer } from 'ws';
 import { initializeRealTimeService, broadcastStatsUpdate } from './services/realtime';
-import { generateOrderNumber, generateTokenNumber, generateBillNumber, handleError } from './utils';
+import { generateOrderNumber, generateTokenNumber, generateBillNumber, initializeCounters, handleError } from './utils';
 import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
 import { handleVoiceCommand } from './services/voiceAssistant';
 import { setupAuth } from './auth';
@@ -82,18 +82,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   };
 
-  // Helper functions
-  const generateOrderNumber = () => {
-    return `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-  };
-
-  const generateTokenNumber = () => {
-    return `T${Math.floor(10 + Math.random() * 90)}`;
-  };
-
-  const generateBillNumber = () => {
-    return `BILL-${Math.floor(1000 + Math.random() * 9000)}`;
-  };
+  // Initialize counters for sequential ticket numbering
+  try {
+    // Get the latest data from storage to determine the starting counters
+    const orders = await storage.getOrders();
+    const tokens = await storage.getKitchenTokens();
+    const bills = await storage.getBills();
+    
+    // Extract the latest order, token, and bill numbers if they exist
+    const lastOrderNumber = orders.length > 0 ? 
+      orders.sort((a, b) => b.id - a.id)[0].orderNumber : null;
+      
+    const lastTokenNumber = tokens.length > 0 ? 
+      tokens.sort((a, b) => b.id - a.id)[0].tokenNumber : null;
+      
+    const lastBillNumber = bills.length > 0 ? 
+      bills.sort((a, b) => b.id - a.id)[0].billNumber : null;
+    
+    // Initialize the counters based on the latest numbers
+    initializeCounters(lastOrderNumber, lastTokenNumber, lastBillNumber);
+    
+    console.log('Sequential ticket numbering system initialized');
+  } catch (error) {
+    console.error('Error initializing sequential counter system:', error);
+    // Continue with default counter values if initialization fails
+  }
 
   // Helper function to handle AI-driven automatic order processing
   const setupAIAutomatedOrderProcessing = async (order: any) => {
