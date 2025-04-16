@@ -409,10 +409,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Broadcast the new order to all connected clients
-      console.log(`Broadcasting new order: ${order.orderNumber}, ID: ${order.id}`);
-      console.log('Order object for broadcasting:', JSON.stringify(order, null, 2));
-      broadcastNewOrder(order);
+      // Note: We'll broadcast the order at the end of this function
+      // to avoid duplicate broadcasts
  
       // Create a kitchen token if needed
       if (order.status !== "completed" && order.status !== "cancelled") {
@@ -501,7 +499,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         setupAIAutomatedOrderProcessing(order);
       }
       
-      // Broadcast the new order immediately for real-time updates
+      // Broadcast the new order once with detailed logging
+      console.log(`Broadcasting simulator order: ${order.orderNumber}, ID: ${order.id}`);
+      console.log('Simulator order object for broadcasting:', JSON.stringify(order, null, 2));
       broadcastNewOrder(order);
       
       res.setHeader('Content-Type', 'application/json');
