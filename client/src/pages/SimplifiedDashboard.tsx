@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -482,9 +483,21 @@ export default function SimplifiedDashboard() {
               
               {/* Pending Orders Column */}
               <div className="flex flex-col w-full">
-                <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
-                  <ClipboardList className="h-5 w-5 mr-2" />
-                  Pending Orders
+                <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                  <div className="flex items-center">
+                    <ClipboardList className="h-5 w-5 mr-2" />
+                    Pending Orders
+                  </div>
+                  {isSelectMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => selectAllInStatus("pending")}
+                      className="text-xs text-amber-50 hover:text-amber-200 pl-1 h-5"
+                    >
+                      Select All
+                    </Button>
+                  )}
                 </div>
                 <Droppable droppableId="pending">
                   {(provided) => (
@@ -501,18 +514,33 @@ export default function SimplifiedDashboard() {
                                 <div 
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-amber-600 to-amber-800 order-card-text"
+                                  {...(isSelectMode ? {} : provided.dragHandleProps)}
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-amber-600 to-amber-800 order-card-text ${
+                                    isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
+                                  }`}
                                   style={{
                                     ...provided.draggableProps.style,
                                     backgroundColor: snapshot.isDragging ? '#ffc107' : undefined,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
+                                  onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
                                 >
                                   <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    <div className="flex items-start gap-2">
+                                      {isSelectMode && (
+                                        <div className="relative flex items-center h-5 mt-1">
+                                          <Checkbox 
+                                            checked={selectedOrders.includes(order.id)} 
+                                            onCheckedChange={() => toggleOrderSelection(order.id)}
+                                            aria-label={`Select order ${order.orderNumber}`}
+                                            className="mr-2 h-4 w-4 rounded-sm"
+                                          />
+                                        </div>
+                                      )}
+                                      <div>
+                                        <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                        <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                      </div>
                                     </div>
                                     <Badge variant="outline" className="text-xs">
                                       <span className="flex items-center">
@@ -575,18 +603,33 @@ export default function SimplifiedDashboard() {
                                 <div 
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-600 to-emerald-800 order-card-text"
+                                  {...(isSelectMode ? {} : provided.dragHandleProps)}
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-600 to-emerald-800 order-card-text ${
+                                    isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
+                                  }`}
                                   style={{
                                     ...provided.draggableProps.style,
                                     backgroundColor: snapshot.isDragging ? '#ffa4b0' : undefined,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
+                                  onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
                                 >
                                   <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    <div className="flex items-start gap-2">
+                                      {isSelectMode && (
+                                        <div className="relative flex items-center h-5 mt-1">
+                                          <Checkbox 
+                                            checked={selectedOrders.includes(order.id)} 
+                                            onCheckedChange={() => toggleOrderSelection(order.id)}
+                                            aria-label={`Select order ${order.orderNumber}`}
+                                            className="mr-2 h-4 w-4 rounded-sm"
+                                          />
+                                        </div>
+                                      )}
+                                      <div>
+                                        <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                        <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                      </div>
                                     </div>
                                     <Badge variant="outline" className="text-xs">
                                       <span className="flex items-center">
@@ -649,18 +692,33 @@ export default function SimplifiedDashboard() {
                                 <div 
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-600 to-blue-800 order-card-text"
+                                  {...(isSelectMode ? {} : provided.dragHandleProps)}
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-600 to-blue-800 order-card-text ${
+                                    isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
+                                  }`}
                                   style={{
                                     ...provided.draggableProps.style,
                                     backgroundColor: snapshot.isDragging ? '#ff87b9' : undefined,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
+                                  onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
                                 >
                                   <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    <div className="flex items-start gap-2">
+                                      {isSelectMode && (
+                                        <div className="relative flex items-center h-5 mt-1">
+                                          <Checkbox 
+                                            checked={selectedOrders.includes(order.id)} 
+                                            onCheckedChange={() => toggleOrderSelection(order.id)}
+                                            aria-label={`Select order ${order.orderNumber}`}
+                                            className="mr-2 h-4 w-4 rounded-sm"
+                                          />
+                                        </div>
+                                      )}
+                                      <div>
+                                        <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                        <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                      </div>
                                     </div>
                                     <Badge variant="outline" className="text-xs">
                                       <span className="flex items-center">
@@ -723,18 +781,33 @@ export default function SimplifiedDashboard() {
                                 <div 
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-600 to-purple-800 order-card-text"
+                                  {...(isSelectMode ? {} : provided.dragHandleProps)}
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-600 to-purple-800 order-card-text ${
+                                    isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
+                                  }`}
                                   style={{
                                     ...provided.draggableProps.style,
                                     backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
+                                  onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
                                 >
                                   <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    <div className="flex items-start gap-2">
+                                      {isSelectMode && (
+                                        <div className="relative flex items-center h-5 mt-1">
+                                          <Checkbox 
+                                            checked={selectedOrders.includes(order.id)} 
+                                            onCheckedChange={() => toggleOrderSelection(order.id)}
+                                            aria-label={`Select order ${order.orderNumber}`}
+                                            className="mr-2 h-4 w-4 rounded-sm"
+                                          />
+                                        </div>
+                                      )}
+                                      <div>
+                                        <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                        <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                      </div>
                                     </div>
                                     <Badge variant="outline" className="text-xs">
                                       <span className="flex items-center">
@@ -797,18 +870,33 @@ export default function SimplifiedDashboard() {
                                 <div 
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-gray-600 to-gray-800 order-card-text"
+                                  {...(isSelectMode ? {} : provided.dragHandleProps)}
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-gray-600 to-gray-800 order-card-text ${
+                                    isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
+                                  }`}
                                   style={{
                                     ...provided.draggableProps.style,
                                     backgroundColor: snapshot.isDragging ? '#a4a4a4' : undefined,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
+                                  onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
                                 >
                                   <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                      <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
-                                      <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                    <div className="flex items-start gap-2">
+                                      {isSelectMode && (
+                                        <div className="relative flex items-center h-5 mt-1">
+                                          <Checkbox 
+                                            checked={selectedOrders.includes(order.id)} 
+                                            onCheckedChange={() => toggleOrderSelection(order.id)}
+                                            aria-label={`Select order ${order.orderNumber}`}
+                                            className="mr-2 h-4 w-4 rounded-sm"
+                                          />
+                                        </div>
+                                      )}
+                                      <div>
+                                        <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
+                                        <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
+                                      </div>
                                     </div>
                                     <Badge variant="outline" className="text-xs">
                                       <span className="flex items-center">
