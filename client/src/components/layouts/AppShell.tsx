@@ -229,6 +229,47 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <div className="flex items-center space-x-4">
+            {/* Quick Order Button */}
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="bg-purple-700 hover:bg-purple-600 border-purple-600 text-white"
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/simulator/create-order', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      tableNumber: 'T1',
+                      orderItems: [
+                        {
+                          menuItemId: 1,
+                          quantity: 1,
+                          price: 370,
+                          specialInstructions: 'Quick order test'
+                        }
+                      ]
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const data = await response.json();
+                    console.log('Quick order created:', data);
+                    alert(`Quick order created: #${data.orderNumber}`);
+                  } else {
+                    console.error('Failed to create quick order');
+                  }
+                } catch (error) {
+                  console.error('Error creating quick order:', error);
+                }
+              }}
+            >
+              <PlusSquare className="h-4 w-4 mr-1" />
+              Quick Order
+            </Button>
+            
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5 text-neutral-300" />
