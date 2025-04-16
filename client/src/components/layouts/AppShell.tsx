@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
-  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils
+  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils, Camera
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,6 +49,7 @@ const managementNavItems: NavItem[] = [
   { label: "Customers", href: "/customers", icon: <Users className="w-5 h-5" /> },
   { label: "Menu Items", href: "/menu-items", icon: <MenuSquare className="w-5 h-5" /> },
   { label: "AR Menu Preview", href: "/ar-menu-preview", icon: <Eye className="w-5 h-5" /> },
+  { label: "AR Menu Experience", href: "/ar-menu", icon: <Camera className="w-5 h-5" /> },
   { label: "Diet Plan", href: "/diet-plan", icon: <Apple className="w-5 h-5" /> },
   { label: "Reports", href: "/reports", icon: <BarChart3 className="w-5 h-5" /> },
 ];
@@ -110,6 +111,7 @@ export function AppShell({ children }: AppShellProps) {
     "/customers": ["admin", "manager"],
     "/menu-items": ["admin", "manager", "kitchen"],
     "/ar-menu-preview": ["admin", "manager", "waiter", "customer"],
+    "/ar-menu": ["admin", "manager", "waiter", "customer"],
     "/reports": ["admin", "manager"],
     "/external-integration": ["admin", "manager"],
     "/voice-assistant": ["admin", "manager"],

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, Scan } from 'lucide-react';
+import { Loader2, Scan, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -22,6 +22,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ARMenuViewer from '@/components/menu/ARMenuViewer';
+import ARCameraView from '@/components/menu/ARCameraView';
 import { MenuItem } from '@shared/schema';
 
 const ARMenuPage: React.FC = () => {
@@ -155,11 +156,28 @@ const ARMenuPage: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="h-full w-full pt-4">
-            {selectedMenuItem && (
-              <ARMenuViewer dishName={selectedMenuItem.name} />
-            )}
-          </div>
+          {/* Tabs for 3D view and AR camera view */}
+          <Tabs defaultValue="3d" className="h-full">
+            <TabsList>
+              <TabsTrigger value="3d">3D Preview</TabsTrigger>
+              <TabsTrigger value="ar">AR Experience</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="3d" className="h-[90%]">
+              {selectedMenuItem && (
+                <ARMenuViewer dishName={selectedMenuItem.name} />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="ar" className="h-[90%]">
+              {selectedMenuItem && (
+                <ARCameraView 
+                  dishName={selectedMenuItem.name} 
+                  onClose={() => setArDialogOpen(false)} 
+                />
+              )}
+            </TabsContent>
+          </Tabs>
           
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-muted-foreground">

@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+// Fix for OrbitControls import
+// @ts-ignore
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Button } from '@/components/ui/button';
 import { Loader2, Maximize2, Minimize2 } from 'lucide-react';
