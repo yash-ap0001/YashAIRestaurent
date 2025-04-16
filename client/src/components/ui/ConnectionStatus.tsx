@@ -1,93 +1,72 @@
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { Wifi, WifiOff } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Wifi, WifiOff } from "lucide-react";
 
-// This component displays the real-time connection status
+// WebSocket connection status component
 export function ConnectionStatus() {
-  const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [reconnecting, setReconnecting] = useState<boolean>(false);
-
+  const [connected, setConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  
   useEffect(() => {
-    // Function to check WebSocket connection
-    const checkConnection = () => {
-      // Determine if there's a WebSocket instance in the global socket variable
-      // We're accessing a global variable defined in queryClient.ts
-      const socketInstance = (window as any).appSocket;
-      
-      if (socketInstance && socketInstance.readyState === WebSocket.OPEN) {
-        setIsConnected(true);
-        setReconnecting(false);
-      } else if (socketInstance && socketInstance.readyState === WebSocket.CONNECTING) {
-        setIsConnected(false);
-        setReconnecting(true);
-      } else {
-        setIsConnected(false);
-        setReconnecting(false);
-      }
-    };
-
-    // Initial check
-    checkConnection();
-
-    // Set up interval to check connection status
-    const interval = setInterval(checkConnection, 2000);
-
-    // Listen for window-level custom events that signal WebSocket status changes
-    const handleOpen = () => {
-      setIsConnected(true);
-      setReconnecting(false);
-    };
-
-    const handleClose = () => {
-      setIsConnected(false);
-      setReconnecting(false);
-    };
-
+    // Check initial connection status
+    if (window.appSocket && window.appSocket.readyState === WebSocket.OPEN) {
+      setConnected(true);
+      setConnecting(false);
+    } else {
+      setConnected(false);
+    }
+    
+    // Event listeners for connection status changes
     const handleConnecting = () => {
-      setIsConnected(false);
-      setReconnecting(true);
+      setConnecting(true);
+      setConnected(false);
     };
-
-    window.addEventListener('ws:open', handleOpen);
-    window.addEventListener('ws:close', handleClose);
+    
+    const handleConnected = () => {
+      setConnected(true);
+      setConnecting(false);
+    };
+    
+    const handleDisconnected = () => {
+      setConnected(false);
+      setConnecting(false);
+    };
+    
+    // Register event listeners
     window.addEventListener('ws:connecting', handleConnecting);
-
+    window.addEventListener('ws:open', handleConnected);
+    window.addEventListener('ws:close', handleDisconnected);
+    
+    // Cleanup
     return () => {
-      clearInterval(interval);
-      window.removeEventListener('ws:open', handleOpen);
-      window.removeEventListener('ws:close', handleClose);
       window.removeEventListener('ws:connecting', handleConnecting);
+      window.removeEventListener('ws:open', handleConnected);
+      window.removeEventListener('ws:close', handleDisconnected);
     };
   }, []);
-
-  const getStatusText = () => {
-    if (isConnected) {
-      return "Connected to real-time notifications";
-    } else if (reconnecting) {
-      return "Reconnecting...";
-    } else {
-      return "Not connected to real-time notifications";
-    }
-  };
-
+  
   return (
     <TooltipProvider>
-      <Tooltip delayDuration={300}>
-        <TooltipTrigger className="flex items-center gap-1.5">
-          {isConnected ? (
-            <Wifi className="w-4 h-4 text-green-500" />
-          ) : reconnecting ? (
-            <Wifi className={cn(
-              "w-4 h-4 text-yellow-500",
-              "animate-pulse"
-            )} />
-          ) : (
-            <WifiOff className="w-4 h-4 text-red-500" />
-          )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="relative cursor-help">
+            {connected ? (
+              <Wifi className="h-5 w-5 text-green-500" />
+            ) : connecting ? (
+              <Wifi className="h-5 w-5 text-yellow-500 animate-pulse" />
+            ) : (
+              <WifiOff className="h-5 w-5 text-red-500" />
+            )}
+          </div>
         </TooltipTrigger>
-        <TooltipContent>
-          <p>{getStatusText()}</p>
+        <TooltipContent side="bottom">
+          <p>
+            {connected
+              ? "Connected to real-time updates"
+              : connecting
+              ? "Connecting to real-time updates..."
+              : "Disconnected from real-time updates"}
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

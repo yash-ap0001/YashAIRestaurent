@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
-  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye
+  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +23,7 @@ import { useAuth, UserRole } from "@/hooks/useAuth";
 import UserMenu from "@/components/auth/UserMenu";
 import { RoleBasedContent } from "@/components/auth/ProtectedRoute";
 import { ConnectionStatus } from "@/components/ui/ConnectionStatus";
+import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
 
 interface NavItem {
   label: string;
@@ -68,6 +69,7 @@ export function AppShell({ children }: AppShellProps) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [chatVisible, setChatVisible] = useState(false);
+  const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const { user, currentRole, setCurrentRole } = useAuth();
 
   const currentPage = mainNavItems.find(item => item.href === location) || 
@@ -232,46 +234,22 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <div className="flex items-center space-x-4">
-            {/* Quick Order Button */}
+            {/* Single Order Button */}
             <Button 
               variant="outline" 
               size="sm"
               className="bg-purple-700 hover:bg-purple-600 border-purple-600 text-white"
-              onClick={async () => {
-                try {
-                  const response = await fetch('/api/simulator/create-order', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      tableNumber: 'T1',
-                      orderItems: [
-                        {
-                          menuItemId: 1,
-                          quantity: 1,
-                          price: 370,
-                          specialInstructions: 'Quick order test'
-                        }
-                      ]
-                    }),
-                  });
-                  
-                  if (response.ok) {
-                    const data = await response.json();
-                    console.log('Quick order created:', data);
-                    alert(`Quick order created: #${data.orderNumber}`);
-                  } else {
-                    console.error('Failed to create quick order');
-                  }
-                } catch (error) {
-                  console.error('Error creating quick order:', error);
-                }
-              }}
+              onClick={() => setSingleOrderOpen(true)}
             >
-              <PlusSquare className="h-4 w-4 mr-1" />
-              Quick Order
+              <Utensils className="h-4 w-4 mr-1" />
+              Single Order
             </Button>
+            
+            {/* Single Order Dialog */}
+            <SingleOrderDialog 
+              open={singleOrderOpen} 
+              onClose={() => setSingleOrderOpen(false)} 
+            />
             
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative">
