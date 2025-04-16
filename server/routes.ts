@@ -35,7 +35,7 @@ import {
 } from "./services/telephony";
 import { processChatbotRequest } from "./services/chatbot";
 import { WebSocketServer } from 'ws';
-import { initializeRealTimeService } from './services/realtime';
+import { initializeRealTimeService, broadcastStatsUpdate } from './services/realtime';
 import { generateOrderNumber, generateTokenNumber, generateBillNumber, handleError } from './utils';
 import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
 import { handleVoiceCommand } from './services/voiceAssistant';
@@ -1377,11 +1377,56 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Dashboard stats
   app.get("/api/dashboard/stats", async (req: Request, res: Response) => {
     try {
-      // Use the centralized stats function from the realtime service
-      // Import at the top of the file instead of using require
+      // Use the realtime service to get stats and broadcast them
+      // We're importing the broadcastStatsUpdate function at the top of the file
       const stats = await broadcastStatsUpdate();
       
-      // Respond with the same stats
+      // If stats is null (due to an error), generate them directly
+      if (!stats) {
+        const orders = await storage.getOrders();
+        const bills = await storage.getBills();
+        const kitchenTokens = await storage.getKitchenTokens();
+        
+        // Get current date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Filter for today's data
+        const todaysOrders = orders.filter(order => {
+          if (order.createdAt) {
+            return new Date(order.createdAt).getTime() >= today.getTime();
+          }
+          return false;
+        });
+        
+        const todaysSales = todaysOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+        
+        // Count active tables (tables with in-progress orders)
+        const activeTableNumbers = new Set(
+          orders
+            .filter(order => order.status === "pending" || order.status === "in-progress")
+            .map(order => order.tableNumber)
+            .filter(Boolean)
+        );
+        
+        // Count kitchen queue items
+        const kitchenQueue = kitchenTokens.filter(token => 
+          token.status === "pending" || token.status === "preparing" || token.status === "delayed"
+        );
+        
+        const urgentTokens = kitchenTokens.filter(token => token.isUrgent);
+        
+        return res.json({
+          todaysSales,
+          ordersCount: todaysOrders.length,
+          activeTables: activeTableNumbers.size,
+          totalTables: 20, // Hardcoded for now
+          kitchenQueueCount: kitchenQueue.length,
+          urgentTokensCount: urgentTokens.length
+        });
+      }
+      
+      // Respond with the stats from broadcastStatsUpdate
       res.json(stats);
     } catch (err) {
       errorHandler(err, res);
