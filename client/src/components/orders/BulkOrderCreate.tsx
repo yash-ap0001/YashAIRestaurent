@@ -191,6 +191,14 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   
   // Apply template
   const applyTemplate = (templateName: string) => {
+    // If "none" is selected, reset to defaults
+    if (templateName === "none") {
+      setTablePrefix("T");
+      setOrderCount(10);
+      setSelectedMenuItems([]);
+      return;
+    }
+    
     const template = TEMPLATES.find(t => t.name === templateName);
     if (!template) return;
     
@@ -356,7 +364,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                     <SelectValue placeholder="Select a template" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {TEMPLATES.map((template) => (
                       <SelectItem key={template.name} value={template.name}>
                         {template.name}
