@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "../lib/queryClient";
+import { queryClient, apiRequest, getQueryFn } from "../lib/queryClient";
 import { useToast } from "./use-toast";
 
 // User type definition
@@ -48,24 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: async () => {
-      try {
-        const res = await apiRequest("GET", "/api/auth/user");
-        if (!res.ok) {
-          if (res.status === 401) {
-            return null;
-          }
-          throw new Error("Failed to fetch user data");
-        }
-        const userData = await res.json();
-        return userData as User;
-      } catch (err) {
-        console.error("Error fetching user data:", err);
-        return null;
-      }
-    },
+  } = useQuery<User | null>({
+    queryKey: ["/api/auth/user"],
+    queryFn: getQueryFn<User | null>({ on401: "returnNull" }),
   });
 
   // Set current role either from auth or from state
@@ -86,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Login successful",
         description: `Welcome back, ${data.fullName}!`,
@@ -112,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
@@ -138,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Registration successful",
         description: `Welcome, ${data.fullName}!`,
@@ -172,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user || null,
         isLoading: isLoading || loginMutation.isPending || logoutMutation.isPending || registerMutation.isPending,
         error,
         login,
