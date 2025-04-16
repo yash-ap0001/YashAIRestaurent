@@ -69,14 +69,16 @@ export default function KitchenTokens() {
     if (a.status === "preparing" && b.status === "pending") return 1;
     
     // Then by creation date (oldest first)
-    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateA - dateB;
   });
 
   // Filter orders by search term and status
   const filteredOrders = activeOrders.filter(order => {
     const matchesSearch = 
-      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.tableNumber.toLowerCase().includes(searchTerm.toLowerCase());
+      (order.orderNumber?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (order.tableNumber?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     
     if (activeTab === "all") return matchesSearch;
     if (activeTab === "pending") return matchesSearch && order.status === "pending";
@@ -146,7 +148,8 @@ export default function KitchenTokens() {
   };
 
   // Calculate time elapsed for an order
-  const getTimeElapsed = (createdAt: string) => {
+  const getTimeElapsed = (createdAt: string | Date) => {
+    if (!createdAt) return "Unknown time";
     return formatDistanceToNow(new Date(createdAt), { addSuffix: true });
   };
 
@@ -201,7 +204,7 @@ export default function KitchenTokens() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredOrders.map((order) => {
                     const statusDisplay = getStatusDisplay(order.status);
-                    const timeElapsed = getTimeElapsed(order.createdAt);
+                    const timeElapsed = order.createdAt ? getTimeElapsed(order.createdAt) : "Unknown time";
                     const token = kitchenTokens.find(t => t.orderId === order.id);
                     const isUrgent = token?.isUrgent;
 

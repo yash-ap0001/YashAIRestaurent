@@ -234,22 +234,6 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <div className="flex items-center space-x-4">
-            {/* Single Order Button */}
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="bg-purple-700 hover:bg-purple-600 border-purple-600 text-white"
-              onClick={() => setSingleOrderOpen(true)}
-            >
-              <Utensils className="h-4 w-4 mr-1" />
-              Single Order
-            </Button>
-            
-            {/* Single Order Dialog */}
-            <SingleOrderDialog 
-              open={singleOrderOpen} 
-              onClose={() => setSingleOrderOpen(false)} 
-            />
             
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative">

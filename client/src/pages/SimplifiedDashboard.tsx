@@ -21,6 +21,7 @@ import { SiZomato, SiSwiggy } from "react-icons/si";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
 import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
+import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
 
 interface Order {
   id: number;
@@ -129,6 +130,7 @@ export default function SimplifiedDashboard() {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [bulkActionAnchor, setBulkActionAnchor] = useState<HTMLElement | null>(null);
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
+  const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -464,34 +466,18 @@ export default function SimplifiedDashboard() {
             <Button 
               variant="secondary" 
               size="sm" 
-              onClick={() => {
-                // Create a quick test order with minimal data
-                const newOrder = {
-                  tableNumber: "T1",
-                  status: "pending",
-                  orderSource: "manual",
-                  orderItems: [
-                    { 
-                      menuItemId: 1, 
-                      quantity: 1, 
-                      price: 250,
-                      specialInstructions: "Single-click test order" 
-                    }
-                  ]
-                };
-                
-                createOrderMutation.mutate(newOrder);
-              }}
-              disabled={createOrderMutation.isPending}
-              className="bg-gradient-to-r from-amber-500 to-amber-700 text-white hover:from-amber-600 hover:to-amber-800"
+              onClick={() => setSingleOrderOpen(true)}
+              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
             >
-              {createOrderMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4 mr-1" />
-              )}
-              <span>Quick Order</span>
+              <Utensils className="h-4 w-4 mr-1" />
+              <span>Create Order</span>
             </Button>
+            
+            {/* Single Order Dialog */}
+            <SingleOrderDialog 
+              open={singleOrderOpen} 
+              onClose={() => setSingleOrderOpen(false)} 
+            />
 
             <div className="relative">
               <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
