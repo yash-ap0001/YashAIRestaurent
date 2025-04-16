@@ -395,9 +395,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const order = await storage.createOrder(parsedOrder);
       
       // Create order items if provided
-      if (Array.isArray(req.body.items)) {
-        console.log(`Creating ${req.body.items.length} order items`);
-        for (const item of req.body.items) {
+      const orderItems = req.body.items || req.body.orderItems;
+      if (Array.isArray(orderItems)) {
+        console.log(`Creating ${orderItems.length} order items`);
+        for (const item of orderItems) {
           const orderItem = {
             ...item,
             orderId: order.id
@@ -406,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.createOrderItem(parsedOrderItem);
         }
       } else {
-        console.log("No order items provided in request");
+        console.log("No order items provided in request:", req.body);
       }
       
       // Create a kitchen token if needed
