@@ -24,6 +24,7 @@ import ExternalIntegration from "@/pages/ExternalIntegration";
 import VoiceAssistant from "@/pages/VoiceAssistant";
 import N8nIntegration from "@/pages/N8nIntegration";
 import DietPlan from "@/pages/DietPlan";
+import ARMenuPreview from "@/pages/ARMenuPreview";
 import LoginPage from "@/pages/LoginPage";
 import CustomerRegistration from "@/pages/CustomerRegistration";
 import LoadingDemo from "@/pages/LoadingDemo";
@@ -76,6 +77,7 @@ function Router() {
       <ProtectedRoute path="/voice-assistant" component={VoiceAssistant} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/n8n-integration" component={N8nIntegration} allowedRoles={["admin"]} />
       <ProtectedRoute path="/diet-plan" component={DietPlan} allowedRoles={["admin", "manager", "waiter", "customer"]} />
+      <ProtectedRoute path="/ar-menu-preview" component={ARMenuPreview} allowedRoles={["admin", "manager", "waiter", "customer"]} />
       <ProtectedRoute path="/loading-demo" component={LoadingDemo} allowedRoles={["admin", "manager"]} />
       
       {/* Fallback to 404 */}
