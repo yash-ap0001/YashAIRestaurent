@@ -66,6 +66,8 @@ export default function VoiceAssistant() {
   const [volume, setVolume] = useState(80);
   const [voiceType, setVoiceType] = useState("default");
   const [commandHistory, setCommandHistory] = useState<{command: string, response: string, timestamp: Date}[]>([]);
+  const [accentMode, setAccentMode] = useState(true);
+  const [language, setLanguage] = useState("en-IN"); // Default to Indian English
   
   // References
   const recognitionRef = useRef<any>(null);
@@ -79,10 +81,16 @@ export default function VoiceAssistant() {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = language; // Set the selected language
       
       recognitionRef.current.onstart = () => {
         setIsListening(true);
-        setFeedback({ type: 'info', message: 'Listening...' });
+        setFeedback({ 
+          type: 'info', 
+          message: accentMode 
+            ? `Listening with accent recognition (${language})...` 
+            : 'Listening...' 
+        });
       };
       
       recognitionRef.current.onresult = (event: any) => {
@@ -121,7 +129,7 @@ export default function VoiceAssistant() {
         recognitionRef.current.stop();
       }
     };
-  }, [toast]);
+  }, [toast, language, accentMode]);
   
   // Function to toggle listening
   const toggleListening = () => {
@@ -132,8 +140,19 @@ export default function VoiceAssistant() {
     } else {
       try {
         setTranscript("");
+        
+        // Update language setting each time we start listening
+        if (recognitionRef.current) {
+          recognitionRef.current.lang = language;
+        }
+        
         recognitionRef.current?.start();
-        setFeedback({ type: 'info', message: 'Listening...' });
+        setFeedback({ 
+          type: 'info', 
+          message: accentMode 
+            ? `Listening with accent recognition (${language})...` 
+            : 'Listening...' 
+        });
       } catch (error) {
         console.error('Error starting speech recognition:', error);
         toast({
@@ -151,7 +170,11 @@ export default function VoiceAssistant() {
       setIsProcessing(true);
       setFeedback({ type: 'info', message: 'Processing command...' });
       
-      const response = await apiRequest("POST", "/api/voice-assistant/process", { command });
+      const response = await apiRequest("POST", "/api/voice-assistant/process", {
+        command,
+        accentMode,
+        language
+      });
       const result = await response.json();
       
       if (result.success) {
@@ -476,6 +499,41 @@ export default function VoiceAssistant() {
                 <p className="text-neutral-400 text-sm">
                   Enable or disable voice responses from the assistant
                 </p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="accent-recognition" className="text-white">Accent Recognition</Label>
+                  <Switch
+                    id="accent-recognition"
+                    checked={accentMode}
+                    onCheckedChange={setAccentMode}
+                    className="data-[state=checked]:bg-purple-600"
+                  />
+                </div>
+                <p className="text-neutral-400 text-sm">
+                  Enable enhanced accent recognition for better speech understanding
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="language" className="text-white">Voice Recognition Language</Label>
+                <Select 
+                  value={language} 
+                  onValueChange={setLanguage}
+                >
+                  <SelectTrigger id="language" className="bg-neutral-900 border-neutral-700 text-white">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
+                    <SelectItem value="en-IN">English (Indian)</SelectItem>
+                    <SelectItem value="en-US">English (American)</SelectItem>
+                    <SelectItem value="en-GB">English (British)</SelectItem>
+                    <SelectItem value="hi-IN">Hindi</SelectItem>
+                    <SelectItem value="te-IN">Telugu</SelectItem>
+                    <SelectItem value="es-ES">Spanish</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               {voiceEnabled && (

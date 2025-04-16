@@ -680,7 +680,7 @@ async function handleUpdateOrderCommand(params: Record<string, any>): Promise<{
         const tokenStatus = status === "ready" ? "completed" : "completed";
         await storage.updateKitchenToken(orderToken.id, { 
           status: tokenStatus,
-          completionTime: new Date()
+          // Not using completionTime as it's not in the KitchenToken schema
         });
       }
     }
@@ -725,7 +725,7 @@ async function handleUpdateOrderCommand(params: Record<string, any>): Promise<{
       response,
       invalidateQueries: ['/api/orders', '/api/kitchen-tokens', '/api/bills']
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating order:", error);
     return {
       success: false,
@@ -1061,7 +1061,12 @@ async function handleGetCustomerCommand(params: Record<string, any>): Promise<{
     const orders = await storage.getOrdersByCustomerId(cust.id);
     
     if (orders.length > 0) {
-      response += ` Has ${orders.length} total orders, with the most recent on ${new Date(orders[0].createdAt).toLocaleDateString()}.`;
+      const createdAt = orders[0].createdAt;
+      if (createdAt) {
+        response += ` Has ${orders.length} total orders, with the most recent on ${new Date(createdAt).toLocaleDateString()}.`;
+      } else {
+        response += ` Has ${orders.length} total orders.`;
+      }
     }
   } else {
     response = `I found ${matchingCustomers.length} customers matching "${customerIdentifier}": `;
@@ -1098,6 +1103,7 @@ async function handleGetStatsCommand(): Promise<{
   today.setHours(0, 0, 0, 0);
   
   const todaysOrders = orders.filter(order => {
+    if (!order.createdAt) return false;
     const orderDate = new Date(order.createdAt);
     return orderDate >= today;
   });
