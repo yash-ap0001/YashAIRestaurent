@@ -589,23 +589,28 @@ export default function SimplifiedDashboard() {
                     <ClipboardList className="h-5 w-5 mr-2" />
                     Pending Orders
                   </div>
-                  {isSelectMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => selectAllInStatus("pending")}
-                      className="text-xs text-amber-50 hover:text-amber-200 pl-1 h-5"
-                    >
-                      Select All
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <div className="text-amber-100 text-sm bg-amber-800 px-2 py-0.5 rounded-full">
+                      {orders.filter(order => order.status === "pending").length}
+                    </div>
+                    {isSelectMode && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => selectAllInStatus("pending")}
+                        className="text-xs text-amber-50 hover:text-amber-200 pl-1 h-5"
+                      >
+                        Select All
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <Droppable droppableId="pending">
                   {(provided) => (
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full pending-column"
                     >
                       {orders
                           .filter(order => order.status === "pending")
@@ -690,23 +695,28 @@ export default function SimplifiedDashboard() {
                     <ChefHat className="h-5 w-5 mr-2" />
                     Preparing
                   </div>
-                  {isSelectMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => selectAllInStatus("preparing")}
-                      className="text-xs text-emerald-50 hover:text-emerald-200 pl-1 h-5"
-                    >
-                      Select All
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <div className="text-emerald-100 text-sm bg-emerald-800 px-2 py-0.5 rounded-full">
+                      {orders.filter(order => order.status === "preparing").length}
+                    </div>
+                    {isSelectMode && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => selectAllInStatus("preparing")}
+                        className="text-xs text-emerald-50 hover:text-emerald-200 pl-1 h-5"
+                      >
+                        Select All
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <Droppable droppableId="preparing">
                   {(provided) => (
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full preparing-column"
                     >
                       {orders
                           .filter(order => order.status === "preparing")
@@ -791,23 +801,28 @@ export default function SimplifiedDashboard() {
                     <Utensils className="h-5 w-5 mr-2" />
                     Ready to Serve
                   </div>
-                  {isSelectMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => selectAllInStatus("ready")}
-                      className="text-xs text-blue-50 hover:text-blue-200 pl-1 h-5"
-                    >
-                      Select All
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <div className="text-blue-100 text-sm bg-blue-800 px-2 py-0.5 rounded-full">
+                      {orders.filter(order => order.status === "ready").length}
+                    </div>
+                    {isSelectMode && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => selectAllInStatus("ready")}
+                        className="text-xs text-blue-50 hover:text-blue-200 pl-1 h-5"
+                      >
+                        Select All
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <Droppable droppableId="ready">
                   {(provided) => (
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full ready-column"
                     >
                       {orders
                           .filter(order => order.status === "ready")
@@ -892,23 +907,28 @@ export default function SimplifiedDashboard() {
                     <CircleCheck className="h-5 w-5 mr-2" />
                     Completed
                   </div>
-                  {isSelectMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => selectAllInStatus("completed")}
-                      className="text-xs text-purple-50 hover:text-purple-200 pl-1 h-5"
-                    >
-                      Select All
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <div className="text-purple-100 text-sm bg-purple-800 px-2 py-0.5 rounded-full">
+                      {orders.filter(order => order.status === "completed").length}
+                    </div>
+                    {isSelectMode && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => selectAllInStatus("completed")}
+                        className="text-xs text-purple-50 hover:text-purple-200 pl-1 h-5"
+                      >
+                        Select All
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <Droppable droppableId="completed">
                   {(provided) => (
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full delivered-column"
                     >
                       {orders
                           .filter(order => order.status === "completed")
@@ -993,23 +1013,28 @@ export default function SimplifiedDashboard() {
                     <CreditCard className="h-5 w-5 mr-2" />
                     Billed
                   </div>
-                  {isSelectMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => selectAllInStatus("billed")}
-                      className="text-xs text-gray-50 hover:text-gray-200 pl-1 h-5"
-                    >
-                      Select All
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <div className="text-gray-100 text-sm bg-gray-800 px-2 py-0.5 rounded-full">
+                      {orders.filter(order => order.status === "billed").length}
+                    </div>
+                    {isSelectMode && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => selectAllInStatus("billed")}
+                        className="text-xs text-gray-50 hover:text-gray-200 pl-1 h-5"
+                      >
+                        Select All
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <Droppable droppableId="billed">
                   {(provided) => (
                     <div 
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full"
+                      className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-neutral-900 w-full billed-column"
                     >
                       {orders
                           .filter(order => order.status === "billed")
