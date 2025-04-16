@@ -178,15 +178,13 @@ export default function SimplifiedDashboard() {
             console.error('Invalid order data structure received:', data);
           }
           
-          // Then invalidate all related queries for consistency
-          queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
-          
-          // Force a refetch after a short delay to ensure data is synchronized with server
+          // Don't invalidate queries immediately after adding the order to avoid duplicate fetching
+          // Just schedule a refetch after a delay to ensure consistency with server
           setTimeout(() => {
             queryClient.refetchQueries({ queryKey: ['/api/orders'] });
-          }, 500);
+            queryClient.refetchQueries({ queryKey: ['/api/kitchen-tokens'] });
+            queryClient.refetchQueries({ queryKey: ['/api/dashboard/stats'] });
+          }, 1000);
         }
         // Invalidate queries based on the type of update
         else if (data.type === 'order_created' || data.type === 'order_updated') {
