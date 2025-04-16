@@ -35,6 +35,7 @@ import { OrderForm } from "@/components/orders/OrderForm";
 import { 
   Search,
   Plus,
+  PlusCircle,
   Clock,
   ChefHat,
   Utensils,
@@ -514,7 +515,7 @@ export default function SimplifiedDashboard() {
               <div className="text-center p-8 bg-white rounded-lg shadow-sm mx-auto max-w-md">
                 <div className="text-[#7A0177] font-bold text-lg mb-2">No Orders Found</div>
                 <p className="text-neutral-600 mb-4">Create a new order to get started managing your restaurant.</p>
-                <Button variant="secondary" onClick={() => setIsOrderFormOpen(true)} className="bg-[#F768A1] text-white hover:bg-[#C51B8A]">
+                <Button variant="secondary" onClick={() => setIsCreateOrderOpen(true)} className="bg-[#F768A1] text-white hover:bg-[#C51B8A]">
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Create New Order
                 </Button>
