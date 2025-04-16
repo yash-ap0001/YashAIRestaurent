@@ -348,27 +348,27 @@ export function OrderForm() {
   return (
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6">
-        <Card className="bg-white rounded-xl shadow-lg overflow-hidden border-0">
-          <CardHeader className="pb-4 pt-6 px-6">
-            <CardTitle className="text-2xl font-semibold text-purple-600">
+        <Card className="bg-black rounded-xl shadow-lg overflow-hidden border border-purple-800">
+          <CardHeader className="pb-4 pt-6 px-6 bg-gradient-to-br from-purple-600 to-pink-600">
+            <CardTitle className="text-2xl font-bold text-white">
               Create New Order
             </CardTitle>
-            <p className="text-gray-600 mt-1">Add delicious menu items to your customer's order.</p>
+            <p className="text-purple-100 mt-1">Add delicious menu items to your customer's order.</p>
           </CardHeader>
-          <CardContent className="space-y-6 p-6 bg-white">
+          <CardContent className="space-y-6 p-6 bg-gray-900 text-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="tableNumber"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Table Number</FormLabel>
+                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                    <FormLabel className="text-sm font-semibold text-white">Table Number</FormLabel>
                     <FormControl>
                       <Input
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Table 1"
-                        className="w-full mt-1 text-gray-700 border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                        className="w-full mt-2 bg-black border-2 border-purple-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                       />
                     </FormControl>
                     <FormMessage />
