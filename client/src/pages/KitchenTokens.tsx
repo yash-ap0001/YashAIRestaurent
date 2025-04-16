@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { 
   Search, 
@@ -17,14 +17,20 @@ import {
   ArrowRight,
   Utensils,
   Trash,
-  Loader2
+  Loader2,
+  ChefHat,
+  Plus,
+  ClipboardList,
+  Timer
 } from "lucide-react";
+import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
 import type { Order, KitchenToken } from "@shared/schema";
 
 // Simplified Kitchen Page that uses Order numbers instead of token numbers
 export default function KitchenTokens() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -163,25 +169,74 @@ export default function KitchenTokens() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Kitchen Queue</h1>
-        <div className="relative">
-          <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by order # or table..."
-            className="pl-10 w-64"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+    <div className="container mx-auto px-4 py-6">
+      <Tabs defaultValue="board">
+        <div className="flex items-center justify-between mb-6">
+          <TabsList>
+            <TabsTrigger value="board" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ClipboardList className="h-4 w-4 mr-2" />
+              Kitchen Queue
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Timer className="h-4 w-4 mr-2" />
+              Queue Stats
+            </TabsTrigger>
+          </TabsList>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle>Kitchen Queue</CardTitle>
-        </CardHeader>
-        <CardContent>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => setSingleOrderOpen(true)}
+              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
+            >
+              <Utensils className="h-4 w-4 mr-1" />
+              <span>Create Order</span>
+            </Button>
+            
+            {/* Single Order Dialog */}
+            <SingleOrderDialog 
+              open={singleOrderOpen} 
+              onClose={() => setSingleOrderOpen(false)} 
+            />
+
+            <div className="relative">
+              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by order # or table..."
+                className="pl-10 w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        <TabsContent value="board" className="space-y-6 mt-2">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold mr-4">Kitchen Orders</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center text-sm">
+                <div className="flex items-center mr-4">
+                  <div className="h-3 w-3 rounded-full bg-amber-600 mr-2"></div>
+                  <span>Pending: </span>
+                  <span className="font-bold ml-1">
+                    {pendingCount}
+                  </span>
+                </div>
+                <div className="flex items-center mr-4">
+                  <div className="h-3 w-3 rounded-full bg-green-600 mr-2"></div>
+                  <span>Preparing: </span>
+                  <span className="font-bold ml-1">
+                    {preparingCount}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="all">
@@ -272,8 +327,32 @@ export default function KitchenTokens() {
               )}
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="stats" className="space-y-6 mt-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Kitchen Queue Statistics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-r from-amber-500 to-amber-700 p-4 rounded-lg text-white">
+                  <h3 className="text-xl font-bold">Pending Orders</h3>
+                  <p className="text-3xl font-bold mt-2">{pendingCount}</p>
+                </div>
+                <div className="bg-gradient-to-r from-green-500 to-green-700 p-4 rounded-lg text-white">
+                  <h3 className="text-xl font-bold">Preparing Orders</h3>
+                  <p className="text-3xl font-bold mt-2">{preparingCount}</p>
+                </div>
+                <div className="bg-gradient-to-r from-purple-500 to-purple-700 p-4 rounded-lg text-white">
+                  <h3 className="text-xl font-bold">Total Orders</h3>
+                  <p className="text-3xl font-bold mt-2">{activeOrders.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
