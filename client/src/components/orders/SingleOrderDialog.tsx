@@ -1,15 +1,54 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Loader2, Plus, Minus, Trash2 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
-import { MenuItem } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import { apiRequest } from "@/lib/queryClient";
+import { Loader2, Plus, Minus, X, Send, AlignLeft } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+interface MenuItem {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  description: string;
+  dietaryInfo: string[];
+  isAvailable: boolean;
+  imageUrl?: string;
+}
+
+interface OrderItem {
+  menuItemId: number;
+  menuItemName?: string;
+  quantity: number;
+  price: number;
+  specialInstructions?: string;
+}
 
 interface SingleOrderDialogProps {
   open: boolean;
@@ -17,258 +56,333 @@ interface SingleOrderDialogProps {
 }
 
 export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
   const [tableNumber, setTableNumber] = useState("T1");
-  const [orderItems, setOrderItems] = useState<any[]>([
-    { menuItemId: "", quantity: 1, price: 0, specialInstructions: "" }
-  ]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [notes, setNotes] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch menu items
-  const { data: menuItems = [] } = useQuery<MenuItem[]>({
-    queryKey: ["/api/menu-items"],
+  const { data: menuItems = [], isLoading: isLoadingMenu } = useQuery<MenuItem[]>({
+    queryKey: ['/api/menu-items'],
   });
 
-  const handleMenuItemChange = (index: number, menuItemId: string) => {
-    const updatedItems = [...orderItems];
-    const selectedItem = menuItems.find(item => item.id.toString() === menuItemId);
-    
-    if (selectedItem) {
-      updatedItems[index] = {
-        ...updatedItems[index],
-        menuItemId: parseInt(menuItemId),
-        price: selectedItem.price
-      };
+  // Extract unique categories
+  const categories = menuItems.reduce((acc: string[], item) => {
+    if (!acc.includes(item.category)) {
+      acc.push(item.category);
+    }
+    return acc;
+  }, []);
+
+  // Filter menu items by category
+  const filteredMenuItems = selectedCategory === 'all'
+    ? menuItems
+    : menuItems.filter(item => item.category === selectedCategory);
+
+  // Create order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData: {
+      tableNumber: string;
+      orderItems: OrderItem[];
+      notes?: string;
+    }) => {
+      const response = await apiRequest("POST", "/api/orders", orderData);
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      toast({
+        title: "Order created",
+        description: `Order #${data.orderNumber} has been created successfully.`,
+      });
+      resetForm();
+      onClose();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to create order",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Reset form when dialog is opened
+  useEffect(() => {
+    if (open) {
+      resetForm();
+    }
+  }, [open]);
+
+  const resetForm = () => {
+    setTableNumber("T1");
+    setSelectedCategory("all");
+    setOrderItems([]);
+    setNotes("");
+  };
+
+  const addOrderItem = (menuItem: MenuItem) => {
+    // Check if the item is already in the order
+    const existingItemIndex = orderItems.findIndex(
+      item => item.menuItemId === menuItem.id
+    );
+
+    if (existingItemIndex >= 0) {
+      // Update quantity if item already exists
+      const updatedItems = [...orderItems];
+      updatedItems[existingItemIndex].quantity += 1;
       setOrderItems(updatedItems);
+    } else {
+      // Add new item to order
+      setOrderItems([
+        ...orderItems,
+        {
+          menuItemId: menuItem.id,
+          menuItemName: menuItem.name,
+          quantity: 1,
+          price: menuItem.price,
+        },
+      ]);
     }
   };
 
-  const handleQuantityChange = (index: number, quantity: number) => {
+  const updateItemQuantity = (index: number, change: number) => {
     const updatedItems = [...orderItems];
-    updatedItems[index] = { ...updatedItems[index], quantity };
-    setOrderItems(updatedItems);
-  };
+    const newQuantity = updatedItems[index].quantity + change;
 
-  const handleSpecialInstructionsChange = (index: number, instructions: string) => {
-    const updatedItems = [...orderItems];
-    updatedItems[index] = { ...updatedItems[index], specialInstructions: instructions };
-    setOrderItems(updatedItems);
-  };
+    if (newQuantity <= 0) {
+      // Remove item if quantity becomes zero or negative
+      updatedItems.splice(index, 1);
+    } else {
+      // Update quantity
+      updatedItems[index].quantity = newQuantity;
+    }
 
-  const addOrderItem = () => {
-    setOrderItems([...orderItems, { menuItemId: "", quantity: 1, price: 0, specialInstructions: "" }]);
+    setOrderItems(updatedItems);
   };
 
   const removeOrderItem = (index: number) => {
-    if (orderItems.length > 1) {
-      const updatedItems = [...orderItems];
-      updatedItems.splice(index, 1);
-      setOrderItems(updatedItems);
-    }
+    const updatedItems = [...orderItems];
+    updatedItems.splice(index, 1);
+    setOrderItems(updatedItems);
   };
 
-  const calculateTotal = () => {
-    return orderItems.reduce((total, item) => {
-      return total + (item.price * item.quantity);
-    }, 0);
-  };
-
-  const handleSubmit = async () => {
-    // Validate order
-    const invalidItems = orderItems.filter(item => !item.menuItemId);
-    if (invalidItems.length > 0) {
-      toast({
-        title: "Incomplete Order",
-        description: "Please select menu items for all order items",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!tableNumber) {
-      toast({
-        title: "Table Number Required",
-        description: "Please enter a table number",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await apiRequest("POST", "/api/orders", {
-        tableNumber,
-        orderItems,
-        orderSource: "manual",
-        status: "pending"
-      });
-      
-      const data = await response.json();
-      
-      toast({
-        title: "Order Created",
-        description: `Order #${data.orderNumber} created successfully`,
-        variant: "default"
-      });
-      
-      // Close dialog and reset form
-      onClose();
-      setTableNumber("T1");
-      setOrderItems([{ menuItemId: "", quantity: 1, price: 0, specialInstructions: "" }]);
-    } catch (error) {
-      console.error("Error creating order:", error);
+  const handleSubmit = () => {
+    if (orderItems.length === 0) {
       toast({
         title: "Error",
-        description: "Failed to create order. Please try again.",
-        variant: "destructive"
+        description: "Please add at least one item to the order",
+        variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    // Prepare order data for submission
+    const orderData = {
+      tableNumber,
+      orderItems: orderItems.map(item => ({
+        menuItemId: item.menuItemId,
+        quantity: item.quantity,
+        price: item.price,
+        specialInstructions: item.specialInstructions || "",
+      })),
+      notes: notes || undefined,
+    };
+
+    createOrderMutation.mutate(orderData);
   };
 
-  // Generate table numbers options T1-T20
-  const tableNumbers = Array.from({ length: 20 }, (_, i) => `T${i + 1}`);
+  // Calculate total amount
+  const totalAmount = orderItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh]">
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-purple-500">Create Single Order</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Create Single Order</DialogTitle>
           <DialogDescription>
-            Quickly create a new order with minimal clicks
+            Quickly create an order with the items below.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="tableNumber">Table Number</Label>
-            <Select
-              value={tableNumber}
-              onValueChange={setTableNumber}
-            >
-              <SelectTrigger id="tableNumber" className="w-full">
-                <SelectValue placeholder="Select table" />
-              </SelectTrigger>
-              <SelectContent>
-                {tableNumbers.map(table => (
-                  <SelectItem key={table} value={table}>{table}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid gap-4 mt-2">
-            <div className="flex items-center justify-between">
-              <Label>Order Items</Label>
-              <Button 
-                type="button" 
-                size="sm" 
-                variant="outline" 
-                onClick={addOrderItem}
-                className="flex items-center gap-1"
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          {/* Left Column - Order Details & Cart */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="tableNumber">Table Number</Label>
+              <Select
+                value={tableNumber}
+                onValueChange={(value) => setTableNumber(value)}
               >
-                <Plus className="h-4 w-4" /> Add Item
-              </Button>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a table" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 20 }, (_, i) => (
+                    <SelectItem key={i} value={`T${i + 1}`}>
+                      Table {i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            
-            {orderItems.map((item, index) => (
-              <Card key={index} className="p-4 relative">
-                <div className="absolute top-2 right-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => removeOrderItem(index)}
-                    disabled={orderItems.length === 1}
-                    className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Remove</span>
-                  </Button>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes">Order Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder="Enter any special instructions for the entire order..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="resize-none"
+                rows={3}
+              />
+            </div>
+
+            {/* Order Items List */}
+            <div className="border rounded-md p-3 space-y-2">
+              <h3 className="font-medium text-sm">Order Items</h3>
+              
+              {orderItems.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground text-sm">
+                  Add items from the menu to start your order
                 </div>
-                
-                <div className="grid gap-3">
-                  <div className="grid gap-2">
-                    <Label htmlFor={`menuItem-${index}`}>Menu Item</Label>
-                    <Select
-                      value={item.menuItemId ? item.menuItemId.toString() : ""}
-                      onValueChange={(value) => handleMenuItemChange(index, value)}
-                    >
-                      <SelectTrigger id={`menuItem-${index}`}>
-                        <SelectValue placeholder="Select menu item" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {menuItems.map(menuItem => (
-                          <SelectItem key={menuItem.id} value={menuItem.id.toString()}>
-                            {menuItem.name} (₹{menuItem.price})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <Label htmlFor={`quantity-${index}`}>Quantity</Label>
-                    <div className="flex items-center">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleQuantityChange(index, Math.max(1, item.quantity - 1))}
-                        className="rounded-r-none"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <Input
-                        id={`quantity-${index}`}
-                        value={item.quantity}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value) || 1;
-                          handleQuantityChange(index, Math.max(1, val));
-                        }}
-                        className="w-16 text-center rounded-none"
-                      />
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleQuantityChange(index, item.quantity + 1)}
-                        className="rounded-l-none"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <Label htmlFor={`instructions-${index}`}>Special Instructions</Label>
-                    <Input
-                      id={`instructions-${index}`}
-                      placeholder="E.g., Extra spicy, No onions"
-                      value={item.specialInstructions}
-                      onChange={(e) => handleSpecialInstructionsChange(index, e.target.value)}
-                    />
-                  </div>
-                </div>
-              </Card>
-            ))}
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Item</TableHead>
+                      <TableHead className="text-center">Qty</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orderItems.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.menuItemName}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center space-x-1">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => updateItemQuantity(index, -1)}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span>{item.quantity}</span>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => updateItemQuantity(index, 1)}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(item.price * item.quantity)}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive"
+                            onClick={() => removeOrderItem(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={2} className="font-semibold">Total</TableCell>
+                      <TableCell className="text-right font-semibold">{formatCurrency(totalAmount)}</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              )}
+            </div>
           </div>
-          
-          <div className="flex justify-between items-center mt-4 text-lg font-medium">
-            <span>Total Amount:</span>
-            <span className="text-purple-500">₹{calculateTotal()}</span>
+
+          {/* Right Column - Menu Items */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="category">Filter by Category</Label>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {isLoadingMenu ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-y-auto" style={{ maxHeight: '400px' }}>
+                {filteredMenuItems.map((menuItem) => (
+                  <Button
+                    key={menuItem.id}
+                    variant="outline"
+                    className={`h-auto py-2 px-3 justify-start text-left flex flex-col items-start ${!menuItem.isAvailable ? 'opacity-50' : ''}`}
+                    disabled={!menuItem.isAvailable}
+                    onClick={() => addOrderItem(menuItem)}
+                  >
+                    <div className="font-medium">{menuItem.name}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-1">{menuItem.description}</div>
+                    <div className="text-sm font-bold mt-1">{formatCurrency(menuItem.price)}</div>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+
+        <DialogFooter className="mt-6">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
           <Button 
-            onClick={handleSubmit} 
-            disabled={loading}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            type="submit" 
+            className="bg-primary text-white hover:bg-primary/90"
+            onClick={handleSubmit}
+            disabled={orderItems.length === 0 || createOrderMutation.isPending}
           >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {createOrderMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4 mr-2" />
+            )}
             Create Order
           </Button>
         </DialogFooter>
