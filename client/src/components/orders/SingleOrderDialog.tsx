@@ -92,25 +92,35 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
       return await response.json();
     },
     onSuccess: (data) => {
-      // Invalidate multiple queries to ensure all data is refreshed
+      console.log('Order created successfully:', data);
+      
+      // Optimistically update the orders cache with the new order
+      queryClient.setQueryData(['/api/orders'], (oldData: any[] | undefined) => {
+        if (!oldData) return [data];
+        return [data, ...oldData];
+      });
+      
+      // Then invalidate all related queries 
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      
+      // Immediately refetch the orders to ensure consistent data
+      queryClient.refetchQueries({ queryKey: ['/api/orders'] });
       
       toast({
         title: "Order created",
         description: `Order #${data.orderNumber} has been created successfully.`,
       });
       
-      // Add a slight delay before closing to ensure data is refreshed properly
+      // Add a slight delay before closing to ensure UI updates are visible
       setTimeout(() => {
         resetForm();
         onClose();
-        // Force a manual refresh of orders data
-        queryClient.refetchQueries({ queryKey: ['/api/orders'] });
-      }, 300);
+      }, 500);
     },
     onError: (error: Error) => {
+      console.error('Failed to create order:', error);
       toast({
         title: "Failed to create order",
         description: error.message,
