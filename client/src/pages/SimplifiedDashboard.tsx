@@ -511,8 +511,13 @@ export default function SimplifiedDashboard() {
 
           <CardContent className="pt-6">
             {orders.length === 0 ? (
-              <div className="text-center py-10 text-neutral-500">
-                No orders found. Create a new order to get started.
+              <div className="text-center p-8 bg-white rounded-lg shadow-sm mx-auto max-w-md">
+                <div className="text-[#7A0177] font-bold text-lg mb-2">No Orders Found</div>
+                <p className="text-neutral-600 mb-4">Create a new order to get started managing your restaurant.</p>
+                <Button variant="secondary" onClick={() => setIsOrderFormOpen(true)} className="bg-[#F768A1] text-white hover:bg-[#C51B8A]">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Create New Order
+                </Button>
               </div>
             ) : (
               <DragDropContext onDragEnd={handleDragEnd}>
@@ -843,7 +848,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#7A0177]"
                         >
                           {orders.filter(order => order.status === "billed").length === 0 ? (
-                            <div className="text-center p-4 text-neutral-500 text-sm">No billed orders</div>
+                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No billed orders</div>
                           ) : (
                             orders
                               .filter(order => order.status === "billed")
