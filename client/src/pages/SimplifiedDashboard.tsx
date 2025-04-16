@@ -131,6 +131,55 @@ export default function SimplifiedDashboard() {
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Set up WebSocket connection for real-time updates
+  useEffect(() => {
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+    const socket = new WebSocket(wsUrl);
+    
+    socket.onopen = () => {
+      console.log('WebSocket connected');
+    };
+    
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // Invalidate queries based on the type of update
+        if (data.type === 'order_created' || data.type === 'order_updated' || data.type === 'new_order') {
+          queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+        }
+        if (data.type === 'kitchen_token_updated' || data.type === 'new_kitchen_token') {
+          queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+        }
+        if (data.type === 'bill_created' || data.type === 'new_bill') {
+          queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+        }
+        // For any activity, refresh stats
+        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+        
+        console.log('WebSocket message received:', data);
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    };
+    
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+    socket.onclose = () => {
+      console.log('Closing WebSocket connection');
+    };
+    
+    // Clean up the WebSocket connection when the component unmounts
+    return () => {
+      socket.close();
+    };
+  }, [queryClient]);
 
   // Queries for data
   const {
@@ -1110,6 +1159,10 @@ export default function SimplifiedDashboard() {
         </TabsContent>
 
         <TabsContent value="stats" className="mt-2">
+          <div className="mb-4">
+            <h1 className="text-2xl font-bold">Today's Stats</h1>
+            <p className="text-muted-foreground">Real-time statistics updated automatically</p>
+          </div>
           <DashboardStats />
         </TabsContent>
       </Tabs>
