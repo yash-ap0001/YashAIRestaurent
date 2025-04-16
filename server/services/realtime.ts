@@ -203,13 +203,30 @@ function sendToClient(client: ExtendedWebSocket | WebSocket, data: any) {
 // Broadcast to all active clients
 export function broadcastToAllClients(data: any) {
   console.log(`Broadcasting to ${activeClients.size} clients:`, data.type, 
-    data.type === WS_EVENTS.NEW_ORDER ? 'New order ID: ' + (data.data?.id || 'unknown') : '');
+    data.type === WS_EVENTS.NEW_ORDER || data.type === 'new_order' ? 'New order ID: ' + (data.data?.id || 'unknown') : '');
+  
+  // Log detailed information for new_order and order_created events to help debug
+  if (data.type === 'new_order' || data.type === WS_EVENTS.NEW_ORDER || data.type === 'order_created') {
+    console.log(`Order broadcast details for ${data.type}:`, 
+                `ID: ${data.data?.id || 'missing'}, ` +
+                `Number: ${data.data?.orderNumber || 'missing'}, ` + 
+                `Status: ${data.data?.status || 'missing'}`);
+    
+    if (!data.data?.id || !data.data?.orderNumber) {
+      console.error('WARNING: Incomplete order data being broadcast!', data);
+    }
+  }
   
   // Add timestamp to help with debugging and caching issues
   const enhancedData = {
     ...data,
     timestamp: Date.now()
   };
+  
+  // Log message to be sent
+  console.log(`Broadcasting message to ${activeClients.size} clients:`, 
+              JSON.stringify(enhancedData).substring(0, 200) + 
+              (JSON.stringify(enhancedData).length > 200 ? '...' : ''));
   
   activeClients.forEach(client => {
     sendToClient(client, enhancedData);
