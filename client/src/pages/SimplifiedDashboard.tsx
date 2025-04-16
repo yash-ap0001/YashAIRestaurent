@@ -310,6 +310,12 @@ export default function SimplifiedDashboard() {
     setSelectedOrders(orderIdsInStatus);
   };
   
+  // Select all orders across all statuses
+  const selectAllOrders = () => {
+    const allOrderIds = orders.map(order => order.id);
+    setSelectedOrders(allOrderIds);
+  };
+  
   // Bulk update orders to a specific status
   const bulkUpdateOrderStatus = (newStatus: string) => {
     // Apply optimistic update to the client-side cache
@@ -420,43 +426,57 @@ export default function SimplifiedDashboard() {
                   </>
                 )}
               </Button>
-              {isSelectMode && selectedOrders.length > 0 && (
+              {isSelectMode && (
                 <div className="ml-4 flex items-center gap-2">
-                  <Badge variant="secondary">
-                    {selectedOrders.length} selected
-                  </Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="secondary" size="sm">
-                        <ChevronsUpDown className="h-4 w-4 mr-1" />
-                        <span>Bulk Actions</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Move Selected Orders To</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")}>
-                        <ClipboardList className="h-4 w-4 mr-2" />
-                        <span>Pending</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")}>
-                        <ChefHat className="h-4 w-4 mr-2" />
-                        <span>Preparing</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")}>
-                        <Utensils className="h-4 w-4 mr-2" />
-                        <span>Ready</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")}>
-                        <CircleCheck className="h-4 w-4 mr-2" />
-                        <span>Completed</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")}>
-                        <Receipt className="h-4 w-4 mr-2" />
-                        <span>Billed</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={selectAllOrders}
+                    className="flex items-center gap-1"
+                  >
+                    <CheckSquare className="h-4 w-4" />
+                    <span>Select All Orders</span>
+                  </Button>
+                  
+                  {selectedOrders.length > 0 && (
+                    <>
+                      <Badge variant="secondary">
+                        {selectedOrders.length} selected
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="secondary" size="sm">
+                            <ChevronsUpDown className="h-4 w-4 mr-1" />
+                            <span>Bulk Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Move Selected Orders To</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")}>
+                            <ClipboardList className="h-4 w-4 mr-2" />
+                            <span>Pending</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")}>
+                            <ChefHat className="h-4 w-4 mr-2" />
+                            <span>Preparing</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")}>
+                            <Utensils className="h-4 w-4 mr-2" />
+                            <span>Ready</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")}>
+                            <CircleCheck className="h-4 w-4 mr-2" />
+                            <span>Completed</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")}>
+                            <Receipt className="h-4 w-4 mr-2" />
+                            <span>Billed</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -584,9 +604,21 @@ export default function SimplifiedDashboard() {
               
               {/* Preparing Orders Column */}
               <div className="flex flex-col w-full">
-                <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
-                  <ChefHat className="h-5 w-5 mr-2" />
-                  Preparing
+                <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                  <div className="flex items-center">
+                    <ChefHat className="h-5 w-5 mr-2" />
+                    Preparing
+                  </div>
+                  {isSelectMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => selectAllInStatus("preparing")}
+                      className="text-xs text-emerald-50 hover:text-emerald-200 pl-1 h-5"
+                    >
+                      Select All
+                    </Button>
+                  )}
                 </div>
                 <Droppable droppableId="preparing">
                   {(provided) => (
@@ -673,9 +705,21 @@ export default function SimplifiedDashboard() {
               
               {/* Ready Orders Column */}
               <div className="flex flex-col w-full">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
-                  <Utensils className="h-5 w-5 mr-2" />
-                  Ready to Serve
+                <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                  <div className="flex items-center">
+                    <Utensils className="h-5 w-5 mr-2" />
+                    Ready to Serve
+                  </div>
+                  {isSelectMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => selectAllInStatus("ready")}
+                      className="text-xs text-blue-50 hover:text-blue-200 pl-1 h-5"
+                    >
+                      Select All
+                    </Button>
+                  )}
                 </div>
                 <Droppable droppableId="ready">
                   {(provided) => (
@@ -762,9 +806,21 @@ export default function SimplifiedDashboard() {
               
               {/* Completed Orders Column */}
               <div className="flex flex-col w-full">
-                <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
-                  <CircleCheck className="h-5 w-5 mr-2" />
-                  Completed
+                <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                  <div className="flex items-center">
+                    <CircleCheck className="h-5 w-5 mr-2" />
+                    Completed
+                  </div>
+                  {isSelectMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => selectAllInStatus("completed")}
+                      className="text-xs text-purple-50 hover:text-purple-200 pl-1 h-5"
+                    >
+                      Select All
+                    </Button>
+                  )}
                 </div>
                 <Droppable droppableId="completed">
                   {(provided) => (
@@ -851,9 +907,21 @@ export default function SimplifiedDashboard() {
               
               {/* Billed Orders Column */}
               <div className="flex flex-col w-full">
-                <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center w-full">
-                  <CreditCard className="h-5 w-5 mr-2" />
-                  Billed
+                <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                  <div className="flex items-center">
+                    <CreditCard className="h-5 w-5 mr-2" />
+                    Billed
+                  </div>
+                  {isSelectMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => selectAllInStatus("billed")}
+                      className="text-xs text-gray-50 hover:text-gray-200 pl-1 h-5"
+                    >
+                      Select All
+                    </Button>
+                  )}
                 </div>
                 <Droppable droppableId="billed">
                   {(provided) => (
