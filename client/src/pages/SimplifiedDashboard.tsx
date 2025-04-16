@@ -147,19 +147,34 @@ export default function SimplifiedDashboard() {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        
+        // For new orders, we need to ensure a complete refresh of the data
+        if (data.type === 'new_order') {
+          console.log('New order received via WebSocket:', data);
+          queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+          
+          // Force a data refetch after a short delay to ensure up-to-date data
+          setTimeout(() => {
+            queryClient.refetchQueries({ queryKey: ['/api/orders'] });
+            queryClient.refetchQueries({ queryKey: ['/api/kitchen-tokens'] });
+          }, 300);
+        }
         // Invalidate queries based on the type of update
-        if (data.type === 'order_created' || data.type === 'order_updated' || data.type === 'new_order') {
+        else if (data.type === 'order_created' || data.type === 'order_updated') {
           queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
           queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
         }
-        if (data.type === 'kitchen_token_updated' || data.type === 'new_kitchen_token') {
+        else if (data.type === 'kitchen_token_updated' || data.type === 'new_kitchen_token') {
           queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
           queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
         }
-        if (data.type === 'bill_created' || data.type === 'new_bill') {
+        else if (data.type === 'bill_created' || data.type === 'new_bill') {
           queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
           queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
         }
+        
         // For any activity, refresh stats
         queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
         
@@ -238,11 +253,20 @@ export default function SimplifiedDashboard() {
       const response = await apiRequest("POST", "/api/orders", orderData);
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Invalidate multiple queries to ensure all data is refreshed
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/kitchen-tokens"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      
+      // Force an immediate refetch to ensure data is up-to-date
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/orders"] });
+      }, 200);
+      
       toast({
         title: "Order created",
-        description: "The new order has been created successfully.",
+        description: `Order #${data.orderNumber} has been created successfully.`,
       });
     },
     onError: (error: Error) => {

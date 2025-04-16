@@ -201,6 +201,10 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
       notes: notes || undefined,
     };
 
+    // Log the order being created for debugging
+    console.log('Creating order with data:', orderData);
+    
+    // Disable button during submission
     createOrderMutation.mutate(orderData);
   };
 
