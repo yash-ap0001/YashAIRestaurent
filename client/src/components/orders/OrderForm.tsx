@@ -326,28 +326,28 @@ export function OrderForm() {
   return (
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span>Order Details</span>
+        <Card className="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden border-0">
+          <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white pb-6">
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <span>Create Your Order</span>
             </CardTitle>
-            <p className="text-sm text-neutral-500 mt-1">Fill in the order details manually or use AI to process natural language orders</p>
+            <p className="text-white text-opacity-90 mt-1">Fill in the order details manually or use our AI to process natural language orders</p>
             
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="space-y-6 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="tableNumber"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Table Number</FormLabel>
+                  <FormItem className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Table Number</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                           <SelectValue placeholder="Select a table" />
                         </SelectTrigger>
                         <SelectContent>
@@ -374,14 +374,14 @@ export function OrderForm() {
                 control={form.control}
                 name="orderSource"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Order Source</FormLabel>
+                  <FormItem className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Order Source</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                           <SelectValue placeholder="Select order source" />
                         </SelectTrigger>
                         <SelectContent>
@@ -399,23 +399,26 @@ export function OrderForm() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <FormLabel className="flex items-center gap-2">
-                  <span>Manual Selection</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <FormLabel className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <span>Add Menu Items</span>
                 </FormLabel>
                 <div className="flex mt-2">
                   <Select
                     disabled={menuLoading}
                     onValueChange={(value) => addMenuItem(parseInt(value))}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                       <SelectValue placeholder="Select menu item" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[300px]">
                       {menuItems?.map((item) => (
                         <SelectItem key={item.id} value={item.id.toString()}>
-                          {item.name} - ₹{item.price}
+                          <div className="flex justify-between w-full">
+                            <span>{item.name}</span>
+                            <span className="text-purple-600 dark:text-purple-400 font-semibold">₹{item.price}</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -461,63 +464,75 @@ export function OrderForm() {
             </div>
 
             {selectedItems.length > 0 && (
-              <div className="space-y-4 mt-4">
-                <h3 className="font-medium">Order Items</h3>
-                {selectedItems.map((item, index) => (
-                  <div key={index} className="border border-neutral-200 rounded-md p-4 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h4 className="font-medium">{item.name}</h4>
-                        <p className="text-sm text-neutral-500">₹{item.price} per item</p>
-                      </div>
-                      <Button 
-                        type="button"
-                        variant="ghost" 
-                        size="icon"
-                        className="h-7 w-7 text-neutral-400 hover:text-error-500"
-                        onClick={() => removeItem(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Button 
-                        type="button"
-                        variant="outline" 
-                        size="icon" 
-                        className="h-7 w-7 rounded-full"
-                        onClick={() => updateItemQuantity(index, item.quantity - 1)}
-                      >
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <span className="mx-3 w-8 text-center">{item.quantity}</span>
-                      <Button 
-                        type="button"
-                        variant="outline" 
-                        size="icon" 
-                        className="h-7 w-7 rounded-full"
-                        onClick={() => updateItemQuantity(index, item.quantity + 1)}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                      <span className="ml-auto font-medium">
-                        ₹{(item.price * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
-                    
-                    <Input
-                      placeholder="Special instructions"
-                      value={item.notes}
-                      onChange={(e) => updateItemNotes(index, e.target.value)}
-                      className="text-sm"
-                    />
+              <div className="space-y-4 mt-6">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 text-white flex justify-between items-center rounded-t-xl">
+                  <h3 className="font-bold text-white">Your Order Summary</h3>
+                  <div className="text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                    {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
                   </div>
-                ))}
+                </div>
                 
-                <div className="flex justify-between pt-2 border-t border-neutral-200">
-                  <span className="font-medium">Total</span>
-                  <span className="font-bold">₹{calculateTotal().toFixed(2)}</span>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-b-xl shadow-sm border border-gray-100 dark:border-gray-700 -mt-4">
+                  <div className="max-h-[300px] overflow-y-auto space-y-3">
+                    {selectedItems.map((item, index) => (
+                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-bold text-gray-800 dark:text-gray-200">{item.name}</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">₹{item.price} per item</p>
+                          </div>
+                          <Button 
+                            type="button"
+                            variant="ghost" 
+                            size="icon"
+                            className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950 rounded-full"
+                            onClick={() => removeItem(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <Button 
+                            type="button"
+                            variant="outline" 
+                            size="icon" 
+                            className="h-7 w-7 rounded-full border-purple-200 hover:bg-purple-100 hover:text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900"
+                            onClick={() => updateItemQuantity(index, item.quantity - 1)}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="mx-3 w-8 text-center font-bold">{item.quantity}</span>
+                          <Button 
+                            type="button"
+                            variant="outline" 
+                            size="icon" 
+                            className="h-7 w-7 rounded-full border-purple-200 hover:bg-purple-100 hover:text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900"
+                            onClick={() => updateItemQuantity(index, item.quantity + 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                          <span className="ml-auto font-bold text-purple-700 dark:text-purple-400">
+                            ₹{(item.price * item.quantity).toFixed(2)}
+                          </span>
+                        </div>
+                        
+                        <Input
+                          placeholder="Special instructions for this item"
+                          value={item.notes}
+                          onChange={(e) => updateItemNotes(index, e.target.value)}
+                          className="text-sm border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg flex justify-between items-center">
+                    <span className="font-bold text-purple-900 dark:text-purple-300">Total Amount</span>
+                    <span className="text-xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      ₹{calculateTotal().toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
@@ -526,12 +541,13 @@ export function OrderForm() {
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Order Notes</FormLabel>
+                <FormItem className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                  <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Order Notes</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Add any special instructions for the entire order"
-                      className="resize-none"
+                      placeholder="Add any special instructions for the entire order..."
+                      className="resize-none mt-2 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      rows={3}
                       {...field}
                     />
                   </FormControl>
@@ -540,20 +556,24 @@ export function OrderForm() {
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="isUrgent"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-2">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-red-100 dark:border-red-900">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        className="data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Mark as Urgent</FormLabel>
+                      <FormLabel className="font-semibold text-red-600 dark:text-red-400">Mark as Urgent</FormLabel>
+                      <p className="text-xs text-gray-500">
+                        Prioritizes this order in the kitchen queue
+                      </p>
                     </div>
                   </FormItem>
                 )}
@@ -563,19 +583,20 @@ export function OrderForm() {
                 control={form.control}
                 name="useAIAutomation"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-2">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-purple-100 dark:border-purple-900">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        className="data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="flex items-center gap-1.5">
+                      <FormLabel className="flex items-center gap-1.5 font-semibold text-purple-700 dark:text-purple-400">
                         <span>Use AI Automation</span>
-                        <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                        <Sparkles className="h-4 w-4 text-purple-500" />
                       </FormLabel>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-gray-500">
                         AI will automatically manage this order's status updates and workflow
                       </p>
                     </div>
@@ -586,67 +607,79 @@ export function OrderForm() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-between space-x-2">
-          <Button 
-            type="button" 
-            variant="destructive"
-            onClick={() => {
-              // Create an emergency test order with fixed data
-              const testOrderData = {
-                tableNumber: "Table 1",
-                status: "pending",
-                totalAmount: 320,
-                notes: "Debug Test Order",
-                isUrgent: false,
-                orderSource: form.getValues("orderSource") || "manual",
-                useAIAutomation: form.getValues("useAIAutomation"),
-                items: [
-                  {
-                    menuItemId: 1,
-                    quantity: 1,
-                    price: 320,
-                    notes: ""
-                  }
-                ]
-              };
-              
-              console.log("EMERGENCY TEST ORDER:", testOrderData);
-              toast({
-                title: "Attempting Emergency Test Order",
-                description: "Submitting a test order to the API..."
-              });
-              
-              // Direct API call to ensure it works
-              try {
-                console.log("Making direct emergency test order");
-                createOrderMutation.mutate(testOrderData);
-              } catch (error: any) {
-                console.error("Emergency order creation failed:", error);
-                toast({
-                  title: "Emergency Order Failed",
-                  description: `Error: ${error?.message || "Unknown error"}`,
-                  variant: "destructive"
-                });
-              }
-            }}
-          >
-            Emergency Debug Order
-          </Button>
-          
-          <div className="flex space-x-2">
+        <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="hidden md:block">
             <Button 
               type="button" 
               variant="outline"
+              size="sm"
+              className="text-xs text-gray-500 border-gray-300"
+              onClick={() => {
+                // Create an emergency test order with fixed data
+                const testOrderData = {
+                  tableNumber: "Table 1",
+                  status: "pending",
+                  totalAmount: 320,
+                  notes: "Debug Test Order",
+                  isUrgent: false,
+                  orderSource: form.getValues("orderSource") || "manual",
+                  useAIAutomation: form.getValues("useAIAutomation"),
+                  items: [
+                    {
+                      menuItemId: 1,
+                      quantity: 1,
+                      price: 320,
+                      notes: ""
+                    }
+                  ]
+                };
+                
+                console.log("EMERGENCY TEST ORDER:", testOrderData);
+                toast({
+                  title: "Attempting Emergency Test Order",
+                  description: "Submitting a test order to the API..."
+                });
+                
+                // Direct API call to ensure it works
+                try {
+                  console.log("Making direct emergency test order");
+                  createOrderMutation.mutate(testOrderData);
+                } catch (error: any) {
+                  console.error("Emergency order creation failed:", error);
+                  toast({
+                    title: "Emergency Order Failed",
+                    description: `Error: ${error?.message || "Unknown error"}`,
+                    variant: "destructive"
+                  });
+                }
+              }}
+            >
+              Debug Order
+            </Button>
+          </div>
+          
+          <div className="flex space-x-4 ml-auto">
+            <Button 
+              type="button" 
+              variant="outline"
+              className="px-6 border-2 font-medium"
               onClick={() => setLocation("/")}
             >
               Cancel
             </Button>
             <Button 
               type="submit"
+              className={`px-8 py-6 font-bold text-lg ${selectedItems.length === 0 ? 'bg-gray-400' : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'}`}
               disabled={createOrderMutation.isPending || selectedItems.length === 0}
             >
-              {createOrderMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Order
+              {createOrderMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>Create Order</>
+              )}
             </Button>
           </div>
         </div>
