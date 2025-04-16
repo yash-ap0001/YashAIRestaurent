@@ -153,38 +153,27 @@ export default function SimplifiedDashboard() {
           console.log('New order received via WebSocket:', data);
           console.log('New order data structure:', JSON.stringify(data, null, 2));
           
-          // Immediately update the orders query data with the new order
+          // Check if we should handle this order update
           if (data.data && data.data.id) {
-            console.log('Adding new order to query cache. Order ID:', data.data.id, 'Order Number:', data.data.orderNumber);
+            console.log('New order received. Order ID:', data.data.id, 'Order Number:', data.data.orderNumber);
             
-            // Try to optimistically add the new order to the existing query data
-            queryClient.setQueryData(['/api/orders'], (oldData: Order[] | undefined) => {
-              if (!oldData) {
-                console.log('No existing orders data, creating new array with just this order');
-                return [data.data];
-              }
-              
-              // Check if this order already exists to avoid duplicates
-              const orderExists = oldData.some(order => order.id === data.data.id);
-              console.log('Order exists in cache already?', orderExists);
-              
-              if (orderExists) return oldData;
-              
-              // Add the new order at the beginning of the array
-              console.log('Adding new order to the beginning of orders array. New length:', oldData.length + 1);
-              return [data.data, ...oldData];
-            });
+            // IMPORTANT: Don't add to cache immediately to prevent duplicate cards
+            // Instead, just schedule a delayed refetch of the data
+            
+            // Significantly increase delay to ensure server processing is complete
+            const refetchDelay = 2000; // 2 seconds delay
+            console.log(`Scheduling data refetch in ${refetchDelay}ms`);
+            
+            // Set a timeout to refetch the data
+            setTimeout(() => {
+              console.log('Executing delayed refetch of orders data');
+              queryClient.refetchQueries({ queryKey: ['/api/orders'] });
+              queryClient.refetchQueries({ queryKey: ['/api/kitchen-tokens'] });
+              queryClient.refetchQueries({ queryKey: ['/api/dashboard/stats'] });
+            }, refetchDelay);
           } else {
             console.error('Invalid order data structure received:', data);
           }
-          
-          // Don't invalidate queries immediately after adding the order to avoid duplicate fetching
-          // Just schedule a refetch after a delay to ensure consistency with server
-          setTimeout(() => {
-            queryClient.refetchQueries({ queryKey: ['/api/orders'] });
-            queryClient.refetchQueries({ queryKey: ['/api/kitchen-tokens'] });
-            queryClient.refetchQueries({ queryKey: ['/api/dashboard/stats'] });
-          }, 1000);
         }
         // Invalidate queries based on the type of update
         else if (data.type === 'order_created' || data.type === 'order_updated') {
@@ -281,20 +270,23 @@ export default function SimplifiedDashboard() {
       return await response.json();
     },
     onSuccess: (data) => {
-      // Invalidate multiple queries to ensure all data is refreshed
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/kitchen-tokens"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      // Increase the delay before refetching data to prevent duplicate entries
+      const refetchDelay = 2000; // 2 seconds
+      console.log(`Order created. Scheduling data refetch in ${refetchDelay}ms`);
       
-      // Force an immediate refetch to ensure data is up-to-date
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ["/api/orders"] });
-      }, 200);
-      
+      // First, show a success notification
       toast({
         title: "Order created",
         description: `Order #${data.orderNumber} has been created successfully.`,
       });
+      
+      // Then, schedule a delayed refetch
+      setTimeout(() => {
+        console.log('Executing delayed refetch after order creation');
+        queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/kitchen-tokens"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      }, refetchDelay);
     },
     onError: (error: Error) => {
       toast({
