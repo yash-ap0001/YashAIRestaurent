@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide Replit metadata borders */
+[data-replit-metadata], [data-component-name] {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove borders from the card components */
+.Droppable div, .Draggable div, [data-rfd-droppable-id], [data-rfd-draggable-id], [data-rfd-draggable-context-id], [data-rfd-droppable-context-id] {
+  outline: none !important;
+  border: none !important;
+}
+
+/* Remove debug outlines */
+div[role="button"], div[tabindex="0"] {
+  outline: none !important;
+  border: none !important;
+}
+
 /* Custom colors */
 .text-navy {
   color: #1a237e !important;
@@ -10,6 +29,12 @@
 @layer base {
   * {
     @apply border-border;
+  }
+  
+  /* Override all Replit metadata borders */
+  *[data-replit-metadata], *[data-component-name], *[data-rfd-droppable-id], *[data-rfd-draggable-id] {
+    outline: none !important;
+    border: none !important;
   }
 
   body {
