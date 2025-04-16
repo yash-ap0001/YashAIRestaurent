@@ -15,6 +15,26 @@ interface Order {
   orderSource: string;
 }
 
+interface OrderItem {
+  id: number;
+  orderId: number;
+  menuItemId: number;
+  quantity: number;
+  price: number;
+  specialInstructions?: string;
+}
+
+interface MenuItem {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  description: string;
+  dietaryInfo: string[];
+  isAvailable: boolean;
+  imageUrl?: string;
+}
+
 interface KitchenToken {
   id: number;
   tokenNumber: string;
@@ -28,7 +48,17 @@ interface Bill {
   orderId: number;
 }
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+interface NewOrderFormData {
+  tableNumber: string;
+  orderItems: {
+    menuItemId: number;
+    quantity: number;
+    price?: number;
+    specialInstructions?: string;
+  }[];
+}
+
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   CircleCheck,
@@ -43,8 +73,38 @@ import {
   Menu,
   MessageSquare,
   Phone,
-  ReceiptText
+  ReceiptText,
+  Plus,
+  Search,
+  Filter,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from "@/components/ui/tabs";
 
 // Order status colors
 const statusColors = {
@@ -69,10 +129,21 @@ const statusText = {
 export default function SimplifiedDashboard() {
   const { toast } = useToast();
   const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [isCreateOrderDialogOpen, setIsCreateOrderDialogOpen] = useState(false);
+  const ordersPerPage = 8; // Number of orders to display per page
 
   // Fetch orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
+  });
+
+  // Fetch menu items for the order creation
+  const { data: menuItems = [], isLoading: menuItemsLoading } = useQuery<MenuItem[]>({
+    queryKey: ["/api/menu-items"],
   });
 
   // Fetch kitchen tokens
@@ -83,6 +154,38 @@ export default function SimplifiedDashboard() {
   // Fetch bills
   const { data: bills = [], isLoading: billsLoading } = useQuery<Bill[]>({
     queryKey: ["/api/bills"],
+  });
+  
+  // New order form state
+  const [newOrder, setNewOrder] = useState<NewOrderFormData>({
+    tableNumber: "",
+    orderItems: [{ menuItemId: 0, quantity: 1 }]
+  });
+  
+  // Create new order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData: NewOrderFormData) => {
+      const res = await apiRequest("POST", "/api/orders", {
+        ...orderData,
+        orderSource: "manual"
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({
+        title: "Order Created",
+        description: "New order has been created successfully",
+      });
+      setIsCreateOrderDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Order Creation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   // Update order status mutation
@@ -281,8 +384,132 @@ export default function SimplifiedDashboard() {
     }).format(amount);
   };
 
+  // Handle adding a new menu item to the order
+  const addMenuItem = () => {
+    setNewOrder({
+      ...newOrder,
+      orderItems: [
+        ...newOrder.orderItems,
+        { menuItemId: 0, quantity: 1 }
+      ]
+    });
+  };
+
+  // Handle removing a menu item from the order
+  const removeMenuItem = (index: number) => {
+    const newItems = [...newOrder.orderItems];
+    newItems.splice(index, 1);
+    setNewOrder({
+      ...newOrder,
+      orderItems: newItems
+    });
+  };
+
+  // Handle updating a menu item in the order
+  const updateOrderItem = (index: number, field: string, value: any) => {
+    const newItems = [...newOrder.orderItems];
+    newItems[index] = {
+      ...newItems[index],
+      [field]: field === 'menuItemId' ? Number(value) : value
+    };
+    
+    // If the menu item was changed, update the price
+    if (field === 'menuItemId') {
+      const menuItem = menuItems.find(item => item.id === Number(value));
+      if (menuItem) {
+        newItems[index].price = menuItem.price;
+      }
+    }
+    
+    setNewOrder({
+      ...newOrder,
+      orderItems: newItems
+    });
+  };
+
+  // Handle form submission for new order
+  const handleCreateOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Remove any items with menuItemId === 0
+    const validItems = newOrder.orderItems.filter(item => item.menuItemId !== 0);
+    
+    if (validItems.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please add at least one menu item",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!newOrder.tableNumber) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a table number",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    createOrderMutation.mutate({
+      tableNumber: newOrder.tableNumber,
+      orderItems: validItems
+    });
+  };
+
+  // Filter and sort orders
+  const filteredOrders = orders
+    .filter((order: Order) => {
+      // Filter by status
+      if (statusFilter !== "all" && order.status !== statusFilter) {
+        return false;
+      }
+      
+      // Filter by search query
+      if (searchQuery && !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !order.tableNumber.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      return true;
+    })
+    .sort((a: Order, b: Order) => {
+      // Sort by selected option
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "oldest":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "amount-high":
+          return b.totalAmount - a.totalAmount;
+        case "amount-low":
+          return a.totalAmount - b.totalAmount;
+        default:
+          return 0;
+      }
+    });
+    
+  // Paginate orders
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const startIndex = (currentPage - 1) * ordersPerPage;
+  const paginatedOrders = filteredOrders.slice(startIndex, startIndex + ordersPerPage);
+  
+  // Calculate total amount for each status
+  const pendingAmount = orders
+    .filter(order => ["pending", "preparing"].includes(order.status))
+    .reduce((sum, order) => sum + order.totalAmount, 0);
+    
+  const readyAmount = orders
+    .filter(order => order.status === "ready")
+    .reduce((sum, order) => sum + order.totalAmount, 0);
+    
+  const billedAmount = orders
+    .filter(order => order.status === "billed")
+    .reduce((sum, order) => sum + order.totalAmount, 0);
+
   // Loading state
-  if (ordersLoading || tokensLoading || billsLoading) {
+  if (ordersLoading || tokensLoading || billsLoading || menuItemsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -292,22 +519,125 @@ export default function SimplifiedDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold">Simple Dashboard</h1>
-        <p className="text-neutral-500">
-          Manage orders with one-click actions. Everything you need in one place.
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Simple Dashboard</h1>
+          <p className="text-neutral-500">
+            Manage all your orders in one place.
+          </p>
+        </div>
+        
+        <Dialog open={isCreateOrderDialogOpen} onOpenChange={setIsCreateOrderDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              New Order
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create New Order</DialogTitle>
+            </DialogHeader>
+            
+            <form onSubmit={handleCreateOrder} className="space-y-6 mt-4">
+              <div>
+                <Label htmlFor="tableNumber">Table Number</Label>
+                <Input 
+                  id="tableNumber"
+                  value={newOrder.tableNumber}
+                  onChange={(e) => setNewOrder({...newOrder, tableNumber: e.target.value})}
+                  placeholder="Enter table number"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label>Menu Items</Label>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={addMenuItem}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+                
+                {newOrder.orderItems.map((item, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-3 items-end">
+                    <div className="col-span-7">
+                      <Label htmlFor={`item-${index}`}>Item</Label>
+                      <Select 
+                        value={item.menuItemId.toString()} 
+                        onValueChange={(value) => updateOrderItem(index, "menuItemId", value)}
+                      >
+                        <SelectTrigger id={`item-${index}`}>
+                          <SelectValue placeholder="Select an item" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {menuItems.filter(item => item.isAvailable).map((menuItem) => (
+                            <SelectItem key={menuItem.id} value={menuItem.id.toString()}>
+                              {menuItem.name} - {formatCurrency(menuItem.price)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-3">
+                      <Label htmlFor={`quantity-${index}`}>Quantity</Label>
+                      <Input 
+                        id={`quantity-${index}`}
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => updateOrderItem(index, "quantity", parseInt(e.target.value))}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        onClick={() => removeMenuItem(index)}
+                        className="w-full"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={createOrderMutation.isPending || newOrder.orderItems.length === 0}
+                >
+                  {createOrderMutation.isPending ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating...</>
+                  ) : (
+                    <>Create Order</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Simple Stats */}
+      {/* Stats Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">Pending Orders</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <div className="text-2xl font-bold">
               {orders.filter((order: Order) => ["pending", "preparing"].includes(order.status)).length}
+            </div>
+            <div className="text-sm text-neutral-500">
+              Value: {formatCurrency(pendingAmount)}
             </div>
           </CardContent>
         </Card>
@@ -315,9 +645,12 @@ export default function SimplifiedDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">Ready to Serve</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <div className="text-2xl font-bold">
               {orders.filter((order: Order) => order.status === "ready").length}
+            </div>
+            <div className="text-sm text-neutral-500">
+              Value: {formatCurrency(readyAmount)}
             </div>
           </CardContent>
         </Card>
@@ -325,76 +658,141 @@ export default function SimplifiedDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-neutral-500">Total Sales Today</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <div className="text-2xl font-bold">
-              {formatCurrency(
-                orders
-                  .filter((order: Order) => order.status === "billed")
-                  .reduce((sum: number, order: Order) => sum + order.totalAmount, 0)
-              )}
+              {formatCurrency(billedAmount)}
+            </div>
+            <div className="text-sm text-neutral-500">
+              Orders: {orders.filter(order => order.status === "billed").length}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Order List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Orders</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {orders.length === 0 ? (
-              <div className="text-center py-6 text-neutral-500">
-                No orders yet. Create a new order to get started.
+      {/* Order Management */}
+      <Card className="overflow-hidden">
+        <Tabs defaultValue="all" className="w-full" onValueChange={(value) => setStatusFilter(value)}>
+          <CardHeader className="pb-0">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <CardTitle>All Orders</CardTitle>
+              
+              <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <div className="relative w-full md:w-64">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-neutral-500" />
+                  <Input
+                    placeholder="Search orders..."
+                    className="pl-8"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full md:w-48">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest first</SelectItem>
+                    <SelectItem value="oldest">Oldest first</SelectItem>
+                    <SelectItem value="amount-high">Amount (high to low)</SelectItem>
+                    <SelectItem value="amount-low">Amount (low to high)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <TabsList className="mt-2">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="preparing">Preparing</TabsTrigger>
+              <TabsTrigger value="ready">Ready</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="billed">Billed</TabsTrigger>
+            </TabsList>
+          </CardHeader>
+
+          <CardContent className="pt-6">
+            {paginatedOrders.length === 0 ? (
+              <div className="text-center py-10 text-neutral-500">
+                No orders found. Try a different filter or create a new order.
               </div>
             ) : (
-              orders.map((order: Order) => (
-                <div 
-                  key={order.id} 
-                  className="border rounded-lg p-4 space-y-3 hover:border-primary transition-colors"
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${statusColors[order.status as keyof typeof statusColors]}`}></div>
-                      <h3 className="font-medium">Order #{order.orderNumber}</h3>
-                      <div className="flex items-center space-x-1 text-neutral-500 text-sm">
-                        <span className="flex items-center">
-                          {getSourceIcon(order.orderSource)}
-                        </span>
-                        <span>{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+              <div className="space-y-4">
+                {paginatedOrders.map((order: Order) => (
+                  <div 
+                    key={order.id} 
+                    className="border rounded-lg p-4 space-y-3 hover:border-primary transition-colors"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-3 h-3 rounded-full ${statusColors[order.status as keyof typeof statusColors]}`}></div>
+                        <h3 className="font-medium">Order #{order.orderNumber}</h3>
+                        <Badge variant="outline" className="text-xs">
+                          <span className="flex items-center space-x-1">
+                            <span className="flex items-center">
+                              {getSourceIcon(order.orderSource)}
+                            </span>
+                            <span>{order.orderSource.charAt(0).toUpperCase() + order.orderSource.slice(1)}</span>
+                          </span>
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-neutral-500">
+                        {format(new Date(order.createdAt), "h:mm a")}
                       </div>
                     </div>
-                    <div className="text-sm text-neutral-500">
-                      {format(new Date(order.createdAt), "h:mm a")}
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-sm text-neutral-500">Table {order.tableNumber}</div>
-                      <div className="font-medium">{formatCurrency(order.totalAmount)}</div>
-                    </div>
                     
-                    <Button
-                      variant={order.status === "billed" ? "outline" : "default"}
-                      size="sm"
-                      disabled={updateOrderMutation.isPending || order.status === "billed"}
-                      onClick={() => progressOrder(order)}
-                    >
-                      {updateOrderMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        getActionIcon(order.status)
-                      )}
-                      {getActionText(order.status)}
-                    </Button>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-sm text-neutral-500">Table {order.tableNumber}</div>
+                        <div className="font-medium">{formatCurrency(order.totalAmount)}</div>
+                      </div>
+                      
+                      <Button
+                        variant={order.status === "billed" ? "outline" : "default"}
+                        size="sm"
+                        disabled={updateOrderMutation.isPending || order.status === "billed"}
+                        onClick={() => progressOrder(order)}
+                      >
+                        {updateOrderMutation.isPending && updateOrderMutation.variables?.id === order.id ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          getActionIcon(order.status)
+                        )}
+                        {getActionText(order.status)}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
-          </div>
-        </CardContent>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-6">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                <div className="text-sm">
+                  Page {currentPage} of {totalPages}
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Tabs>
       </Card>
     </div>
   );
