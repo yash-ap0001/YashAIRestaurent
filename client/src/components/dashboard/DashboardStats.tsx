@@ -5,6 +5,8 @@ import {
   CreditCard, Receipt, HandPlatter, ChefHat, 
   ArrowUpRight, Clock, AlertTriangle 
 } from "lucide-react";
+import { useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 interface DashboardStatsProps {
   className?: string;
@@ -20,9 +22,56 @@ interface DashboardStats {
 }
 
 export function DashboardStats({ className }: DashboardStatsProps) {
-  const { data, isLoading } = useQuery<DashboardStats>({
+  const { data, isLoading, refetch } = useQuery<DashboardStats>({
     queryKey: ['/api/dashboard/stats'],
+    refetchInterval: 5000, // Refetch data every 5 seconds
+    staleTime: 1000, // Data becomes stale after 1 second for stats
   });
+  
+  // Set up WebSocket listener for real-time stats updates
+  useEffect(() => {
+    // Connect to WebSocket for real-time updates
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+    const socket = new WebSocket(wsUrl);
+    
+    socket.onopen = () => {
+      console.log('WebSocket connected for dashboard stats');
+    };
+    
+    // Listen for real-time updates that should trigger a stats refresh
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // If we receive any of these events, refresh the stats
+        if (
+          data.type === 'order_created' || 
+          data.type === 'order_updated' || 
+          data.type === 'bill_created' || 
+          data.type === 'kitchen_token_updated'
+        ) {
+          refetch();
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+    
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+    // Also set up an interval as a fallback for when WebSocket might be disconnected
+    const intervalId = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+    }, 10000); // Every 10 seconds as a fallback
+    
+    // Clean up on component unmount
+    return () => {
+      socket.close();
+      clearInterval(intervalId);
+    };
+  }, [refetch]);
 
   if (isLoading) {
     return (
