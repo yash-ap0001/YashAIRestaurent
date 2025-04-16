@@ -256,71 +256,116 @@ export default function KitchenTokens() {
                   No orders found in this queue
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   {filteredOrders.map((order) => {
-                    const statusDisplay = getStatusDisplay(order.status);
                     const timeElapsed = order.createdAt ? getTimeElapsed(order.createdAt) : "Unknown time";
                     const token = kitchenTokens.find(t => t.orderId === order.id);
                     const isUrgent = token?.isUrgent;
+                    
+                    // Determine card color based on status
+                    let cardBgColor = "";
+                    let textColor = "text-white";
+                    let actionButton = "";
+                    let actionIcon = <></>;
+                    let actionLabel = "";
+                    let nextStatus = "";
+                    
+                    switch(order.status) {
+                      case "pending":
+                        cardBgColor = "bg-gradient-to-r from-amber-500 to-amber-700";
+                        actionButton = "bg-white text-orange-800 hover:bg-gray-100";
+                        actionIcon = <Utensils className="h-4 w-4 mr-1" />;
+                        actionLabel = "Start";
+                        nextStatus = "preparing";
+                        break;
+                      case "preparing":
+                        cardBgColor = "bg-gradient-to-r from-green-500 to-green-700";
+                        actionButton = "bg-white text-green-800 hover:bg-gray-100";
+                        actionIcon = <CheckCircle className="h-4 w-4 mr-1" />;
+                        actionLabel = "Ready";
+                        nextStatus = "ready";
+                        break;
+                      case "ready":
+                        cardBgColor = "bg-gradient-to-r from-blue-500 to-blue-700";
+                        actionButton = "bg-white text-blue-800 hover:bg-gray-100";
+                        actionIcon = <CheckCircle className="h-4 w-4 mr-1" />;
+                        actionLabel = "Complete";
+                        nextStatus = "completed";
+                        break;
+                      case "completed":
+                        cardBgColor = "bg-gradient-to-r from-purple-500 to-purple-700";
+                        actionButton = "bg-white text-purple-800 hover:bg-gray-100";
+                        actionIcon = <CheckCircle className="h-4 w-4 mr-1" />;
+                        actionLabel = "Bill";
+                        nextStatus = "billed";
+                        break;
+                      case "billed":
+                        cardBgColor = "bg-gradient-to-r from-gray-600 to-gray-800";
+                        actionButton = "bg-white text-gray-800 hover:bg-gray-100";
+                        actionIcon = <CheckCircle className="h-4 w-4 mr-1" />;
+                        actionLabel = "Complete";
+                        nextStatus = "completed";
+                        break;
+                      default:
+                        cardBgColor = "bg-gradient-to-r from-gray-400 to-gray-600";
+                        break;
+                    }
 
                     return (
-                      <Card 
+                      <div 
                         key={order.id} 
-                        className={`${isUrgent ? 'border-red-400' : ''} overflow-hidden`}
+                        className={`${cardBgColor} rounded-lg overflow-hidden ${isUrgent ? 'ring-2 ring-red-500' : ''}`}
                       >
                         {isUrgent && (
-                          <div className="bg-red-500 text-white text-xs font-medium py-1 px-3 text-center">
-                            URGENT ORDER
+                          <div className="bg-red-500 text-white text-xs font-medium py-1 px-2 text-center">
+                            URGENT
                           </div>
                         )}
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start mb-3">
+                        <div className="p-3 space-y-2">
+                          <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-bold text-lg">#{order.orderNumber}</h3>
-                              <p className="text-sm text-muted-foreground">Table: {order.tableNumber}</p>
+                              <h3 className={`font-bold text-lg ${textColor}`}>#{order.orderNumber}</h3>
+                              <p className={`text-xs ${textColor} opacity-90`}>
+                                {order.tableNumber}
+                              </p>
                             </div>
-                            <Badge className={statusDisplay.color}>
-                              <span className="flex items-center">
-                                {statusDisplay.icon}
-                                {statusDisplay.label}
-                              </span>
-                            </Badge>
+                            <div>
+                              <p className={`font-bold text-lg ${textColor}`}>
+                                ₹{order.totalAmount || "NaN"}
+                              </p>
+                            </div>
                           </div>
                           
-                          <div className="flex items-center justify-between text-sm mb-4">
-                            <span className="text-muted-foreground flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
+                          <div className="flex items-center text-xs mt-1">
+                            <span className={`${textColor} opacity-90`}>
                               {timeElapsed}
                             </span>
-                            <span className="font-medium">
-                              ₹{order.totalAmount}
-                            </span>
                           </div>
                           
-                          <div className="space-y-2 mt-4">
+                          <div className="space-y-1 mt-2">
                             <Button 
-                              className={`w-full ${statusDisplay.nextColor} text-white`}
+                              className={`w-full ${actionButton}`}
                               size="sm"
-                              onClick={() => handleUpdateStatus(order.id, statusDisplay.nextStatus)}
+                              onClick={() => handleUpdateStatus(order.id, nextStatus)}
                             >
-                              <Utensils className="h-4 w-4 mr-2" />
-                              {statusDisplay.nextAction}
+                              {actionIcon}
+                              {actionLabel}
                             </Button>
                             
-                            {order.status !== "delayed" && (
+                            {order.status !== "delayed" && order.status === "pending" && (
                               <Button 
                                 variant="outline" 
-                                className="w-full border-red-300 text-red-600 hover:bg-red-50"
+                                className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
                                 size="sm"
                                 onClick={() => handleUpdateStatus(order.id, "delayed")}
                               >
-                                <AlertTriangle className="h-4 w-4 mr-2" />
-                                Mark Delayed
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                Delay
                               </Button>
                             )}
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>

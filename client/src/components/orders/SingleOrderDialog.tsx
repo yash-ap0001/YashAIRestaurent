@@ -92,13 +92,23 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
       return await response.json();
     },
     onSuccess: (data) => {
+      // Invalidate multiple queries to ensure all data is refreshed
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      
       toast({
         title: "Order created",
         description: `Order #${data.orderNumber} has been created successfully.`,
       });
-      resetForm();
-      onClose();
+      
+      // Add a slight delay before closing to ensure data is refreshed properly
+      setTimeout(() => {
+        resetForm();
+        onClose();
+        // Force a manual refresh of orders data
+        queryClient.refetchQueries({ queryKey: ['/api/orders'] });
+      }, 300);
     },
     onError: (error: Error) => {
       toast({
