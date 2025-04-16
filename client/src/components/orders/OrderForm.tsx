@@ -549,7 +549,7 @@ export function OrderForm() {
                             type="button"
                             variant="ghost" 
                             size="icon"
-                            className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950 rounded-full"
+                            className="h-8 w-8 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
                             onClick={() => removeItem(index)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -605,12 +605,12 @@ export function OrderForm() {
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                  <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Order Notes</FormLabel>
+                <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                  <FormLabel className="text-sm font-semibold text-white">Order Notes</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Add any special instructions for the entire order..."
-                      className="resize-none mt-2 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="resize-none mt-2 border-2 border-purple-600 bg-black text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                       rows={3}
                       {...field}
                     />
@@ -625,17 +625,17 @@ export function OrderForm() {
                 control={form.control}
                 name="isUrgent"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-red-100 dark:border-red-900">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-red-700">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
+                        className="border-red-500 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="font-semibold text-red-600 dark:text-red-400">Mark as Urgent</FormLabel>
-                      <p className="text-xs text-gray-500">
+                      <FormLabel className="font-semibold text-red-400">Mark as Urgent</FormLabel>
+                      <p className="text-xs text-gray-400">
                         Prioritizes this order in the kitchen queue
                       </p>
                     </div>
@@ -647,20 +647,20 @@ export function OrderForm() {
                 control={form.control}
                 name="useAIAutomation"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-purple-100 dark:border-purple-900">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-purple-800">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                        className="border-purple-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="flex items-center gap-1.5 font-semibold text-purple-700 dark:text-purple-400">
+                      <FormLabel className="flex items-center gap-1.5 font-semibold text-purple-400">
                         <span>Use AI Automation</span>
                         <Sparkles className="h-4 w-4 text-purple-500" />
                       </FormLabel>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         AI will automatically manage this order's status updates and workflow
                       </p>
                     </div>
@@ -671,13 +671,13 @@ export function OrderForm() {
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between pt-6 border-t border-purple-800">
           <div className="hidden md:block">
             <Button 
               type="button" 
               variant="outline"
               size="sm"
-              className="text-xs text-gray-500 border-gray-300"
+              className="text-xs text-purple-400 border-purple-600 hover:bg-purple-900/30"
               onClick={() => {
                 // Create an emergency test order with fixed data
                 const testOrderData = {
@@ -726,7 +726,7 @@ export function OrderForm() {
             <Button 
               type="button" 
               variant="outline"
-              className="px-6 border-2 font-medium"
+              className="px-6 border-2 border-purple-600 text-purple-300 font-medium hover:bg-purple-900/30"
               onClick={() => setLocation("/")}
             >
               Cancel
