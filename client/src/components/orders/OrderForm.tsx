@@ -347,7 +347,7 @@ export function OrderForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6 h-full overflow-y-auto">
         <Card className="bg-black rounded-xl shadow-lg overflow-hidden border border-purple-800">
           <CardHeader className="pb-4 pt-6 px-6 bg-gradient-to-br from-purple-600 to-pink-600">
             <CardTitle className="text-2xl font-bold text-white">

@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 
 export default function NewOrder() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-8 h-[calc(100vh-64px)] flex flex-col overflow-hidden">
+      <div className="flex justify-between items-center flex-shrink-0">
         <div>
           <Link href="/">
             <Button variant="ghost" className="mb-2 -ml-3 text-gray-500 hover:text-gray-700">
@@ -35,7 +35,7 @@ export default function NewOrder() {
         </div>
       </div>
       
-      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 p-1 rounded-2xl">
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 p-1 rounded-2xl flex-grow overflow-hidden">
         <OrderForm />
       </div>
     </div>
