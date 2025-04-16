@@ -412,7 +412,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Broadcast the new order to all connected clients
       console.log(`Broadcasting new order: ${order.orderNumber}`);
       broadcastNewOrder(order);
- 
+      } else {
+        console.log("No order items provided in request:", req.body);
+      }
+      
       // Create a kitchen token if needed
       if (order.status !== "completed" && order.status !== "cancelled") {
         console.log("Creating kitchen token for order:", order.id);
