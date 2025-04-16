@@ -1,22 +1,65 @@
+// Counters for sequential numbering
+let orderCounter = 1001; // Start from 1001
+let tokenCounter = 1; // Start from 1
+let billCounter = 1001; // Start from 1001
+
 /**
- * Generate a unique order number
+ * Generate a sequential order number
  */
 export function generateOrderNumber(): string {
-  return `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+  const orderNumber = `ORD-${orderCounter.toString().padStart(4, '0')}`;
+  orderCounter++;
+  return orderNumber;
 }
 
 /**
- * Generate a unique kitchen token number
+ * Generate a sequential kitchen token number
  */
 export function generateTokenNumber(): string {
-  return `T${Math.floor(10 + Math.random() * 90)}`;
+  const tokenNumber = `T${tokenCounter.toString().padStart(2, '0')}`;
+  tokenCounter++;
+  return tokenNumber;
 }
 
 /**
- * Generate a unique bill number
+ * Generate a sequential bill number
  */
 export function generateBillNumber(): string {
-  return `BILL-${Math.floor(1000 + Math.random() * 9000)}`;
+  const billNumber = `BILL-${billCounter.toString().padStart(4, '0')}`;
+  billCounter++;
+  return billNumber;
+}
+
+/**
+ * Initialize counters based on existing data
+ */
+export function initializeCounters(
+  lastOrderNumber: string | null, 
+  lastTokenNumber: string | null, 
+  lastBillNumber: string | null
+): void {
+  if (lastOrderNumber) {
+    const orderNum = parseInt(lastOrderNumber.replace('ORD-', ''));
+    if (!isNaN(orderNum) && orderNum >= orderCounter) {
+      orderCounter = orderNum + 1;
+    }
+  }
+  
+  if (lastTokenNumber) {
+    const tokenNum = parseInt(lastTokenNumber.replace('T', ''));
+    if (!isNaN(tokenNum) && tokenNum >= tokenCounter) {
+      tokenCounter = tokenNum + 1;
+    }
+  }
+  
+  if (lastBillNumber) {
+    const billNum = parseInt(lastBillNumber.replace('BILL-', ''));
+    if (!isNaN(billNum) && billNum >= billCounter) {
+      billCounter = billNum + 1;
+    }
+  }
+  
+  console.log(`Counters initialized: orders=${orderCounter}, tokens=${tokenCounter}, bills=${billCounter}`);
 }
 
 /**
