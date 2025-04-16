@@ -348,42 +348,42 @@ export function OrderForm() {
   return (
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6">
-        <Card className="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden border-0">
-          <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white pb-6">
+        <Card className="bg-black rounded-xl shadow-md overflow-hidden border border-purple-800">
+          <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white pb-6">
             <CardTitle className="flex items-center gap-2 text-2xl">
               <span>Create Your Order</span>
             </CardTitle>
             <p className="text-white text-opacity-90 mt-1">Fill in the order details manually or use our AI to process natural language orders</p>
             
           </CardHeader>
-          <CardContent className="space-y-6 p-6">
+          <CardContent className="space-y-6 p-6 bg-gray-900">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="tableNumber"
                 render={({ field }) => (
-                  <FormItem className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Table Number</FormLabel>
+                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                    <FormLabel className="text-sm font-semibold text-white">Table Number</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
-                        <SelectTrigger className="w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <SelectTrigger className="w-full mt-2 bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                           <SelectValue placeholder="Select a table" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Table 1">Table 1</SelectItem>
-                          <SelectItem value="Table 2">Table 2</SelectItem>
-                          <SelectItem value="Table 3">Table 3</SelectItem>
-                          <SelectItem value="Table 4">Table 4</SelectItem>
-                          <SelectItem value="Table 5">Table 5</SelectItem>
-                          <SelectItem value="Table 6">Table 6</SelectItem>
-                          <SelectItem value="Table 7">Table 7</SelectItem>
-                          <SelectItem value="Table 8">Table 8</SelectItem>
-                          <SelectItem value="Table 9">Table 9</SelectItem>
-                          <SelectItem value="Table 10">Table 10</SelectItem>
-                          <SelectItem value="Takeaway">Takeaway</SelectItem>
+                        <SelectContent className="bg-black border-purple-600 text-white">
+                          <SelectItem value="Table 1" className="text-white focus:bg-purple-800 focus:text-white">Table 1</SelectItem>
+                          <SelectItem value="Table 2" className="text-white focus:bg-purple-800 focus:text-white">Table 2</SelectItem>
+                          <SelectItem value="Table 3" className="text-white focus:bg-purple-800 focus:text-white">Table 3</SelectItem>
+                          <SelectItem value="Table 4" className="text-white focus:bg-purple-800 focus:text-white">Table 4</SelectItem>
+                          <SelectItem value="Table 5" className="text-white focus:bg-purple-800 focus:text-white">Table 5</SelectItem>
+                          <SelectItem value="Table 6" className="text-white focus:bg-purple-800 focus:text-white">Table 6</SelectItem>
+                          <SelectItem value="Table 7" className="text-white focus:bg-purple-800 focus:text-white">Table 7</SelectItem>
+                          <SelectItem value="Table 8" className="text-white focus:bg-purple-800 focus:text-white">Table 8</SelectItem>
+                          <SelectItem value="Table 9" className="text-white focus:bg-purple-800 focus:text-white">Table 9</SelectItem>
+                          <SelectItem value="Table 10" className="text-white focus:bg-purple-800 focus:text-white">Table 10</SelectItem>
+                          <SelectItem value="Takeaway" className="text-white focus:bg-purple-800 focus:text-white">Takeaway</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -396,22 +396,22 @@ export function OrderForm() {
                 control={form.control}
                 name="orderSource"
                 render={({ field }) => (
-                  <FormItem className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Order Source</FormLabel>
+                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                    <FormLabel className="text-sm font-semibold text-white">Order Source</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
-                        <SelectTrigger className="w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <SelectTrigger className="w-full mt-2 bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                           <SelectValue placeholder="Select order source" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="manual">Manual / In-Person</SelectItem>
-                          <SelectItem value="zomato">Zomato</SelectItem>
-                          <SelectItem value="swiggy">Swiggy</SelectItem>
-                          <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                          <SelectItem value="phone">Phone</SelectItem>
+                        <SelectContent className="bg-black border-purple-600 text-white">
+                          <SelectItem value="manual" className="text-white focus:bg-purple-800 focus:text-white">Manual / In-Person</SelectItem>
+                          <SelectItem value="zomato" className="text-white focus:bg-purple-800 focus:text-white">Zomato</SelectItem>
+                          <SelectItem value="swiggy" className="text-white focus:bg-purple-800 focus:text-white">Swiggy</SelectItem>
+                          <SelectItem value="whatsapp" className="text-white focus:bg-purple-800 focus:text-white">WhatsApp</SelectItem>
+                          <SelectItem value="phone" className="text-white focus:bg-purple-800 focus:text-white">Phone</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -536,14 +536,14 @@ export function OrderForm() {
                   </div>
                 </div>
                 
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-b-xl shadow-sm border border-gray-100 dark:border-gray-700 -mt-4">
+                <div className="bg-black p-4 rounded-b-xl shadow-md border border-purple-800 -mt-4">
                   <div className="max-h-[300px] overflow-y-auto space-y-3">
                     {selectedItems.map((item, index) => (
-                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                      <div key={index} className="border border-purple-800 rounded-xl p-4 space-y-3 hover:bg-purple-900/30 transition-colors">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h4 className="font-bold text-gray-800 dark:text-gray-200">{item.name}</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">₹{item.price} per item</p>
+                            <h4 className="font-bold text-white">{item.name}</h4>
+                            <p className="text-sm text-purple-300">₹{item.price} per item</p>
                           </div>
                           <Button 
                             type="button"
@@ -561,22 +561,22 @@ export function OrderForm() {
                             type="button"
                             variant="outline" 
                             size="icon" 
-                            className="h-7 w-7 rounded-full border-purple-200 hover:bg-purple-100 hover:text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900"
+                            className="h-7 w-7 rounded-full border-purple-600 text-purple-400 hover:bg-purple-900 hover:text-white"
                             onClick={() => updateItemQuantity(index, item.quantity - 1)}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="mx-3 w-8 text-center font-bold">{item.quantity}</span>
+                          <span className="mx-3 w-8 text-center font-bold text-white">{item.quantity}</span>
                           <Button 
                             type="button"
                             variant="outline" 
                             size="icon" 
-                            className="h-7 w-7 rounded-full border-purple-200 hover:bg-purple-100 hover:text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900"
+                            className="h-7 w-7 rounded-full border-purple-600 text-purple-400 hover:bg-purple-900 hover:text-white"
                             onClick={() => updateItemQuantity(index, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
-                          <span className="ml-auto font-bold text-purple-700 dark:text-purple-400">
+                          <span className="ml-auto font-bold text-purple-400">
                             ₹{(item.price * item.quantity).toFixed(2)}
                           </span>
                         </div>
@@ -585,15 +585,15 @@ export function OrderForm() {
                           placeholder="Special instructions for this item"
                           value={item.notes}
                           onChange={(e) => updateItemNotes(index, e.target.value)}
-                          className="text-sm border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          className="text-sm border-2 border-purple-600 bg-black text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                         />
                       </div>
                     ))}
                   </div>
                   
-                  <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg flex justify-between items-center">
-                    <span className="font-bold text-purple-900 dark:text-purple-300">Total Amount</span>
-                    <span className="text-xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <div className="mt-4 p-3 bg-purple-900/30 rounded-lg flex justify-between items-center border border-purple-600">
+                    <span className="font-bold text-purple-300">Total Amount</span>
+                    <span className="text-xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                       ₹{calculateTotal().toFixed(2)}
                     </span>
                   </div>
