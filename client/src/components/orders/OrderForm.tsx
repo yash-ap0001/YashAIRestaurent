@@ -380,22 +380,22 @@ export function OrderForm() {
                 control={form.control}
                 name="orderSource"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Order Source</FormLabel>
+                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                    <FormLabel className="text-sm font-semibold text-white">Order Source</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
-                        <SelectTrigger className="w-full mt-1 text-gray-700 border-gray-300 focus:ring-purple-500 focus:border-purple-500">
+                        <SelectTrigger className="w-full mt-2 bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                           <SelectValue placeholder="Select order source" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="manual">Manual / In-Person</SelectItem>
-                          <SelectItem value="zomato">Zomato</SelectItem>
-                          <SelectItem value="swiggy">Swiggy</SelectItem>
-                          <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                          <SelectItem value="phone">Phone</SelectItem>
+                        <SelectContent className="bg-black border-purple-600 text-white">
+                          <SelectItem value="manual" className="text-white focus:bg-purple-800 focus:text-white">Manual / In-Person</SelectItem>
+                          <SelectItem value="zomato" className="text-white focus:bg-purple-800 focus:text-white">Zomato</SelectItem>
+                          <SelectItem value="swiggy" className="text-white focus:bg-purple-800 focus:text-white">Swiggy</SelectItem>
+                          <SelectItem value="whatsapp" className="text-white focus:bg-purple-800 focus:text-white">WhatsApp</SelectItem>
+                          <SelectItem value="phone" className="text-white focus:bg-purple-800 focus:text-white">Phone</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -407,31 +407,31 @@ export function OrderForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div>
-                <div className="border border-gray-300 rounded-lg mb-3 focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500">
+                <div className="bg-black rounded-lg mb-3">
                   <div className="flex items-center p-2">
-                    <Search className="h-4 w-4 text-purple-500 mr-2 ml-1" />
+                    <Search className="h-4 w-4 text-gray-400 mr-2" />
                     <Input
                       type="text"
                       placeholder="Search menu items..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-9 bg-transparent text-gray-700 placeholder:text-gray-400"
+                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-9 bg-transparent text-white placeholder:text-gray-400"
                     />
                   </div>
                 </div>
                 
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-gray-700 font-medium">Menu Category</span>
+                  <span className="text-white font-medium">Menu Category</span>
                   <Select
                     value={selectedCategory}
                     onValueChange={setSelectedCategory}
                   >
-                    <SelectTrigger className="w-[180px] border-gray-300 text-gray-700 focus:ring-1 focus:ring-purple-500 focus:border-purple-500">
+                    <SelectTrigger className="w-[180px] border-purple-600 bg-black text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500">
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-black border-purple-600 text-white">
                       {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
+                        <SelectItem key={category} value={category} className="text-white focus:bg-purple-800 focus:text-white">
                           {category}
                         </SelectItem>
                       ))}
@@ -439,16 +439,16 @@ export function OrderForm() {
                   </Select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-2">
+                <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-2">
                   {filteredMenuItems.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-white border border-gray-200 shadow-sm rounded-lg p-4 cursor-pointer hover:border-purple-300 hover:shadow-md transition-all flex flex-col"
+                      className="bg-black rounded-lg p-4 cursor-pointer hover:bg-black/80 transition-colors flex flex-col"
                       onClick={() => addMenuItem(item.id)}
                     >
-                      <h4 className="font-medium text-gray-800">{item.name}</h4>
-                      <p className="text-xs text-gray-500 mt-1 mb-2">{item.description?.substring(0, 40) || 'Fragrant basmati rice dish'}{(item.description && item.description.length > 40) ? '...' : ''}</p>
-                      <span className="text-purple-600 font-semibold mt-auto">₹{item.price}</span>
+                      <h4 className="font-medium text-white">{item.name}</h4>
+                      <p className="text-xs text-gray-400 mt-1 mb-2">{item.description?.substring(0, 40) || 'Fragrant basmati rice dish'}{(item.description && item.description.length > 40) ? '...' : ''}</p>
+                      <span className="text-purple-500 font-semibold mt-auto">₹{item.price}</span>
                     </div>
                   ))}
                 </div>
@@ -492,28 +492,28 @@ export function OrderForm() {
             </div>
 
             {selectedItems.length > 0 && (
-              <div className="space-y-0 mt-8">
-                <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-3 text-white flex justify-between items-center rounded-t-lg">
-                  <h3 className="font-semibold text-white text-lg">Your Order Summary</h3>
+              <div className="space-y-4 mt-6">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 text-white flex justify-between items-center rounded-t-xl">
+                  <h3 className="font-bold text-white">Your Order Summary</h3>
                   <div className="text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">
                     {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
                   </div>
                 </div>
                 
-                <div className="bg-white p-4 rounded-b-lg shadow-md border border-gray-200">
-                  <div className="max-h-[300px] overflow-y-auto space-y-4">
+                <div className="bg-black p-4 rounded-b-xl shadow-md border border-purple-800 -mt-4">
+                  <div className="max-h-[300px] overflow-y-auto space-y-3">
                     {selectedItems.map((item, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-3 hover:border-purple-200 hover:bg-purple-50 transition-colors">
+                      <div key={index} className="border border-purple-800 rounded-xl p-4 space-y-3 hover:bg-purple-900/30 transition-colors">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h4 className="font-medium text-gray-800">{item.name}</h4>
-                            <p className="text-sm text-gray-500">₹{item.price} per item</p>
+                            <h4 className="font-bold text-white">{item.name}</h4>
+                            <p className="text-sm text-purple-300">₹{item.price} per item</p>
                           </div>
                           <Button 
                             type="button"
                             variant="ghost" 
                             size="icon"
-                            className="h-8 w-8 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-full"
+                            className="h-8 w-8 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
                             onClick={() => removeItem(index)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -525,41 +525,39 @@ export function OrderForm() {
                             type="button"
                             variant="outline" 
                             size="icon" 
-                            className="h-7 w-7 rounded-lg border-gray-300 text-gray-500 hover:bg-purple-50 hover:text-purple-600"
+                            className="h-7 w-7 rounded-full border-purple-600 text-purple-400 hover:bg-purple-900 hover:text-white"
                             onClick={() => updateItemQuantity(index, item.quantity - 1)}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="mx-3 w-8 text-center font-medium text-gray-800">{item.quantity}</span>
+                          <span className="mx-3 w-8 text-center font-bold text-white">{item.quantity}</span>
                           <Button 
                             type="button"
                             variant="outline" 
                             size="icon" 
-                            className="h-7 w-7 rounded-lg border-gray-300 text-gray-500 hover:bg-purple-50 hover:text-purple-600"
+                            className="h-7 w-7 rounded-full border-purple-600 text-purple-400 hover:bg-purple-900 hover:text-white"
                             onClick={() => updateItemQuantity(index, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
-                          <span className="ml-auto font-semibold text-purple-600">
+                          <span className="ml-auto font-bold text-purple-400">
                             ₹{(item.price * item.quantity).toFixed(2)}
                           </span>
                         </div>
                         
-                        <div className="flex items-center border rounded-md border-gray-300 p-2 focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500">
-                          <Input
-                            placeholder="Special instructions for this item..."
-                            value={item.notes}
-                            onChange={(e) => updateItemNotes(index, e.target.value)}
-                            className="text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-700 placeholder:text-gray-400"
-                          />
-                        </div>
+                        <Input
+                          placeholder="Special instructions for this item"
+                          value={item.notes}
+                          onChange={(e) => updateItemNotes(index, e.target.value)}
+                          className="text-sm border-2 border-purple-600 bg-black text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
                       </div>
                     ))}
                   </div>
                   
-                  <div className="mt-6 p-3 bg-purple-50 rounded-lg flex justify-between items-center border border-purple-100">
-                    <span className="font-medium text-gray-700">Total Amount</span>
-                    <span className="text-xl font-bold text-purple-600">
+                  <div className="mt-4 p-3 bg-purple-900/30 rounded-lg flex justify-between items-center border border-purple-600">
+                    <span className="font-bold text-purple-300">Total Amount</span>
+                    <span className="text-xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                       ₹{calculateTotal().toFixed(2)}
                     </span>
                   </div>
@@ -571,16 +569,16 @@ export function OrderForm() {
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Order Notes</FormLabel>
+                <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                  <FormLabel className="text-sm font-semibold text-white">Order Notes</FormLabel>
                   <FormControl>
-                    <div className="flex items-center border rounded-md border-gray-300 p-2 focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500">
+                    <div className="flex items-center mt-2 border-2 rounded-md border-purple-600 p-2 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500 bg-black">
                       <div className="text-purple-500 mr-2">
                         <List className="h-5 w-5" />
                       </div>
                       <Textarea
                         placeholder="Enter any special instructions for the entire order..."
-                        className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
+                        className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none bg-black text-white placeholder:text-gray-500"
                         rows={2}
                         {...field}
                       />
@@ -596,19 +594,17 @@ export function OrderForm() {
                 control={form.control}
                 name="isUrgent"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-colors">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-red-700">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-red-400 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
+                        className="border-red-500 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="font-medium text-red-600 flex items-center gap-1.5">
-                        Mark as Urgent
-                      </FormLabel>
-                      <p className="text-xs text-gray-500">
+                      <FormLabel className="font-semibold text-red-400">Mark as Urgent</FormLabel>
+                      <p className="text-xs text-gray-400">
                         Prioritizes this order in the kitchen queue
                       </p>
                     </div>
@@ -620,20 +616,20 @@ export function OrderForm() {
                 control={form.control}
                 name="useAIAutomation"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-colors">
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-purple-800">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-purple-400 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                        className="border-purple-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="flex items-center gap-1.5 font-medium text-purple-600">
+                      <FormLabel className="flex items-center gap-1.5 font-semibold text-purple-400">
                         <span>Use AI Automation</span>
                         <Sparkles className="h-4 w-4 text-purple-500" />
                       </FormLabel>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         AI will automatically manage this order's status updates and workflow
                       </p>
                     </div>
@@ -644,13 +640,13 @@ export function OrderForm() {
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-between pt-6 border-t border-gray-200 mt-6">
+        <div className="flex items-center justify-between pt-6 border-t border-purple-800">
           <div className="hidden md:block">
             <Button 
               type="button" 
               variant="outline"
               size="sm"
-              className="text-xs text-gray-500 border-gray-300 hover:bg-gray-50"
+              className="text-xs text-purple-400 border-purple-600 hover:bg-purple-900/30"
               onClick={() => {
                 // Create an emergency test order with fixed data
                 const testOrderData = {
@@ -699,19 +695,19 @@ export function OrderForm() {
             <Button 
               type="button" 
               variant="outline"
-              className="px-6 border border-gray-300 text-gray-600 font-medium hover:bg-gray-50"
+              className="px-6 border-2 border-purple-600 text-purple-300 font-medium hover:bg-purple-900/30"
               onClick={() => setLocation("/")}
             >
               Cancel
             </Button>
             <Button 
               type="submit"
-              className={`px-8 py-2 font-medium ${selectedItems.length === 0 ? 'bg-gray-200 text-gray-400' : 'bg-purple-600 hover:bg-purple-700 text-white shadow-md'}`}
+              className={`px-8 py-6 font-bold text-lg ${selectedItems.length === 0 ? 'bg-gray-800 text-gray-500' : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-800 hover:to-pink-800 shadow-lg shadow-purple-900/50'}`}
               disabled={createOrderMutation.isPending || selectedItems.length === 0}
             >
               {createOrderMutation.isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Processing...
                 </>
               ) : (
