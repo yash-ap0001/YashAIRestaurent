@@ -348,15 +348,15 @@ export function OrderForm() {
   return (
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6">
-        <Card className="bg-black rounded-xl shadow-md overflow-hidden border border-purple-800">
-          <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white pb-6">
-            <CardTitle className="flex items-center gap-2 text-2xl">
+        <Card className="bg-black rounded-xl shadow-lg overflow-hidden border-2 border-purple-700">
+          <CardHeader className="bg-gradient-to-r from-purple-700 to-pink-700 text-white pb-6">
+            <CardTitle className="flex items-center gap-2 text-2xl font-bold">
               <span>Create Your Order</span>
             </CardTitle>
             <p className="text-white text-opacity-90 mt-1">Fill in the order details manually or use our AI to process natural language orders</p>
             
           </CardHeader>
-          <CardContent className="space-y-6 p-6 bg-gray-900">
+          <CardContent className="space-y-6 p-6 bg-black">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -490,7 +490,7 @@ export function OrderForm() {
                 </div>
               </div>
 
-              <div className="md:border-l md:pl-4 md:border-neutral-200">
+              <div className="md:border-l md:pl-4 md:border-purple-700">
                 <NaturalLanguageOrderInput
                   onOrderProcessed={(processedOrder) => {
                     if (!menuItems || !processedOrder.items.length) return;
@@ -733,7 +733,7 @@ export function OrderForm() {
             </Button>
             <Button 
               type="submit"
-              className={`px-8 py-6 font-bold text-lg ${selectedItems.length === 0 ? 'bg-gray-400' : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'}`}
+              className={`px-8 py-6 font-bold text-lg ${selectedItems.length === 0 ? 'bg-gray-800 text-gray-500' : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-800 hover:to-pink-800 shadow-lg shadow-purple-900/50'}`}
               disabled={createOrderMutation.isPending || selectedItems.length === 0}
             >
               {createOrderMutation.isPending ? (
