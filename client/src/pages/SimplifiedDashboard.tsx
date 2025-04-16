@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { format } from "date-fns";
 
 // Define types
@@ -146,6 +147,49 @@ export default function SimplifiedDashboard() {
   const [sortBy, setSortBy] = useState<string>("newest");
   const [isCreateOrderDialogOpen, setIsCreateOrderDialogOpen] = useState(false);
   const ordersPerPage = 20; // Number of orders to display per page - increased to fit more orders on screen
+  
+  // Handle drag and drop functionality
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+    
+    // If there's no destination or the item was dropped back to its original position
+    if (!destination || 
+        (destination.droppableId === source.droppableId && 
+        destination.index === source.index)) {
+      return;
+    }
+    
+    // Find the order that was dragged
+    const orderId = parseInt(draggableId);
+    const order = orders.find(o => o.id === orderId);
+    
+    if (!order) return;
+    
+    // Determine the new status based on the destination droppable id
+    const newStatus = destination.droppableId;
+    
+    // If the status didn't change, do nothing
+    if (order.status === newStatus) return;
+    
+    // Update the order status
+    updateOrderMutation.mutate({ id: orderId, status: newStatus });
+    
+    // If moving to preparing, create kitchen token
+    if (newStatus === "preparing") {
+      const hasToken = kitchenTokens.some((token: KitchenToken) => token.orderId === orderId);
+      if (!hasToken) {
+        createTokenMutation.mutate({ orderId });
+      }
+    }
+    
+    // If moving to billed, create bill
+    if (newStatus === "billed") {
+      const hasBill = bills.some((bill: Bill) => bill.orderId === orderId);
+      if (!hasBill) {
+        createBillMutation.mutate({ orderId });
+      }
+    }
+  };
 
   // Fetch orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
