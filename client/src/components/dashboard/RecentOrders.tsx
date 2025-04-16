@@ -117,7 +117,7 @@ export function RecentOrders({ className }: RecentOrdersProps) {
                       {Math.floor(Math.random() * 6) + 1} items
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-300">
-                      ₹{order.totalAmount.toLocaleString()}
+                      ₹{(order.totalAmount ?? 0).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}>
