@@ -531,7 +531,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#feebe2]"
                         >
                           {orders.filter(order => order.status === "pending").length === 0 ? (
-                            <div className="text-center p-4 text-neutral-500 text-sm">No pending orders</div>
+                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No pending orders</div>
                           ) : (
                             orders
                               .filter(order => order.status === "pending")
@@ -609,7 +609,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#FBB4B9]"
                         >
                           {orders.filter(order => order.status === "preparing").length === 0 ? (
-                            <div className="text-center p-4 text-neutral-500 text-sm">No orders in preparation</div>
+                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No orders in preparation</div>
                           ) : (
                             orders
                               .filter(order => order.status === "preparing")
@@ -687,7 +687,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#F768A1]"
                         >
                           {orders.filter(order => order.status === "ready").length === 0 ? (
-                            <div className="text-center p-4 text-neutral-500 text-sm">No ready orders</div>
+                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No ready orders</div>
                           ) : (
                             orders
                               .filter(order => order.status === "ready")
@@ -698,16 +698,16 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-100 to-green-100 border-emerald-500"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#6ee7b7' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#fff1f5' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
-                                          <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
                                           <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
@@ -765,7 +765,7 @@ export default function SimplifiedDashboard() {
                           className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#C51B8A]"
                         >
                           {orders.filter(order => order.status === "completed").length === 0 ? (
-                            <div className="text-center p-4 text-neutral-500 text-sm">No completed orders</div>
+                            <div className="text-center p-4 bg-white rounded-md shadow-sm text-neutral-600 text-sm">No completed orders</div>
                           ) : (
                             orders
                               .filter(order => order.status === "completed")
@@ -776,16 +776,16 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-indigo-100 to-violet-100 border-indigo-500"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#a5b4fc' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#fcf1f7' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
-                                          <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
                                           <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
@@ -854,16 +854,16 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-100 to-fuchsia-100 border-purple-500"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#d8b4fe' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#f1eef6' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
-                                          <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
                                           <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
