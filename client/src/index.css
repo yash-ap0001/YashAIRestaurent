@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom colors */
+.text-navy {
+  color: #1a237e !important;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -77,10 +82,10 @@
     opacity: 0.8;
   }
   
-  /* Target pending order cards with dark text for better contrast on gold */
+  /* Target pending order cards with navy text for better contrast on gold */
   [droppableId="pending"] .rounded-lg .text-xs,
   [droppableId="pending"] .rounded-lg .text-neutral-500 {
-    color: #7A0177 !important;
+    color: #1a237e !important;
     opacity: 1;
   }
   
@@ -94,7 +99,7 @@
   
   /* Font bold handling for pending cards */
   [droppableId="pending"] .rounded-lg .font-bold {
-    color: #7A0177 !important;
+    color: #1a237e !important;
   }
   
   /* Headings for non-pending cards */
@@ -115,7 +120,7 @@
   /* Headings for pending cards */
   [droppableId="pending"] .rounded-lg h3,
   [droppableId="pending"] .rounded-lg .text-\[\#7A0177\] {
-    color: #7A0177 !important;
+    color: #1a237e !important;
     font-weight: 700;
     font-size: 1.125rem;
     line-height: 1.75rem;
