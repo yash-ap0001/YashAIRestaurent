@@ -29,7 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MenuItem } from "@shared/schema";
-import { Loader2, Minus, Plus, Trash2, Sparkles } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2, Sparkles, Search } from "lucide-react";
 import { NaturalLanguageOrderInput } from "./NaturalLanguageOrderInput";
 
 const formSchema = z.object({
@@ -54,6 +54,8 @@ export function OrderForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   
   const [selectedItems, setSelectedItems] = useState<{
     menuItemId: number;
@@ -78,6 +80,26 @@ export function OrderForm() {
   const { data: menuItems, isLoading: menuLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu-items'],
   });
+  
+  // Extract unique categories for filtering
+  const categories = menuItems ? 
+    ['all', ...Array.from(new Set(menuItems.map(item => item.category)))] : 
+    ['all'];
+    
+  // Filter menu items by category and search query
+  const filteredMenuItems = menuItems ? 
+    menuItems.filter(item => {
+      // Apply category filter
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      
+      // Apply search filter
+      const matchesSearch = 
+        !searchQuery || 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      return matchesCategory && matchesSearch;
+    }) : [];
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
@@ -404,6 +426,43 @@ export function OrderForm() {
                 <FormLabel className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
                   <span>Add Menu Items</span>
                 </FormLabel>
+                
+                {/* Search and Category Filters */}
+                <div className="space-y-3 mb-3">
+                  {/* Search Input */}
+                  <div className="flex items-center bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
+                    <Search className="h-4 w-4 text-gray-500 ml-3" />
+                    <Input
+                      type="text"
+                      placeholder="Search menu items..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
+                    />
+                  </div>
+                  
+                  {/* Category Filter */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Filter by category:</span>
+                    <Select
+                      value={selectedCategory}
+                      onValueChange={setSelectedCategory}
+                    >
+                      <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {/* Menu Item Selector */}
                 <div className="flex mt-2">
                   <Select
                     disabled={menuLoading}
@@ -413,7 +472,7 @@ export function OrderForm() {
                       <SelectValue placeholder="Select menu item" />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
-                      {menuItems?.map((item) => (
+                      {filteredMenuItems.map((item) => (
                         <SelectItem key={item.id} value={item.id.toString()}>
                           <div className="flex justify-between w-full">
                             <span>{item.name}</span>
@@ -423,6 +482,11 @@ export function OrderForm() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                
+                {/* Display filtered items count */}
+                <div className="mt-2 text-xs text-gray-500">
+                  {filteredMenuItems.length} items found
                 </div>
               </div>
 
