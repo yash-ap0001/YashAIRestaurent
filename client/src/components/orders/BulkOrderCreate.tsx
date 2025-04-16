@@ -1,43 +1,29 @@
-import { useState, useEffect } from "react";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import {
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue 
 } from "@/components/ui/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Copy, FileSpreadsheet, MessageSquare } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Loader2, Plus, Minus, Check, X } from "lucide-react";
 
 interface MenuItem {
   id: number;
@@ -66,96 +52,91 @@ interface OrderTemplate {
   }[];
 }
 
+// Pre-defined templates for common order patterns
+const TEMPLATES: OrderTemplate[] = [
+  {
+    name: "Breakfast - 10 Tables",
+    description: "Standard breakfast items for 10 tables",
+    itemsCount: 3,
+    tablePrefix: "B",
+    defaultItems: []  // Will be populated with breakfast items
+  },
+  {
+    name: "Lunch - 20 Tables",
+    description: "Lunch combo for 20 tables",
+    itemsCount: 3,
+    tablePrefix: "L",
+    defaultItems: []  // Will be populated with lunch items
+  },
+  {
+    name: "Dinner - 15 Tables",
+    description: "Full dinner service for 15 tables",
+    itemsCount: 4,
+    tablePrefix: "D",
+    defaultItems: []  // Will be populated with dinner items
+  },
+  {
+    name: "Coffee Break - 30 Tables",
+    description: "Coffee and snacks for 30 tables",
+    itemsCount: 2,
+    tablePrefix: "C",
+    defaultItems: []  // Will be populated with coffee items
+  }
+];
+
 export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
-  const [activeTab, setActiveTab] = useState("quick");
-  const [orderCount, setOrderCount] = useState(10);
-  const [tablePrefix, setTablePrefix] = useState("T");
-  const [tableStart, setTableStart] = useState(1);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [processingAi, setProcessingAi] = useState(false);
-  const [selectedCommonItems, setSelectedCommonItems] = useState<number[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("standard");
+  const [orderCount, setOrderCount] = useState<number>(10);
+  const [tablePrefix, setTablePrefix] = useState<string>("T");
+  const [tableStart, setTableStart] = useState<number>(1);
+  const [selectedMenuItems, setSelectedMenuItems] = useState<number[]>([]);
+  const [aiPrompt, setAiPrompt] = useState<string>("");
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Query menu items
+  
+  // Fetch menu items for selection
   const { data: menuItems = [], isLoading: isLoadingMenuItems } = useQuery<MenuItem[]>({
     queryKey: ["/api/menu-items"],
   });
-
-  // Sample order templates
-  const orderTemplates: OrderTemplate[] = [
-    {
-      name: "Breakfast for 20",
-      description: "Standard breakfast with dosa, idli and coffee",
-      itemsCount: 20,
-      tablePrefix: "T",
-      defaultItems: [
-        { menuItemId: 1, quantity: 1 }, // Assuming ID 1 is Dosa
-        { menuItemId: 2, quantity: 1 }, // Assuming ID 2 is Idli
-        { menuItemId: 10, quantity: 1 }, // Assuming ID 10 is Coffee
-      ]
-    },
-    {
-      name: "Lunch for 50",
-      description: "South Indian thali with rice, curry, and lassi",
-      itemsCount: 50,
-      tablePrefix: "T",
-      defaultItems: [
-        { menuItemId: 3, quantity: 1 }, // Assuming ID 3 is Rice
-        { menuItemId: 4, quantity: 1 }, // Assuming ID 4 is Curry
-        { menuItemId: 11, quantity: 1 }, // Assuming ID 11 is Lassi
-      ]
-    },
-    {
-      name: "Dinner for 30",
-      description: "Evening specials with biryani and naan",
-      itemsCount: 30,
-      tablePrefix: "T",
-      defaultItems: [
-        { menuItemId: 5, quantity: 1 }, // Assuming ID 5 is Biryani
-        { menuItemId: 6, quantity: 1 }, // Assuming ID 6 is Naan
-        { menuItemId: 12, quantity: 1 }, // Assuming ID 12 is Sweet
-      ]
-    },
-  ];
-
-  // Select a template
-  const handleTemplateSelect = (templateName: string) => {
-    const template = orderTemplates.find(t => t.name === templateName);
-    if (template) {
-      setSelectedTemplate(templateName);
-      setOrderCount(template.itemsCount);
-      setTablePrefix(template.tablePrefix);
-      
-      // Select the default menu items for this template
-      setSelectedCommonItems(template.defaultItems.map(item => item.menuItemId));
-      
-      toast({
-        title: "Template Selected",
-        description: `${template.name} template loaded with ${template.itemsCount} orders.`,
-      });
+  
+  // Filter menu items by category for easier selection
+  const menuItemsByCategory = menuItems.reduce((acc, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
     }
-  };
-
-  // Create bulk orders mutation
-  const createBulkOrdersMutation = useMutation({
+    acc[item.category].push(item);
+    return acc;
+  }, {} as Record<string, MenuItem[]>);
+  
+  // Get unique categories
+  const categories = Object.keys(menuItemsByCategory).sort();
+  
+  // Standard bulk order creation
+  const bulkOrderMutation = useMutation({
     mutationFn: async (data: {
       orderCount: number;
       tablePrefix: string;
       tableStart: number;
       selectedMenuItems: number[];
     }) => {
-      const response = await apiRequest("POST", "/api/simulator/create-bulk-orders", data);
+      const response = await apiRequest(
+        "POST",
+        "/api/simulator/create-bulk-orders",
+        data
+      );
       return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/kitchen-tokens"] });
+      
       toast({
-        title: "Bulk Orders Created",
-        description: `Successfully created ${orderCount} new orders.`,
+        title: "Bulk orders created",
+        description: `Successfully created ${orderCount} orders`,
       });
+      
       onClose();
     },
     onError: (error: Error) => {
@@ -166,325 +147,347 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
       });
     },
   });
-
-  // Create orders from AI prompt mutation
-  const createAiOrdersMutation = useMutation({
+  
+  // AI-powered bulk order creation
+  const aiOrderMutation = useMutation({
     mutationFn: async (prompt: string) => {
-      setProcessingAi(true);
-      const response = await apiRequest("POST", "/api/ai/process-bulk-order", { prompt });
+      const response = await apiRequest(
+        "POST",
+        "/api/ai/process-bulk-order",
+        { prompt }
+      );
       return await response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/kitchen-tokens"] });
+      
       toast({
-        title: "AI Orders Created",
-        description: `Created ${data.createdCount} orders from your natural language input.`,
+        title: "AI bulk orders created",
+        description: `Successfully created ${data.createdCount} orders based on your prompt`,
       });
-      setProcessingAi(false);
+      
       onClose();
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to process AI order",
+        title: "Failed to create orders",
         description: error.message,
         variant: "destructive",
       });
-      setProcessingAi(false);
     },
   });
-
-  // Handle quick create submission
-  const handleQuickCreate = () => {
-    if (selectedCommonItems.length === 0) {
-      toast({
-        title: "No menu items selected",
-        description: "Please select at least one menu item for the orders.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    createBulkOrdersMutation.mutate({
-      orderCount,
-      tablePrefix,
-      tableStart,
-      selectedMenuItems: selectedCommonItems,
-    });
-  };
-
-  // Handle AI prompt submission
-  const handleAiPrompt = () => {
-    if (!aiPrompt.trim()) {
-      toast({
-        title: "Empty prompt",
-        description: "Please enter a description of the orders you want to create.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    createAiOrdersMutation.mutate(aiPrompt);
-  };
-
-  // Handle menu item selection
-  const toggleMenuItem = (id: number) => {
-    setSelectedCommonItems(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(itemId => itemId !== id);
+  
+  // Toggle menu item selection
+  const toggleMenuItem = (menuItemId: number) => {
+    setSelectedMenuItems((current) => {
+      if (current.includes(menuItemId)) {
+        return current.filter(id => id !== menuItemId);
       } else {
-        return [...prev, id];
+        return [...current, menuItemId];
       }
     });
   };
-
+  
+  // Apply template
+  const applyTemplate = (templateName: string) => {
+    const template = TEMPLATES.find(t => t.name === templateName);
+    if (!template) return;
+    
+    setTablePrefix(template.tablePrefix);
+    setOrderCount(templateName.includes("Breakfast") ? 10 : 
+                 templateName.includes("Lunch") ? 20 : 
+                 templateName.includes("Dinner") ? 15 : 30);
+    
+    // Select menu items based on template
+    const newSelectedItems: number[] = [];
+    
+    if (templateName.includes("Breakfast")) {
+      // Find breakfast items
+      menuItems.forEach(item => {
+        const nameLower = item.name.toLowerCase();
+        const categoryLower = item.category.toLowerCase();
+        if (
+          nameLower.includes("breakfast") || 
+          categoryLower.includes("breakfast") ||
+          nameLower.includes("coffee") || 
+          nameLower.includes("tea") || 
+          nameLower.includes("juice") ||
+          nameLower.includes("egg") ||
+          nameLower.includes("dosa") ||
+          nameLower.includes("idli") ||
+          nameLower.includes("toast")
+        ) {
+          newSelectedItems.push(item.id);
+        }
+      });
+    } else if (templateName.includes("Lunch")) {
+      // Find lunch items
+      menuItems.forEach(item => {
+        const nameLower = item.name.toLowerCase();
+        const categoryLower = item.category.toLowerCase();
+        if (
+          nameLower.includes("lunch") || 
+          categoryLower.includes("lunch") ||
+          nameLower.includes("curry") || 
+          nameLower.includes("rice") || 
+          nameLower.includes("naan") ||
+          nameLower.includes("roti") ||
+          nameLower.includes("thali")
+        ) {
+          newSelectedItems.push(item.id);
+        }
+      });
+    } else if (templateName.includes("Dinner")) {
+      // Find dinner items
+      menuItems.forEach(item => {
+        const nameLower = item.name.toLowerCase();
+        const categoryLower = item.category.toLowerCase();
+        if (
+          nameLower.includes("dinner") || 
+          categoryLower.includes("dinner") ||
+          nameLower.includes("special") || 
+          nameLower.includes("signature") || 
+          nameLower.includes("main") ||
+          nameLower.includes("biryani") ||
+          nameLower.includes("curry")
+        ) {
+          newSelectedItems.push(item.id);
+        }
+      });
+    } else if (templateName.includes("Coffee")) {
+      // Find coffee and snack items
+      menuItems.forEach(item => {
+        const nameLower = item.name.toLowerCase();
+        const categoryLower = item.category.toLowerCase();
+        if (
+          nameLower.includes("coffee") || 
+          categoryLower.includes("coffee") ||
+          nameLower.includes("tea") || 
+          nameLower.includes("snack") || 
+          nameLower.includes("pastry") ||
+          nameLower.includes("cake") ||
+          nameLower.includes("cookie")
+        ) {
+          newSelectedItems.push(item.id);
+        }
+      });
+    }
+    
+    // Limit to 3-4 items depending on template
+    setSelectedMenuItems(newSelectedItems.slice(0, template.itemsCount));
+  };
+  
+  // Create bulk orders with standard method
+  const handleCreateBulkOrders = () => {
+    if (selectedMenuItems.length === 0) {
+      toast({
+        title: "Select menu items",
+        description: "Please select at least one menu item",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    bulkOrderMutation.mutate({
+      orderCount,
+      tablePrefix,
+      tableStart,
+      selectedMenuItems,
+    });
+  };
+  
+  // Create bulk orders with AI
+  const handleCreateAiOrders = () => {
+    if (!aiPrompt.trim()) {
+      toast({
+        title: "Enter a prompt",
+        description: "Please describe the orders you want to create",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    aiOrderMutation.mutate(aiPrompt);
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[720px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Bulk Order Creation</DialogTitle>
+          <DialogTitle>Bulk Order Creation</DialogTitle>
           <DialogDescription>
-            Create multiple orders in one go with minimal clicks.
+            Create multiple orders at once to save time. Perfect for events or busy periods.
           </DialogDescription>
         </DialogHeader>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-          <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="quick">
-              <Plus className="h-4 w-4 mr-2" />
-              Quick Create
-            </TabsTrigger>
-            <TabsTrigger value="templates">
-              <Copy className="h-4 w-4 mr-2" />
-              Templates
-            </TabsTrigger>
-            <TabsTrigger value="ai">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              AI Assistant
-            </TabsTrigger>
+        
+        <Tabs 
+          defaultValue="standard" 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="mt-4"
+        >
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="standard">Standard Creation</TabsTrigger>
+            <TabsTrigger value="ai">AI-Powered Creation</TabsTrigger>
           </TabsList>
-
-          {/* Quick Create Tab */}
-          <TabsContent value="quick" className="space-y-4">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="orderCount">Number of Orders</Label>
-                  <div className="flex items-center gap-4">
-                    <Slider
-                      id="orderCount"
-                      min={1}
-                      max={100}
-                      step={1}
-                      value={[orderCount]}
-                      onValueChange={(value) => setOrderCount(value[0])}
-                      className="flex-1"
-                    />
-                    <Input
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={orderCount}
-                      onChange={(e) => setOrderCount(Number(e.target.value))}
-                      className="w-20"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="tablePrefix">Table Prefix</Label>
-                    <Input
-                      id="tablePrefix"
-                      value={tablePrefix}
-                      onChange={(e) => setTablePrefix(e.target.value)}
-                      placeholder="T"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tableStart">Starting Table Number</Label>
-                    <Input
-                      id="tableStart"
-                      type="number"
-                      min={1}
-                      value={tableStart}
-                      onChange={(e) => setTableStart(Number(e.target.value))}
-                    />
-                  </div>
-                </div>
-              </div>
-
+          
+          {/* Standard bulk creation tab */}
+          <TabsContent value="standard" className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Common Menu Items</Label>
-                <div className="border rounded-md p-2 h-40 overflow-y-auto space-y-1">
-                  {isLoadingMenuItems ? (
-                    <div className="flex items-center justify-center h-full">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : (
-                    menuItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`flex items-center justify-between p-2 rounded-md cursor-pointer hover:bg-muted ${
-                          selectedCommonItems.includes(item.id) ? "bg-secondary" : ""
-                        }`}
-                        onClick={() => toggleMenuItem(item.id)}
-                      >
-                        <div className="flex items-center">
-                          <span>{item.name}</span>
-                          <Badge variant="outline" className="ml-2">
-                            ₹{item.price}
-                          </Badge>
-                        </div>
-                        {selectedCommonItems.includes(item.id) && (
-                          <Badge className="bg-primary">Selected</Badge>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Select items to include in all orders. Each order will include all selected items.
-                </p>
+                <Label htmlFor="orderCount">Number of Orders</Label>
+                <Input
+                  id="orderCount"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={orderCount}
+                  onChange={(e) => setOrderCount(parseInt(e.target.value) || 1)}
+                />
               </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={onClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleQuickCreate}
-                disabled={createBulkOrdersMutation.isPending}
-                className="gap-2"
-              >
-                {createBulkOrdersMutation.isPending && (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )}
-                Create {orderCount} Orders
-              </Button>
-            </DialogFooter>
-          </TabsContent>
-
-          {/* Templates Tab */}
-          <TabsContent value="templates" className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              {orderTemplates.map((template) => (
-                <Card 
-                  key={template.name}
-                  className={`cursor-pointer hover:shadow-md transition-shadow ${
-                    selectedTemplate === template.name ? "border-primary border-2" : ""
-                  }`}
-                  onClick={() => handleTemplateSelect(template.name)}
-                >
-                  <CardHeader className="pb-2">
-                    <CardTitle>{template.name}</CardTitle>
-                    <CardDescription>{template.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="text-sm text-muted-foreground">
-                      <div>Orders: {template.itemsCount}</div>
-                      <div>Items per order: {template.defaultItems.length}</div>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      size="sm"
-                      variant={selectedTemplate === template.name ? "default" : "outline"}
-                      className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTemplateSelect(template.name);
-                        setActiveTab("quick");
-                      }}
-                    >
-                      Use Template
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+              <div className="space-y-2">
+                <Label htmlFor="template">Apply Template (Optional)</Label>
+                <Select value={selectedTemplate} onValueChange={(value) => {
+                  setSelectedTemplate(value);
+                  applyTemplate(value);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {TEMPLATES.map((template) => (
+                      <SelectItem key={template.name} value={template.name}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tablePrefix">Table Prefix</Label>
+                <Input
+                  id="tablePrefix"
+                  value={tablePrefix}
+                  onChange={(e) => setTablePrefix(e.target.value)}
+                  maxLength={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tableStart">Starting Table Number</Label>
+                <Input
+                  id="tableStart"
+                  type="number"
+                  min={1}
+                  value={tableStart}
+                  onChange={(e) => setTableStart(parseInt(e.target.value) || 1)}
+                />
+              </div>
             </div>
             
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={onClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => setActiveTab("quick")}
-                disabled={!selectedTemplate}
-              >
-                Continue to Configuration
-              </Button>
-            </DialogFooter>
-          </TabsContent>
-
-          {/* AI Assistant Tab */}
-          <TabsContent value="ai" className="space-y-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="aiPrompt">Describe Your Order Requirements</Label>
-                <Textarea
-                  id="aiPrompt"
-                  placeholder="Create 25 vegetarian lunch orders for tables 10-35 with rice, dal, and naan."
-                  rows={5}
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Describe the bulk orders you need, including quantities, table numbers, and menu items.
-                  Our AI will automatically create the appropriate orders.
-                </p>
+            <div className="space-y-2">
+              <Label>Select Menu Items</Label>
+              <div className="border rounded-md p-4 max-h-[300px] overflow-y-auto">
+                {isLoadingMenuItems ? (
+                  <div className="flex justify-center items-center h-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {categories.map((category) => (
+                      <div key={category} className="space-y-2">
+                        <h3 className="text-sm font-medium">{category}</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {menuItemsByCategory[category].map((item) => (
+                            <div 
+                              key={item.id} 
+                              className={`flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-accent transition-colors ${
+                                selectedMenuItems.includes(item.id) ? 'bg-primary/10 border-primary' : ''
+                              }`}
+                              onClick={() => toggleMenuItem(item.id)}
+                            >
+                              <Checkbox 
+                                checked={selectedMenuItems.includes(item.id)} 
+                                onCheckedChange={() => toggleMenuItem(item.id)}
+                              />
+                              <div className="flex-1 truncate">
+                                <span className="text-sm font-medium">{item.name}</span>
+                                <span className="text-sm text-muted-foreground ml-2">₹{item.price}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-
-              <div className="bg-muted p-4 rounded-md">
-                <h4 className="font-medium mb-2">Example inputs:</h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="cursor-pointer hover:text-primary" onClick={() => setAiPrompt("Create 10 breakfast orders with dosa and coffee for tables T1 to T10")}>
-                    "Create 10 breakfast orders with dosa and coffee for tables T1 to T10"
-                  </li>
-                  <li className="cursor-pointer hover:text-primary" onClick={() => setAiPrompt("Generate 25 lunch orders, each with rice, curry, and lassi")}>
-                    "Generate 25 lunch orders, each with rice, curry, and lassi"
-                  </li>
-                  <li className="cursor-pointer hover:text-primary" onClick={() => setAiPrompt("Make 15 dinner orders with biryani, naan, and sweet dish for customer event")}>
-                    "Make 15 dinner orders with biryani, naan, and sweet dish for customer event"
-                  </li>
-                </ul>
+              <div className="text-sm text-muted-foreground">
+                Selected {selectedMenuItems.length} items
               </div>
             </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={onClose}
-                disabled={processingAi}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAiPrompt}
-                disabled={!aiPrompt.trim() || processingAi}
-                className="gap-2"
-              >
-                {processingAi ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <MessageSquare className="h-4 w-4" />
-                    Process with AI
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
+          </TabsContent>
+          
+          {/* AI-powered creation tab */}
+          <TabsContent value="ai" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="aiPrompt">Describe Your Order Requirements</Label>
+              <Textarea
+                id="aiPrompt"
+                placeholder="Example: Create breakfast orders for 20 tables (T1-T20) with coffee, dosa and idli"
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                className="h-32"
+              />
+              <p className="text-sm text-muted-foreground">
+                Provide details like number of orders, table numbers, menu items, and any special requirements.
+                Our AI will analyze your request and create the appropriate orders.
+              </p>
+            </div>
+            
+            <div className="space-y-1">
+              <h3 className="text-sm font-medium">Examples:</h3>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• "Create lunch orders for tables L1 through L30 with curry and rice"</li>
+                <li>• "20 breakfast orders for tables starting at B10 with coffee and snacks"</li>
+                <li>• "15 dinner reservations with our signature biryani dishes"</li>
+              </ul>
+            </div>
           </TabsContent>
         </Tabs>
+        
+        <DialogFooter className="flex items-center justify-between">
+          <Button variant="outline" onClick={onClose}>
+            <X className="h-4 w-4 mr-2" />
+            Cancel
+          </Button>
+          {activeTab === "standard" ? (
+            <Button 
+              onClick={handleCreateBulkOrders}
+              disabled={bulkOrderMutation.isPending || selectedMenuItems.length === 0}
+            >
+              {bulkOrderMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
+              Create {orderCount} Orders
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleCreateAiOrders}
+              disabled={aiOrderMutation.isPending || !aiPrompt.trim()}
+            >
+              {aiOrderMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              Create Orders with AI
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

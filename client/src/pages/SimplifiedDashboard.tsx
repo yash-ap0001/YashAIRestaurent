@@ -16,10 +16,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CircleCheck, ChefHat, Utensils, ClipboardList, ClipboardCheck, Timer, Phone, Smartphone, Search, Globe, User, UserPlus, ReceiptText, CreditCard, PanelLeft, PanelRight, Mail, X, CheckSquare, ChevronsUpDown, Receipt } from "lucide-react";
+import { Loader2, CircleCheck, ChefHat, Utensils, ClipboardList, ClipboardCheck, Timer, Phone, Smartphone, Search, Globe, User, UserPlus, ReceiptText, CreditCard, PanelLeft, PanelRight, Mail, X, CheckSquare, ChevronsUpDown, Receipt, Plus } from "lucide-react";
 import { SiZomato, SiSwiggy } from "react-icons/si";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
+import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
 
 interface Order {
   id: number;
@@ -127,6 +128,7 @@ export default function SimplifiedDashboard() {
   const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [bulkActionAnchor, setBulkActionAnchor] = useState<HTMLElement | null>(null);
+  const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -542,23 +544,40 @@ export default function SimplifiedDashboard() {
                 </div>
               )}
             </div>
-            <div className="flex items-center text-sm">
-              <div className="flex items-center mr-4">
-                <div className="h-3 w-3 rounded-full bg-amber-600 mr-2"></div>
-                <span>Pending: </span>
-                <span className="font-bold ml-1">
-                  {orders.filter((order: Order) => ["pending", "preparing"].includes(order.status)).length}
-                </span>
-              </div>
-              <div className="flex items-center mr-4">
-                <div className="h-3 w-3 rounded-full bg-blue-600 mr-2"></div>
-                <span>Ready: </span>
-                <span className="font-bold ml-1">
-                  {orders.filter((order: Order) => order.status === "ready").length}
-                </span>
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={() => setIsBulkCreateOpen(true)}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Bulk Create Orders
+              </Button>
+              
+              <div className="flex items-center text-sm">
+                <div className="flex items-center mr-4">
+                  <div className="h-3 w-3 rounded-full bg-amber-600 mr-2"></div>
+                  <span>Pending: </span>
+                  <span className="font-bold ml-1">
+                    {orders.filter((order: Order) => ["pending", "preparing"].includes(order.status)).length}
+                  </span>
+                </div>
+                <div className="flex items-center mr-4">
+                  <div className="h-3 w-3 rounded-full bg-blue-600 mr-2"></div>
+                  <span>Ready: </span>
+                  <span className="font-bold ml-1">
+                    {orders.filter((order: Order) => order.status === "ready").length}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Bulk Order Creation Dialog */}
+          <BulkOrderCreate 
+            isOpen={isBulkCreateOpen}
+            onClose={() => setIsBulkCreateOpen(false)}
+          />
 
           <DragDropContext onDragEnd={handleDragEnd}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">

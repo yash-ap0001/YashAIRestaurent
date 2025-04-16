@@ -767,6 +767,270 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     }
   });
 
+  // Bulk order creation endpoints
+  app.post("/api/simulator/create-bulk-orders", async (req: Request, res: Response) => {
+    try {
+      console.log("Bulk Order Creation - Received request:", req.body);
+      
+      const { orderCount, tablePrefix, tableStart, selectedMenuItems } = req.body;
+      
+      if (!orderCount || orderCount < 1 || !selectedMenuItems || !selectedMenuItems.length) {
+        return res.status(400).json({ error: "Invalid request parameters" });
+      }
+      
+      // Fetch menu items
+      const menuItemsData = [];
+      for (const menuItemId of selectedMenuItems) {
+        const menuItem = await storage.getMenuItem(menuItemId);
+        if (menuItem) {
+          menuItemsData.push(menuItem);
+        }
+      }
+      
+      if (menuItemsData.length === 0) {
+        return res.status(400).json({ error: "No valid menu items found" });
+      }
+      
+      const createdOrders = [];
+      
+      // Create multiple orders
+      for (let i = 0; i < orderCount; i++) {
+        const tableNumber = `${tablePrefix}${tableStart + i}`;
+        
+        // Calculate total amount based on selected menu items
+        const totalAmount = menuItemsData.reduce((sum, item) => sum + item.price, 0);
+        
+        // Create a new order
+        const orderData = {
+          orderNumber: generateOrderNumber(),
+          tableNumber,
+          status: "pending",
+          totalAmount,
+          orderSource: "bulk_creation",
+          useAIAutomation: true,
+          notes: "Created via bulk order tool"
+        };
+        
+        const parsedOrder = insertOrderSchema.parse(orderData);
+        const order = await storage.createOrder(parsedOrder);
+        
+        // Create order items
+        for (const menuItem of menuItemsData) {
+          const orderItemData = {
+            orderId: order.id,
+            menuItemId: menuItem.id,
+            quantity: 1,
+            price: menuItem.price
+          };
+          
+          const parsedOrderItem = insertOrderItemSchema.parse(orderItemData);
+          await storage.createOrderItem(parsedOrderItem);
+        }
+        
+        // Create kitchen token
+        const tokenData = {
+          tokenNumber: generateTokenNumber(),
+          orderId: order.id,
+          status: "pending"
+        };
+        
+        const parsedToken = insertKitchenTokenSchema.parse(tokenData);
+        await storage.createKitchenToken(parsedToken);
+        
+        // Record activity
+        await storage.createActivity({
+          type: "order_created",
+          description: `Bulk order created for table ${tableNumber}`,
+          data: { orderId: order.id, orderNumber: order.orderNumber }
+        });
+        
+        createdOrders.push(order);
+      }
+      
+      res.status(201).json({
+        message: `Successfully created ${createdOrders.length} orders`,
+        orders: createdOrders
+      });
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  });
+
+  // AI-assisted bulk order creation endpoint
+  app.post("/api/ai/process-bulk-order", async (req: Request, res: Response) => {
+    try {
+      console.log("AI Bulk Order Creation - Received request:", req.body);
+      
+      const { prompt } = req.body;
+      
+      if (!prompt) {
+        return res.status(400).json({ error: "No prompt provided" });
+      }
+      
+      // Get all menu items for reference
+      const allMenuItems = await storage.getMenuItems();
+      
+      // Extract information from the prompt using simple pattern matching
+      // In a real app, this would use a proper NLP service like OpenAI
+      const promptLower = prompt.toLowerCase();
+      
+      // Extract order count - look for numbers followed by "order" or similar words
+      let orderCount = 5; // Default
+      const orderCountMatch = promptLower.match(/(\d+)\s*(orders|meals|breakfasts|lunches|dinners)/);
+      if (orderCountMatch) {
+        orderCount = parseInt(orderCountMatch[1], 10);
+      }
+      
+      // Extract table information - look for "table" followed by prefix or numbers
+      let tablePrefix = "T";
+      let tableStart = 1;
+      
+      const tableMatch = promptLower.match(/tables?\s*([a-z])?(\d+)(?:\s*-\s*|\s*to\s*)([a-z])?(\d+)/i);
+      if (tableMatch) {
+        tablePrefix = tableMatch[1] || "T";
+        tableStart = parseInt(tableMatch[2], 10);
+      }
+      
+      // Find menu items mentioned in the prompt
+      const menuItemIds: number[] = [];
+      const quantities: Record<number, number> = {};
+      
+      allMenuItems.forEach(item => {
+        const itemNameLower = item.name.toLowerCase();
+        if (promptLower.includes(itemNameLower)) {
+          menuItemIds.push(item.id);
+          
+          // Try to find quantities for this item
+          const quantityMatch = promptLower.match(new RegExp(`(\\d+)\\s*${itemNameLower}s?`, 'i'));
+          if (quantityMatch) {
+            quantities[item.id] = parseInt(quantityMatch[1], 10);
+          } else {
+            quantities[item.id] = 1;
+          }
+        }
+      });
+      
+      // If no menu items found, add some defaults based on meal type
+      if (menuItemIds.length === 0) {
+        if (promptLower.includes("breakfast")) {
+          // Add breakfast items by looking for them in the menu
+          allMenuItems.forEach(item => {
+            const itemNameLower = item.name.toLowerCase();
+            if (["dosa", "idli", "coffee", "tea", "breakfast"].some(word => itemNameLower.includes(word))) {
+              menuItemIds.push(item.id);
+            }
+          });
+        } else if (promptLower.includes("lunch")) {
+          // Add lunch items
+          allMenuItems.forEach(item => {
+            const itemNameLower = item.name.toLowerCase();
+            if (["rice", "curry", "thali", "roti", "lunch"].some(word => itemNameLower.includes(word))) {
+              menuItemIds.push(item.id);
+            }
+          });
+        } else if (promptLower.includes("dinner")) {
+          // Add dinner items
+          allMenuItems.forEach(item => {
+            const itemNameLower = item.name.toLowerCase();
+            if (["biryani", "naan", "dinner", "special"].some(word => itemNameLower.includes(word))) {
+              menuItemIds.push(item.id);
+            }
+          });
+        }
+      }
+      
+      // If still no menu items, just add the first few
+      if (menuItemIds.length === 0 && allMenuItems.length > 0) {
+        menuItemIds.push(...allMenuItems.slice(0, Math.min(3, allMenuItems.length)).map(item => item.id));
+      }
+      
+      const createdOrders = [];
+      
+      // Create orders based on analysis
+      for (let i = 0; i < orderCount; i++) {
+        const tableNumber = `${tablePrefix}${tableStart + i}`;
+        
+        // Get menu items by IDs
+        const menuItemsData = allMenuItems.filter(item => 
+          menuItemIds.includes(item.id)
+        );
+        
+        // Calculate total amount
+        const totalAmount = menuItemsData.reduce((sum, item) => {
+          const quantity = quantities[item.id] || 1;
+          return sum + (item.price * quantity);
+        }, 0);
+        
+        // Create a new order
+        const orderData = {
+          orderNumber: generateOrderNumber(),
+          tableNumber,
+          status: "pending",
+          totalAmount,
+          orderSource: "ai_bulk_creation",
+          useAIAutomation: true,
+          notes: `Created via AI assistant: "${prompt}"`
+        };
+        
+        const parsedOrder = insertOrderSchema.parse(orderData);
+        const order = await storage.createOrder(parsedOrder);
+        
+        // Create order items
+        for (const menuItem of menuItemsData) {
+          const quantity = quantities[menuItem.id] || 1;
+          
+          const orderItemData = {
+            orderId: order.id,
+            menuItemId: menuItem.id,
+            quantity,
+            price: menuItem.price * quantity
+          };
+          
+          const parsedOrderItem = insertOrderItemSchema.parse(orderItemData);
+          await storage.createOrderItem(parsedOrderItem);
+        }
+        
+        // Create kitchen token
+        const tokenData = {
+          tokenNumber: generateTokenNumber(),
+          orderId: order.id,
+          status: "pending"
+        };
+        
+        const parsedToken = insertKitchenTokenSchema.parse(tokenData);
+        await storage.createKitchenToken(parsedToken);
+        
+        // Record activity
+        await storage.createActivity({
+          type: "order_created",
+          description: `AI bulk order created for table ${tableNumber}`,
+          data: { orderId: order.id, orderNumber: order.orderNumber }
+        });
+        
+        createdOrders.push(order);
+      }
+      
+      // Analysis results for debugging/UI
+      const analysis = {
+        orderCount,
+        tablePrefix,
+        tableStart,
+        menuItemIds,
+        quantities
+      };
+      
+      res.status(201).json({
+        message: `Successfully created ${createdOrders.length} orders based on AI analysis`,
+        prompt,
+        createdCount: createdOrders.length,
+        analysis,
+        orders: createdOrders
+      });
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  });
+
   // Customers
   app.get("/api/customers", async (req: Request, res: Response) => {
     try {
