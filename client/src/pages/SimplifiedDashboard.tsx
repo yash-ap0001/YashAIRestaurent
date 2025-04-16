@@ -6,8 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CircleCheck, ChefHat, Utensils, ClipboardList, ClipboardCheck, Timer, Phone, Smartphone, Search, Globe, User, UserPlus, ReceiptText, CreditCard, PanelLeft, PanelRight, Mail } from "lucide-react";
+import { Loader2, CircleCheck, ChefHat, Utensils, ClipboardList, ClipboardCheck, Timer, Phone, Smartphone, Search, Globe, User, UserPlus, ReceiptText, CreditCard, PanelLeft, PanelRight, Mail, X, CheckSquare, ChevronsUpDown, Receipt } from "lucide-react";
 import { SiZomato, SiSwiggy } from "react-icons/si";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
@@ -114,6 +122,9 @@ const getStatusColor = (status: string) => {
 
 export default function SimplifiedDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [bulkActionAnchor, setBulkActionAnchor] = useState<HTMLElement | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -269,6 +280,62 @@ export default function SimplifiedDashboard() {
       hasBill
     };
   };
+  
+  // Multi-select functionality
+  const toggleOrderSelection = (orderId: number) => {
+    setSelectedOrders(prev => {
+      if (prev.includes(orderId)) {
+        return prev.filter(id => id !== orderId);
+      } else {
+        return [...prev, orderId];
+      }
+    });
+  };
+  
+  // Toggle select mode on/off
+  const toggleSelectMode = () => {
+    setIsSelectMode(prev => !prev);
+    // Clear selections when turning select mode off
+    if (isSelectMode) {
+      setSelectedOrders([]);
+    }
+  };
+  
+  // Select all orders in a specific status
+  const selectAllInStatus = (status: string) => {
+    const orderIdsInStatus = orders
+      .filter(order => order.status === status)
+      .map(order => order.id);
+    setSelectedOrders(orderIdsInStatus);
+  };
+  
+  // Bulk update orders to a specific status
+  const bulkUpdateOrderStatus = (newStatus: string) => {
+    // Apply optimistic update to the client-side cache
+    queryClient.setQueryData(["/api/orders"], (oldData: Order[] | undefined) => {
+      if (!oldData) return oldData;
+      
+      return oldData.map(item => {
+        if (selectedOrders.includes(item.id)) {
+          return { ...item, status: newStatus };
+        }
+        return item;
+      });
+    });
+    
+    // Update each selected order
+    selectedOrders.forEach(orderId => {
+      updateOrderMutation.mutate({ id: orderId, status: newStatus });
+    });
+    
+    // Clear selections after bulk update
+    setSelectedOrders([]);
+    
+    toast({
+      title: "Bulk update completed",
+      description: `${selectedOrders.length} orders updated to "${newStatus}" status.`,
+    });
+  };
 
   // Filter orders by search term
   const filteredOrders = orders.filter((order: Order) => {
@@ -332,7 +399,66 @@ export default function SimplifiedDashboard() {
 
         <TabsContent value="board" className="space-y-6 mt-2">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">Today's Orders</h1>
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold mr-4">Today's Orders</h1>
+              <Button 
+                variant={isSelectMode ? "default" : "outline"}
+                size="sm"
+                onClick={toggleSelectMode}
+                className="flex items-center gap-1"
+              >
+                {isSelectMode ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    <span>Cancel Selection</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckSquare className="h-4 w-4" />
+                    <span>Select Orders</span>
+                  </>
+                )}
+              </Button>
+              {isSelectMode && selectedOrders.length > 0 && (
+                <div className="ml-4 flex items-center gap-2">
+                  <Badge variant="secondary">
+                    {selectedOrders.length} selected
+                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="secondary" size="sm">
+                        <ChevronsUpDown className="h-4 w-4 mr-1" />
+                        <span>Bulk Actions</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Move Selected Orders To</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")}>
+                        <ClipboardList className="h-4 w-4 mr-2" />
+                        <span>Pending</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")}>
+                        <ChefHat className="h-4 w-4 mr-2" />
+                        <span>Preparing</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")}>
+                        <Utensils className="h-4 w-4 mr-2" />
+                        <span>Ready</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")}>
+                        <CircleCheck className="h-4 w-4 mr-2" />
+                        <span>Completed</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")}>
+                        <Receipt className="h-4 w-4 mr-2" />
+                        <span>Billed</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
             <div className="flex items-center text-sm">
               <div className="flex items-center mr-4">
                 <div className="h-3 w-3 rounded-full bg-amber-600 mr-2"></div>
