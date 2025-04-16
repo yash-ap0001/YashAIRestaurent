@@ -347,8 +347,12 @@ export default function SimplifiedDashboard() {
 
   // Get unique order sources for filtering
   const orderSources = useMemo(() => {
-    const sources = [...new Set(orders.map(order => order.orderSource))];
-    return sources.sort();
+    // Create an array of unique order sources without using Set spreading
+    const sourcesMap: {[key: string]: boolean} = {};
+    orders.forEach(order => {
+      sourcesMap[order.orderSource] = true;
+    });
+    return Object.keys(sourcesMap).sort();
   }, [orders]);
 
   // Filter orders by search term and selected filters
