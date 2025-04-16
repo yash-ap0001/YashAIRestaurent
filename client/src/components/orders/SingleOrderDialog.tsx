@@ -268,7 +268,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-black border border-purple-800 shadow-lg">
+      <DialogContent className="sm:max-w-4xl h-[700px] overflow-hidden bg-black border border-purple-800 shadow-lg">
         <DialogHeader className="pb-3 border-b border-purple-800 bg-gradient-to-br from-purple-600 to-pink-600">
           <DialogTitle className="text-2xl font-bold text-white">Create New Order</DialogTitle>
           <DialogDescription className="text-purple-100">
@@ -276,7 +276,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 h-[530px] overflow-y-auto pr-2">
           {/* Left Column - Order Details & Cart */}
           <div className="space-y-5">
             <div className="p-4 bg-black rounded-xl shadow-md border border-purple-800">
