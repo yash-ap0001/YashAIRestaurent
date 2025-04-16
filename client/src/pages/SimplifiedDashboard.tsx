@@ -519,7 +519,7 @@ export default function SimplifiedDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {/* Pending Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-orange-600 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-orange-500">
+                    <div className="bg-[#feebe2] text-[#7A0177] font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <Clock className="h-5 w-5 mr-2" />
                       Pending Orders
                     </div>
@@ -528,7 +528,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-orange-400 rounded-b-md shadow-lg bg-gradient-to-b from-orange-50 to-amber-50"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#feebe2]"
                         >
                           {orders.filter(order => order.status === "pending").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No pending orders</div>
@@ -542,16 +542,16 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-orange-100 to-amber-100 border-orange-400"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#ffb380' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#fff4ee' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
-                                          <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
                                           <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
@@ -597,7 +597,7 @@ export default function SimplifiedDashboard() {
                   
                   {/* Preparing Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-blue-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-blue-600">
+                    <div className="bg-[#FBB4B9] text-[#7A0177] font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <ChefHat className="h-5 w-5 mr-2" />
                       Preparing
                     </div>
@@ -606,7 +606,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-blue-400 rounded-b-md shadow-lg bg-gradient-to-b from-blue-50 to-blue-100"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#FBB4B9]"
                         >
                           {orders.filter(order => order.status === "preparing").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No orders in preparation</div>
@@ -620,16 +620,16 @@ export default function SimplifiedDashboard() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="border-2 rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-100 to-sky-100 border-blue-500"
+                                      className="rounded-lg p-3 hover:shadow-xl transition-all bg-white"
                                       style={{
                                         ...provided.draggableProps.style,
-                                        backgroundColor: snapshot.isDragging ? '#93c5fd' : undefined,
+                                        backgroundColor: snapshot.isDragging ? '#fff1f2' : undefined,
                                         transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                       }}
                                     >
                                       <div className="flex justify-between items-start mb-2">
                                         <div>
-                                          <h3 className="font-medium text-sm">#{order.orderNumber}</h3>
+                                          <h3 className="font-bold text-lg text-[#7A0177]">#{order.orderNumber}</h3>
                                           <div className="text-xs text-neutral-500">Table {order.tableNumber}</div>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
@@ -675,7 +675,7 @@ export default function SimplifiedDashboard() {
                   
                   {/* Ready Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-emerald-600 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-emerald-500">
+                    <div className="bg-[#F768A1] text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <Utensils className="h-5 w-5 mr-2" />
                       Ready to Serve
                     </div>
@@ -684,7 +684,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-emerald-400 rounded-b-md shadow-lg bg-gradient-to-b from-emerald-50 to-emerald-100"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#F768A1]"
                         >
                           {orders.filter(order => order.status === "ready").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No ready orders</div>
@@ -753,7 +753,7 @@ export default function SimplifiedDashboard() {
                   
                   {/* Completed Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-indigo-600 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-indigo-500">
+                    <div className="bg-[#C51B8A] text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <CircleCheck className="h-5 w-5 mr-2" />
                       Completed
                     </div>
@@ -762,7 +762,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-indigo-400 rounded-b-md shadow-lg bg-gradient-to-b from-indigo-50 to-indigo-100"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#C51B8A]"
                         >
                           {orders.filter(order => order.status === "completed").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No completed orders</div>
@@ -831,7 +831,7 @@ export default function SimplifiedDashboard() {
                   
                   {/* Billed Orders Column */}
                   <div className="flex flex-col space-y-3">
-                    <div className="bg-purple-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md border-2 border-purple-600">
+                    <div className="bg-[#7A0177] text-white font-bold py-2 rounded-t-md text-center flex items-center justify-center shadow-md">
                       <ReceiptText className="h-5 w-5 mr-2" />
                       Billed
                     </div>
@@ -840,7 +840,7 @@ export default function SimplifiedDashboard() {
                         <div 
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 border-2 border-purple-400 rounded-b-md shadow-lg bg-gradient-to-b from-purple-50 to-purple-100"
+                          className="space-y-3 max-h-[70vh] overflow-y-auto p-4 rounded-b-md shadow-lg bg-[#7A0177]"
                         >
                           {orders.filter(order => order.status === "billed").length === 0 ? (
                             <div className="text-center p-4 text-neutral-500 text-sm">No billed orders</div>
