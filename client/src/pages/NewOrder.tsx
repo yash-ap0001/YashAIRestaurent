@@ -14,7 +14,7 @@ export default function NewOrder() {
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-extrabold text-white">
             Create New Order
           </h1>
           <p className="text-gray-500 mt-2 max-w-2xl">
@@ -25,17 +25,17 @@ export default function NewOrder() {
         
         <div className="hidden md:flex items-center gap-6 text-gray-500">
           <div className="flex items-center gap-2">
-            <Utensils className="h-5 w-5 text-purple-500" />
+            <Utensils className="h-5 w-5 text-blue-500" />
             <span className="text-sm">Easy Menu Selection</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clipboard className="h-5 w-5 text-purple-500" />
+            <Clipboard className="h-5 w-5 text-blue-500" />
             <span className="text-sm">AI-Powered Order Processing</span>
           </div>
         </div>
       </div>
       
-      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 p-1 rounded-2xl flex-grow overflow-hidden">
+      <div className="bg-neutral-900 rounded-xl flex-grow overflow-hidden border border-gray-800">
         <OrderForm />
       </div>
     </div>

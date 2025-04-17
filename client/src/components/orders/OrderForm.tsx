@@ -348,27 +348,20 @@ export function OrderForm() {
   return (
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-6 h-full overflow-y-auto">
-        <Card className="bg-black rounded-xl shadow-lg overflow-hidden border border-purple-800">
-          <CardHeader className="pb-4 pt-6 px-6 bg-gray-900 border-b border-gray-800">
-            <CardTitle className="text-2xl font-bold text-white">
-              Create New Order
-            </CardTitle>
-            <p className="text-gray-400 mt-1">Add delicious menu items to your customer's order.</p>
-          </CardHeader>
-          <CardContent className="space-y-6 p-6 bg-gray-900 text-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="tableNumber"
                 render={({ field }) => (
-                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-blue-800">
                     <FormLabel className="text-sm font-semibold text-white">Table Number</FormLabel>
                     <FormControl>
                       <Input
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Table 1"
-                        className="w-full mt-2 bg-black border-2 border-purple-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        className="w-full mt-2 bg-black border-2 border-blue-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </FormControl>
                     <FormMessage />
@@ -380,22 +373,22 @@ export function OrderForm() {
                 control={form.control}
                 name="orderSource"
                 render={({ field }) => (
-                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
+                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-blue-800">
                     <FormLabel className="text-sm font-semibold text-white">Order Source</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
-                        <SelectTrigger className="w-full mt-2 bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <SelectTrigger className="w-full mt-2 bg-black border-2 border-blue-600 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                           <SelectValue placeholder="Select order source" />
                         </SelectTrigger>
-                        <SelectContent className="bg-black border-purple-600 text-white">
-                          <SelectItem value="manual" className="text-white focus:bg-purple-800 focus:text-white">Manual / In-Person</SelectItem>
-                          <SelectItem value="zomato" className="text-white focus:bg-purple-800 focus:text-white">Zomato</SelectItem>
-                          <SelectItem value="swiggy" className="text-white focus:bg-purple-800 focus:text-white">Swiggy</SelectItem>
-                          <SelectItem value="whatsapp" className="text-white focus:bg-purple-800 focus:text-white">WhatsApp</SelectItem>
-                          <SelectItem value="phone" className="text-white focus:bg-purple-800 focus:text-white">Phone</SelectItem>
+                        <SelectContent className="bg-black border-blue-600 text-white">
+                          <SelectItem value="manual" className="text-white focus:bg-blue-800 focus:text-white">Manual / In-Person</SelectItem>
+                          <SelectItem value="zomato" className="text-white focus:bg-blue-800 focus:text-white">Zomato</SelectItem>
+                          <SelectItem value="swiggy" className="text-white focus:bg-blue-800 focus:text-white">Swiggy</SelectItem>
+                          <SelectItem value="whatsapp" className="text-white focus:bg-blue-800 focus:text-white">WhatsApp</SelectItem>
+                          <SelectItem value="phone" className="text-white focus:bg-blue-800 focus:text-white">Phone</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -405,56 +398,8 @@ export function OrderForm() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div>
-                <div className="bg-black rounded-lg mb-3">
-                  <div className="flex items-center p-2">
-                    <Search className="h-4 w-4 text-gray-400 mr-2" />
-                    <Input
-                      type="text"
-                      placeholder="Search menu items..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-9 bg-transparent text-white placeholder:text-gray-400"
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-white font-medium">Menu Category</span>
-                  <Select
-                    value={selectedCategory}
-                    onValueChange={setSelectedCategory}
-                  >
-                    <SelectTrigger className="w-[180px] border-purple-600 bg-black text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500">
-                      <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border-purple-600 text-white">
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category} className="text-white focus:bg-purple-800 focus:text-white">
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-2">
-                  {filteredMenuItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="bg-black rounded-lg p-4 cursor-pointer hover:bg-black/80 transition-colors flex flex-col"
-                      onClick={() => addMenuItem(item.id)}
-                    >
-                      <h4 className="font-medium text-white">{item.name}</h4>
-                      <p className="text-xs text-gray-400 mt-1 mb-2">{item.description?.substring(0, 40) || 'Fragrant basmati rice dish'}{(item.description && item.description.length > 40) ? '...' : ''}</p>
-                      <span className="text-purple-500 font-semibold mt-auto">₹{item.price}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="md:border-l md:pl-4 md:border-purple-700">
+            <div className="grid grid-cols-1 gap-6">
+              <div className="md:border-l md:pl-4 md:border-blue-700">
                 <NaturalLanguageOrderInput
                   onOrderProcessed={(processedOrder) => {
                     if (!menuItems || !processedOrder.items.length) return;
@@ -490,9 +435,62 @@ export function OrderForm() {
                 />
               </div>
             </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6">
+          {/* Menu Items (Left Side) */}
+          <div>
+            <div className="bg-black rounded-lg mb-3">
+              <div className="flex items-center p-2">
+                <Search className="h-4 w-4 text-gray-400 mr-2" />
+                <Input
+                  type="text"
+                  placeholder="Search menu items..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-9 bg-transparent text-white placeholder:text-gray-400"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-white font-medium">Menu Category</span>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-[180px] border-blue-600 bg-black text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent className="bg-black border-blue-600 text-white">
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category} className="text-white focus:bg-blue-800 focus:text-white">
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            {selectedItems.length > 0 && (
-              <div className="space-y-4 mt-6">
+            <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-2">
+              {filteredMenuItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-black rounded-lg p-4 cursor-pointer hover:bg-black/80 transition-colors flex flex-col"
+                  onClick={() => addMenuItem(item.id)}
+                >
+                  <h4 className="font-medium text-white">{item.name}</h4>
+                  <p className="text-xs text-gray-400 mt-1 mb-2">{item.description?.substring(0, 40) || 'Fragrant basmati rice dish'}{(item.description && item.description.length > 40) ? '...' : ''}</p>
+                  <span className="text-blue-500 font-semibold mt-auto">₹{item.price}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Order Summary (Right Side) */}
+          <div>
+            {selectedItems.length > 0 ? (
+              <div className="space-y-4">
                 <div className="bg-gray-800 p-2 text-white flex justify-between items-center rounded-t-xl border border-gray-700">
                   <h3 className="font-bold text-white">Your Order Summary</h3>
                   <div className="text-sm bg-gray-700 px-2 py-1 rounded-full">
@@ -500,14 +498,14 @@ export function OrderForm() {
                   </div>
                 </div>
                 
-                <div className="bg-black p-4 rounded-b-xl shadow-md border border-purple-800 -mt-4">
-                  <div className="max-h-[300px] overflow-y-auto space-y-3">
+                <div className="bg-black p-4 rounded-b-xl shadow-md border border-blue-800 -mt-4">
+                  <div className="max-h-[400px] overflow-y-auto space-y-3">
                     {selectedItems.map((item, index) => (
-                      <div key={index} className="border border-purple-800 rounded-xl p-4 space-y-3 hover:bg-purple-900/30 transition-colors">
+                      <div key={index} className="border border-blue-800 rounded-xl p-4 space-y-3 hover:bg-blue-900/30 transition-colors">
                         <div className="flex justify-between items-center">
                           <div>
                             <h4 className="font-bold text-white">{item.name}</h4>
-                            <p className="text-sm text-purple-300">₹{item.price} per item</p>
+                            <p className="text-sm text-blue-300">₹{item.price} per item</p>
                           </div>
                           <Button 
                             type="button"
@@ -525,7 +523,7 @@ export function OrderForm() {
                             type="button"
                             variant="outline" 
                             size="icon" 
-                            className="h-7 w-7 rounded-full border-purple-600 text-purple-400 hover:bg-purple-900 hover:text-white"
+                            className="h-7 w-7 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
                             onClick={() => updateItemQuantity(index, item.quantity - 1)}
                           >
                             <Minus className="h-3 w-3" />
@@ -535,12 +533,12 @@ export function OrderForm() {
                             type="button"
                             variant="outline" 
                             size="icon" 
-                            className="h-7 w-7 rounded-full border-purple-600 text-purple-400 hover:bg-purple-900 hover:text-white"
+                            className="h-7 w-7 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
                             onClick={() => updateItemQuantity(index, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
-                          <span className="ml-auto font-bold text-purple-400">
+                          <span className="ml-auto font-bold text-blue-400">
                             ₹{(item.price * item.quantity).toFixed(2)}
                           </span>
                         </div>
@@ -549,98 +547,132 @@ export function OrderForm() {
                           placeholder="Special instructions for this item"
                           value={item.notes}
                           onChange={(e) => updateItemNotes(index, e.target.value)}
-                          className="text-sm border-2 border-purple-600 bg-black text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          className="text-sm border-2 border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     ))}
                   </div>
                   
-                  <div className="mt-4 p-3 bg-purple-900/30 rounded-lg flex justify-between items-center border border-purple-600">
-                    <span className="font-bold text-purple-300">Total Amount</span>
-                    <span className="text-xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <div className="mt-4 p-3 bg-blue-900/30 rounded-lg flex justify-between items-center border border-blue-600">
+                    <span className="font-bold text-blue-300">Total Amount</span>
+                    <span className="text-xl font-extrabold text-white">
                       ₹{calculateTotal().toFixed(2)}
                     </span>
                   </div>
                 </div>
               </div>
+            ) : (
+              <div className="bg-black p-6 rounded-xl border border-blue-800 flex flex-col items-center justify-center h-64">
+                <ShoppingCart className="h-12 w-12 text-blue-500 mb-4" />
+                <h3 className="text-xl font-bold text-white">Your order is empty</h3>
+                <p className="text-gray-400 text-center mt-2">
+                  Add items from the menu on the left to create your order
+                </p>
+              </div>
             )}
+          </div>
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6">
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem className="bg-black p-4 rounded-xl shadow-md border border-blue-800">
+                <FormLabel className="text-sm font-semibold text-white">Order Notes</FormLabel>
+                <FormControl>
+                  <div className="flex items-center mt-2 border-2 rounded-md border-blue-600 p-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 bg-black">
+                    <div className="text-blue-500 mr-2">
+                      <List className="h-5 w-5" />
+                    </div>
+                    <Textarea
+                      placeholder="Enter any special instructions for the entire order..."
+                      className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none bg-black text-white placeholder:text-gray-500"
+                      rows={2}
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="notes"
+              name="isUrgent"
               render={({ field }) => (
-                <FormItem className="bg-black p-4 rounded-xl shadow-md border border-purple-800">
-                  <FormLabel className="text-sm font-semibold text-white">Order Notes</FormLabel>
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-red-700">
                   <FormControl>
-                    <div className="flex items-center mt-2 border-2 rounded-md border-purple-600 p-2 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500 bg-black">
-                      <div className="text-purple-500 mr-2">
-                        <List className="h-5 w-5" />
-                      </div>
-                      <Textarea
-                        placeholder="Enter any special instructions for the entire order..."
-                        className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none bg-black text-white placeholder:text-gray-500"
-                        rows={2}
-                        {...field}
-                      />
-                    </div>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="border-red-500 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="font-semibold text-red-400">Mark as Urgent</FormLabel>
+                    <p className="text-xs text-gray-400">
+                      Prioritizes this order in the kitchen queue
+                    </p>
+                  </div>
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="useAIAutomation"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-blue-800">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="border-blue-500 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="flex items-center gap-1.5 font-semibold text-blue-400">
+                      <span>Use AI Automation</span>
+                      <Sparkles className="h-4 w-4 text-blue-500" />
+                    </FormLabel>
+                    <p className="text-xs text-gray-400">
+                      AI will automatically manage this order's status updates and workflow
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="isUrgent"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-red-700">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="border-red-500 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-semibold text-red-400">Mark as Urgent</FormLabel>
-                      <p className="text-xs text-gray-400">
-                        Prioritizes this order in the kitchen queue
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="useAIAutomation"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-purple-800">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="border-purple-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="flex items-center gap-1.5 font-semibold text-purple-400">
-                        <span>Use AI Automation</span>
-                        <Sparkles className="h-4 w-4 text-purple-500" />
-                      </FormLabel>
-                      <p className="text-xs text-gray-400">
-                        AI will automatically manage this order's status updates and workflow
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex items-center justify-between pt-6 border-t border-purple-800">
+        <div className="flex items-center justify-end p-6 border-t border-blue-800">
+          <div className="flex space-x-4 ml-auto">
+            <Button 
+              type="button" 
+              variant="outline"
+              className="px-6 border-2 border-blue-600 text-blue-300 font-medium hover:bg-blue-900/30"
+              onClick={() => setLocation("/")}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit"
+              className={`px-8 py-6 font-bold text-lg ${selectedItems.length === 0 ? 'bg-gray-800 text-gray-500' : 'bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 shadow-lg shadow-blue-900/50'}`}
+              disabled={createOrderMutation.isPending || selectedItems.length === 0}
+            >
+              {createOrderMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>Create Order</>
+              )}
+            </Button>
+          </div>
           <div className="hidden md:block">
             <Button 
               type="button" 
