@@ -29,7 +29,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MenuItem } from "@shared/schema";
-import { Loader2, Minus, Plus, Trash2, Sparkles, Search, List } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2, Sparkles, Search, List, ShoppingCart } from "lucide-react";
 import { NaturalLanguageOrderInput } from "./NaturalLanguageOrderInput";
 
 const formSchema = z.object({
@@ -661,80 +661,6 @@ export function OrderForm() {
             <Button 
               type="submit"
               className={`px-8 py-6 font-bold text-lg ${selectedItems.length === 0 ? 'bg-gray-800 text-gray-500' : 'bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 shadow-lg shadow-blue-900/50'}`}
-              disabled={createOrderMutation.isPending || selectedItems.length === 0}
-            >
-              {createOrderMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>Create Order</>
-              )}
-            </Button>
-          </div>
-          <div className="hidden md:block">
-            <Button 
-              type="button" 
-              variant="outline"
-              size="sm"
-              className="text-xs text-purple-400 border-purple-600 hover:bg-purple-900/30"
-              onClick={() => {
-                // Create an emergency test order with fixed data
-                const testOrderData = {
-                  tableNumber: "Table 1",
-                  status: "pending",
-                  totalAmount: 320,
-                  notes: "Debug Test Order",
-                  isUrgent: false,
-                  orderSource: form.getValues("orderSource") || "manual",
-                  useAIAutomation: form.getValues("useAIAutomation"),
-                  items: [
-                    {
-                      menuItemId: 1,
-                      quantity: 1,
-                      price: 320,
-                      notes: ""
-                    }
-                  ]
-                };
-                
-                console.log("EMERGENCY TEST ORDER:", testOrderData);
-                toast({
-                  title: "Attempting Emergency Test Order",
-                  description: "Submitting a test order to the API..."
-                });
-                
-                // Direct API call to ensure it works
-                try {
-                  console.log("Making direct emergency test order");
-                  createOrderMutation.mutate(testOrderData);
-                } catch (error: any) {
-                  console.error("Emergency order creation failed:", error);
-                  toast({
-                    title: "Emergency Order Failed",
-                    description: `Error: ${error?.message || "Unknown error"}`,
-                    variant: "destructive"
-                  });
-                }
-              }}
-            >
-              Debug Order
-            </Button>
-          </div>
-          
-          <div className="flex space-x-4 ml-auto">
-            <Button 
-              type="button" 
-              variant="outline"
-              className="px-6 border-2 border-purple-600 text-purple-300 font-medium hover:bg-purple-900/30"
-              onClick={() => setLocation("/")}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit"
-              className={`px-8 py-6 font-bold text-lg ${selectedItems.length === 0 ? 'bg-gray-800 text-gray-500' : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-800 hover:to-pink-800 shadow-lg shadow-purple-900/50'}`}
               disabled={createOrderMutation.isPending || selectedItems.length === 0}
             >
               {createOrderMutation.isPending ? (
