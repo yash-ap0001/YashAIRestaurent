@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, Plus, Minus, X, Send, AlignLeft, Search, ListChecks, Sparkles } from "lucide-react";
+import { Loader2, Plus, Minus, X, Send, AlignLeft, Search, ListChecks, Sparkles, MessageSquare } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -588,10 +588,10 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               </TabsContent>
               
               {/* AI Natural Language Order Tab Content */}
-              <TabsContent value="ai-order" className="flex flex-col mt-0 h-[calc(100vh-210px)] p-4">
-                <div className="flex-1 flex flex-col">
-                  {/* AI Order Input Section */}
-                  <div className="bg-black border border-blue-900/50 rounded-lg p-4 mb-4 flex-1">
+              <TabsContent value="ai-order" className="flex flex-col mt-0 h-[calc(100vh-210px)]">
+                <div className="flex h-full">
+                  {/* Left Column - AI Natural Language Input */}
+                  <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
                     <div className="flex items-center mb-3">
                       <div className="h-10 w-10 bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
                         <Sparkles className="h-5 w-5 text-blue-400" />
@@ -602,7 +602,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                       </div>
                     </div>
                     
-                    <div className="relative mb-3">
+                    <div className="relative mb-4">
                       <Textarea 
                         value={aiOrderInput}
                         onChange={(e) => setAiOrderInput(e.target.value)}
@@ -636,7 +636,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                       </Button>
                     </div>
                     
-                    <div className="bg-blue-950/20 rounded-lg p-3 border border-blue-900/30">
+                    <div className="bg-blue-950/20 rounded-lg p-3 border border-blue-900/30 mb-3">
                       <h4 className="text-sm font-medium text-blue-300 mb-1">Tips for Natural Language Orders:</h4>
                       <ul className="text-sm text-gray-300 space-y-1 list-disc pl-5">
                         <li>Specify quantity before each item (e.g., "2 Veg Biryani")</li>
@@ -646,44 +646,118 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                         <li><span className="text-blue-300">Pro tip:</span> Use <kbd className="px-1 py-0.5 bg-blue-900/50 rounded text-xs border border-blue-700 mx-1">Ctrl+Enter</kbd> to quickly process your order</li>
                       </ul>
                     </div>
+                    
+                    <div className="flex-1 overflow-auto rounded-lg border border-blue-900/30 bg-black p-3">
+                      <div className="flex items-center mb-2">
+                        <MessageSquare className="h-5 w-5 text-blue-400 mr-2" />
+                        <h4 className="font-medium text-white">Example Orders</h4>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="border border-blue-900/30 rounded-md p-2 hover:bg-blue-900/10 cursor-pointer"
+                          onClick={() => setAiOrderInput("3 Veg Biryani, 2 Butter Chicken, 5 Naan, and 2 Mango Lassi")}>
+                          <p className="text-sm text-gray-300">3 Veg Biryani, 2 Butter Chicken, 5 Naan, and 2 Mango Lassi</p>
+                        </div>
+                        <div className="border border-blue-900/30 rounded-md p-2 hover:bg-blue-900/10 cursor-pointer"
+                          onClick={() => setAiOrderInput("मुझे 2 पनीर टिक्का, 1 दाल फ्राई और 3 बटर नान चाहिए")}>
+                          <p className="text-sm text-gray-300">मुझे 2 पनीर टिक्का, 1 दाल फ्राई और 3 बटर नान चाहिए</p>
+                        </div>
+                        <div className="border border-blue-900/30 rounded-md p-2 hover:bg-blue-900/10 cursor-pointer"
+                          onClick={() => setAiOrderInput("Quiero 2 pollo al curry, 1 arroz con verduras y 3 naan de ajo")}>
+                          <p className="text-sm text-gray-300">Quiero 2 pollo al curry, 1 arroz con verduras y 3 naan de ajo</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
-                  {/* Order Summary Section - Same as in Menu Selection Tab */}
-                  <div className="bg-black border border-gray-800 rounded-lg overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-2 flex justify-between items-center">
+                  {/* Right Column - Order Summary */}
+                  <div className="w-1/2 h-full p-3 flex flex-col">
+                    <div className="flex justify-between items-center mb-2">
                       <h3 className="font-bold text-white">Your Order Summary</h3>
                       {orderItems.length > 0 && (
-                        <div className="text-xs bg-blue-800 px-2 py-1 rounded-full">
+                        <div className="text-sm bg-blue-900/30 px-2 py-1 rounded-full text-blue-300 border border-blue-800/50">
                           {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
                         </div>
                       )}
                     </div>
                     
-                    <div className="p-3">
-                      {orderItems.length === 0 ? (
-                        <div className="text-center py-4 text-gray-400">
-                          <p>Your order will appear here after processing</p>
-                        </div>
-                      ) : (
-                        <div>
-                          {orderItems.map((item, index) => (
-                            <div key={index} className="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
-                              <div className="flex items-center">
-                                <span className="font-bold text-white mr-2">{item.quantity}x</span>
-                                <span className="text-white">{item.menuItemName}</span>
-                              </div>
-                              <span className="text-blue-400 font-bold">
-                                {formatCurrency(item.price * item.quantity)}
-                              </span>
-                            </div>
-                          ))}
+                    <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-hidden">
+                      {orderItems.length > 0 ? (
+                        <div className="h-full flex flex-col">
+                          <div className="flex-1 overflow-auto p-2 space-y-2">
+                            {orderItems.map((item, index) => {
+                              const menuItem = menuItems.find(mi => mi.id === item.menuItemId);
+                              return (
+                                <div key={index} className="border border-blue-800/50 rounded-lg p-3 space-y-2 hover:bg-blue-900/20 transition-colors">
+                                  <div className="flex justify-between items-center">
+                                    <div>
+                                      <h4 className="font-bold text-white">{item.menuItemName || (menuItem ? menuItem.name : `Item #${item.menuItemId}`)}</h4>
+                                      <p className="text-sm text-blue-300">{formatCurrency(item.price)} per item</p>
+                                    </div>
+                                    <Button 
+                                      type="button"
+                                      variant="ghost" 
+                                      size="icon"
+                                      className="h-7 w-7 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
+                                      onClick={() => removeOrderItem(index)}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                  
+                                  <div className="flex items-center">
+                                    <Button 
+                                      type="button"
+                                      variant="outline" 
+                                      size="icon" 
+                                      className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
+                                      onClick={() => updateItemQuantity(index, -1)}
+                                    >
+                                      <Minus className="h-3 w-3" />
+                                    </Button>
+                                    <span className="mx-3 w-6 text-center font-bold text-white">{item.quantity}</span>
+                                    <Button 
+                                      type="button"
+                                      variant="outline" 
+                                      size="icon" 
+                                      className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
+                                      onClick={() => updateItemQuantity(index, 1)}
+                                    >
+                                      <Plus className="h-3 w-3" />
+                                    </Button>
+                                    <span className="ml-auto font-bold text-blue-400">
+                                      {formatCurrency(item.price * item.quantity)}
+                                    </span>
+                                  </div>
+                                  
+                                  <Input
+                                    placeholder="Special instructions..."
+                                    value={item.specialInstructions || ""}
+                                    onChange={(e) => {
+                                      const updatedItems = [...orderItems];
+                                      updatedItems[index].specialInstructions = e.target.value;
+                                      setOrderItems(updatedItems);
+                                    }}
+                                    className="text-xs h-7 border border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
                           
-                          <div className="mt-3 pt-3 border-t border-gray-800 flex justify-between items-center">
-                            <span className="font-bold text-white">Total</span>
-                            <span className="text-lg font-extrabold text-white">
+                          <div className="p-3 bg-blue-900/30 flex justify-between items-center border-t border-blue-800">
+                            <span className="font-bold text-blue-300">Total Amount</span>
+                            <span className="text-xl font-extrabold text-white">
                               {formatCurrency(totalAmount)}
                             </span>
                           </div>
+                        </div>
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center">
+                          <Send className="h-12 w-12 text-blue-500 mb-4" />
+                          <h3 className="text-xl font-bold text-white">Your order is empty</h3>
+                          <p className="text-gray-400 text-center mt-2 max-w-xs">
+                            Process your natural language order to see items here
+                          </p>
                         </div>
                       )}
                     </div>
