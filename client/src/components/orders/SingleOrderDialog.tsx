@@ -396,25 +396,25 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid grid-cols-2 h-12">
+              <TabsList className="grid grid-cols-2 h-9 w-full p-1 bg-blue-950/40">
                 <TabsTrigger 
                   value="menu-select" 
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white"
+                  className="h-7 text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white"
                 >
-                  <ListChecks className="h-4 w-4 mr-2" />
+                  <ListChecks className="h-3.5 w-3.5 mr-1.5" />
                   Menu Selection
                 </TabsTrigger>
                 <TabsTrigger 
                   value="ai-order" 
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white"
+                  className="h-7 text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white"
                 >
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                   AI Natural Language Order
                 </TabsTrigger>
               </TabsList>
               
               {/* Menu Selection Tab Content */}
-              <TabsContent value="menu-select" className="flex flex-col mt-0 h-[calc(100vh-210px)]">
+              <TabsContent value="menu-select" className="mt-0">
                 <div className="flex h-full">
                   {/* Left Column - Menu Items */}
                   <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
@@ -588,7 +588,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               </TabsContent>
               
               {/* AI Natural Language Order Tab Content */}
-              <TabsContent value="ai-order" className="flex flex-col mt-0 h-[calc(100vh-210px)]">
+              <TabsContent value="ai-order" className="mt-0">
                 <div className="flex h-full">
                   {/* Left Column - AI Natural Language Input */}
                   <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
