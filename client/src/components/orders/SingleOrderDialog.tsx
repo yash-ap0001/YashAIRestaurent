@@ -414,7 +414,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               </TabsList>
               
               {/* Menu Selection Tab Content */}
-              <TabsContent value="menu-select" className="mt-0">
+              <TabsContent value="menu-select" className="mt-0 h-[calc(100vh-280px)]">
                 <div className="flex h-full">
                   {/* Left Column - Menu Items */}
                   <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
@@ -588,7 +588,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               </TabsContent>
               
               {/* AI Natural Language Order Tab Content */}
-              <TabsContent value="ai-order" className="mt-0">
+              <TabsContent value="ai-order" className="mt-0 h-[calc(100vh-280px)]">
                 <div className="flex h-full">
                   {/* Left Column - AI Natural Language Input */}
                   <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
@@ -772,15 +772,15 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
 
         {/* Footer with Notes */}
         <div className="border-t border-gray-800 p-3 bg-neutral-950">
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-3 items-start">
             <div className="flex-1">
-              <div className="flex items-center border rounded border-blue-600 px-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-black h-9">
-                <AlignLeft className="h-4 w-4 text-blue-500 mr-2" />
-                <Input
-                  placeholder="Order notes..."
+              <div className="flex border rounded border-blue-600 px-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-black">
+                <AlignLeft className="h-4 w-4 text-blue-500 mr-2 mt-3" />
+                <Textarea
+                  placeholder="Order notes... (dietary preferences, allergies, special requirements)"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 bg-transparent text-white placeholder:text-gray-500"
+                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[80px] bg-transparent text-white placeholder:text-gray-500 py-2"
                 />
               </div>
             </div>
@@ -789,7 +789,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               type="button" 
               variant="outline"
               onClick={onClose}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+              className="border-gray-700 text-gray-300 hover:bg-gray-800 mt-3"
             >
               Cancel
             </Button>

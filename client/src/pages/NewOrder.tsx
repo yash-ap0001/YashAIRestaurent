@@ -63,13 +63,13 @@ export default function NewOrder() {
         </TabsList>
         
         <div className="flex-1 overflow-hidden bg-neutral-900">
-          <TabsContent value="menu-order" className="h-full m-0 data-[state=active]:block overflow-hidden">
+          <TabsContent value="menu-order" className="h-[calc(100vh-140px)] m-0 data-[state=active]:block overflow-hidden">
             <div className="h-full overflow-hidden">
               <OrderForm />
             </div>
           </TabsContent>
           
-          <TabsContent value="voice-order" className="h-full m-0 data-[state=active]:block overflow-hidden">
+          <TabsContent value="voice-order" className="h-[calc(100vh-140px)] m-0 data-[state=active]:block overflow-hidden">
             <div className="flex h-full overflow-hidden">
               {/* Left Column - Voice Order Input */}
               <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
@@ -147,7 +147,7 @@ export default function NewOrder() {
             </div>
           </TabsContent>
           
-          <TabsContent value="external-order" className="flex-1 h-full m-0 p-8 data-[state=active]:flex flex-col">
+          <TabsContent value="external-order" className="h-[calc(100vh-140px)] m-0 p-8 data-[state=active]:flex flex-col">
             <div className="bg-neutral-950 rounded-xl p-6 border border-gray-800 flex flex-col items-center">
               <ReceiptText className="h-16 w-16 text-blue-500 mb-4" />
               <h2 className="text-2xl font-bold text-white">External Order</h2>
