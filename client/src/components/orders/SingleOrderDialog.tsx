@@ -286,12 +286,12 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                   value={tableNumber}
                   onValueChange={(value) => setTableNumber(value)}
                 >
-                  <SelectTrigger className="bg-black border-2 border-purple-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                  <SelectTrigger className="bg-neutral-950 border-2 border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <SelectValue placeholder="Select a table" />
                   </SelectTrigger>
-                  <SelectContent className="bg-black border-purple-600 text-white">
+                  <SelectContent className="bg-neutral-950 border-gray-700 text-white">
                     {Array.from({ length: 20 }, (_, i) => (
-                      <SelectItem key={i} value={`T${i + 1}`} className="text-white focus:bg-purple-800 focus:text-white">
+                      <SelectItem key={i} value={`T${i + 1}`} className="text-white focus:bg-blue-600 focus:text-white">
                         Table {i + 1}
                       </SelectItem>
                     ))}
@@ -387,9 +387,9 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                 )}
                 
                 {orderItems.length > 0 && (
-                  <div className="mt-4 p-3 bg-purple-900/30 rounded-lg flex justify-between items-center border border-purple-600">
-                    <span className="font-bold text-purple-300">Total Amount</span>
-                    <span className="text-xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <div className="mt-4 p-3 bg-blue-900/30 rounded-lg flex justify-between items-center border border-blue-700">
+                    <span className="font-bold text-blue-300">Total Amount</span>
+                    <span className="text-xl font-extrabold text-white">
                       {formatCurrency(totalAmount)}
                     </span>
                   </div>
@@ -487,13 +487,13 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
           </div>
         </div>
 
-        <DialogFooter className="mt-6 pt-4 border-t border-purple-800">
-          <Button variant="outline" onClick={onClose} className="border-2 border-purple-600 text-purple-400 hover:bg-purple-900/30">
+        <DialogFooter className="mt-6 pt-4 border-t border-gray-800">
+          <Button variant="outline" onClick={onClose} className="border-2 border-gray-700 text-gray-300 hover:bg-gray-800">
             Cancel
           </Button>
           <Button 
             type="submit" 
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 px-8"
+            className="bg-gradient-to-r from-blue-600 to-blue-800 text-white hover:from-blue-700 hover:to-blue-900 px-8"
             onClick={handleSubmit}
             disabled={orderItems.length === 0 || createOrderMutation.isPending}
           >
