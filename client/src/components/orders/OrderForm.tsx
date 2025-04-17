@@ -347,48 +347,32 @@ export function OrderForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-4 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleFormSubmit} className="h-[calc(100vh-170px)] flex flex-col">
+        {/* Header Area with Table/Source Selection */}
+        <div className="flex px-4 py-2 border-b border-gray-800 gap-4 bg-neutral-950 h-14">
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex items-center gap-2">
+              <span className="text-white font-medium text-sm whitespace-nowrap">Table:</span>
               <FormField
                 control={form.control}
                 name="tableNumber"
                 render={({ field }) => (
-                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-blue-800">
-                    <FormLabel className="text-sm font-semibold text-white">Table Number</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Table 1"
-                        className="w-full mt-2 bg-black border-2 border-blue-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="orderSource"
-                render={({ field }) => (
-                  <FormItem className="bg-black p-4 rounded-xl shadow-md border border-blue-800">
-                    <FormLabel className="text-sm font-semibold text-white">Order Source</FormLabel>
+                  <FormItem className="m-0">
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value || ""}
+                        name="tableNumber"
                       >
-                        <SelectTrigger className="w-full mt-2 bg-black border-2 border-blue-600 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                          <SelectValue placeholder="Select order source" />
+                        <SelectTrigger className="w-20 h-8 border-blue-600 bg-black text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                          <SelectValue placeholder="T1" />
                         </SelectTrigger>
                         <SelectContent className="bg-black border-blue-600 text-white">
-                          <SelectItem value="manual" className="text-white focus:bg-blue-800 focus:text-white">Manual / In-Person</SelectItem>
-                          <SelectItem value="zomato" className="text-white focus:bg-blue-800 focus:text-white">Zomato</SelectItem>
-                          <SelectItem value="swiggy" className="text-white focus:bg-blue-800 focus:text-white">Swiggy</SelectItem>
-                          <SelectItem value="whatsapp" className="text-white focus:bg-blue-800 focus:text-white">WhatsApp</SelectItem>
-                          <SelectItem value="phone" className="text-white focus:bg-blue-800 focus:text-white">Phone</SelectItem>
+                          <SelectItem value="T1">T1</SelectItem>
+                          <SelectItem value="T2">T2</SelectItem>
+                          <SelectItem value="T3">T3</SelectItem>
+                          <SelectItem value="T4">T4</SelectItem>
+                          <SelectItem value="T5">T5</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -397,69 +381,79 @@ export function OrderForm() {
                 )}
               />
             </div>
-
-            <div className="grid grid-cols-1 gap-6">
-              <div className="md:border-l md:pl-4 md:border-blue-700">
-                <NaturalLanguageOrderInput
-                  onOrderProcessed={(processedOrder) => {
-                    if (!menuItems || !processedOrder.items.length) return;
-                    
-                    // Map the processed items to selectedItems format
-                    const newItems = processedOrder.items.map(item => {
-                      const menuItem = menuItems.find(mi => mi.id === item.menuItemId);
-                      if (!menuItem) return null;
-                      
-                      return {
-                        menuItemId: menuItem.id,
-                        name: menuItem.name,
-                        quantity: item.quantity,
-                        price: menuItem.price,
-                        notes: item.notes || ""
-                      };
-                    }).filter(Boolean) as {
-                      menuItemId: number;
-                      name: string;
-                      quantity: number;
-                      price: number;
-                      notes: string;
-                    }[];
-                    
-                    // Add all new items
-                    setSelectedItems([...selectedItems, ...newItems]);
-                    
-                    // Set the order notes if provided
-                    if (processedOrder.notes) {
-                      form.setValue("notes", processedOrder.notes);
-                    }
-                  }}
-                />
-              </div>
-            </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6">
-          {/* Menu Items (Left Side) */}
-          <div>
-            <div className="bg-black rounded-lg mb-3">
-              <div className="flex items-center p-2">
-                <Search className="h-4 w-4 text-gray-400 mr-2" />
-                <Input
-                  type="text"
-                  placeholder="Search menu items..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-9 bg-transparent text-white placeholder:text-gray-400"
-                />
-              </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-white font-medium text-sm whitespace-nowrap">Source:</span>
+              <FormField
+                control={form.control}
+                name="orderSource"
+                render={({ field }) => (
+                  <FormItem className="m-0">
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-28 h-8 border-blue-600 bg-black text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                          <SelectValue placeholder="Manual" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black border-blue-600 text-white">
+                          <SelectItem value="manual">Manual</SelectItem>
+                          <SelectItem value="zomato">Zomato</SelectItem>
+                          <SelectItem value="swiggy">Swiggy</SelectItem>
+                          <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                          <SelectItem value="phone">Phone</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-white font-medium">Menu Category</span>
+            <div className="ml-auto flex items-center">
+              <Button 
+                type="submit"
+                className={`h-9 px-6 font-bold ${selectedItems.length === 0 ? 'bg-gray-800 text-gray-500' : 'bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 shadow-lg shadow-blue-900/50'}`}
+                disabled={createOrderMutation.isPending || selectedItems.length === 0}
+              >
+                {createOrderMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>Create Order</>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Main Content Area */}
+        <div className="flex-1 flex h-[calc(100vh-220px)] overflow-hidden">
+          {/* Menu Items (Left Side) */}
+          <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="bg-black rounded-lg flex-1">
+                <div className="flex items-center p-1">
+                  <Search className="h-4 w-4 text-gray-400 ml-2" />
+                  <Input
+                    type="text"
+                    placeholder="Search menu items..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 bg-transparent text-white placeholder:text-gray-400"
+                  />
+                </div>
+              </div>
+              
               <Select
                 value={selectedCategory}
                 onValueChange={setSelectedCategory}
               >
-                <SelectTrigger className="w-[180px] border-blue-600 bg-black text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                <SelectTrigger className="w-[130px] h-8 border-blue-600 bg-black text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent className="bg-black border-blue-600 text-white">
@@ -472,36 +466,40 @@ export function OrderForm() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-2">
-              {filteredMenuItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-black rounded-lg p-4 cursor-pointer hover:bg-black/80 transition-colors flex flex-col"
-                  onClick={() => addMenuItem(item.id)}
-                >
-                  <h4 className="font-medium text-white">{item.name}</h4>
-                  <p className="text-xs text-gray-400 mt-1 mb-2">{item.description?.substring(0, 40) || 'Fragrant basmati rice dish'}{(item.description && item.description.length > 40) ? '...' : ''}</p>
-                  <span className="text-blue-500 font-semibold mt-auto">₹{item.price}</span>
-                </div>
-              ))}
+            <div className="flex-1 overflow-auto rounded-lg border border-gray-800 bg-black p-2">
+              <div className="grid grid-cols-2 gap-2">
+                {filteredMenuItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-black rounded-lg p-3 cursor-pointer hover:bg-blue-900/20 transition-colors flex flex-col border border-blue-900/30"
+                    onClick={() => addMenuItem(item.id)}
+                  >
+                    <h4 className="font-medium text-white">{item.name}</h4>
+                    <p className="text-xs text-gray-400 mt-1 mb-1 line-clamp-2">{item.description || 'Fragrant basmati rice dish'}</p>
+                    <span className="text-blue-500 font-semibold mt-auto">₹{item.price}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Order Summary (Right Side) */}
-          <div>
-            {selectedItems.length > 0 ? (
-              <div className="space-y-4">
-                <div className="bg-gray-800 p-2 text-white flex justify-between items-center rounded-t-xl border border-gray-700">
-                  <h3 className="font-bold text-white">Your Order Summary</h3>
-                  <div className="text-sm bg-gray-700 px-2 py-1 rounded-full">
-                    {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
-                  </div>
+          <div className="w-1/2 h-full p-3 flex flex-col">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-bold text-white">Your Order Summary</h3>
+              {selectedItems.length > 0 && (
+                <div className="text-sm bg-blue-900/30 px-2 py-1 rounded-full text-blue-300 border border-blue-800/50">
+                  {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
                 </div>
-                
-                <div className="bg-black p-4 rounded-b-xl shadow-md border border-blue-800 -mt-4">
-                  <div className="max-h-[400px] overflow-y-auto space-y-3">
+              )}
+            </div>
+            
+            <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-hidden">
+              {selectedItems.length > 0 ? (
+                <div className="h-full flex flex-col">
+                  <div className="flex-1 overflow-auto p-2 space-y-2">
                     {selectedItems.map((item, index) => (
-                      <div key={index} className="border border-blue-800 rounded-xl p-4 space-y-3 hover:bg-blue-900/30 transition-colors">
+                      <div key={index} className="border border-blue-800/50 rounded-lg p-3 space-y-2 hover:bg-blue-900/20 transition-colors">
                         <div className="flex justify-between items-center">
                           <div>
                             <h4 className="font-bold text-white">{item.name}</h4>
@@ -511,7 +509,7 @@ export function OrderForm() {
                             type="button"
                             variant="ghost" 
                             size="icon"
-                            className="h-8 w-8 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
+                            className="h-7 w-7 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
                             onClick={() => removeItem(index)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -523,17 +521,17 @@ export function OrderForm() {
                             type="button"
                             variant="outline" 
                             size="icon" 
-                            className="h-7 w-7 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
-                            onClick={() => updateItemQuantity(index, item.quantity - 1)}
+                            className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
+                            onClick={() => updateItemQuantity(index, Math.max(1, item.quantity - 1))}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="mx-3 w-8 text-center font-bold text-white">{item.quantity}</span>
+                          <span className="mx-3 w-6 text-center font-bold text-white">{item.quantity}</span>
                           <Button 
                             type="button"
                             variant="outline" 
                             size="icon" 
-                            className="h-7 w-7 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
+                            className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
                             onClick={() => updateItemQuantity(index, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />
@@ -544,66 +542,65 @@ export function OrderForm() {
                         </div>
                         
                         <Input
-                          placeholder="Special instructions for this item"
+                          placeholder="Special instructions..."
                           value={item.notes}
                           onChange={(e) => updateItemNotes(index, e.target.value)}
-                          className="text-sm border-2 border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="text-xs h-7 border border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     ))}
                   </div>
                   
-                  <div className="mt-4 p-3 bg-blue-900/30 rounded-lg flex justify-between items-center border border-blue-600">
+                  <div className="p-3 bg-blue-900/30 flex justify-between items-center border-t border-blue-800">
                     <span className="font-bold text-blue-300">Total Amount</span>
                     <span className="text-xl font-extrabold text-white">
                       ₹{calculateTotal().toFixed(2)}
                     </span>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="bg-black p-6 rounded-xl border border-blue-800 flex flex-col items-center justify-center h-64">
-                <ShoppingCart className="h-12 w-12 text-blue-500 mb-4" />
-                <h3 className="text-xl font-bold text-white">Your order is empty</h3>
-                <p className="text-gray-400 text-center mt-2">
-                  Add items from the menu on the left to create your order
-                </p>
-              </div>
-            )}
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center">
+                  <ShoppingCart className="h-12 w-12 text-blue-500 mb-4" />
+                  <h3 className="text-xl font-bold text-white">Your order is empty</h3>
+                  <p className="text-gray-400 text-center mt-2 max-w-xs">
+                    Add items from the menu on the left to create your order
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6">
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem className="bg-black p-4 rounded-xl shadow-md border border-blue-800">
-                <FormLabel className="text-sm font-semibold text-white">Order Notes</FormLabel>
-                <FormControl>
-                  <div className="flex items-center mt-2 border-2 rounded-md border-blue-600 p-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 bg-black">
-                    <div className="text-blue-500 mr-2">
-                      <List className="h-5 w-5" />
-                    </div>
-                    <Textarea
-                      placeholder="Enter any special instructions for the entire order..."
-                      className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none bg-black text-white placeholder:text-gray-500"
-                      rows={2}
-                      {...field}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Footer Area with Notes and Checkboxes */}
+        <div className="border-t border-gray-800 p-3 bg-neutral-950">
+          <div className="flex gap-3 items-center">
+            <div className="flex-1">
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="m-0">
+                    <FormControl>
+                      <div className="flex items-center border rounded border-blue-600 px-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-black h-9">
+                        <List className="h-4 w-4 text-blue-500 mr-2" />
+                        <Input
+                          placeholder="Order notes..."
+                          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 bg-transparent text-white placeholder:text-gray-500"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
             <FormField
               control={form.control}
               name="isUrgent"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-red-700">
+                <FormItem className="flex items-center space-x-2 m-0">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
@@ -611,12 +608,7 @@ export function OrderForm() {
                       className="border-red-500 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="font-semibold text-red-400">Mark as Urgent</FormLabel>
-                    <p className="text-xs text-gray-400">
-                      Prioritizes this order in the kitchen queue
-                    </p>
-                  </div>
+                  <FormLabel className="text-red-400 text-sm font-medium cursor-pointer">Urgent</FormLabel>
                 </FormItem>
               )}
             />
@@ -625,7 +617,7 @@ export function OrderForm() {
               control={form.control}
               name="useAIAutomation"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-black p-4 rounded-xl shadow-md border border-blue-800">
+                <FormItem className="flex items-center space-x-2 m-0">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
@@ -633,45 +625,12 @@ export function OrderForm() {
                       className="border-blue-500 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="flex items-center gap-1.5 font-semibold text-blue-400">
-                      <span>Use AI Automation</span>
-                      <Sparkles className="h-4 w-4 text-blue-500" />
-                    </FormLabel>
-                    <p className="text-xs text-gray-400">
-                      AI will automatically manage this order's status updates and workflow
-                    </p>
-                  </div>
+                  <FormLabel className="text-blue-400 text-sm font-medium cursor-pointer flex items-center">
+                    AI Automation <Sparkles className="h-3 w-3 text-blue-500 ml-1" />
+                  </FormLabel>
                 </FormItem>
               )}
             />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end p-6 border-t border-blue-800">
-          <div className="flex space-x-4 ml-auto">
-            <Button 
-              type="button" 
-              variant="outline"
-              className="px-6 border-2 border-blue-600 text-blue-300 font-medium hover:bg-blue-900/30"
-              onClick={() => setLocation("/")}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit"
-              className={`px-8 py-6 font-bold text-lg ${selectedItems.length === 0 ? 'bg-gray-800 text-gray-500' : 'bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 shadow-lg shadow-blue-900/50'}`}
-              disabled={createOrderMutation.isPending || selectedItems.length === 0}
-            >
-              {createOrderMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>Create Order</>
-              )}
-            </Button>
           </div>
         </div>
       </form>

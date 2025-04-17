@@ -36,7 +36,7 @@ export default function NewOrder() {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="bg-neutral-950 border-b border-gray-800 h-14 px-4 w-full justify-start gap-2">
+        <TabsList className="bg-neutral-950 border-b border-gray-800 h-10 px-4 w-full justify-start gap-2">
           <TabsTrigger value="menu-order" className="data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-300">
             <Utensils className="h-4 w-4 mr-2" /> 
             Menu Order
@@ -52,8 +52,8 @@ export default function NewOrder() {
         </TabsList>
         
         <div className="flex-1 overflow-hidden bg-neutral-900">
-          <TabsContent value="menu-order" className="flex-1 h-full m-0 data-[state=active]:flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
+          <TabsContent value="menu-order" className="h-full m-0 data-[state=active]:block overflow-hidden">
+            <div className="h-full overflow-hidden">
               <OrderForm />
             </div>
           </TabsContent>
