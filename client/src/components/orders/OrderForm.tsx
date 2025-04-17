@@ -347,9 +347,9 @@ export function OrderForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-6 h-full overflow-y-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleFormSubmit} className="space-y-4 p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="tableNumber"
