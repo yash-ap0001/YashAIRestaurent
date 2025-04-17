@@ -292,7 +292,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
             </Select>
           </div>
           
-          <div className="ml-auto">
+          <div className="flex-1 flex justify-center">
             <Button 
               type="button" 
               onClick={handleSubmit}
@@ -483,6 +483,38 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
           </div>
         </div>
         
+        {/* AI Natural Language Input */}
+        <div className="bg-blue-950/20 border-t border-blue-900/40 px-3 py-2">
+          <div className="flex items-center">
+            <div className="h-8 w-8 bg-blue-900/40 rounded-full flex items-center justify-center mr-2">
+              <Send className="h-4 w-4 text-blue-300" />
+            </div>
+            <div className="flex-1">
+              <div className="text-xs font-medium text-blue-300 mb-0.5">AI Natural Language Order</div>
+              <div className="relative">
+                <Input 
+                  placeholder="Type your order in natural language (e.g., '2 Veg Biryani, 1 Butter Chicken with extra spice')"
+                  className="w-full bg-blue-900/20 border-blue-700 text-white h-9 pl-3 pr-10 focus:border-blue-500 focus:ring-blue-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      // Here you would process the natural language input
+                      console.log("Processing natural language order");
+                      // Clear the input
+                      e.currentTarget.value = '';
+                    }
+                  }}
+                />
+                <Button
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 bg-blue-700 hover:bg-blue-600 rounded-full"
+                  onClick={() => console.log("Processing natural language order")}
+                >
+                  <Send className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Footer with Notes */}
         <div className="border-t border-gray-800 p-3 bg-neutral-950">
           <div className="flex gap-3 items-center">
