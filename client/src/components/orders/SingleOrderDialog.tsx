@@ -268,7 +268,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-4xl h-[700px] overflow-hidden bg-neutral-900 border border-gray-800 shadow-lg">
+      <DialogContent className="sm:max-w-5xl h-[750px] overflow-hidden bg-neutral-900 border border-gray-800 shadow-lg">
         <DialogHeader className="pb-3 border-b border-gray-800">
           <DialogTitle className="text-2xl font-bold text-white">Create New Order</DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -276,130 +276,9 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 h-[530px] overflow-y-auto pr-2">
-          {/* Left Column - Order Details & Cart */}
-          <div className="space-y-5">
-            <div className="p-4 bg-neutral-950 rounded-xl shadow-md border border-gray-800">
-              <div className="space-y-3">
-                <Label htmlFor="tableNumber" className="text-sm font-semibold text-white">Table Number</Label>
-                <Select
-                  value={tableNumber}
-                  onValueChange={(value) => setTableNumber(value)}
-                >
-                  <SelectTrigger className="bg-neutral-950 border-2 border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <SelectValue placeholder="Select a table" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-neutral-950 border-gray-700 text-white">
-                    {Array.from({ length: 20 }, (_, i) => (
-                      <SelectItem key={i} value={`T${i + 1}`} className="text-white focus:bg-blue-600 focus:text-white">
-                        Table {i + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="p-4 bg-neutral-950 rounded-xl shadow-md border border-gray-800">
-              <Label htmlFor="notes" className="text-sm font-semibold text-white">Order Notes</Label>
-              <div className="flex mt-2 items-start space-x-2">
-                <AlignLeft className="h-5 w-5 mt-2 text-blue-500 flex-shrink-0" />
-                <Textarea
-                  id="notes"
-                  placeholder="Enter any special instructions for the entire order..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="resize-none border-2 border-gray-700 bg-neutral-950 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
-                />
-              </div>
-            </div>
-
-            {/* Order Items Summary */}
-            <div className="bg-neutral-950 rounded-xl shadow-md border border-gray-800 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-2 text-white flex justify-between items-center">
-                <h3 className="font-bold text-white">Your Order Summary</h3>
-                <div className="text-sm bg-blue-800 px-2 py-1 rounded-full">
-                  {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
-                </div>
-              </div>
-              
-              <div className="p-3">
-                {orderItems.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
-                    <div className="mb-2">👈 Add menu items from the right panel</div>
-                    <div className="text-sm">Your order will appear here</div>
-                  </div>
-                ) : (
-                  <div className="max-h-[300px] overflow-y-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gray-900 border-b border-gray-800">
-                          <TableHead className="font-bold text-white">Item</TableHead>
-                          <TableHead className="text-center font-bold text-white">Qty</TableHead>
-                          <TableHead className="text-right font-bold text-white">Price</TableHead>
-                          <TableHead className="w-[50px]"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody className="text-white">
-                        {orderItems.map((item, index) => (
-                          <TableRow key={index} className="hover:bg-blue-900/20 border-b border-gray-800">
-                            <TableCell className="font-medium text-white">{item.menuItemName}</TableCell>
-                            <TableCell className="text-center">
-                              <div className="flex items-center justify-center space-x-1">
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  className="h-7 w-7 rounded-full border-gray-700 text-blue-400 hover:bg-blue-900/50 hover:text-white"
-                                  onClick={() => updateItemQuantity(index, -1)}
-                                >
-                                  <Minus className="h-3 w-3" />
-                                </Button>
-                                <span className="w-6 text-center font-bold text-white">{item.quantity}</span>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  className="h-7 w-7 rounded-full border-gray-700 text-blue-400 hover:bg-blue-900/50 hover:text-white"
-                                  onClick={() => updateItemQuantity(index, 1)}
-                                >
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right text-blue-300">
-                              {formatCurrency(item.price * item.quantity)}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-red-500 hover:bg-red-900/30 hover:text-red-300"
-                                onClick={() => removeOrderItem(index)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-                
-                {orderItems.length > 0 && (
-                  <div className="mt-4 p-3 bg-blue-900/30 rounded-lg flex justify-between items-center border border-blue-700">
-                    <span className="font-bold text-blue-300">Total Amount</span>
-                    <span className="text-xl font-extrabold text-white">
-                      {formatCurrency(totalAmount)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Menu Items */}
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 overflow-hidden">
+          {/* Left Column - Menu Items */}
+          <div className="h-[550px] overflow-y-auto pr-2">
             <div className="bg-neutral-950 p-4 rounded-xl shadow-md border border-gray-800">
               {/* Search and Category Controls */}
               <div className="mb-4">
@@ -483,6 +362,127 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                   })}
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Right Column - Order Details */}
+          <div className="space-y-4 h-[550px] overflow-y-auto pr-2">
+            <div className="p-4 bg-neutral-950 rounded-xl shadow-md border border-gray-800 mb-4">
+              <div className="space-y-3">
+                <Label htmlFor="tableNumber" className="text-sm font-semibold text-white">Table Number</Label>
+                <Select
+                  value={tableNumber}
+                  onValueChange={(value) => setTableNumber(value)}
+                >
+                  <SelectTrigger className="bg-neutral-950 border-2 border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <SelectValue placeholder="Select a table" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-neutral-950 border-gray-700 text-white">
+                    {Array.from({ length: 20 }, (_, i) => (
+                      <SelectItem key={i} value={`T${i + 1}`} className="text-white focus:bg-blue-600 focus:text-white">
+                        Table {i + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="p-4 bg-neutral-950 rounded-xl shadow-md border border-gray-800 mb-4">
+              <Label htmlFor="notes" className="text-sm font-semibold text-white">Order Notes</Label>
+              <div className="flex mt-2 items-start space-x-2">
+                <AlignLeft className="h-5 w-5 mt-2 text-blue-500 flex-shrink-0" />
+                <Textarea
+                  id="notes"
+                  placeholder="Enter any special instructions for the entire order..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="resize-none border-2 border-gray-700 bg-neutral-950 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* Order Items Summary */}
+            <div className="bg-neutral-950 rounded-xl shadow-md border border-gray-800 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-2 text-white flex justify-between items-center">
+                <h3 className="font-bold text-white">Your Order Summary</h3>
+                <div className="text-sm bg-blue-800 px-2 py-1 rounded-full">
+                  {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
+                </div>
+              </div>
+              
+              <div className="p-3">
+                {orderItems.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">
+                    <div className="mb-2">👈 Add menu items from the left panel</div>
+                    <div className="text-sm">Your order will appear here</div>
+                  </div>
+                ) : (
+                  <div className="max-h-[300px] overflow-y-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gray-900 border-b border-gray-800">
+                          <TableHead className="font-bold text-white">Item</TableHead>
+                          <TableHead className="text-center font-bold text-white">Qty</TableHead>
+                          <TableHead className="text-right font-bold text-white">Price</TableHead>
+                          <TableHead className="w-[50px]"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody className="text-white">
+                        {orderItems.map((item, index) => (
+                          <TableRow key={index} className="hover:bg-blue-900/20 border-b border-gray-800">
+                            <TableCell className="font-medium text-white">{item.menuItemName}</TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center space-x-1">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-7 w-7 rounded-full border-gray-700 text-blue-400 hover:bg-blue-900/50 hover:text-white"
+                                  onClick={() => updateItemQuantity(index, -1)}
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </Button>
+                                <span className="w-6 text-center font-bold text-white">{item.quantity}</span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-7 w-7 rounded-full border-gray-700 text-blue-400 hover:bg-blue-900/50 hover:text-white"
+                                  onClick={() => updateItemQuantity(index, 1)}
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right text-blue-300">
+                              {formatCurrency(item.price * item.quantity)}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-red-500 hover:bg-red-900/30 hover:text-red-300"
+                                onClick={() => removeOrderItem(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+                
+                {orderItems.length > 0 && (
+                  <div className="mt-4 p-3 bg-blue-900/30 rounded-lg flex justify-between items-center border border-blue-700">
+                    <span className="font-bold text-blue-300">Total Amount</span>
+                    <span className="text-xl font-extrabold text-white">
+                      {formatCurrency(totalAmount)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
