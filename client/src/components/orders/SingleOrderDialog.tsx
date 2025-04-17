@@ -268,59 +268,93 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-5xl h-[750px] overflow-hidden bg-neutral-900 border border-gray-800 shadow-lg">
-        <DialogHeader className="pb-3 border-b border-gray-800">
-          <DialogTitle className="text-2xl font-bold text-white">Create New Order</DialogTitle>
-          <DialogDescription className="text-gray-400">
-            Add delicious menu items to your customer's order.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-6xl h-[650px] overflow-hidden bg-neutral-900 border border-gray-800 shadow-lg p-0">
+        {/* Header with Table Selection & Create Button */}
+        <div className="flex px-4 py-2 border-b border-gray-800 gap-4 bg-neutral-950 h-14 items-center">
+          <DialogTitle className="text-xl font-bold text-white">Create Order</DialogTitle>
+          
+          <div className="flex items-center gap-2 ml-4">
+            <span className="text-white font-medium text-sm whitespace-nowrap">Table:</span>
+            <Select
+              value={tableNumber}
+              onValueChange={(value) => setTableNumber(value)}
+            >
+              <SelectTrigger className="w-20 h-8 border-blue-600 bg-black text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                <SelectValue placeholder="T1" />
+              </SelectTrigger>
+              <SelectContent className="bg-black border-blue-600 text-white">
+                {Array.from({ length: 10 }, (_, i) => (
+                  <SelectItem key={i} value={`T${i + 1}`} className="text-white focus:bg-blue-600 focus:text-white">
+                    T{i + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="ml-auto">
+            <Button 
+              type="button" 
+              onClick={handleSubmit}
+              disabled={createOrderMutation.isPending || orderItems.length === 0}
+              className={`h-9 px-6 font-bold ${orderItems.length === 0 ? 'bg-gray-800 text-gray-500' : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/50'}`}
+            >
+              {createOrderMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>Create Order</>
+              )}
+            </Button>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 overflow-hidden">
+        {/* Main Content - Two Columns */}
+        <div className="flex h-[calc(100%-110px)] overflow-hidden">
           {/* Left Column - Menu Items */}
-          <div className="h-[550px] overflow-y-auto pr-2">
-            <div className="bg-neutral-950 p-4 rounded-xl shadow-md border border-gray-800">
-              {/* Search and Category Controls */}
-              <div className="mb-4">
-                <div className="flex items-center mb-3 bg-neutral-950 border-2 border-gray-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-                  <Search className="h-4 w-4 text-blue-400 ml-3" />
+          <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="bg-black rounded-lg flex-1">
+                <div className="flex items-center p-1">
+                  <Search className="h-4 w-4 text-gray-400 ml-2" />
                   <Input
                     type="text"
                     placeholder="Search menu items..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-10 bg-transparent text-white placeholder:text-gray-400"
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 bg-transparent text-white placeholder:text-gray-400"
                   />
                 </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="category" className="text-sm font-semibold text-white">Menu Category</Label>
-                  <Select
-                    value={selectedCategory}
-                    onValueChange={setSelectedCategory}
-                  >
-                    <SelectTrigger className="w-[180px] bg-neutral-950 border-2 border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-neutral-950 border-gray-700 text-white">
-                      <SelectItem value="all" className="text-white focus:bg-blue-600 focus:text-white">All Categories</SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category} className="text-white focus:bg-blue-600 focus:text-white">
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
+              
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-[130px] h-8 border-blue-600 bg-black text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent className="bg-black border-blue-600 text-white">
+                  <SelectItem value="all" className="text-white focus:bg-blue-800 focus:text-white">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category} className="text-white focus:bg-blue-800 focus:text-white">
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              {isLoadingMenu ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
-                  <p className="text-sm text-gray-500">Loading menu items...</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto pr-1" style={{ maxHeight: '450px' }}>
+            {isLoadingMenu ? (
+              <div className="flex-1 flex flex-col items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
+                <p className="text-sm text-gray-500">Loading menu items...</p>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-auto rounded-lg border border-gray-800 bg-black p-2">
+                <div className="grid grid-cols-2 gap-2">
                   {filteredMenuItems.map((menuItem) => {
                     // Check if this item is already in the order
                     const existingItem = orderItems.find(item => item.menuItemId === menuItem.id);
@@ -331,185 +365,149 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                         key={menuItem.id}
                         onClick={() => menuItem.isAvailable && addOrderItem(menuItem)}
                         className={`
-                          relative cursor-pointer rounded-xl p-3 transition-all duration-200
-                          ${!menuItem.isAvailable ? 'opacity-50 cursor-not-allowed bg-gray-900' : 
-                            isInOrder ? 'bg-blue-900/30 border-2 border-blue-700' : 
-                            'bg-gray-900 hover:bg-blue-900/20 border border-gray-800 hover:border-blue-700 hover:shadow-md'}
+                          relative cursor-pointer rounded-lg p-3 transition-all duration-200
+                          ${!menuItem.isAvailable ? 'opacity-50 cursor-not-allowed bg-black' : 
+                            isInOrder ? 'bg-blue-900/20 border border-blue-700' : 
+                            'bg-black hover:bg-blue-900/20 transition-colors flex flex-col border border-blue-900/30'}
                         `}
                       >
                         {isInOrder && (
-                          <div className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold">
+                          <div className="absolute -top-2 -right-2 bg-blue-600 text-white h-5 w-5 rounded-full flex items-center justify-center text-xs font-bold">
                             {existingItem.quantity}
                           </div>
                         )}
                         
-                        <div className="font-bold text-white">{menuItem.name}</div>
-                        <div className="text-xs text-gray-400 line-clamp-1 mt-1">{menuItem.description}</div>
-                        <div className="mt-2 flex justify-between items-center">
-                          <div className="text-sm font-extrabold text-blue-400">{formatCurrency(menuItem.price)}</div>
-                          {menuItem.dietaryInfo && menuItem.dietaryInfo.length > 0 && (
-                            <div className="flex space-x-1">
-                              {menuItem.dietaryInfo.map((info, i) => (
-                                <span key={i} className="text-[10px] px-1.5 py-0.5 bg-blue-900/50 text-blue-300 border border-blue-700 rounded-full">
-                                  {info}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                        <h4 className="font-medium text-white">{menuItem.name}</h4>
+                        <p className="text-xs text-gray-400 mt-1 mb-1 line-clamp-2">{menuItem.description || 'Fragrant basmati rice dish'}</p>
+                        <span className="text-blue-500 font-semibold mt-auto">{formatCurrency(menuItem.price)}</span>
                       </div>
                     );
                   })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* Right Column - Order Details */}
-          <div className="space-y-4 h-[550px] overflow-y-auto pr-2">
-            <div className="p-4 bg-neutral-950 rounded-xl shadow-md border border-gray-800 mb-4">
-              <div className="space-y-3">
-                <Label htmlFor="tableNumber" className="text-sm font-semibold text-white">Table Number</Label>
-                <Select
-                  value={tableNumber}
-                  onValueChange={(value) => setTableNumber(value)}
-                >
-                  <SelectTrigger className="bg-neutral-950 border-2 border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <SelectValue placeholder="Select a table" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-neutral-950 border-gray-700 text-white">
-                    {Array.from({ length: 20 }, (_, i) => (
-                      <SelectItem key={i} value={`T${i + 1}`} className="text-white focus:bg-blue-600 focus:text-white">
-                        Table {i + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="p-4 bg-neutral-950 rounded-xl shadow-md border border-gray-800 mb-4">
-              <Label htmlFor="notes" className="text-sm font-semibold text-white">Order Notes</Label>
-              <div className="flex mt-2 items-start space-x-2">
-                <AlignLeft className="h-5 w-5 mt-2 text-blue-500 flex-shrink-0" />
-                <Textarea
-                  id="notes"
-                  placeholder="Enter any special instructions for the entire order..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="resize-none border-2 border-gray-700 bg-neutral-950 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
-                />
-              </div>
-            </div>
-
-            {/* Order Items Summary */}
-            <div className="bg-neutral-950 rounded-xl shadow-md border border-gray-800 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-2 text-white flex justify-between items-center">
-                <h3 className="font-bold text-white">Your Order Summary</h3>
-                <div className="text-sm bg-blue-800 px-2 py-1 rounded-full">
+          {/* Right Column - Order Items */}
+          <div className="w-1/2 h-full p-3 flex flex-col">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-bold text-white">Your Order Summary</h3>
+              {orderItems.length > 0 && (
+                <div className="text-sm bg-blue-900/30 px-2 py-1 rounded-full text-blue-300 border border-blue-800/50">
                   {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
                 </div>
-              </div>
-              
-              <div className="p-3">
-                {orderItems.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
-                    <div className="mb-2">👈 Add menu items from the left panel</div>
-                    <div className="text-sm">Your order will appear here</div>
-                  </div>
-                ) : (
-                  <div className="max-h-[300px] overflow-y-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gray-900 border-b border-gray-800">
-                          <TableHead className="font-bold text-white">Item</TableHead>
-                          <TableHead className="text-center font-bold text-white">Qty</TableHead>
-                          <TableHead className="text-right font-bold text-white">Price</TableHead>
-                          <TableHead className="w-[50px]"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody className="text-white">
-                        {orderItems.map((item, index) => (
-                          <TableRow key={index} className="hover:bg-blue-900/20 border-b border-gray-800">
-                            <TableCell className="font-medium text-white">{item.menuItemName}</TableCell>
-                            <TableCell className="text-center">
-                              <div className="flex items-center justify-center space-x-1">
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  className="h-7 w-7 rounded-full border-gray-700 text-blue-400 hover:bg-blue-900/50 hover:text-white"
-                                  onClick={() => updateItemQuantity(index, -1)}
-                                >
-                                  <Minus className="h-3 w-3" />
-                                </Button>
-                                <span className="w-6 text-center font-bold text-white">{item.quantity}</span>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  className="h-7 w-7 rounded-full border-gray-700 text-blue-400 hover:bg-blue-900/50 hover:text-white"
-                                  onClick={() => updateItemQuantity(index, 1)}
-                                >
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right text-blue-300">
+              )}
+            </div>
+            
+            <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-hidden">
+              {orderItems.length > 0 ? (
+                <div className="h-full flex flex-col">
+                  <div className="flex-1 overflow-auto p-2 space-y-2">
+                    {orderItems.map((item, index) => {
+                      const menuItem = menuItems.find(mi => mi.id === item.menuItemId);
+                      return (
+                        <div key={index} className="border border-blue-800/50 rounded-lg p-3 space-y-2 hover:bg-blue-900/20 transition-colors">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="font-bold text-white">{item.menuItemName || (menuItem ? menuItem.name : `Item #${item.menuItemId}`)}</h4>
+                              <p className="text-sm text-blue-300">{formatCurrency(item.price)} per item</p>
+                            </div>
+                            <Button 
+                              type="button"
+                              variant="ghost" 
+                              size="icon"
+                              className="h-7 w-7 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
+                              onClick={() => removeOrderItem(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <Button 
+                              type="button"
+                              variant="outline" 
+                              size="icon" 
+                              className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
+                              onClick={() => updateItemQuantity(index, -1)}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="mx-3 w-6 text-center font-bold text-white">{item.quantity}</span>
+                            <Button 
+                              type="button"
+                              variant="outline" 
+                              size="icon" 
+                              className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
+                              onClick={() => updateItemQuantity(index, 1)}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                            <span className="ml-auto font-bold text-blue-400">
                               {formatCurrency(item.price * item.quantity)}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-red-500 hover:bg-red-900/30 hover:text-red-300"
-                                onClick={() => removeOrderItem(index)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                            </span>
+                          </div>
+                          
+                          <Input
+                            placeholder="Special instructions..."
+                            value={item.specialInstructions || ""}
+                            onChange={(e) => {
+                              const updatedItems = [...orderItems];
+                              updatedItems[index].specialInstructions = e.target.value;
+                              setOrderItems(updatedItems);
+                            }}
+                            className="text-xs h-7 border border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
-                
-                {orderItems.length > 0 && (
-                  <div className="mt-4 p-3 bg-blue-900/30 rounded-lg flex justify-between items-center border border-blue-700">
+                  
+                  <div className="p-3 bg-blue-900/30 flex justify-between items-center border-t border-blue-800">
                     <span className="font-bold text-blue-300">Total Amount</span>
                     <span className="text-xl font-extrabold text-white">
                       {formatCurrency(totalAmount)}
                     </span>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center">
+                  <Send className="h-12 w-12 text-blue-500 mb-4" />
+                  <h3 className="text-xl font-bold text-white">Your order is empty</h3>
+                  <p className="text-gray-400 text-center mt-2 max-w-xs">
+                    Add items from the menu on the left to create your order
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        <DialogFooter className="mt-6 pt-4 border-t border-gray-800">
-          <Button variant="outline" onClick={onClose} className="border-2 border-gray-700 text-gray-300 hover:bg-gray-800">
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            className="bg-gradient-to-r from-blue-600 to-blue-800 text-white hover:from-blue-700 hover:to-blue-900 px-8"
-            onClick={handleSubmit}
-            disabled={orderItems.length === 0 || createOrderMutation.isPending}
-          >
-            {createOrderMutation.isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Create Order
-              </>
-            )}
-          </Button>
-        </DialogFooter>
+        
+        {/* Footer with Notes */}
+        <div className="border-t border-gray-800 p-3 bg-neutral-950">
+          <div className="flex gap-3 items-center">
+            <div className="flex-1">
+              <div className="flex items-center border rounded border-blue-600 px-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-black h-9">
+                <AlignLeft className="h-4 w-4 text-blue-500 mr-2" />
+                <Input
+                  placeholder="Order notes..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 bg-transparent text-white placeholder:text-gray-500"
+                />
+              </div>
+            </div>
+            
+            <Button
+              type="button" 
+              variant="outline"
+              onClick={onClose}
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
