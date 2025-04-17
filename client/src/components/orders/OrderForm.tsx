@@ -485,7 +485,7 @@ export function OrderForm() {
 
           {/* Order Summary (Right Side) */}
           <div className="w-1/2 h-full p-3 flex flex-col">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-3">
               <h3 className="font-bold text-white">Your Order Summary</h3>
               {selectedItems.length > 0 && (
                 <div className="text-sm bg-blue-900/30 px-2 py-1 rounded-full text-blue-300 border border-blue-800/50">
@@ -573,7 +573,7 @@ export function OrderForm() {
         
         {/* Footer Area with Notes and Checkboxes */}
         <div className="border-t border-gray-800 p-3 bg-neutral-950">
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-3 items-start">
             <div className="flex-1">
               <FormField
                 control={form.control}
@@ -581,11 +581,11 @@ export function OrderForm() {
                 render={({ field }) => (
                   <FormItem className="m-0">
                     <FormControl>
-                      <div className="flex items-center border rounded border-blue-600 px-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-black h-9">
-                        <List className="h-4 w-4 text-blue-500 mr-2" />
-                        <Input
-                          placeholder="Order notes..."
-                          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 bg-transparent text-white placeholder:text-gray-500"
+                      <div className="flex border rounded border-blue-600 px-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-black">
+                        <List className="h-4 w-4 text-blue-500 mr-2 mt-3" />
+                        <Textarea
+                          placeholder="Order notes... (dietary preferences, allergies, special requirements)"
+                          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[80px] bg-transparent text-white placeholder:text-gray-500 py-2"
                           {...field}
                         />
                       </div>
@@ -600,7 +600,7 @@ export function OrderForm() {
               control={form.control}
               name="isUrgent"
               render={({ field }) => (
-                <FormItem className="flex items-center space-x-2 m-0">
+                <FormItem className="flex items-center space-x-2 m-0 mt-3">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
@@ -617,7 +617,7 @@ export function OrderForm() {
               control={form.control}
               name="useAIAutomation"
               render={({ field }) => (
-                <FormItem className="flex items-center space-x-2 m-0">
+                <FormItem className="flex items-center space-x-2 m-0 mt-3">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
