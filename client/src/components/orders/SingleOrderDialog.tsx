@@ -64,6 +64,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("menu-select");
   const [aiOrderInput, setAiOrderInput] = useState("");
+  const [isProcessingAiOrder, setIsProcessingAiOrder] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -166,6 +167,75 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
     setSelectedCategory("all");
     setOrderItems([]);
     setNotes("");
+    setAiOrderInput("");
+  };
+  
+  // Process natural language order with AI
+  const processAiOrder = async () => {
+    if (!aiOrderInput.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter your order in natural language",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (isProcessingAiOrder) return; // Prevent multiple submissions
+    
+    try {
+      setIsProcessingAiOrder(true);
+      
+      toast({
+        title: "Processing",
+        description: "Analyzing your natural language order...",
+      });
+      
+      const response = await apiRequest("POST", "/api/ai/process-order", {
+        orderText: aiOrderInput,
+        tableNumber: tableNumber
+      });
+      
+      const data = await response.json();
+      
+      if (data.items && data.items.length > 0) {
+        // Set order items based on AI processing results
+        const processedItems = data.items.map((item: any) => ({
+          menuItemId: item.menuItemId,
+          menuItemName: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          specialInstructions: item.specialInstructions || "",
+        }));
+        
+        setOrderItems(processedItems);
+        setActiveTab("menu-select"); // Switch to menu view to show selections
+        
+        toast({
+          title: "Order processed",
+          description: `Successfully identified ${processedItems.length} items from your request`,
+        });
+      } else {
+        toast({
+          title: "Processing issue",
+          description: "Couldn't identify menu items in your request. Please try different wording or select items manually.",
+          variant: "destructive",
+        });
+      }
+      
+      // Clear the AI input field
+      setAiOrderInput("");
+      
+    } catch (error) {
+      console.error("Error processing AI order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process your natural language order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingAiOrder(false);
+    }
   };
 
   const addOrderItem = (menuItem: MenuItem) => {
@@ -224,6 +294,9 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
       return;
     }
 
+    // Determine if this order was created using AI
+    const wasCreatedWithAI = activeTab === "ai-order";
+
     // Prepare order data for submission
     const orderData = {
       tableNumber,
@@ -241,10 +314,10 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
         specialInstructions: item.specialInstructions || "",
       })),
       notes: notes || undefined,
-      orderSource: "manual_dialog", // Help with identifying order source
+      orderSource: wasCreatedWithAI ? "ai_dialog" : "manual_dialog", // Differentiate between AI and manual orders
       status: "pending",
       totalAmount: totalAmount,
-      useAIAutomation: false
+      useAIAutomation: wasCreatedWithAI // Enable AI automation for orders created with AI
     };
 
     // Log the order being created for debugging
@@ -533,27 +606,33 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                       <Textarea 
                         value={aiOrderInput}
                         onChange={(e) => setAiOrderInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          // Handle Ctrl+Enter or Cmd+Enter to submit
+                          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                            e.preventDefault();
+                            processAiOrder();
+                          }
+                        }}
                         placeholder="Type your order here, for example: 'I want 2 Veg Biryani, 1 Butter Chicken with extra spice, 3 Garlic Naan, and 2 Sweet Lassi'"
                         className="w-full h-32 bg-neutral-950 border-blue-800 rounded-lg text-white placeholder:text-gray-500 focus:border-blue-600 focus:ring-blue-600"
                       />
                       <Button
                         type="button"
                         className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700"
-                        onClick={() => {
-                          // Dummy implementation - In reality, this would call the AI service
-                          if (aiOrderInput.trim()) {
-                            console.log("Processing natural language order:", aiOrderInput);
-                            toast({
-                              title: "AI Order Processing",
-                              description: "Your natural language order is being processed...",
-                            });
-                            // Clear the input
-                            setAiOrderInput("");
-                          }
-                        }}
+                        onClick={processAiOrder}
+                        disabled={isProcessingAiOrder || !aiOrderInput.trim()}
                       >
-                        <Send className="h-4 w-4 mr-2" />
-                        Process Order
+                        {isProcessingAiOrder ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            Process Order
+                          </>
+                        )}
                       </Button>
                     </div>
                     
@@ -564,6 +643,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                         <li>Include special instructions after the item name (e.g., "Butter Chicken with extra spice")</li>
                         <li>You can mix multiple items in a single request</li>
                         <li>Our AI understands Hindi, Telugu, English, and Spanish</li>
+                        <li><span className="text-blue-300">Pro tip:</span> Use <kbd className="px-1 py-0.5 bg-blue-900/50 rounded text-xs border border-blue-700 mx-1">Ctrl+Enter</kbd> to quickly process your order</li>
                       </ul>
                     </div>
                   </div>
