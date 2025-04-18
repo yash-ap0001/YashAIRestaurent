@@ -16,7 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, Plus, Minus, X, Search, ListChecks, Sparkles, MessageSquare } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Loader2, Plus, Minus, X, Search, ListChecks, Sparkles, MessageSquare, Bot } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CompactOrderSummary } from "./CompactOrderSummary";
@@ -54,6 +56,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
   const [activeTab, setActiveTab] = useState("menu-select");
   const [aiOrderInput, setAiOrderInput] = useState("");
   const [isProcessingAiOrder, setIsProcessingAiOrder] = useState(false);
+  const [useAIAutomation, setUseAIAutomation] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -150,6 +153,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
     setOrderItems([]);
     setNotes("");
     setAiOrderInput("");
+    setUseAIAutomation(false); // Reset AI automation toggle to off
   };
   
   // Process natural language order with AI
@@ -299,7 +303,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
       orderSource: wasCreatedWithAI ? "ai_dialog" : "manual_dialog", // Differentiate between AI and manual orders
       status: "pending",
       totalAmount: totalAmount,
-      useAIAutomation: wasCreatedWithAI // Enable AI automation for orders created with AI
+      useAIAutomation: useAIAutomation // Use the explicit toggle from UI
     };
 
     // Disable button during submission
@@ -345,6 +349,24 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          
+          <div className="flex items-center ml-4 gap-2">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="ai-automation"
+                checked={useAIAutomation}
+                onCheckedChange={setUseAIAutomation}
+                className="data-[state=checked]:bg-blue-600"
+              />
+              <Label
+                htmlFor="ai-automation"
+                className="text-xs flex items-center font-medium text-white"
+              >
+                <Bot className="h-3.5 w-3.5 mr-1 text-blue-400" />
+                Auto-Progress
+              </Label>
+            </div>
           </div>
           
           <div className="flex-1 flex justify-center">
