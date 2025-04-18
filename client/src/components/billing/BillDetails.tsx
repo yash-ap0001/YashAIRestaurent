@@ -19,7 +19,7 @@ import { Order as BaseOrder, OrderItem, MenuItem, Bill } from "@shared/schema";
 interface Order extends BaseOrder {
   items?: OrderItem[];
 }
-import { File, Send, Printer } from "lucide-react";
+import { ChevronLeft, ChevronRight, File, Send, Printer } from "lucide-react";
 import { format } from "date-fns";
 
 interface BillDetailsProps {
@@ -31,6 +31,8 @@ export function BillDetails({ orderId }: BillDetailsProps) {
   const queryClient = useQueryClient();
   const [discount, setDiscount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10; // Show 10 items per page
 
   // Fetch order details
   const { data: order, isLoading: orderLoading } = useQuery<Order>({
@@ -263,6 +265,15 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                 <td class="align-right">₹${(item.price * item.quantity).toFixed(2)}</td>
               </tr>
             `).join('')}
+            ${orderItems.length > 20 ? `
+              <tr>
+                <td colspan="4" class="align-center">
+                  <p style="text-align: center; color: #666; font-style: italic; padding: 8px 0;">
+                    * This order contains ${orderItems.length} items in total *
+                  </p>
+                </td>
+              </tr>
+            ` : ''}
           </tbody>
         </table>
         
@@ -369,23 +380,61 @@ export function BillDetails({ orderId }: BillDetailsProps) {
           </thead>
           <tbody>
             {orderItems && orderItems.length > 0 ? (
-              orderItems.map((item: OrderItem) => (
-                <tr key={item.id} className="border-t border-gray-700">
-                  <td className="px-4 py-2 text-sm text-gray-200">
-                    {getItemName(item.menuItemId)}
-                    {item.notes && <p className="text-xs text-gray-400">{item.notes}</p>}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-gray-300 text-right">₹{item.price}</td>
-                  <td className="px-4 py-2 text-sm text-gray-300 text-right">{item.quantity}</td>
-                  <td className="px-4 py-2 text-sm text-purple-300 text-right">₹{(item.price * item.quantity).toFixed(2)}</td>
-                </tr>
-              ))
+              orderItems
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((item: OrderItem) => (
+                  <tr key={item.id} className="border-t border-gray-700">
+                    <td className="px-4 py-2 text-sm text-gray-200">
+                      {getItemName(item.menuItemId)}
+                      {item.notes && <p className="text-xs text-gray-400">{item.notes}</p>}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-300 text-right">₹{item.price}</td>
+                    <td className="px-4 py-2 text-sm text-gray-300 text-right">{item.quantity}</td>
+                    <td className="px-4 py-2 text-sm text-purple-300 text-right">₹{(item.price * item.quantity).toFixed(2)}</td>
+                  </tr>
+                ))
             ) : (
               <tr className="border-t border-gray-700">
                 <td colSpan={4} className="px-4 py-3 text-sm text-center text-gray-400">No items in this order</td>
               </tr>
             )}
           </tbody>
+          {orderItems.length > itemsPerPage && (
+            <tfoot className="bg-gray-800 border-t border-gray-700">
+              <tr>
+                <td colSpan={4} className="px-4 py-2">
+                  <div className="flex items-center justify-between text-gray-300 text-sm">
+                    <div>
+                      Showing {Math.min(itemsPerPage, orderItems.length - (currentPage - 1) * itemsPerPage)} of {orderItems.length} items
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 border-gray-600 bg-gray-700 hover:bg-gray-600 text-white"
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        <span className="sr-only">Previous page</span>
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span>Page {currentPage} of {Math.ceil(orderItems.length / itemsPerPage)}</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 border-gray-600 bg-gray-700 hover:bg-gray-600 text-white"
+                        onClick={() => setCurrentPage(p => Math.min(Math.ceil(orderItems.length / itemsPerPage), p + 1))}
+                        disabled={currentPage >= Math.ceil(orderItems.length / itemsPerPage)}
+                      >
+                        <span className="sr-only">Next page</span>
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
       
