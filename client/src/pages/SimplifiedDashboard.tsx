@@ -1177,7 +1177,7 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-gray-600 to-gray-800 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-slate-500 to-slate-700 order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
