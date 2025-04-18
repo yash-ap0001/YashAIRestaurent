@@ -65,31 +65,8 @@ export default function Billing() {
           </div>
         </div>
 
-        <TabsContent value="board" className="flex flex-col h-full space-y-3 pt-1 overflow-hidden">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-shrink-0">
-            <Card className="bg-gradient-to-r from-purple-500 to-purple-700 text-white border-0 shadow">
-              <CardContent className="p-3">
-                <h3 className="text-base font-semibold">Pending Bills</h3>
-                <p className="text-2xl font-bold">{pendingBillCount}</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-r from-gray-600 to-gray-800 text-white border-0 shadow">
-              <CardContent className="p-3">
-                <h3 className="text-base font-semibold">Billed</h3>
-                <p className="text-2xl font-bold">{billedCount}</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-gradient-to-r from-green-500 to-green-700 text-white border-0 shadow">
-              <CardContent className="p-3">
-                <h3 className="text-base font-semibold">Total Revenue</h3>
-                <p className="text-2xl font-bold">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-grow overflow-hidden">
+        <TabsContent value="board" className="flex flex-col h-full pt-1 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-grow overflow-hidden h-full">
             <Card className="lg:col-span-1 flex flex-col border shadow overflow-hidden">
               <CardHeader className="bg-muted/40 py-2 px-4 flex-shrink-0">
                 <CardTitle className="text-lg font-bold text-primary">Billable Orders</CardTitle>
@@ -167,27 +144,67 @@ export default function Billing() {
         </TabsContent>
 
         <TabsContent value="stats" className="flex-grow h-full overflow-auto">
-          <Card className="border shadow h-full">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl font-bold text-primary">Billing Statistics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-r from-purple-500 to-purple-700 p-4 rounded-md text-white">
+          <div className="space-y-4 p-1">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-r from-purple-500 to-purple-700 text-white border-0 shadow">
+                <CardContent className="p-4">
                   <h3 className="text-lg font-bold">Today's Bills</h3>
-                  <p className="text-2xl font-bold mt-2">{billedCount}</p>
-                </div>
-                <div className="bg-gradient-to-r from-green-500 to-green-700 p-4 rounded-md text-white">
+                  <p className="text-3xl font-bold mt-2">{billedCount}</p>
+                  <p className="text-sm mt-2 opacity-80">Total bills generated today</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-green-500 to-green-700 text-white border-0 shadow">
+                <CardContent className="p-4">
                   <h3 className="text-lg font-bold">Total Revenue</h3>
-                  <p className="text-2xl font-bold mt-2">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
-                </div>
-                <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-4 rounded-md text-white">
+                  <p className="text-3xl font-bold mt-2">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
+                  <p className="text-sm mt-2 opacity-80">Total earnings from all bills</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-r from-blue-500 to-blue-700 text-white border-0 shadow">
+                <CardContent className="p-4">
                   <h3 className="text-lg font-bold">Pending Bills</h3>
-                  <p className="text-2xl font-bold mt-2">{pendingBillCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  <p className="text-3xl font-bold mt-2">{pendingBillCount}</p>
+                  <p className="text-sm mt-2 opacity-80">Orders ready to be billed</p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="border shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-bold text-primary">Average Bill Value</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-green-600">
+                      ₹{bills.length > 0 
+                        ? Math.round(bills.reduce((acc, bill) => acc + (bill.total || 0), 0) / bills.length).toLocaleString() 
+                        : 0}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">Average amount per bill</p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-bold text-primary">Billing Conversion</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-blue-600">
+                      {orders && orders.length > 0 
+                        ? Math.round((bills.length / orders.length) * 100)
+                        : 0}%
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">Orders converted to bills</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </TabsComponent>
     </div>
