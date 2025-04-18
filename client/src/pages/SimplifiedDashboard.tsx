@@ -453,13 +453,24 @@ export default function SimplifiedDashboard() {
 
   // Filter orders by search term and selected filters
   const filteredOrders = orders.filter((order: Order) => {
-    // Filter by search term
-    const matchesSearch = 
-      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.tableNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.orderSource.toLowerCase().includes(searchTerm.toLowerCase());
+    // If search term is empty, don't filter by search
+    if (!searchTerm.trim()) {
+      // Only apply source filter
+      return !orderSourceFilter || order.orderSource === orderSourceFilter;
+    }
     
-    // Filter by order source
+    // Search term is not empty, apply strict filtering
+    const search = searchTerm.toLowerCase().trim();
+    
+    // Perform a more thorough search
+    const matchesSearch = 
+      (order.orderNumber && order.orderNumber.toLowerCase().includes(search)) ||
+      (order.tableNumber && order.tableNumber.toLowerCase().includes(search)) ||
+      (order.orderSource && order.orderSource.toLowerCase().includes(search)) ||
+      (order.status && order.status.toLowerCase().includes(search)) ||
+      (order.totalAmount && order.totalAmount.toString().includes(search));
+    
+    // Filter by order source if specified
     const matchesOrderSource = !orderSourceFilter || order.orderSource === orderSourceFilter;
     
     return matchesSearch && matchesOrderSource;
@@ -511,13 +522,22 @@ export default function SimplifiedDashboard() {
             {/* We've removed the dialog and now route to the NewOrder page */}
 
             <div className="relative">
-              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-primary" />
               <Input
-                placeholder="Search order or table..."
-                className="pl-10 w-64"
+                placeholder="Search order #, table, status..."
+                className="pl-10 w-72 border-primary/30 focus:border-primary focus:ring-primary bg-muted/5 text-md"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {searchTerm && (
+                <button 
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setSearchTerm("")}
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
             
             <DropdownMenu>
@@ -554,93 +574,99 @@ export default function SimplifiedDashboard() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold mr-4">Today's Orders</h1>
-              <Button 
-                variant={isSelectMode ? "default" : "outline"}
-                size="sm"
-                onClick={toggleSelectMode}
-                className="flex items-center gap-1"
-              >
-                {isSelectMode ? (
-                  <>
-                    <X className="h-4 w-4" />
-                    <span>Cancel Selection</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckSquare className="h-4 w-4" />
-                    <span>Select Orders</span>
-                  </>
-                )}
-              </Button>
-              {isSelectMode && (
-                <div className="ml-4 flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={selectAllOrders}
-                      className="flex items-center gap-1"
-                    >
-                      <CheckSquare className="h-4 w-4" />
-                      <span>Select All Orders</span>
-                    </Button>
-
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setSelectedOrders([])}
-                      className="flex items-center gap-1"
-                    >
-                      <X className="h-4 w-4" />
-                      <span>Clear Selection</span>
-                    </Button>
-                  </div>
-                  
-                  <Badge variant="outline">
-                    Total Orders: {orders.length}
-                  </Badge>
-                  
-                  {selectedOrders.length > 0 && (
+              <div className="flex items-center gap-2 bg-muted/10 p-2 rounded-lg">
+                <Button 
+                  variant={isSelectMode ? "destructive" : "secondary"}
+                  size="sm"
+                  onClick={toggleSelectMode}
+                  className={`flex items-center gap-1 ${isSelectMode ? "shadow-lg" : ""}`}
+                >
+                  {isSelectMode ? (
                     <>
-                      <Badge variant="secondary">
-                        {selectedOrders.length} selected
+                      <X className="h-4 w-4" />
+                      <span>Exit Select Mode</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckSquare className="h-4 w-4" />
+                      <span>Select Orders</span>
+                    </>
+                  )}
+                </Button>
+                
+                {isSelectMode && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={selectAllOrders}
+                        className="flex items-center gap-1 bg-background"
+                      >
+                        <CheckSquare className="h-4 w-4" />
+                        <span>Select All</span>
+                      </Button>
+
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setSelectedOrders([])}
+                        className="flex items-center gap-1 bg-background"
+                      >
+                        <X className="h-4 w-4" />
+                        <span>Clear</span>
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 ml-2">
+                      <Badge variant="outline" className="bg-background">
+                        {orders.length} Total
                       </Badge>
+                      
+                      {selectedOrders.length > 0 && (
+                        <Badge variant="secondary" className="bg-primary text-primary-foreground">
+                          {selectedOrders.length} Selected
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {selectedOrders.length > 0 && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="secondary" size="sm">
+                          <Button variant="secondary" size="sm" className="ml-2 bg-primary text-primary-foreground hover:bg-primary/90">
                             <ChevronsUpDown className="h-4 w-4 mr-1" />
                             <span>Bulk Actions</span>
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="w-56">
                           <DropdownMenuLabel>Move Selected Orders To</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")}>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")} className="cursor-pointer">
                             <ClipboardList className="h-4 w-4 mr-2" />
                             <span>Pending</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")}>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")} className="cursor-pointer">
                             <ChefHat className="h-4 w-4 mr-2" />
                             <span>Preparing</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")}>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")} className="cursor-pointer">
                             <Utensils className="h-4 w-4 mr-2" />
                             <span>Ready</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")}>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")} className="cursor-pointer">
                             <CircleCheck className="h-4 w-4 mr-2" />
                             <span>Completed</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")}>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")} className="cursor-pointer">
                             <Receipt className="h-4 w-4 mr-2" />
                             <span>Billed</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </>
-                  )}
-                </div>
-              )}
+                    )}
+                  </>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Link href="/new-order">
