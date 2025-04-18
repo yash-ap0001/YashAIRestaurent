@@ -449,7 +449,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                               <div>
                                 <h4 className="font-semibold text-white text-sm">{menuItem.name}</h4>
                                 <p className="text-gray-400 text-xs line-clamp-1">{menuItem.description}</p>
-                                {menuItem.dietaryInfo.length > 0 && (
+                                {menuItem.dietaryInfo && menuItem.dietaryInfo.length > 0 && (
                                   <div className="flex gap-1 mt-1">
                                     {menuItem.dietaryInfo.map((tag) => (
                                       <span
