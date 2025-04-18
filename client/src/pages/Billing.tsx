@@ -8,15 +8,19 @@ import {
   Search, 
   ReceiptText, 
   ClipboardList,
-  BarChart3
+  BarChart3,
+  X
 } from "lucide-react";
 import { Tabs as TabsComponent, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function Billing() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [billDialogOpen, setBillDialogOpen] = useState(false);
 
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
@@ -39,6 +43,12 @@ export default function Billing() {
   const billedCount = bills.length;
   const pendingBillCount = completedOrders?.length || 0;
   
+  // Function to handle order click
+  const handleOrderClick = (orderId: number) => {
+    setSelectedOrderId(orderId);
+    setBillDialogOpen(true);
+  };
+
   return (
     <div className="container mx-auto p-2 sm:p-4 h-screen flex flex-col">
       <TabsComponent defaultValue="board" className="flex flex-col h-full">
@@ -66,82 +76,102 @@ export default function Billing() {
         </div>
 
         <TabsContent value="board" className="flex flex-col h-full pt-1 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-grow overflow-hidden h-full">
-            <Card className="lg:col-span-1 flex flex-col border shadow overflow-hidden">
-              <CardHeader className="bg-muted/40 py-2 px-4 flex-shrink-0">
-                <CardTitle className="text-lg font-bold text-primary">Billable Orders</CardTitle>
-                <p className="text-xs text-muted-foreground">Select an order to generate a bill</p>
-              </CardHeader>
-              
-              <CardContent className="p-3 flex-grow overflow-hidden">
-                {isLoading ? (
-                  <p className="text-center py-4 text-muted-foreground text-sm">Loading orders...</p>
-                ) : completedOrders && completedOrders.length > 0 ? (
-                  <div className="space-y-2 h-full overflow-y-auto pr-1">
-                    {completedOrders.map(order => {
-                      // Check if order already has a bill
-                      const hasBill = bills.some(bill => bill.orderId === order.id);
-                      const cardClass = hasBill 
-                        ? "bg-gray-100 border-gray-300" 
-                        : "bg-green-50 border-green-200 hover:border-green-300";
-                      
-                      return (
-                        <div 
-                          key={order.id}
-                          onClick={() => setSelectedOrderId(order.id)}
-                          className={`p-3 border rounded cursor-pointer transition-colors ${
-                            selectedOrderId === order.id 
-                              ? "border-primary border-2" 
-                              : cardClass
-                          }`}
-                        >
-                          <div className="flex justify-between">
-                            <div>
-                              <h3 className="font-medium text-base">#{order.orderNumber}</h3>
-                              <p className="text-xs text-muted-foreground mt-0.5">{order.tableNumber || "Takeaway"}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-sm">₹{order.totalAmount?.toLocaleString() || '0'}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                {order.createdAt ? format(new Date(order.createdAt), "HH:mm") : ""}
-                              </p>
-                            </div>
+          <Card className="flex flex-col border shadow overflow-hidden h-full">
+            <CardHeader className="bg-muted/40 py-2 px-4 flex-shrink-0">
+              <CardTitle className="text-lg font-bold text-primary">Billable Orders</CardTitle>
+              <p className="text-xs text-muted-foreground">Click on an order to view and print bill</p>
+            </CardHeader>
+            
+            <CardContent className="p-3 flex-grow overflow-hidden">
+              {isLoading ? (
+                <p className="text-center py-4 text-muted-foreground text-sm">Loading orders...</p>
+              ) : completedOrders && completedOrders.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 h-full overflow-y-auto p-1">
+                  {completedOrders.map(order => {
+                    // Check if order already has a bill
+                    const hasBill = bills.some(bill => bill.orderId === order.id);
+                    const cardClass = hasBill 
+                      ? "bg-gray-100 border-gray-300" 
+                      : "bg-green-50 border-green-200 hover:border-green-300";
+                    
+                    return (
+                      <div 
+                        key={order.id}
+                        onClick={() => handleOrderClick(order.id)}
+                        className={`p-3 border rounded cursor-pointer transition-colors hover:shadow-md ${cardClass}`}
+                      >
+                        <div className="flex justify-between mb-2">
+                          <div>
+                            <h3 className="font-medium text-base">#{order.orderNumber}</h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">{order.tableNumber || "Takeaway"}</p>
                           </div>
-                          {hasBill && (
-                            <Badge className="mt-1 bg-gray-600 text-xs">Already Billed</Badge>
-                          )}
+                          <div className="text-right">
+                            <p className="font-medium text-sm">₹{order.totalAmount?.toLocaleString() || '0'}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {order.createdAt ? format(new Date(order.createdAt), "HH:mm") : ""}
+                            </p>
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-center py-4 text-muted-foreground text-sm">
+                        <div className="flex justify-between items-center">
+                          {hasBill && (
+                            <Badge className="bg-gray-600 text-xs">Already Billed</Badge>
+                          )}
+                          {!hasBill && (
+                            <Badge className="bg-green-600 text-xs">Ready to Bill</Badge>
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-xs h-6 px-2 ml-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOrderClick(order.id);
+                            }}
+                          >
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <ReceiptText className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                  <p className="text-base font-medium mb-1">
                     {searchTerm ? "No matching orders found" : "No billable orders available"}
                   </p>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card className="lg:col-span-2 flex flex-col border shadow overflow-hidden">
-              <CardHeader className="bg-muted/40 py-2 px-4 flex-shrink-0">
-                <CardTitle className="text-lg font-bold text-primary">Bill Details</CardTitle>
-                <p className="text-xs text-muted-foreground">Generate and print bills</p>
-              </CardHeader>
-              
-              <CardContent className="p-3 flex-grow overflow-auto">
-                {selectedOrderId ? (
-                  <BillDetails orderId={selectedOrderId} />
-                ) : (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <ReceiptText className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                    <p className="text-base font-medium mb-1">No order selected</p>
-                    <p className="text-sm">Select an order from the list to view bill details</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  <p className="text-sm">
+                    {searchTerm 
+                      ? "Try using a different search term" 
+                      : "Orders with 'completed' or 'ready' status will appear here"}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
+        
+        {/* Bill Details Dialog */}
+        <Dialog open={billDialogOpen} onOpenChange={setBillDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="flex flex-row items-center justify-between">
+              <DialogTitle className="text-xl font-bold text-primary">Bill Details</DialogTitle>
+              <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogClose>
+            </DialogHeader>
+            {selectedOrderId ? (
+              <BillDetails orderId={selectedOrderId} />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No order selected</p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <TabsContent value="stats" className="flex-grow h-full overflow-auto">
           <div className="space-y-4 p-1">
