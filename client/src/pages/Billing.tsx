@@ -84,18 +84,18 @@ export default function Billing() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-1">
-              <CardHeader className="pb-2">
-                <CardTitle>Billable Orders</CardTitle>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[70vh]">
+            <Card className="lg:col-span-1 h-full flex flex-col">
+              <CardHeader className="pb-2 flex-shrink-0">
+                <CardTitle className="text-lg">Billable Orders</CardTitle>
                 <p className="text-sm text-muted-foreground">Select an order to generate a bill</p>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">                  
+              <CardContent className="flex-grow overflow-hidden flex flex-col">
+                <div className="space-y-4 flex-grow flex flex-col">                  
                   {isLoading ? (
                     <p className="text-center py-8 text-muted-foreground">Loading orders...</p>
                   ) : completedOrders && completedOrders.length > 0 ? (
-                    <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                    <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
                       {completedOrders.map(order => {
                         // Check if order already has a bill
                         const hasBill = bills.some(bill => bill.orderId === order.id);
@@ -141,12 +141,12 @@ export default function Billing() {
               </CardContent>
             </Card>
             
-            <Card className="lg:col-span-2">
-              <CardHeader className="pb-2">
-                <CardTitle>Bill Details</CardTitle>
+            <Card className="lg:col-span-2 h-full flex flex-col">
+              <CardHeader className="pb-2 flex-shrink-0">
+                <CardTitle className="text-lg">Bill Details</CardTitle>
                 <p className="text-sm text-muted-foreground">Generate and print bills</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-grow overflow-auto">
                 {selectedOrderId ? (
                   <BillDetails orderId={selectedOrderId} />
                 ) : (
