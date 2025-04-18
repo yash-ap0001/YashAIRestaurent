@@ -375,14 +375,14 @@ export function BillDetails({ orderId }: BillDetailsProps) {
       
       {/* Simplified Order Items Table */}
       <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-700">
-        <h3 className="bg-purple-900 px-4 py-3 text-white font-medium">Order Items</h3>
+        <h3 className="bg-purple-900 px-3 py-2 text-white font-medium text-sm">Order Items</h3>
         <table className="min-w-full">
           <thead className="bg-gray-800">
             <tr>
-              <th className="px-4 py-2 text-left text-xs text-gray-300">Item</th>
-              <th className="px-4 py-2 text-right text-xs text-gray-300">Price</th>
-              <th className="px-4 py-2 text-right text-xs text-gray-300">Qty</th>
-              <th className="px-4 py-2 text-right text-xs text-gray-300">Total</th>
+              <th className="px-3 py-1.5 text-left text-xs text-gray-300">Item</th>
+              <th className="px-3 py-1.5 text-right text-xs text-gray-300">Price</th>
+              <th className="px-3 py-1.5 text-right text-xs text-gray-300">Qty</th>
+              <th className="px-3 py-1.5 text-right text-xs text-gray-300">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -391,50 +391,50 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                 .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                 .map((item: OrderItem) => (
                   <tr key={item.id} className="border-t border-gray-700">
-                    <td className="px-4 py-2 text-sm text-gray-200">
+                    <td className="px-3 py-1.5 text-xs text-gray-200">
                       {getItemName(item.menuItemId)}
                       {item.notes && <p className="text-xs text-gray-400">{item.notes}</p>}
                     </td>
-                    <td className="px-4 py-2 text-sm text-gray-300 text-right">₹{item.price}</td>
-                    <td className="px-4 py-2 text-sm text-gray-300 text-right">{item.quantity}</td>
-                    <td className="px-4 py-2 text-sm text-purple-300 text-right">₹{(item.price * item.quantity).toFixed(2)}</td>
+                    <td className="px-3 py-1.5 text-xs text-gray-300 text-right">₹{item.price}</td>
+                    <td className="px-3 py-1.5 text-xs text-gray-300 text-right">{item.quantity}</td>
+                    <td className="px-3 py-1.5 text-xs text-purple-300 text-right">₹{(item.price * item.quantity).toFixed(2)}</td>
                   </tr>
                 ))
             ) : (
               <tr className="border-t border-gray-700">
-                <td colSpan={4} className="px-4 py-3 text-sm text-center text-gray-400">No items in this order</td>
+                <td colSpan={4} className="px-3 py-2 text-xs text-center text-gray-400">No items in this order</td>
               </tr>
             )}
           </tbody>
           {orderItems.length > itemsPerPage && (
             <tfoot className="bg-gray-800 border-t border-gray-700">
               <tr>
-                <td colSpan={4} className="px-4 py-2">
-                  <div className="flex items-center justify-between text-gray-300 text-sm">
+                <td colSpan={4} className="px-3 py-1.5">
+                  <div className="flex items-center justify-between text-gray-300 text-xs">
                     <div>
                       Showing {Math.min(itemsPerPage, orderItems.length - (currentPage - 1) * itemsPerPage)} of {orderItems.length} items
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="h-8 w-8 p-0 border-gray-600 bg-gray-700 hover:bg-gray-600 text-white"
+                        className="h-6 w-6 p-0 border-gray-600 bg-gray-700 hover:bg-gray-600 text-white"
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
                       >
                         <span className="sr-only">Previous page</span>
-                        <ChevronLeft className="h-4 w-4" />
+                        <ChevronLeft className="h-3 w-3" />
                       </Button>
                       <span>Page {currentPage} of {Math.ceil(orderItems.length / itemsPerPage)}</span>
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="h-8 w-8 p-0 border-gray-600 bg-gray-700 hover:bg-gray-600 text-white"
+                        className="h-6 w-6 p-0 border-gray-600 bg-gray-700 hover:bg-gray-600 text-white"
                         onClick={() => setCurrentPage(p => Math.min(Math.ceil(orderItems.length / itemsPerPage), p + 1))}
                         disabled={currentPage >= Math.ceil(orderItems.length / itemsPerPage)}
                       >
                         <span className="sr-only">Next page</span>
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
@@ -445,16 +445,55 @@ export function BillDetails({ orderId }: BillDetailsProps) {
         </table>
       </div>
       
+      {/* Action Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="border-purple-500 text-purple-300 hover:bg-purple-900/50 flex items-center gap-1"
+          onClick={handlePrint}
+        >
+          <Printer className="h-3.5 w-3.5" />
+          Print
+        </Button>
+        
+        {existingBill && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="border-blue-500 text-blue-300 hover:bg-blue-900/50 flex items-center gap-1"
+            onClick={() => downloadPdf(existingBill.id)}
+          >
+            <File className="h-3.5 w-3.5" />
+            PDF
+          </Button>
+        )}
+        
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="border-green-500 text-green-300 hover:bg-green-900/50 flex items-center gap-1"
+          onClick={() => {
+            const message = `Order #${order.orderNumber}\nTable: ${order.tableNumber || "Takeaway"}\nTotal: ₹${subtotal.toFixed(2)}`;
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+          }}
+        >
+          <Send className="h-3.5 w-3.5" />
+          Share
+        </Button>
+      </div>
+      
       {/* Simplified Payment and Summary Section */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row gap-3">
         {/* Payment Info (When Creating Bill) */}
         {!existingBill && (
-          <div className="md:w-1/2 bg-gray-900 p-4 rounded-lg border border-gray-700">
-            <h3 className="text-purple-300 font-medium mb-3">Payment Information</h3>
+          <div className="md:w-1/2 bg-gray-900 p-3 rounded-lg border border-gray-700">
+            <h3 className="text-purple-300 font-medium mb-2 text-sm">Payment Information</h3>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div>
-                <label className="text-sm text-gray-300 mb-1 block">Discount Amount</label>
+                <label className="text-xs text-gray-300 mb-1 block">Discount Amount</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
                     <span className="text-gray-400">₹</span>
@@ -464,16 +503,16 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                     min="0"
                     value={discount.toString()}
                     onChange={(e) => setDiscount(Number(e.target.value))}
-                    className="bg-gray-800 border-gray-700 text-white pl-7"
+                    className="bg-gray-800 border-gray-700 text-white pl-7 h-8 text-sm"
                     placeholder="0.00"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="text-sm text-gray-300 mb-1 block">Payment Method</label>
+                <label className="text-xs text-gray-300 mb-1 block">Payment Method</label>
                 <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white w-full">
+                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white w-full h-8 text-sm">
                     <SelectValue placeholder="Select payment method" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-700 text-white">
@@ -489,40 +528,40 @@ export function BillDetails({ orderId }: BillDetailsProps) {
         )}
         
         {/* Bill Summary */}
-        <div className={`${!existingBill ? 'md:w-1/2' : 'w-full'} bg-gray-900 p-4 rounded-lg border border-gray-700`}>
-          <h3 className="text-purple-300 font-medium mb-3">Bill Summary</h3>
+        <div className={`${!existingBill ? 'md:w-1/2' : 'w-full'} bg-gray-900 p-3 rounded-lg border border-gray-700`}>
+          <h3 className="text-purple-300 font-medium mb-2 text-sm">Bill Summary</h3>
           
-          <div className="space-y-2 mb-3">
-            <div className="flex justify-between text-sm">
+          <div className="space-y-1 mb-2">
+            <div className="flex justify-between text-xs">
               <span className="text-gray-300">Subtotal</span>
               <span className="text-gray-200">₹{subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-xs">
               <span className="text-gray-300">Tax (5%)</span>
               <span className="text-gray-200">₹{taxAmount.toFixed(2)}</span>
             </div>
             {discount > 0 && (
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs">
                 <span className="text-gray-300">Discount</span>
                 <span className="text-red-400">-₹{discount.toFixed(2)}</span>
               </div>
             )}
-            <div className="border-t border-gray-700 pt-2 mt-2"></div>
+            <div className="border-t border-gray-700 pt-1 mt-1"></div>
             <div className="flex justify-between">
-              <span className="font-medium text-white">Total Amount</span>
-              <span className="font-bold text-lg text-white">₹{total.toFixed(2)}</span>
+              <span className="font-medium text-sm text-white">Total Amount</span>
+              <span className="font-bold text-base text-white">₹{total.toFixed(2)}</span>
             </div>
           </div>
           
           {existingBill ? (
             <div>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-gray-800 p-3 rounded">
-                  <p className="text-xs text-gray-400 mb-1">Payment Method</p>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-gray-800 p-2 rounded">
+                  <p className="text-xs text-gray-400">Payment Method</p>
                   <p className="font-medium text-sm text-purple-300">{existingBill.paymentMethod || "Not specified"}</p>
                 </div>
-                <div className="bg-gray-800 p-3 rounded">
-                  <p className="text-xs text-gray-400 mb-1">Payment Status</p>
+                <div className="bg-gray-800 p-2 rounded">
+                  <p className="text-xs text-gray-400">Payment Status</p>
                   <p className={`font-medium text-sm ${
                     existingBill.paymentStatus === "paid" ? "text-green-400" : "text-amber-400"
                   }`}>
@@ -533,7 +572,7 @@ export function BillDetails({ orderId }: BillDetailsProps) {
               
               <Button 
                 variant="default" 
-                size="lg" 
+                size="sm" 
                 className="w-full bg-purple-700 hover:bg-purple-600 text-white" 
                 disabled={existingBill.paymentStatus === "paid" || markAsPaidMutation.isPending}
                 onClick={() => handleMarkAsPaid(existingBill.id)}
@@ -545,26 +584,11 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                     : "Mark as Paid"
                 }
               </Button>
-              
-              <div className="flex justify-center mt-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-purple-500 text-purple-300 hover:bg-purple-900/50"
-                  onClick={() => {
-                    const message = `Thank you for dining with us!\nBill #${existingBill.billNumber}\nOrder #${order.orderNumber}\nTotal: ₹${existingBill.total.toFixed(2)}`;
-                    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-                    window.open(whatsappUrl, '_blank');
-                  }}
-                >
-                  Share via WhatsApp
-                </Button>
-              </div>
             </div>
           ) : (
             <Button 
               variant="default" 
-              size="lg" 
+              size="sm" 
               className="w-full bg-purple-700 hover:bg-purple-600 text-white" 
               onClick={handleGenerateBill}
               disabled={createBillMutation.isPending}
