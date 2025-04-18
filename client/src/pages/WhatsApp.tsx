@@ -247,7 +247,7 @@ export default function WhatsApp() {
                         value={message} 
                         onChange={(e) => setMessage(e.target.value)} 
                         placeholder="Type a message..."
-                        rows={4}
+                        rows={3}
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         Try "Order: 2 butter chicken, 3 naan" or "bill"
@@ -278,7 +278,7 @@ export default function WhatsApp() {
                         value={message} 
                         onChange={(e) => setMessage(e.target.value)} 
                         placeholder="Type a message..."
-                        rows={4}
+                        rows={3}
                       />
                     </div>
                     <Button 
@@ -296,13 +296,13 @@ export default function WhatsApp() {
           
           {/* Bill with Health Tips Form */}
           <Card className="mt-4">
-            <CardHeader className="pb-2">
+            <CardHeader className="py-2">
               <CardTitle className="flex items-center gap-2">
                 <HeartPulse className="h-5 w-5" />
                 Send Bill with Health Tips
               </CardTitle>
               <CardDescription>
-                Send a bill with nutritional information and health recommendations
+                Send bill with nutritional info and health tips
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -340,7 +340,7 @@ export default function WhatsApp() {
         {/* Message History */}
         <div className="md:col-span-2">
           <Card className="h-full">
-            <CardHeader>
+            <CardHeader className="py-3">
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
                 Message History
@@ -381,7 +381,7 @@ export default function WhatsApp() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-10">
+                <div className="text-center py-6">
                   <p className="text-gray-500">No messages found</p>
                   <p className="text-sm text-gray-400">Try sending a message to see it here</p>
                 </div>
