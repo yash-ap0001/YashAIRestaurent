@@ -312,7 +312,10 @@ export default function Billing() {
                                 variant="outline" 
                                 size="sm" 
                                 className="h-8 px-2"
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.print();
+                                }}
                               >
                                 <Printer className="h-4 w-4 mr-1" /> Print
                               </Button>
