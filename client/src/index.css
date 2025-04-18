@@ -107,6 +107,36 @@ div[role="button"], div[tabindex="0"] {
   color: #1a237e !important;
 }
 
+/* Enhanced checkboxes for selection mode */
+.selection-checkbox [data-state="checked"] {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+}
+
+/* Make all checkboxes larger and more visible */
+[data-radix-checkbox-root], 
+[role="checkbox"],
+input[type="checkbox"],
+div[data-state="checked"],
+div[data-state="unchecked"] {
+  height: 1.25rem !important;
+  width: 1.25rem !important;
+  border-width: 2px !important;
+  border-color: #7c3aed !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Style the checked state */
+[data-state="checked"] {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+}
+
+/* Make the checkboxes more visible in cards */
+.rounded-lg [role="checkbox"] {
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.5) !important;
+}
+
 @layer base {
   * {
     @apply border-border;
