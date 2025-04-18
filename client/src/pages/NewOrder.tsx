@@ -9,15 +9,62 @@ import {
   MicOff, 
   Send, 
   ClipboardList,
-  FileText
+  FileText,
+  Sparkles,
+  Loader2
 } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function NewOrder() {
   const [activeTab, setActiveTab] = useState("menu-order");
+  const [aiOrderInput, setAiOrderInput] = useState("");
+  const [isProcessingAiOrder, setIsProcessingAiOrder] = useState(false);
+  const [orderItems, setOrderItems] = useState([]);
+  const { toast } = useToast();
+  
+  // Process AI natural language order
+  const processAiOrder = async () => {
+    if (!aiOrderInput.trim()) return;
+    
+    setIsProcessingAiOrder(true);
+    
+    try {
+      const response = await apiRequest("POST", "/api/ai/process-order", {
+        text: aiOrderInput
+      });
+      
+      const data = await response.json();
+      
+      if (data.items && data.items.length > 0) {
+        setOrderItems(data.items);
+        toast({
+          title: "Order processed",
+          description: `Successfully processed your order with ${data.items.length} items.`,
+        });
+      } else {
+        toast({
+          title: "No items detected",
+          description: "Unable to detect menu items in your description. Please try again with more specific details.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error processing AI order:", error);
+      toast({
+        title: "Processing failed",
+        description: "There was an error processing your natural language order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingAiOrder(false);
+    }
+  };
   
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden">
@@ -52,6 +99,10 @@ export default function NewOrder() {
             <Utensils className="h-3.5 w-3.5 mr-1.5" /> 
             Menu Order
           </TabsTrigger>
+          <TabsTrigger value="ai-order" className="h-7 text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+            AI Natural Language Order
+          </TabsTrigger>
           <TabsTrigger value="voice-order" className="h-7 text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white">
             <MessageSquareText className="h-3.5 w-3.5 mr-1.5" />
             Voice Order
@@ -66,6 +117,114 @@ export default function NewOrder() {
           <TabsContent value="menu-order" className="h-[calc(100vh-90px)] m-0 data-[state=active]:block overflow-hidden">
             <div className="h-full overflow-hidden">
               <OrderForm />
+            </div>
+          </TabsContent>
+          
+          {/* AI Natural Language Order Tab Content */}
+          <TabsContent value="ai-order" className="h-[calc(100vh-90px)] m-0 data-[state=active]:block overflow-hidden">
+            <div className="flex h-full overflow-hidden">
+              {/* Left Column - AI Order Input */}
+              <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
+                <div className="flex items-center mb-3">
+                  <div className="h-10 w-10 bg-purple-900/30 rounded-full flex items-center justify-center mr-3">
+                    <Sparkles className="h-5 w-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">AI Natural Language Order</h3>
+                    <p className="text-sm text-gray-400">Describe your order in simple sentences</p>
+                  </div>
+                </div>
+                
+                <div className="bg-purple-950/20 rounded-lg p-3 border border-purple-900/30 mb-3">
+                  <h4 className="text-sm font-medium text-purple-300 mb-1">How to use:</h4>
+                  <ul className="text-sm text-gray-300 space-y-1 list-disc pl-5">
+                    <li>Type your order in natural language</li>
+                    <li>You can include quantities and special instructions</li>
+                    <li>Our AI supports Hindi, Telugu, English, and Spanish</li>
+                    <li>For example: "I'd like 2 veg biryani, 1 butter naan, and a mango lassi. Make the biryani spicy."</li>
+                  </ul>
+                </div>
+                
+                <div className="flex-1 flex flex-col">
+                  <div className="flex-1 rounded-lg border border-purple-800/40 overflow-hidden mb-3">
+                    <Textarea
+                      placeholder="Type your order in natural language here..."
+                      value={aiOrderInput}
+                      onChange={(e) => setAiOrderInput(e.target.value)}
+                      className="h-full bg-black/70 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none text-white text-sm placeholder:text-gray-500"
+                    />
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    onClick={processAiOrder}
+                    disabled={isProcessingAiOrder || !aiOrderInput.trim()}
+                    className="w-full font-semibold bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800"
+                  >
+                    {isProcessingAiOrder ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Process Natural Language Order
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Right Column - Order Summary */}
+              <div className="w-1/2 h-full p-3 flex flex-col">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-bold text-white">Your Order Summary</h3>
+                  <div className="text-sm bg-purple-900/30 px-2 py-1 rounded-full text-purple-300 border border-purple-800/50">
+                    {orderItems.length || 0} items
+                  </div>
+                </div>
+                
+                <div className="flex-1 bg-black/70 rounded-lg border border-gray-800 overflow-hidden">
+                  {orderItems.length > 0 ? (
+                    <div className="h-full p-3 overflow-auto">
+                      {orderItems.map((item, index) => (
+                        <div key={index} className="mb-3 p-2 border border-purple-900/20 rounded-md bg-purple-950/10">
+                          <div className="flex justify-between">
+                            <h4 className="font-medium text-white">{item.name}</h4>
+                            <span className="text-purple-300">x{item.quantity}</span>
+                          </div>
+                          <div className="flex justify-between text-sm mt-1">
+                            <span className="text-gray-400">{item.specialInstructions || "No special instructions"}</span>
+                            <span className="text-white">₹{item.price * item.quantity}</span>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      <div className="mt-4 pt-4 border-t border-gray-800 flex justify-between items-center">
+                        <span className="font-bold text-white">Total Amount:</span>
+                        <span className="text-lg font-bold text-white">
+                          ₹{orderItems.reduce((total, item) => total + (item.price * item.quantity), 0)}
+                        </span>
+                      </div>
+                      
+                      <div className="mt-4">
+                        <Button className="w-full bg-green-600 hover:bg-green-700">
+                          Place Order
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center">
+                      <Sparkles className="h-12 w-12 text-purple-500 mb-4" />
+                      <h3 className="text-xl font-bold text-white">Your order is empty</h3>
+                      <p className="text-gray-400 text-center mt-2 max-w-xs">
+                        Use the natural language input on the left to describe your order
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </TabsContent>
           
