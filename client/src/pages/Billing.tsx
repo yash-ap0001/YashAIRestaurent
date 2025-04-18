@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,9 @@ import {
   Calendar,
   ArrowUpDown,
   Check,
-  Printer
+  Printer,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Tabs as TabsComponent, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
@@ -54,6 +56,7 @@ export default function Billing() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [filterOption, setFilterOption] = useState<FilterOption>("all");
   const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
@@ -147,6 +150,11 @@ export default function Billing() {
       setSortOrder('asc');
     }
   };
+  
+  // Reset to page 1 when search, filter, or items per page changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterOption, itemsPerPage]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -270,7 +278,7 @@ export default function Billing() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredOrders.slice(0, itemsPerPage).map(order => {
+                  {filteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(order => {
                     const hasBill = bills.some(bill => bill.orderId === order.id);
                     
                     return (
@@ -349,14 +357,96 @@ export default function Billing() {
             )}
           </div>
           
-          <div className="p-2 border-t bg-muted/30 text-sm text-muted-foreground flex justify-between">
-            <div>
-              Showing {Math.min(filteredOrders.length, itemsPerPage)} of {filteredOrders.length} orders
-            </div>
-            <div className="flex gap-4">
-              <span>Billed: {billedCount}</span>
-              <span>Pending: {pendingBillCount}</span>
-              <span>Total Revenue: ₹{totalRevenue.toLocaleString()}</span>
+          <div className="p-2 border-t bg-muted/30 text-sm text-muted-foreground">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-3">
+              <div>
+                Showing {Math.min(filteredOrders.length - (currentPage - 1) * itemsPerPage, itemsPerPage)} 
+                of {filteredOrders.length} orders
+                {filteredOrders.length > itemsPerPage && (
+                  <span className="ml-2">
+                    (Page {currentPage} of {Math.ceil(filteredOrders.length / itemsPerPage)})
+                  </span>
+                )}
+              </div>
+              
+              {filteredOrders.length > itemsPerPage && (
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <span className="sr-only">Previous page</span>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  {Array.from({ length: Math.min(5, Math.ceil(filteredOrders.length / itemsPerPage)) }, (_, i) => {
+                    // Calculate page numbers to show (always include first, last, and pages around current)
+                    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+                    let pageNum = i + 1;
+
+                    if (totalPages > 5) {
+                      // Show first, last, and pages around current
+                      if (currentPage <= 3) {
+                        // Near start: show 1,2,3,4,...,last
+                        if (i < 4) {
+                          pageNum = i + 1;
+                        } else {
+                          pageNum = totalPages;
+                        }
+                      } else if (currentPage >= totalPages - 2) {
+                        // Near end: show 1,...,last-3,last-2,last-1,last
+                        if (i === 0) {
+                          pageNum = 1;
+                        } else {
+                          pageNum = totalPages - 4 + i;
+                        }
+                      } else {
+                        // Middle: show 1,...,current-1,current,current+1,...,last
+                        if (i === 0) {
+                          pageNum = 1;
+                        } else if (i === 4) {
+                          pageNum = totalPages;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                      }
+                    }
+
+                    return (
+                      <Button 
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"} 
+                        size="sm" 
+                        className="h-8 w-8 p-0 hidden md:flex"
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                  <span className="md:hidden">
+                    Page {currentPage} of {Math.ceil(filteredOrders.length / itemsPerPage)}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredOrders.length / itemsPerPage), p + 1))}
+                    disabled={currentPage >= Math.ceil(filteredOrders.length / itemsPerPage)}
+                  >
+                    <span className="sr-only">Next page</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex gap-4">
+                <span>Billed: {billedCount}</span>
+                <span>Pending: {pendingBillCount}</span>
+                <span>Total Revenue: ₹{totalRevenue.toLocaleString()}</span>
+              </div>
             </div>
           </div>
         </TabsContent>
