@@ -13,7 +13,7 @@ import {
   Sparkles,
   Loader2
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,11 +21,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+  specialInstructions?: string;
+}
+
 export default function NewOrder() {
   const [activeTab, setActiveTab] = useState("menu-order");
   const [aiOrderInput, setAiOrderInput] = useState("");
   const [isProcessingAiOrder, setIsProcessingAiOrder] = useState(false);
-  const [orderItems, setOrderItems] = useState([]);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   
   // Process AI natural language order
@@ -66,6 +75,47 @@ export default function NewOrder() {
     }
   };
   
+  // Submit the order to the server
+  const submitOrder = async () => {
+    if (orderItems.length === 0) return;
+    
+    setIsSubmittingOrder(true);
+    
+    try {
+      const response = await apiRequest("POST", "/api/orders", {
+        items: orderItems,
+        orderSource: "ai",
+        tableNumber: "AI-1", // Default table for AI orders
+        customerName: "Walk-in Customer",
+        autoProgress: false // Default to manual progression
+      });
+      
+      const data = await response.json();
+      
+      toast({
+        title: "Order placed successfully",
+        description: `Your order #${data.orderNumber} has been placed.`,
+      });
+      
+      // Reset the form
+      setOrderItems([]);
+      setAiOrderInput("");
+      
+      // Navigate back to the dashboard using wouter
+      setLocation("/");
+      
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      toast({
+        title: "Failed to place order",
+        description: "There was an error submitting your order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
+  
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden">
       <div className="bg-neutral-950 p-1 border-b border-gray-800 flex justify-between items-center flex-shrink-0">
@@ -81,16 +131,7 @@ export default function NewOrder() {
           </h1>
         </div>
         
-        <div className="hidden md:flex items-center gap-4 text-gray-500">
-          <div className="flex items-center gap-1">
-            <Utensils className="h-4 w-4 text-blue-500" />
-            <span className="text-xs">Menu Selection</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Clipboard className="h-4 w-4 text-blue-500" />
-            <span className="text-xs">AI Processing</span>
-          </div>
-        </div>
+        {/* Removed the icons and text in the header */}
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
@@ -209,8 +250,19 @@ export default function NewOrder() {
                       </div>
                       
                       <div className="mt-4">
-                        <Button className="w-full bg-green-600 hover:bg-green-700">
-                          Place Order
+                        <Button
+                          onClick={submitOrder}
+                          disabled={isSubmittingOrder}
+                          className="w-full bg-green-600 hover:bg-green-700"
+                        >
+                          {isSubmittingOrder ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Placing Order...
+                            </>
+                          ) : (
+                            'Place Order'
+                          )}
                         </Button>
                       </div>
                     </div>
