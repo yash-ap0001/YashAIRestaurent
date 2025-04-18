@@ -95,6 +95,10 @@ export function BillDetails({ orderId }: BillDetailsProps) {
   const downloadPdf = (billId: number) => {
     window.open(`/api/bills/${billId}/pdf`, '_blank');
   };
+  
+  const handlePrint = () => {
+    window.print();
+  };
 
   if (orderLoading) {
     return <p className="text-center py-4">Loading order details...</p>;
@@ -104,13 +108,13 @@ export function BillDetails({ orderId }: BillDetailsProps) {
     return <p className="text-center py-4">Order not found</p>;
   }
 
-  const orderItems = order.items as OrderItem[];
+  // Get order items - check if they're available in the order object or use an empty array
+  const orderItems = (order as any).items as OrderItem[] || [];
   
   // Calculate subtotal
-  const subtotal = orderItems?.reduce(
-    (sum, item) => sum + (item.price * item.quantity), 
-    0
-  ) || order.totalAmount;
+  const subtotal = orderItems.length > 0 
+    ? orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    : order.totalAmount || 0;
   
   // Calculate tax (5%)
   const taxRate = 0.05;
@@ -130,7 +134,7 @@ export function BillDetails({ orderId }: BillDetailsProps) {
         <div>
           <h2 className="text-xl font-semibold">Order #{order.orderNumber}</h2>
           <p className="text-neutral-500">
-            {order.tableNumber || "Takeaway"} • {format(new Date(order.createdAt), "PPp")}
+            {order.tableNumber || "Takeaway"} • {order.createdAt ? format(new Date(order.createdAt as string), "PPp") : ""}
           </p>
         </div>
         
@@ -144,7 +148,10 @@ export function BillDetails({ orderId }: BillDetailsProps) {
               <File className="h-4 w-4 mr-2" />
               Download PDF
             </Button>
-            <Button size="sm">
+            <Button 
+              size="sm"
+              onClick={handlePrint}
+            >
               <Printer className="h-4 w-4 mr-2" />
               Print
             </Button>
