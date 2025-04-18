@@ -323,7 +323,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-6xl h-[650px] overflow-hidden bg-neutral-900 border border-gray-800 shadow-lg p-0">
+      <DialogContent className="sm:max-w-6xl h-[600px] overflow-hidden bg-neutral-900 border border-gray-800 shadow-lg p-0">
         {/* Header with Table Selection & Create Button */}
         <div className="flex px-4 py-2 border-b border-gray-800 gap-4 bg-neutral-950 h-14 items-center">
           <DialogTitle className="text-xl font-bold text-white">Create Order</DialogTitle>
@@ -367,7 +367,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
         </div>
 
         {/* Main Content with Tabs */}
-        <div className="h-[calc(100%-110px)] overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden flex flex-col">
           {/* Tab Selector */}
           <div className="border-b border-gray-800 bg-neutral-950">
             <Tabs 
