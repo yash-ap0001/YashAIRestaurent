@@ -36,24 +36,8 @@ export function BillDetails({ orderId }: BillDetailsProps) {
     }
   });
   
-  // Fetch order items separately
-  const { data: fetchedOrderItems = [] } = useQuery<OrderItem[]>({
-    queryKey: ['/api/orders', orderId, 'items'],
-    queryFn: async () => {
-      try {
-        const itemsResponse = await fetch(`/api/orders/${orderId}/items`);
-        if (!itemsResponse.ok) {
-          console.error('Failed to fetch order items');
-          return [];
-        }
-        return await itemsResponse.json();
-      } catch (error) {
-        console.error('Error fetching order items:', error);
-        return [];
-      }
-    },
-    enabled: !!order
-  });
+  // Get order items from the order object
+  const orderItems = order?.items || [];
 
   // Check if a bill already exists for this order
   const { data: bills } = useQuery<Bill[]>({
@@ -127,9 +111,9 @@ export function BillDetails({ orderId }: BillDetailsProps) {
     return <p className="text-center py-4">Order not found</p>;
   }
 
-  // Calculate subtotal from fetchedOrderItems or use order.totalAmount as fallback
-  const subtotal = fetchedOrderItems && fetchedOrderItems.length > 0 
-    ? fetchedOrderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  // Calculate subtotal from orderItems or use order.totalAmount as fallback
+  const subtotal = orderItems && orderItems.length > 0 
+    ? orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     : order.totalAmount || 0;
   
   // Calculate tax (5%)
@@ -200,8 +184,8 @@ export function BillDetails({ orderId }: BillDetailsProps) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-neutral-200">
-            {fetchedOrderItems && fetchedOrderItems.length > 0 ? (
-              fetchedOrderItems.map((item) => (
+            {orderItems && orderItems.length > 0 ? (
+              orderItems.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-800">
                     {getItemName(item.menuItemId)}
