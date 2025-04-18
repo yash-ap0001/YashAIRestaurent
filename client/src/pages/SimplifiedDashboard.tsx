@@ -506,16 +506,7 @@ export default function SimplifiedDashboard() {
           </TabsList>
 
           <div className="flex items-center gap-3">
-            <Link href="/new-order">
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
-              >
-                <Utensils className="h-4 w-4 mr-1" />
-                <span>Create Order</span>
-              </Button>
-            </Link>
+            {/* We've moved the Create Order button to the action row at the bottom */}
             
             {/* We've removed the dialog and now route to the NewOrder page */}
 
@@ -652,6 +643,17 @@ export default function SimplifiedDashboard() {
               )}
             </div>
             <div className="flex items-center gap-3">
+              <Link href="/new-order">
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
+                >
+                  <Utensils className="h-4 w-4 mr-1" />
+                  <span>Create Order</span>
+                </Button>
+              </Link>
+              
               <Button
                 onClick={() => setIsBulkCreateOpen(true)}
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -660,23 +662,6 @@ export default function SimplifiedDashboard() {
                 <Plus className="h-4 w-4 mr-1" />
                 Bulk Create Orders
               </Button>
-              
-              <div className="flex items-center text-sm">
-                <div className="flex items-center mr-4">
-                  <div className="h-3 w-3 rounded-full bg-amber-600 mr-2"></div>
-                  <span>Pending: </span>
-                  <span className="font-bold ml-1">
-                    {orders.filter((order: Order) => ["pending", "preparing"].includes(order.status)).length}
-                  </span>
-                </div>
-                <div className="flex items-center mr-4">
-                  <div className="h-3 w-3 rounded-full bg-blue-600 mr-2"></div>
-                  <span>Ready: </span>
-                  <span className="font-bold ml-1">
-                    {orders.filter((order: Order) => order.status === "ready").length}
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
 
