@@ -581,81 +581,80 @@ export default function SimplifiedDashboard() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold mr-4">Today's Orders</h1>
-              <div className="flex items-center gap-2 bg-muted/10 p-1 rounded-lg">
-                <Button 
-                  variant={isSelectMode ? "destructive" : "secondary"}
-                  size="sm"
-                  onClick={toggleSelectMode}
-                  className={`h-8 px-2 text-xs ${isSelectMode ? "shadow-lg" : ""}`}
-                >
-                  {isSelectMode ? "Exit Select Mode" : "Select Orders"}
-                </Button>
-                
-                {isSelectMode && (
-                  <>
-                    <div className="flex items-center gap-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={selectAllOrders}
-                        className="h-8 px-2 text-xs bg-background"
-                      >
-                        Select All
-                      </Button>
+              
+              {isSelectMode && (
+                <div className="flex items-center gap-2 bg-muted/10 p-1 rounded-lg">
+                  <Button 
+                    variant="destructive"
+                    size="sm"
+                    onClick={toggleSelectMode}
+                    className="h-8 px-2 text-xs shadow-lg"
+                  >
+                    Exit Select Mode
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={selectAllOrders}
+                      className="h-8 px-2 text-xs bg-background"
+                    >
+                      Select All
+                    </Button>
 
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setSelectedOrders([])}
-                        className="h-8 px-2 text-xs bg-background"
-                      >
-                        Clear
-                      </Button>
-                    </div>
-                    
-                    <div className="flex items-center gap-1">
-                      <Badge variant="outline" className="text-xs px-1 py-0 h-5 bg-background">
-                        {orders.length} Total
-                      </Badge>
-                      
-                      {selectedOrders.length > 0 && (
-                        <Badge variant="secondary" className="text-xs px-1 py-0 h-5 bg-primary text-primary-foreground">
-                          {selectedOrders.length} Selected
-                        </Badge>
-                      )}
-                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedOrders([])}
+                      className="h-8 px-2 text-xs bg-background"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center gap-1">
+                    <Badge variant="outline" className="text-xs px-1 py-0 h-5 bg-background">
+                      {orders.length} Total
+                    </Badge>
                     
                     {selectedOrders.length > 0 && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="secondary" size="sm" className="h-8 px-2 text-xs bg-primary text-primary-foreground hover:bg-primary/90">
-                            Bulk Actions
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuLabel className="text-xs">Move Selected Orders To</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")} className="cursor-pointer text-xs">
-                            Pending
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")} className="cursor-pointer text-xs">
-                            Preparing
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")} className="cursor-pointer text-xs">
-                            Ready
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")} className="cursor-pointer text-xs">
-                            Completed
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")} className="cursor-pointer text-xs">
-                            Billed
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Badge variant="secondary" className="text-xs px-1 py-0 h-5 bg-primary text-primary-foreground">
+                        {selectedOrders.length} Selected
+                      </Badge>
                     )}
-                  </>
-                )}
-              </div>
+                  </div>
+                  
+                  {selectedOrders.length > 0 && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="secondary" size="sm" className="h-8 px-2 text-xs bg-primary text-primary-foreground hover:bg-primary/90">
+                          Bulk Actions
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel className="text-xs">Move Selected Orders To</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")} className="cursor-pointer text-xs">
+                          Pending
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")} className="cursor-pointer text-xs">
+                          Preparing
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")} className="cursor-pointer text-xs">
+                          Ready
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")} className="cursor-pointer text-xs">
+                          Completed
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")} className="cursor-pointer text-xs">
+                          Billed
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <Link href="/new-order">
@@ -677,6 +676,51 @@ export default function SimplifiedDashboard() {
                 <Plus className="h-4 w-4 mr-1" />
                 Bulk Create Orders
               </Button>
+              
+              {/* Select Orders dropdown */}
+              {!isSelectMode && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" size="sm" className="h-9 px-2">
+                      <CheckSquare className="h-4 w-4 mr-1" />
+                      <span>Select Orders</span>
+                      <ChevronsUpDown className="h-3 w-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>Order Selection Options</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={toggleSelectMode} className="cursor-pointer">
+                      <CheckSquare className="h-4 w-4 mr-2" />
+                      Select All Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      toggleSelectMode();
+                      setTimeout(() => selectAllInStatus("pending"), 100);
+                    }} className="cursor-pointer">
+                      Select Pending Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      toggleSelectMode();
+                      setTimeout(() => selectAllInStatus("preparing"), 100);
+                    }} className="cursor-pointer">
+                      Select Preparing Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      toggleSelectMode();
+                      setTimeout(() => selectAllInStatus("ready"), 100);
+                    }} className="cursor-pointer">
+                      Select Ready Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      toggleSelectMode();
+                      setTimeout(() => selectAllInStatus("completed"), 100);
+                    }} className="cursor-pointer">
+                      Select Completed Orders
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
 
