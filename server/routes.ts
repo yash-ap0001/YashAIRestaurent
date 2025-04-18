@@ -696,6 +696,38 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     }
   });
 
+  // Update bill (e.g. mark as paid)
+  app.patch("/api/bills/:id", async (req: Request, res: Response) => {
+    try {
+      const billId = parseInt(req.params.id);
+      const bill = await storage.getBill(billId);
+      
+      if (!bill) {
+        return res.status(404).json({ error: "Bill not found" });
+      }
+      
+      const updatedBill = await storage.updateBill(billId, req.body);
+      
+      // Broadcast the updated bill status via WebSocket
+      if (updatedBill) {
+        // If marking as paid, this is an important event to broadcast
+        if (req.body.paymentStatus === "paid") {
+          broadcastMessage({ 
+            type: "bill_paid", 
+            data: updatedBill 
+          });
+          
+          // Update stats after payment is recorded
+          broadcastStatsUpdate();
+        }
+      }
+      
+      res.json(updatedBill);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+
   // Generate PDF bill
   app.get("/api/bills/:id/pdf", async (req: Request, res: Response) => {
     try {

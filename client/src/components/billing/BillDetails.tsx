@@ -90,17 +90,21 @@ export function BillDetails({ orderId }: BillDetailsProps) {
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Payment recorded",
         description: "Bill has been marked as paid"
       });
       // Ensure we invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
+      // Also invalidate the specific bill
+      queryClient.invalidateQueries({ queryKey: ['/api/bills', data.id] });
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       if (orderId) {
         queryClient.invalidateQueries({ queryKey: ['/api/orders', orderId] });
       }
+      // Force refetch of bills to update UI
+      queryClient.refetchQueries({ queryKey: ['/api/bills'] });
     },
     onError: (error) => {
       toast({
