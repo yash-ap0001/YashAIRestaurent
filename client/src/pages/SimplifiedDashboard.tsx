@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "wouter";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,6 @@ import { SiZomato, SiSwiggy } from "react-icons/si";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
 import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
-import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
 
 interface Order {
   id: number;
@@ -506,21 +506,18 @@ export default function SimplifiedDashboard() {
           </TabsList>
 
           <div className="flex items-center gap-3">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => setSingleOrderOpen(true)}
-              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
-            >
-              <Utensils className="h-4 w-4 mr-1" />
-              <span>Create Order</span>
-            </Button>
+            <Link href="/new-order">
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
+              >
+                <Utensils className="h-4 w-4 mr-1" />
+                <span>Create Order</span>
+              </Button>
+            </Link>
             
-            {/* Single Order Dialog */}
-            <SingleOrderDialog 
-              open={singleOrderOpen} 
-              onClose={() => setSingleOrderOpen(false)} 
-            />
+            {/* We've removed the dialog and now route to the NewOrder page */}
 
             <div className="relative">
               <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
