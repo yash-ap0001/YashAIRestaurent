@@ -95,7 +95,12 @@ export function BillDetails({ orderId }: BillDetailsProps) {
         title: "Payment recorded",
         description: "Bill has been marked as paid"
       });
+      // Ensure we invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      if (orderId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/orders', orderId] });
+      }
     },
     onError: (error) => {
       toast({
@@ -343,26 +348,28 @@ export function BillDetails({ orderId }: BillDetailsProps) {
   };
 
   return (
-    <div className="space-y-4 p-2">
-      {/* Simple Header with Minimal Order Info */}
-      <div className="flex flex-col gap-2 bg-purple-900 p-4 rounded-lg shadow-sm text-white">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white">Order #{order.orderNumber}</h2>
+    <div className="space-y-3 p-4">
+      {/* Simple Header with Minimal Order Info - Horizontal layout */}
+      <div className="flex justify-between items-center bg-purple-900 p-3 rounded-lg shadow-sm text-white">
+        <div className="flex flex-col">
+          <h2 className="text-lg font-bold text-white">Order #{order.orderNumber}</h2>
+          <div className="flex items-center gap-2 text-xs text-purple-200">
+            <span>{order.tableNumber || "Takeaway"}</span>
+            <span>
+              {order.createdAt 
+                ? typeof order.createdAt === 'string'
+                  ? format(new Date(order.createdAt), "PPp")
+                  : format(new Date(), "PPp")
+                : ""
+              }
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
           <Badge variant={existingBill ? "secondary" : "outline"} className={existingBill ? "bg-purple-600 text-white hover:bg-purple-600" : "border-white text-white"}>
             {existingBill ? "Billed" : "Unbilled"}
           </Badge>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-purple-200">
-          <span>{order.tableNumber || "Takeaway"}</span>
-          <span>
-            {order.createdAt 
-              ? typeof order.createdAt === 'string'
-                ? format(new Date(order.createdAt), "PPp")
-                : format(new Date(), "PPp")
-              : ""
-            }
-          </span>
-          {existingBill && <span>Bill #{existingBill.billNumber}</span>}
+          {existingBill && <span className="text-xs text-purple-200">Bill #{existingBill.billNumber}</span>}
         </div>
       </div>
       

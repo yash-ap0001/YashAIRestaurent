@@ -453,17 +453,19 @@ export default function Billing() {
         
         {/* Bill Details Dialog */}
         <Dialog open={billDialogOpen} onOpenChange={setBillDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-4xl max-h-[95vh] p-0 pt-2 overflow-hidden">
+            <DialogHeader className="px-6 py-2 mb-0">
               <DialogTitle className="text-xl font-bold text-primary">Bill Details</DialogTitle>
             </DialogHeader>
-            {selectedOrderId ? (
-              <BillDetails orderId={selectedOrderId} />
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No order selected</p>
-              </div>
-            )}
+            <div className="overflow-y-auto max-h-[calc(95vh-80px)] pt-0">
+              {selectedOrderId ? (
+                <BillDetails orderId={selectedOrderId} />
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No order selected</p>
+                </div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
 
