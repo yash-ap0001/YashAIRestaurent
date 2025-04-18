@@ -581,57 +581,45 @@ export default function SimplifiedDashboard() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold mr-4">Today's Orders</h1>
-              <div className="flex items-center gap-2 bg-muted/10 p-2 rounded-lg">
+              <div className="flex items-center gap-2 bg-muted/10 p-1 rounded-lg">
                 <Button 
                   variant={isSelectMode ? "destructive" : "secondary"}
                   size="sm"
                   onClick={toggleSelectMode}
-                  className={`flex items-center gap-1 ${isSelectMode ? "shadow-lg" : ""}`}
+                  className={`h-8 px-2 text-xs ${isSelectMode ? "shadow-lg" : ""}`}
                 >
-                  {isSelectMode ? (
-                    <>
-                      <X className="h-4 w-4" />
-                      <span>Exit Select Mode</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckSquare className="h-4 w-4" />
-                      <span>Select Orders</span>
-                    </>
-                  )}
+                  {isSelectMode ? "Exit Select Mode" : "Select Orders"}
                 </Button>
                 
                 {isSelectMode && (
                   <>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={selectAllOrders}
-                        className="flex items-center gap-1 bg-background"
+                        className="h-8 px-2 text-xs bg-background"
                       >
-                        <CheckSquare className="h-4 w-4" />
-                        <span>Select All</span>
+                        Select All
                       </Button>
 
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => setSelectedOrders([])}
-                        className="flex items-center gap-1 bg-background"
+                        className="h-8 px-2 text-xs bg-background"
                       >
-                        <X className="h-4 w-4" />
-                        <span>Clear</span>
+                        Clear
                       </Button>
                     </div>
                     
-                    <div className="flex items-center gap-2 ml-2">
-                      <Badge variant="outline" className="bg-background">
+                    <div className="flex items-center gap-1">
+                      <Badge variant="outline" className="text-xs px-1 py-0 h-5 bg-background">
                         {orders.length} Total
                       </Badge>
                       
                       {selectedOrders.length > 0 && (
-                        <Badge variant="secondary" className="bg-primary text-primary-foreground">
+                        <Badge variant="secondary" className="text-xs px-1 py-0 h-5 bg-primary text-primary-foreground">
                           {selectedOrders.length} Selected
                         </Badge>
                       )}
@@ -640,33 +628,27 @@ export default function SimplifiedDashboard() {
                     {selectedOrders.length > 0 && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="secondary" size="sm" className="ml-2 bg-primary text-primary-foreground hover:bg-primary/90">
-                            <ChevronsUpDown className="h-4 w-4 mr-1" />
-                            <span>Bulk Actions</span>
+                          <Button variant="secondary" size="sm" className="h-8 px-2 text-xs bg-primary text-primary-foreground hover:bg-primary/90">
+                            Bulk Actions
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
-                          <DropdownMenuLabel>Move Selected Orders To</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel className="text-xs">Move Selected Orders To</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")} className="cursor-pointer">
-                            <ClipboardList className="h-4 w-4 mr-2" />
-                            <span>Pending</span>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")} className="cursor-pointer text-xs">
+                            Pending
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")} className="cursor-pointer">
-                            <ChefHat className="h-4 w-4 mr-2" />
-                            <span>Preparing</span>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")} className="cursor-pointer text-xs">
+                            Preparing
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")} className="cursor-pointer">
-                            <Utensils className="h-4 w-4 mr-2" />
-                            <span>Ready</span>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")} className="cursor-pointer text-xs">
+                            Ready
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")} className="cursor-pointer">
-                            <CircleCheck className="h-4 w-4 mr-2" />
-                            <span>Completed</span>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")} className="cursor-pointer text-xs">
+                            Completed
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")} className="cursor-pointer">
-                            <Receipt className="h-4 w-4 mr-2" />
-                            <span>Billed</span>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")} className="cursor-pointer text-xs">
+                            Billed
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -727,7 +709,6 @@ export default function SimplifiedDashboard() {
                         />
                       </div>
                     )}
-                    <ClipboardList className="h-5 w-5 mr-2" />
                     Pending Orders
                   </div>
                   <div className="flex items-center gap-2">
@@ -839,7 +820,6 @@ export default function SimplifiedDashboard() {
                         />
                       </div>
                     )}
-                    <ChefHat className="h-5 w-5 mr-2" />
                     Preparing
                   </div>
                   <div className="flex items-center gap-2">
@@ -951,7 +931,6 @@ export default function SimplifiedDashboard() {
                         />
                       </div>
                     )}
-                    <Utensils className="h-5 w-5 mr-2" />
                     Ready to Serve
                   </div>
                   <div className="flex items-center gap-2">
@@ -1063,7 +1042,6 @@ export default function SimplifiedDashboard() {
                         />
                       </div>
                     )}
-                    <CircleCheck className="h-5 w-5 mr-2" />
                     Completed
                   </div>
                   <div className="flex items-center gap-2">
@@ -1175,7 +1153,6 @@ export default function SimplifiedDashboard() {
                         />
                       </div>
                     )}
-                    <CreditCard className="h-5 w-5 mr-2" />
                     Billed
                   </div>
                   <div className="flex items-center gap-2">
