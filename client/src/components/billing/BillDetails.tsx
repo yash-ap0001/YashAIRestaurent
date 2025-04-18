@@ -12,7 +12,12 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Order, OrderItem, MenuItem, Bill } from "@shared/schema";
+import { Order as BaseOrder, OrderItem, MenuItem, Bill } from "@shared/schema";
+
+// Extended Order type with items
+interface Order extends BaseOrder {
+  items?: OrderItem[];
+}
 import { File, Send, Printer } from "lucide-react";
 import { format } from "date-fns";
 
@@ -73,6 +78,34 @@ export function BillDetails({ orderId }: BillDetailsProps) {
       });
     }
   });
+  
+  // Mark as paid mutation
+  const markAsPaidMutation = useMutation({
+    mutationFn: async (billId: number) => {
+      const response = await apiRequest("PATCH", `/api/bills/${billId}`, {
+        paymentStatus: "paid"
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment recorded",
+        description: "Bill has been marked as paid"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/bills'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error updating payment status",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const handleMarkAsPaid = (billId: number) => {
+    markAsPaidMutation.mutate(billId);
+  };
 
   const handleGenerateBill = () => {
     if (!order) return;
@@ -100,7 +133,176 @@ export function BillDetails({ orderId }: BillDetailsProps) {
   };
   
   const handlePrint = () => {
-    window.print();
+    // Check if order exists
+    if (!order) {
+      toast({
+        title: "Error",
+        description: "Order details not available for printing",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) {
+      toast({
+        title: "Error",
+        description: "Could not open print window. Please check your popup blocker settings.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Calculate values for the print view
+    const printSubtotal = orderItems && orderItems.length > 0 
+      ? orderItems.reduce((sum: number, item: OrderItem) => sum + (item.price * item.quantity), 0)
+      : order.totalAmount || 0;
+    const printTaxAmount = printSubtotal * taxRate;
+    const printTotal = printSubtotal + printTaxAmount - discount;
+    
+    // Generate HTML content for the print window
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Bill #${existingBill?.billNumber || ''} - Order #${order.orderNumber}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            margin: 20px;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 24px;
+          }
+          .header p {
+            margin: 5px 0;
+            color: #666;
+          }
+          .info {
+            margin-bottom: 20px;
+          }
+          .info p {
+            margin: 5px 0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+          }
+          th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+          }
+          th {
+            font-weight: bold;
+            background-color: #f8f8f8;
+          }
+          .amount-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+          }
+          .amount-row.total {
+            font-weight: bold;
+            font-size: 18px;
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+            margin-top: 8px;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+            color: #666;
+          }
+          .align-right {
+            text-align: right;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>YashHotelBot</h1>
+          <p>123 Main Street, City, State - 12345</p>
+          <p>Phone: +91 98765 43210 | Email: contact@yashhotelbot.com</p>
+        </div>
+        
+        <div class="info">
+          <p><strong>Bill #:</strong> ${existingBill?.billNumber || 'DRAFT'}</p>
+          <p><strong>Order #:</strong> ${order.orderNumber}</p>
+          <p><strong>Table:</strong> ${order.tableNumber || 'Takeaway'}</p>
+          <p><strong>Date:</strong> ${format(new Date(), 'PPp')}</p>
+          ${existingBill ? `<p><strong>Payment Method:</strong> ${existingBill.paymentMethod || 'Not specified'}</p>` : ''}
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th class="align-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orderItems.map((item: OrderItem) => `
+              <tr>
+                <td>${getItemName(item.menuItemId)}</td>
+                <td>₹${item.price.toFixed(2)}</td>
+                <td>${item.quantity}</td>
+                <td class="align-right">₹${(item.price * item.quantity).toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div class="amount-row">
+          <span>Subtotal:</span>
+          <span>₹${printSubtotal.toFixed(2)}</span>
+        </div>
+        <div class="amount-row">
+          <span>Tax (5%):</span>
+          <span>₹${printTaxAmount.toFixed(2)}</span>
+        </div>
+        ${discount > 0 ? `
+          <div class="amount-row">
+            <span>Discount:</span>
+            <span>-₹${discount.toFixed(2)}</span>
+          </div>
+        ` : ''}
+        <div class="amount-row total">
+          <span>Total:</span>
+          <span>₹${printTotal.toFixed(2)}</span>
+        </div>
+        
+        <div class="footer">
+          <p>Thank you for your visit!</p>
+          <p>GST No: 123456789ABC | PAN: ABCDE1234F</p>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Write content to the print window and print
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    // Wait for content to load before printing
+    printWindow.onload = function() {
+      printWindow.print();
+      // Close the window after printing (optional)
+      // printWindow.close();
+    };
   };
 
   if (orderLoading) {
@@ -113,7 +315,7 @@ export function BillDetails({ orderId }: BillDetailsProps) {
 
   // Calculate subtotal from orderItems or use order.totalAmount as fallback
   const subtotal = orderItems && orderItems.length > 0 
-    ? orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    ? orderItems.reduce((sum: number, item: OrderItem) => sum + (item.price * item.quantity), 0)
     : order.totalAmount || 0;
   
   // Calculate tax (5%)
@@ -185,7 +387,7 @@ export function BillDetails({ orderId }: BillDetailsProps) {
           </thead>
           <tbody className="bg-white divide-y divide-neutral-200">
             {orderItems && orderItems.length > 0 ? (
-              orderItems.map((item) => (
+              orderItems.map((item: OrderItem) => (
                 <tr key={item.id}>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-800">
                     {getItemName(item.menuItemId)}
@@ -292,10 +494,16 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                 variant="default" 
                 size="lg" 
                 className="w-full mt-6"
-                disabled={existingBill.paymentStatus === "paid"}
+                disabled={existingBill.paymentStatus === "paid" || markAsPaidMutation.isPending}
+                onClick={() => handleMarkAsPaid(existingBill.id)}
               >
                 <Send className="h-4 w-4 mr-2" />
-                {existingBill.paymentStatus === "paid" ? "Already Paid" : "Mark as Paid"}
+                {existingBill.paymentStatus === "paid" 
+                  ? "Already Paid" 
+                  : markAsPaidMutation.isPending 
+                    ? "Processing..." 
+                    : "Mark as Paid"
+                }
               </Button>
             </div>
           ) : (
@@ -312,7 +520,25 @@ export function BillDetails({ orderId }: BillDetailsProps) {
           
           {existingBill && (
             <div className="flex justify-center mt-4">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  // Format a WhatsApp message with bill details
+                  const message = `Thank you for dining with us!\n\n` +
+                    `Bill #${existingBill.billNumber}\n` +
+                    `Order #${order.orderNumber}\n` +
+                    `Date: ${format(new Date(existingBill.createdAt || new Date()), 'PPp')}\n\n` +
+                    `Total Amount: ₹${existingBill.total.toFixed(2)}\n\n` +
+                    `We hope to serve you again soon!`;
+                  
+                  // Create WhatsApp URL with encoded message
+                  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                  
+                  // Open WhatsApp in a new window
+                  window.open(whatsappUrl, '_blank');
+                }}
+              >
                 Share via WhatsApp
               </Button>
             </div>
