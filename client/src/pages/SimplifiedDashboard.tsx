@@ -583,36 +583,7 @@ export default function SimplifiedDashboard() {
               <h1 className="text-2xl font-bold mr-4">Today's Orders</h1>
               
               {isSelectMode && (
-                <div className="flex items-center gap-2 bg-muted/10 p-1 rounded-lg">
-                  <Button 
-                    variant="destructive"
-                    size="sm"
-                    onClick={toggleSelectMode}
-                    className="h-8 px-2 text-xs shadow-lg"
-                  >
-                    Exit Select Mode
-                  </Button>
-                  
-                  <div className="flex items-center gap-1">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={selectAllOrders}
-                      className="h-8 px-2 text-xs bg-background"
-                    >
-                      Select All
-                    </Button>
-
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setSelectedOrders([])}
-                      className="h-8 px-2 text-xs bg-background"
-                    >
-                      Clear
-                    </Button>
-                  </div>
-                  
+                <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     <Badge variant="outline" className="text-xs px-1 py-0 h-5 bg-background">
                       {orders.length} Total
@@ -625,11 +596,31 @@ export default function SimplifiedDashboard() {
                     )}
                   </div>
                   
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="destructive" size="sm" className="h-8 px-2 text-xs">
+                        Selection Controls <ChevronsUpDown className="h-3 w-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-48">
+                      <DropdownMenuItem onClick={toggleSelectMode} className="cursor-pointer text-xs">
+                        Exit Select Mode
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={selectAllOrders} className="cursor-pointer text-xs">
+                        Select All Orders
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSelectedOrders([])} className="cursor-pointer text-xs">
+                        Clear Selection
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  
                   {selectedOrders.length > 0 && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="secondary" size="sm" className="h-8 px-2 text-xs bg-primary text-primary-foreground hover:bg-primary/90">
-                          Bulk Actions
+                          Bulk Actions <ChevronsUpDown className="h-3 w-3 ml-1" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
