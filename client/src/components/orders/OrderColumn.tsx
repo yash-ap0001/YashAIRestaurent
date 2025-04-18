@@ -1,9 +1,9 @@
 import { useColumnColors } from "@/contexts/ColumnColorContext";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ColumnType } from "@/contexts/ColumnColorContext";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 interface ColumnHeaderProps {
   title: string;
@@ -79,72 +79,42 @@ export function ColumnColorPicker({ columnType, label }: ColorPickerProps) {
   const { getColumnStyle, updateColumnStyle } = useColumnColors();
   const style = getColumnStyle(columnType);
   
-  const handleBgColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateColumnStyle(columnType, { ...style, backgroundColor: e.target.value });
+  const handleBgColorChange = (value: string) => {
+    updateColumnStyle(columnType, { ...style, backgroundColor: value });
   };
   
-  const handleTextColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateColumnStyle(columnType, { ...style, textColor: e.target.value });
+  const handleTextColorChange = (value: string) => {
+    updateColumnStyle(columnType, { ...style, textColor: value });
   };
   
-  const handleBorderColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateColumnStyle(columnType, { ...style, borderColor: e.target.value });
+  const handleBorderColorChange = (value: string) => {
+    updateColumnStyle(columnType, { ...style, borderColor: value });
   };
   
   return (
     <div className="space-y-2">
       <div className="font-medium text-sm">{label}</div>
-      <div className="grid grid-cols-3 gap-2">
-        <div className="space-y-1">
-          <Label htmlFor={`${columnType}-bg`} className="text-xs">Background</Label>
-          <div className="flex items-center space-x-2">
-            <div 
-              className="w-4 h-4 rounded-full border" 
-              style={{ backgroundColor: style.backgroundColor }}
-            />
-            <Input
-              id={`${columnType}-bg`}
-              type="text"
-              value={style.backgroundColor}
-              onChange={handleBgColorChange}
-              className="h-6 text-xs"
-            />
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-3">
+        <ColorPicker
+          id={`${columnType}-bg`}
+          label="Background"
+          value={style.backgroundColor}
+          onChange={handleBgColorChange}
+        />
         
-        <div className="space-y-1">
-          <Label htmlFor={`${columnType}-text`} className="text-xs">Text</Label>
-          <div className="flex items-center space-x-2">
-            <div 
-              className="w-4 h-4 rounded-full border" 
-              style={{ backgroundColor: style.textColor }}
-            />
-            <Input
-              id={`${columnType}-text`}
-              type="text"
-              value={style.textColor}
-              onChange={handleTextColorChange}
-              className="h-6 text-xs"
-            />
-          </div>
-        </div>
+        <ColorPicker
+          id={`${columnType}-text`}
+          label="Text"
+          value={style.textColor}
+          onChange={handleTextColorChange}
+        />
         
-        <div className="space-y-1">
-          <Label htmlFor={`${columnType}-border`} className="text-xs">Border</Label>
-          <div className="flex items-center space-x-2">
-            <div 
-              className="w-4 h-4 rounded-full border" 
-              style={{ backgroundColor: style.borderColor }}
-            />
-            <Input
-              id={`${columnType}-border`}
-              type="text"
-              value={style.borderColor}
-              onChange={handleBorderColorChange}
-              className="h-6 text-xs"
-            />
-          </div>
-        </div>
+        <ColorPicker
+          id={`${columnType}-border`}
+          label="Border"
+          value={style.borderColor}
+          onChange={handleBorderColorChange}
+        />
       </div>
       
       <div className="flex mt-1">
