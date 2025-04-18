@@ -314,7 +314,12 @@ export default function Billing() {
                                 className="h-8 px-2"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  window.print();
+                                  // Find the bill for this order and open the bill dialog
+                                  const bill = bills.find(b => b.orderId === order.id);
+                                  if (bill) {
+                                    setSelectedOrderId(order.id);
+                                    setBillDialogOpen(true);
+                                  }
                                 }}
                               >
                                 <Printer className="h-4 w-4 mr-1" /> Print

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Order as BaseOrder, OrderItem, MenuItem, Bill } from "@shared/schema";
 
 // Extended Order type with items
@@ -331,10 +332,15 @@ export function BillDetails({ orderId }: BillDetailsProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-xl font-semibold">Order #{order.orderNumber}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold">Order #{order.orderNumber}</h2>
+            <Badge variant={existingBill ? "secondary" : "outline"}>
+              {existingBill ? "Billed" : "Unbilled"}
+            </Badge>
+          </div>
           <p className="text-neutral-500">
             {order.tableNumber || "Takeaway"} • {
               order.createdAt 
@@ -346,25 +352,27 @@ export function BillDetails({ orderId }: BillDetailsProps) {
           </p>
         </div>
         
-        {existingBill ? (
-          <div className="space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => downloadPdf(existingBill.id)}
-            >
-              <File className="h-4 w-4 mr-2" />
-              Download PDF
-            </Button>
-            <Button 
-              size="sm"
-              onClick={handlePrint}
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Print
-            </Button>
-          </div>
-        ) : null}
+        <div className="flex gap-2">
+          {existingBill && (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => downloadPdf(existingBill.id)}
+              >
+                <File className="h-4 w-4 mr-1" />
+                PDF
+              </Button>
+              <Button 
+                size="sm"
+                onClick={handlePrint}
+              >
+                <Printer className="h-4 w-4 mr-1" />
+                Print
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       
       <div className="border rounded-md">
