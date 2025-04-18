@@ -110,59 +110,85 @@ export function ThemeColumnHeader({ className, variant, children }: ThemeClasses
 export function ThemeCard({ className, variant, children, ...props }: ThemeClassesProps & React.HTMLAttributes<HTMLDivElement>) {
   const { colors, theme } = useTheme();
   
-  // Apply different background colors based on the theme and variant
+  // Apply different background colors based on the theme and variant - matching header colors but with transparency
   const getBgColor = () => {
     switch(theme) {
       case 'dark':
-        return variant === 'pending' ? 'bg-amber-950/40' :
-               variant === 'preparing' ? 'bg-emerald-950/40' :
-               variant === 'ready' ? 'bg-blue-950/40' :
-               variant === 'completed' ? 'bg-purple-950/40' : '';
+        return variant === 'pending' ? 'bg-amber-700/30' :
+               variant === 'preparing' ? 'bg-emerald-700/30' :
+               variant === 'ready' ? 'bg-blue-700/30' :
+               variant === 'completed' ? 'bg-purple-700/30' : '';
       case 'light':
-        return variant === 'pending' ? 'bg-amber-100' :
-               variant === 'preparing' ? 'bg-emerald-100' :
-               variant === 'ready' ? 'bg-blue-100' :
-               variant === 'completed' ? 'bg-purple-100' : '';
+        return variant === 'pending' ? 'bg-amber-500/20' :
+               variant === 'preparing' ? 'bg-emerald-500/20' :
+               variant === 'ready' ? 'bg-blue-500/20' :
+               variant === 'completed' ? 'bg-purple-500/20' : '';
       case 'royal':
-        return variant === 'pending' ? 'bg-amber-900/30' :
-               variant === 'preparing' ? 'bg-emerald-900/30' :
-               variant === 'ready' ? 'bg-blue-900/30' :
-               variant === 'completed' ? 'bg-purple-900/30' : '';
+        return variant === 'pending' ? 'bg-amber-600/30' :
+               variant === 'preparing' ? 'bg-emerald-600/30' :
+               variant === 'ready' ? 'bg-blue-600/30' :
+               variant === 'completed' ? 'bg-purple-600/30' : '';
       case 'forest':
-        return variant === 'pending' ? 'bg-yellow-900/40' :
-               variant === 'preparing' ? 'bg-green-900/40' :
-               variant === 'ready' ? 'bg-teal-900/40' :
-               variant === 'completed' ? 'bg-indigo-900/40' : '';
+        return variant === 'pending' ? 'bg-yellow-700/30' :
+               variant === 'preparing' ? 'bg-green-700/30' :
+               variant === 'ready' ? 'bg-teal-700/30' :
+               variant === 'completed' ? 'bg-indigo-700/30' : '';
       case 'sunset':
-        return variant === 'pending' ? 'bg-orange-900/40' :
-               variant === 'preparing' ? 'bg-rose-900/40' :
-               variant === 'ready' ? 'bg-pink-900/40' :
-               variant === 'completed' ? 'bg-violet-900/40' : '';
+        return variant === 'pending' ? 'bg-orange-600/30' :
+               variant === 'preparing' ? 'bg-rose-600/30' :
+               variant === 'ready' ? 'bg-pink-600/30' :
+               variant === 'completed' ? 'bg-violet-600/30' : '';
       default:
-        return variant === 'pending' ? 'bg-amber-950/40' :
-               variant === 'preparing' ? 'bg-emerald-950/40' :
-               variant === 'ready' ? 'bg-blue-950/40' :
-               variant === 'completed' ? 'bg-purple-950/40' : '';
+        return variant === 'pending' ? 'bg-amber-700/30' :
+               variant === 'preparing' ? 'bg-emerald-700/30' :
+               variant === 'ready' ? 'bg-blue-700/30' :
+               variant === 'completed' ? 'bg-purple-700/30' : '';
     }
   };
   
+  // Border colors matching the header colors for visual connection
   const getBorderColor = () => {
-    switch(variant) {
-      case 'pending': return 'border-l-4 border-l-amber-500';
-      case 'preparing': return 'border-l-4 border-l-emerald-500';
-      case 'ready': return 'border-l-4 border-l-blue-500';
-      case 'completed': return 'border-l-4 border-l-purple-500';
-      default: return '';
+    switch(theme) {
+      case 'dark':
+        return variant === 'pending' ? 'border-l-4 border-l-amber-700' :
+               variant === 'preparing' ? 'border-l-4 border-l-emerald-700' :
+               variant === 'ready' ? 'border-l-4 border-l-blue-700' :
+               variant === 'completed' ? 'border-l-4 border-l-purple-700' : '';
+      case 'light':
+        return variant === 'pending' ? 'border-l-4 border-l-amber-500' :
+               variant === 'preparing' ? 'border-l-4 border-l-emerald-500' :
+               variant === 'ready' ? 'border-l-4 border-l-blue-500' :
+               variant === 'completed' ? 'border-l-4 border-l-purple-500' : '';
+      case 'royal':
+        return variant === 'pending' ? 'border-l-4 border-l-amber-600' :
+               variant === 'preparing' ? 'border-l-4 border-l-emerald-600' :
+               variant === 'ready' ? 'border-l-4 border-l-blue-600' :
+               variant === 'completed' ? 'border-l-4 border-l-purple-600' : '';
+      case 'forest':
+        return variant === 'pending' ? 'border-l-4 border-l-yellow-700' :
+               variant === 'preparing' ? 'border-l-4 border-l-green-700' :
+               variant === 'ready' ? 'border-l-4 border-l-teal-700' :
+               variant === 'completed' ? 'border-l-4 border-l-indigo-700' : '';
+      case 'sunset':
+        return variant === 'pending' ? 'border-l-4 border-l-orange-600' :
+               variant === 'preparing' ? 'border-l-4 border-l-rose-600' :
+               variant === 'ready' ? 'border-l-4 border-l-pink-600' :
+               variant === 'completed' ? 'border-l-4 border-l-violet-600' : '';
+      default:
+        return variant === 'pending' ? 'border-l-4 border-l-amber-700' :
+               variant === 'preparing' ? 'border-l-4 border-l-emerald-700' :
+               variant === 'ready' ? 'border-l-4 border-l-blue-700' :
+               variant === 'completed' ? 'border-l-4 border-l-purple-700' : '';
     }
   };
   
+  // Remove the colors[variant] and use only our explicit theme colors
   return (
     <div 
       className={cn(
         "p-3 rounded-lg shadow-md hover:shadow-lg transition-all", 
         getBgColor(),
         getBorderColor(),
-        colors[variant],
         className
       )}
       {...props}
@@ -174,13 +200,13 @@ export function ThemeCard({ className, variant, children, ...props }: ThemeClass
 
 // Specific component for buttons with theme styling
 export function ThemeButton({ className, variant, children, ...props }: ThemeClassesProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const { colors, theme } = useTheme();
+  const { theme } = useTheme();
   
   const buttonVariant = variant.startsWith('button') ? variant : 'buttonPrimary';
   
   // Apply different background colors based on the theme and variant
   const getBgColor = () => {
-    if (variant === 'buttonPrimary') {
+    if (buttonVariant === 'buttonPrimary') {
       switch(theme) {
         case 'dark': return 'bg-purple-700 hover:bg-purple-800';
         case 'light': return 'bg-purple-500 hover:bg-purple-600';
@@ -189,7 +215,7 @@ export function ThemeButton({ className, variant, children, ...props }: ThemeCla
         case 'sunset': return 'bg-orange-500 hover:bg-orange-600';
         default: return 'bg-purple-700 hover:bg-purple-800';
       }
-    } else if (variant === 'buttonSecondary') {
+    } else if (buttonVariant === 'buttonSecondary') {
       switch(theme) {
         case 'dark': return 'bg-gray-700 hover:bg-gray-800'; 
         case 'light': return 'bg-gray-500 hover:bg-gray-600';
