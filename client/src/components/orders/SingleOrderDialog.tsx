@@ -670,11 +670,11 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                   </div>
                   
                   {/* Right Column - Order Summary */}
-                  <div className="w-1/2 h-full p-3 flex flex-col">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-bold text-white">Your Order Summary</h3>
+                  <div className="w-1/2 h-full p-2 flex flex-col">
+                    <div className="flex justify-between items-center mb-1">
+                      <h3 className="font-bold text-white text-sm">Your Order Summary</h3>
                       {orderItems.length > 0 && (
-                        <div className="text-sm bg-blue-900/30 px-2 py-1 rounded-full text-blue-300 border border-blue-800/50">
+                        <div className="text-xs bg-blue-900/30 px-1.5 py-0.5 rounded-full text-blue-300 border border-blue-800/50">
                           {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
                         </div>
                       )}
