@@ -3,7 +3,8 @@ import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
-  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils, Camera
+  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils, Camera,
+  ChevronRight, PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,6 +25,12 @@ import UserMenu from "@/components/auth/UserMenu";
 import { RoleBasedContent } from "@/components/auth/ProtectedRoute";
 import { ConnectionStatus } from "@/components/ui/ConnectionStatus";
 import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface NavItem {
   label: string;
@@ -70,6 +77,7 @@ export function AppShell({ children }: AppShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [chatVisible, setChatVisible] = useState(false);
   const [singleOrderOpen, setSingleOrderOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user, currentRole, setCurrentRole } = useAuth();
 
   const currentPage = mainNavItems.find(item => item.href === location) || 
@@ -120,97 +128,185 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-neutral-900 text-neutral-200">
-      {/* Sidebar - hidden on mobile */}
-      <aside className="hidden md:flex md:w-64 flex-col bg-black border-r border-neutral-800 h-full">
-        <div className="p-4 flex items-center space-x-3 border-b border-neutral-800">
-          <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
-            <HandPlatter size={20} />
+      {/* Collapsible Sidebar - hidden on mobile */}
+      <aside className={cn(
+        "hidden md:flex flex-col bg-black border-r border-neutral-800 h-full transition-all duration-300",
+        sidebarCollapsed ? "md:w-16" : "md:w-64"
+      )}>
+        <div className="p-4 flex items-center justify-between border-b border-neutral-800">
+          <div className={cn("flex items-center", sidebarCollapsed ? "justify-center w-full" : "")}>
+            <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
+              <HandPlatter size={20} />
+            </div>
+            {!sidebarCollapsed && <h1 className="text-lg font-semibold text-white ml-3">YashHotelBot</h1>}
           </div>
-          <h1 className="text-lg font-semibold text-white">YashHotelBot</h1>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="p-1"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          </Button>
         </div>
         
-        <nav className="flex-1 pt-4 pb-4">
-          <div className="px-3 mb-2">
-            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Main</p>
-          </div>
-          <ul>
-            {getFilteredNavItems(mainNavItems, currentRole).map((item) => (
-              <li key={item.href}>
-                <Link 
-                  href={item.href}
-                  className={cn(
-                    "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                    location === item.href 
-                      ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                      : "text-neutral-400 hover:bg-neutral-800"
-                  )}
-                >
-                  <span className="mr-3 text-current">{item.icon}</span>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          
-          {getFilteredNavItems(managementNavItems, currentRole).length > 0 && (
-            <>
-              <div className="px-3 mb-2 mt-6">
-                <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Management</p>
-              </div>
-              <ul>
-                {getFilteredNavItems(managementNavItems, currentRole).map((item) => (
-                  <li key={item.href}>
+        {sidebarCollapsed ? (
+          // Collapsed sidebar - only icons
+          <nav className="flex-1 pt-4 pb-4 overflow-hidden">
+            <ul className="space-y-2">
+              {getFilteredNavItems(mainNavItems, currentRole).map((item) => (
+                <li key={item.href} className="px-4">
+                  <Link 
+                    href={item.href}
+                    className={cn(
+                      "flex justify-center items-center p-2 rounded-md",
+                      location === item.href 
+                        ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                        : "text-neutral-400 hover:bg-neutral-800"
+                    )}
+                    title={item.label}
+                  >
+                    {item.icon}
+                  </Link>
+                </li>
+              ))}
+              
+              {getFilteredNavItems(managementNavItems, currentRole).length > 0 && 
+                getFilteredNavItems(managementNavItems, currentRole).map((item) => (
+                  <li key={item.href} className="px-4">
                     <Link 
                       href={item.href}
                       className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                        "flex justify-center items-center p-2 rounded-md",
                         location === item.href 
                           ? "text-purple-400 bg-purple-900 bg-opacity-40" 
                           : "text-neutral-400 hover:bg-neutral-800"
                       )}
+                      title={item.label}
                     >
-                      <span className="mr-3 text-current">{item.icon}</span>
-                      {item.label}
+                      {item.icon}
                     </Link>
                   </li>
-                ))}
-              </ul>
-            </>
-          )}
-          
-          {(currentRole === "admin" || currentRole === "manager") && (
-            <>
-              <div className="px-3 mb-2 mt-6">
-                <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Testing</p>
-              </div>
-              <ul>
-                {getFilteredNavItems(testingNavItems, currentRole).map((item) => (
-                  <li key={item.href}>
+                ))
+              }
+              
+              {(currentRole === "admin" || currentRole === "manager") && 
+                getFilteredNavItems(testingNavItems, currentRole).map((item) => (
+                  <li key={item.href} className="px-4">
                     <Link 
                       href={item.href}
                       className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                        "flex justify-center items-center p-2 rounded-md",
                         location === item.href 
                           ? "text-purple-400 bg-purple-900 bg-opacity-40" 
                           : "text-neutral-400 hover:bg-neutral-800"
                       )}
+                      title={item.label}
                     >
-                      <span className="mr-3 text-current">{item.icon}</span>
-                      {item.label}
+                      {item.icon}
                     </Link>
                   </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </nav>
+                ))
+              }
+            </ul>
+          </nav>
+        ) : (
+          // Expanded sidebar with accordion
+          <nav className="flex-1 pt-4 pb-4 overflow-hidden">
+            <Accordion type="multiple" defaultValue={["main"]} className="border-none">
+              <AccordionItem value="main" className="border-none">
+                <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                  Main
+                </AccordionTrigger>
+                <AccordionContent className="pt-0 pb-1">
+                  <ul>
+                    {getFilteredNavItems(mainNavItems, currentRole).map((item) => (
+                      <li key={item.href}>
+                        <Link 
+                          href={item.href}
+                          className={cn(
+                            "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                            location === item.href 
+                              ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                              : "text-neutral-400 hover:bg-neutral-800"
+                          )}
+                        >
+                          <span className="mr-3 text-current">{item.icon}</span>
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+              
+              {getFilteredNavItems(managementNavItems, currentRole).length > 0 && (
+                <AccordionItem value="management" className="border-none">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                    Management
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-0 pb-1">
+                    <ul>
+                      {getFilteredNavItems(managementNavItems, currentRole).map((item) => (
+                        <li key={item.href}>
+                          <Link 
+                            href={item.href}
+                            className={cn(
+                              "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                              location === item.href 
+                                ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                                : "text-neutral-400 hover:bg-neutral-800"
+                            )}
+                          >
+                            <span className="mr-3 text-current">{item.icon}</span>
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+              
+              {(currentRole === "admin" || currentRole === "manager") && (
+                <AccordionItem value="testing" className="border-none">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                    Testing
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-0 pb-1">
+                    <ul>
+                      {getFilteredNavItems(testingNavItems, currentRole).map((item) => (
+                        <li key={item.href}>
+                          <Link 
+                            href={item.href}
+                            className={cn(
+                              "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                              location === item.href 
+                                ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                                : "text-neutral-400 hover:bg-neutral-800"
+                            )}
+                          >
+                            <span className="mr-3 text-current">{item.icon}</span>
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+          </nav>
+        )}
         
-        <div className="p-4 border-t border-neutral-800">
-          <div className="text-xs text-neutral-400 text-center">
-            <p>YashHotelBot v1.2.0</p>
-            <p className="mt-1">© 2025 Yash Solutions</p>
+        {!sidebarCollapsed && (
+          <div className="p-4 border-t border-neutral-800">
+            <div className="text-xs text-neutral-400 text-center">
+              <p>YashHotelBot v1.2.0</p>
+              <p className="mt-1">© 2025 Yash Solutions</p>
+            </div>
           </div>
-        </div>
+        )}
       </aside>
       
       {/* Main Content */}
@@ -269,83 +365,93 @@ export function AppShell({ children }: AppShellProps) {
             <h1 className="text-lg font-semibold text-white">YashHotelBot</h1>
           </div>
           
-          <nav className="flex-1 pt-4 pb-4">
-            <div className="px-3 mb-2">
-              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Main</p>
-            </div>
-            <ul>
-              {getFilteredNavItems(mainNavItems, currentRole).map((item) => (
-                <li key={item.href}>
-                  <Link 
-                    href={item.href}
-                    className={cn(
-                      "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                      location === item.href 
-                        ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                        : "text-neutral-400 hover:bg-neutral-800"
-                    )}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <span className="mr-3 text-current">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            
-            {getFilteredNavItems(managementNavItems, currentRole).length > 0 && (
-              <>
-                <div className="px-3 mb-2 mt-6">
-                  <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Management</p>
-                </div>
-                <ul>
-                  {getFilteredNavItems(managementNavItems, currentRole).map((item) => (
-                    <li key={item.href}>
-                      <Link 
-                        href={item.href}
-                        className={cn(
-                          "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                          location === item.href 
-                            ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                            : "text-neutral-400 hover:bg-neutral-800"
-                        )}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <span className="mr-3 text-current">{item.icon}</span>
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-            
-            {(currentRole === "admin" || currentRole === "manager") && (
-              <>
-                <div className="px-3 mb-2 mt-6">
-                  <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Testing</p>
-                </div>
-                <ul>
-                  {getFilteredNavItems(testingNavItems, currentRole).map((item) => (
-                    <li key={item.href}>
-                      <Link 
-                        href={item.href}
-                        className={cn(
-                          "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                          location === item.href 
-                            ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                            : "text-neutral-400 hover:bg-neutral-800"
-                        )}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <span className="mr-3 text-current">{item.icon}</span>
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+          <nav className="flex-1 pt-4 pb-4 overflow-hidden">
+            <Accordion type="multiple" defaultValue={["main"]} className="border-none">
+              <AccordionItem value="main" className="border-none">
+                <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                  Main
+                </AccordionTrigger>
+                <AccordionContent className="pt-0 pb-1">
+                  <ul>
+                    {getFilteredNavItems(mainNavItems, currentRole).map((item) => (
+                      <li key={item.href}>
+                        <Link 
+                          href={item.href}
+                          className={cn(
+                            "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                            location === item.href 
+                              ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                              : "text-neutral-400 hover:bg-neutral-800"
+                          )}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <span className="mr-3 text-current">{item.icon}</span>
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+              
+              {getFilteredNavItems(managementNavItems, currentRole).length > 0 && (
+                <AccordionItem value="management" className="border-none">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                    Management
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-0 pb-1">
+                    <ul>
+                      {getFilteredNavItems(managementNavItems, currentRole).map((item) => (
+                        <li key={item.href}>
+                          <Link 
+                            href={item.href}
+                            className={cn(
+                              "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                              location === item.href 
+                                ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                                : "text-neutral-400 hover:bg-neutral-800"
+                            )}
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <span className="mr-3 text-current">{item.icon}</span>
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+              
+              {(currentRole === "admin" || currentRole === "manager") && (
+                <AccordionItem value="testing" className="border-none">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                    Testing
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-0 pb-1">
+                    <ul>
+                      {getFilteredNavItems(testingNavItems, currentRole).map((item) => (
+                        <li key={item.href}>
+                          <Link 
+                            href={item.href}
+                            className={cn(
+                              "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                              location === item.href 
+                                ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                                : "text-neutral-400 hover:bg-neutral-800"
+                            )}
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <span className="mr-3 text-current">{item.icon}</span>
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
           </nav>
           
           {/* Footer section with app version */}
