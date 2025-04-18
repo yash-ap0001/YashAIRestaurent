@@ -334,15 +334,15 @@ export function BillDetails({ orderId }: BillDetailsProps) {
   return (
     <div className="space-y-4 p-2">
       {/* Header with order info and action buttons */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4 bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4 bg-gradient-to-r from-purple-950/90 to-purple-800 p-4 rounded-lg shadow-sm text-white">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-primary">Order #{order.orderNumber}</h2>
-            <Badge variant={existingBill ? "secondary" : "outline"} className={existingBill ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}>
+            <h2 className="text-xl font-bold text-white">Order #{order.orderNumber}</h2>
+            <Badge variant={existingBill ? "secondary" : "outline"} className={existingBill ? "bg-purple-600 text-white hover:bg-purple-600" : "border-white text-white"}>
               {existingBill ? "Billed" : "Unbilled"}
             </Badge>
           </div>
-          <div className="flex items-center gap-2 mt-1 text-sm text-neutral-600">
+          <div className="flex items-center gap-2 mt-1 text-sm text-purple-200">
             <span className="flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V5zm1 0v10h12V5H4z" clipRule="evenodd"/>
@@ -365,84 +365,60 @@ export function BillDetails({ orderId }: BillDetailsProps) {
           </div>
           {existingBill && (
             <div className="mt-1 text-sm">
-              <span className="text-primary font-medium">Bill #{existingBill.billNumber}</span>
+              <span className="text-purple-200 font-medium">Bill #{existingBill.billNumber}</span>
             </div>
-          )}
-        </div>
-        
-        <div className="flex gap-2 self-end md:self-start">
-          {existingBill && (
-            <>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="bg-white border-primary text-primary hover:bg-primary/10"
-                onClick={() => downloadPdf(existingBill.id)}
-              >
-                <File className="h-4 w-4 mr-1" />
-                Download PDF
-              </Button>
-              <Button 
-                size="sm"
-                className="bg-primary hover:bg-primary/90"
-                onClick={handlePrint}
-              >
-                <Printer className="h-4 w-4 mr-1" />
-                Print
-              </Button>
-            </>
           )}
         </div>
       </div>
       
       {/* Order Items Table */}
-      <div className="rounded-lg overflow-hidden border shadow-sm">
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b">
-          <h3 className="font-medium text-gray-800">Order Items</h3>
+      <div className="rounded-lg overflow-hidden border shadow-sm bg-gray-900">
+        <div className="bg-gradient-to-r from-purple-900 to-purple-800 px-4 py-3 border-b border-gray-700">
+          <h3 className="font-medium text-white">Order Items</h3>
         </div>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-700">
+          <thead className="bg-gray-800">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Item
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Price
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Qty
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Total
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-900 divide-y divide-gray-700">
             {orderItems && orderItems.length > 0 ? (
               orderItems.map((item: OrderItem) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-800">
+                <tr key={item.id} className="hover:bg-gray-800">
+                  <td className="px-4 py-3 text-sm text-gray-200">
                     {getItemName(item.menuItemId)}
                     {item.notes && (
-                      <p className="text-xs text-gray-500 mt-1">{item.notes}</p>
+                      <p className="text-xs text-gray-400 mt-1">{item.notes}</p>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                  <td className="px-4 py-3 text-sm text-gray-300 text-right">
                     ₹{item.price.toFixed(2)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                  <td className="px-4 py-3 text-sm text-gray-300 text-right">
                     {item.quantity}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-800 text-right">
+                  <td className="px-4 py-3 text-sm font-medium text-purple-300 text-right">
                     ₹{(item.price * item.quantity).toFixed(2)}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-sm text-center text-gray-500">
+                <td colSpan={4} className="px-4 py-6 text-sm text-center text-gray-400">
                   <div className="flex flex-col items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                     No items in this order
@@ -457,36 +433,36 @@ export function BillDetails({ orderId }: BillDetailsProps) {
       {/* Payment Information and Summary */}
       <div className="flex flex-col md:flex-row md:justify-between gap-6">
         {!existingBill && (
-          <div className="space-y-4 md:w-1/2 bg-white p-4 rounded-lg border shadow-sm">
-            <h3 className="font-medium text-primary border-b pb-2">Payment Information</h3>
+          <div className="space-y-4 md:w-1/2 bg-gray-900 p-4 rounded-lg border border-gray-700 shadow-sm">
+            <h3 className="font-medium text-purple-300 border-b border-gray-700 pb-2">Payment Information</h3>
             
             <div className="space-y-4">
               <div className="relative">
-                <label className="text-sm font-medium text-gray-700 flex items-center mb-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                <label className="text-sm font-medium text-gray-300 flex items-center mb-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
                   </svg>
                   Discount Amount
                 </label>
                 <div className="relative mt-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">₹</span>
+                    <span className="text-gray-400 sm:text-sm">₹</span>
                   </div>
                   <Input
                     type="number"
                     min="0"
                     value={discount.toString()}
                     onChange={(e) => setDiscount(Number(e.target.value))}
-                    className="border-gray-300 focus:border-primary focus:ring-primary pl-7"
+                    className="bg-gray-800 border-gray-700 text-white focus:border-purple-500 focus:ring-purple-500 pl-7"
                     placeholder="0.00"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Enter discount amount (if applicable)</p>
+                <p className="text-xs text-gray-400 mt-1">Enter discount amount (if applicable)</p>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-gray-700 flex items-center mb-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                <label className="text-sm font-medium text-gray-300 flex items-center mb-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                     <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                   </svg>
@@ -496,32 +472,32 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                   value={paymentMethod} 
                   onValueChange={setPaymentMethod}
                 >
-                  <SelectTrigger className="border-gray-300 focus:border-primary w-full">
+                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white focus:border-purple-500 focus:ring-purple-500 w-full">
                     <SelectValue placeholder="Select payment method" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
                     <div className="p-1">
-                      <SelectItem value="cash" className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                      <SelectItem value="cash" className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-700 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
                         </svg>
                         Cash
                       </SelectItem>
-                      <SelectItem value="card" className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                      <SelectItem value="card" className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-700 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                           <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                         </svg>
                         Credit/Debit Card
                       </SelectItem>
-                      <SelectItem value="upi" className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
+                      <SelectItem value="upi" className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-700 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
                         </svg>
                         UPI
                       </SelectItem>
-                      <SelectItem value="wallet" className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-600" viewBox="0 0 20 20" fill="currentColor">
+                      <SelectItem value="wallet" className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-700 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
                         </svg>
                         Digital Wallet
@@ -531,12 +507,12 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                 </Select>
               </div>
                 
-              <div className="bg-blue-50 rounded-md p-2.5 mt-2">
+              <div className="bg-purple-900/50 rounded-md p-2.5 mt-2 border border-purple-800/50">
                 <div className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-300 mt-0.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <p className="text-xs text-blue-700">
+                  <p className="text-xs text-purple-200">
                     Click the "Generate Bill" button below to finalize this order and create a bill with the specified payment details.
                   </p>
                 </div>
@@ -545,68 +521,68 @@ export function BillDetails({ orderId }: BillDetailsProps) {
           </div>
         )}
         
-        <div className={`${!existingBill ? 'md:w-1/2' : 'w-full'} bg-white p-4 rounded-lg border shadow-sm`}>
-          <h3 className="font-medium text-primary border-b pb-2 mb-3 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <div className={`${!existingBill ? 'md:w-1/2' : 'w-full'} bg-gray-900 p-4 rounded-lg border border-gray-700 shadow-sm`}>
+          <h3 className="font-medium text-purple-300 border-b border-gray-700 pb-2 mb-3 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm4.707 3.707a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L8.414 9H10a3 3 0 013 3v1a1 1 0 102 0v-1a5 5 0 00-5-5H8.414l1.293-1.293z" clipRule="evenodd" />
             </svg>
             Bill Summary
           </h3>
           
-          <div className="bg-gray-50 rounded-lg p-3 space-y-2 mb-3">
+          <div className="bg-gray-800 rounded-lg p-3 space-y-2 mb-3 border border-gray-700">
             <div className="flex justify-between py-1 text-sm items-center">
-              <span className="text-gray-600 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <span className="text-gray-300 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                   <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                 </svg>
                 Subtotal
               </span>
-              <span className="font-medium">₹{subtotal.toFixed(2)}</span>
+              <span className="font-medium text-gray-200">₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-1 text-sm items-center">
-              <span className="text-gray-600 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <span className="text-gray-300 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                 </svg>
                 Tax (5%)
               </span>
-              <span className="font-medium">₹{taxAmount.toFixed(2)}</span>
+              <span className="font-medium text-gray-200">₹{taxAmount.toFixed(2)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between py-1 text-sm items-center">
-                <span className="text-gray-600 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <span className="text-gray-300 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm4.5 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm-3-1a1 1 0 11-2 0 1 1 0 012 0zm7 1a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clipRule="evenodd" />
                   </svg>
                   Discount
                 </span>
-                <span className="font-medium text-red-600">-₹{discount.toFixed(2)}</span>
+                <span className="font-medium text-red-400">-₹{discount.toFixed(2)}</span>
               </div>
             )}
           </div>
           
-          <div className="flex justify-between py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3">
-            <span className="font-semibold flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+          <div className="flex justify-between py-2 bg-gradient-to-r from-purple-900 to-purple-800 rounded-lg p-3 border border-purple-700">
+            <span className="font-semibold flex items-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-purple-300" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
               </svg>
               Total Amount
             </span>
-            <span className="font-bold text-lg text-primary">₹{total.toFixed(2)}</span>
+            <span className="font-bold text-lg text-white">₹{total.toFixed(2)}</span>
           </div>
           
           {existingBill ? (
-            <div className="pt-4 mt-2 border-t border-dashed border-gray-200">
+            <div className="pt-4 mt-2 border-t border-dashed border-gray-700">
               <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-gray-50 p-3 rounded">
-                  <p className="text-xs text-gray-500 mb-1">Payment Method</p>
-                  <p className="font-medium capitalize text-sm">{existingBill.paymentMethod || "Not specified"}</p>
+                <div className="bg-gray-800 p-3 rounded border border-gray-700">
+                  <p className="text-xs text-gray-400 mb-1">Payment Method</p>
+                  <p className="font-medium capitalize text-sm text-purple-300">{existingBill.paymentMethod || "Not specified"}</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded">
-                  <p className="text-xs text-gray-500 mb-1">Payment Status</p>
+                <div className="bg-gray-800 p-3 rounded border border-gray-700">
+                  <p className="text-xs text-gray-400 mb-1">Payment Status</p>
                   <p className={`font-medium capitalize text-sm ${
-                    existingBill.paymentStatus === "paid" ? "text-green-600" : "text-amber-600"
+                    existingBill.paymentStatus === "paid" ? "text-green-400" : "text-amber-400"
                   }`}>
                     {existingBill.paymentStatus}
                   </p>
@@ -617,8 +593,8 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                 variant="default" 
                 size="lg" 
                 className={`w-full mt-2 ${existingBill.paymentStatus === "paid" 
-                  ? "bg-green-600 hover:bg-green-700" 
-                  : "bg-primary hover:bg-primary/90"}`}
+                  ? "bg-purple-800 hover:bg-purple-700 text-white" 
+                  : "bg-purple-700 hover:bg-purple-600 text-white"}`}
                 disabled={existingBill.paymentStatus === "paid" || markAsPaidMutation.isPending}
                 onClick={() => handleMarkAsPaid(existingBill.id)}
               >
@@ -635,7 +611,7 @@ export function BillDetails({ orderId }: BillDetailsProps) {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="text-green-600 border-green-600 hover:bg-green-50"
+                  className="border-purple-500 text-purple-300 hover:bg-purple-900/50"
                   onClick={() => {
                     // Format a WhatsApp message with bill details
                     const message = `Thank you for dining with us!\n\n` +
@@ -663,7 +639,7 @@ export function BillDetails({ orderId }: BillDetailsProps) {
             <Button 
               variant="default" 
               size="lg" 
-              className="w-full mt-6 bg-primary hover:bg-primary/90" 
+              className="w-full mt-6 bg-purple-700 hover:bg-purple-600 text-white" 
               onClick={handleGenerateBill}
               disabled={createBillMutation.isPending}
             >
