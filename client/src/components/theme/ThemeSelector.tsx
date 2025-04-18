@@ -1,7 +1,5 @@
-import React from "react";
-import { useTheme, ThemeOption, themeColors } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -9,120 +7,126 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Palette, Check, Sun, Moon, Crown, Leaf, Sunset } from "lucide-react";
+import { ThemeOption, useTheme } from "@/contexts/ThemeContext";
+import { Paintbrush } from "lucide-react";
 
-// Theme option with icon and name
-interface ThemeOptionProps {
-  value: ThemeOption;
-  icon: React.ReactNode;
-  label: string;
-  description: string;
-  onClick: () => void;
-  isActive: boolean;
-}
-
-const ThemeOptionItem: React.FC<ThemeOptionProps> = ({ 
-  value, 
-  icon, 
-  label, 
-  description, 
-  onClick, 
-  isActive 
-}) => {
-  const gradientClass = themeColors[value].buttonPrimary;
-  
-  return (
-    <div 
-      className={`flex items-center justify-between p-2 rounded-md cursor-pointer hover:bg-muted/50 ${isActive ? 'bg-muted' : ''}`}
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-2">
-        <div className={`p-1.5 rounded-md ${gradientClass} text-white`}>
-          {icon}
-        </div>
-        <div>
-          <div className="font-medium">{label}</div>
-          <div className="text-xs text-muted-foreground">{description}</div>
-        </div>
-      </div>
-      {isActive && <Check className="h-4 w-4 text-primary" />}
-    </div>
-  );
+// Map theme names to user-friendly display names
+const themeDisplayNames: Record<ThemeOption, string> = {
+  default: "Purple Theme",
+  dark: "Dark Mode",
+  light: "Light Mode",
+  royal: "Royal Blue",
+  forest: "Forest Green",
+  sunset: "Sunset Orange"
 };
 
-// Main theme selector component
-export const ThemeSelector: React.FC = () => {
-  const { theme, changeTheme } = useTheme();
-
-  const themeOptions: { 
-    value: ThemeOption; 
-    icon: React.ReactNode; 
-    label: string;
-    description: string;
-  }[] = [
-    { 
-      value: 'default', 
-      icon: <Palette className="h-4 w-4" />, 
-      label: 'Default',
-      description: 'Dark purple accents with colorful statuses' 
-    },
-    { 
-      value: 'dark', 
-      icon: <Moon className="h-4 w-4" />, 
-      label: 'Dark Monochrome',
-      description: 'Shades of gray for a minimalist look' 
-    },
-    { 
-      value: 'light', 
-      icon: <Sun className="h-4 w-4" />, 
-      label: 'Light Mode',
-      description: 'Bright and clean with blue accents' 
-    },
-    { 
-      value: 'royal', 
-      icon: <Crown className="h-4 w-4" />, 
-      label: 'Royal Purple',
-      description: 'Rich indigo and purple tones' 
-    },
-    { 
-      value: 'forest', 
-      icon: <Leaf className="h-4 w-4" />, 
-      label: 'Forest Green',
-      description: 'Calming emerald and teal palette' 
-    },
-    { 
-      value: 'sunset', 
-      icon: <Sunset className="h-4 w-4" />, 
-      label: 'Sunset Orange',
-      description: 'Warm orange and red color scheme' 
-    },
-  ];
-
+export function ThemeSelector() {
+  const { theme, changeTheme, setTheme } = useTheme();
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="h-8 gap-1">
-          <Palette className="h-4 w-4" />
-          <span>Theme</span>
+          <Paintbrush className="h-3.5 w-3.5" />
+          <span className="hidden md:inline">Theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[240px]">
-        <DropdownMenuLabel className="text-xs">Dashboard Themes</DropdownMenuLabel>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Theme Options</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <div className="py-1 px-1 space-y-1">
-          {themeOptions.map((option) => (
-            <ThemeOptionItem
-              key={option.value}
-              value={option.value}
-              icon={option.icon}
-              label={option.label}
-              description={option.description}
-              onClick={() => changeTheme(option.value)}
-              isActive={theme === option.value}
-            />
-          ))}
-        </div>
+        
+        {/* Predefined Themes */}
+        {Object.entries(themeDisplayNames).map(([key, name]) => (
+          <DropdownMenuItem
+            key={key}
+            className="cursor-pointer"
+            onClick={() => changeTheme(key as ThemeOption)}
+          >
+            <div className="flex items-center gap-2">
+              <div 
+                className={`w-4 h-4 rounded-full ${key === theme ? 'ring-2 ring-primary' : ''}`} 
+                style={{
+                  background: key === 'default' ? '#7A0177' : 
+                            key === 'dark' ? '#333333' : 
+                            key === 'light' ? '#f8f9fa' : 
+                            key === 'royal' ? '#4338ca' : 
+                            key === 'forest' ? '#047857' : 
+                            '#f97316' // sunset
+                }}
+              />
+              <span>{name}</span>
+              {key === theme && (
+                <span className="ml-auto text-xs opacity-60">Active</span>
+              )}
+            </div>
+          </DropdownMenuItem>
+        ))}
+        
+        <DropdownMenuSeparator />
+        
+        {/* Theme Presets - using theme.json format */}
+        <DropdownMenuLabel className="text-xs">Theme Presets</DropdownMenuLabel>
+        
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => setTheme({
+            primary: "#7A0177",
+            appearance: "dark",
+            radius: 0.5,
+            variant: "vibrant"
+          })}
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-[#7A0177]" />
+            <span>Purple Vibrant</span>
+          </div>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => setTheme({
+            primary: "#22c55e",
+            appearance: "dark",
+            radius: 0.5,
+            variant: "professional"
+          })}
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-[#22c55e]" />
+            <span>Green Professional</span>
+          </div>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => setTheme({
+            primary: "#0ea5e9",
+            appearance: "dark",
+            radius: 0.5,
+            variant: "tint"
+          })}
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-[#0ea5e9]" />
+            <span>Blue Tint</span>
+          </div>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => setTheme({
+            primary: "#f97316",
+            appearance: "dark",
+            radius: 0.75,
+            variant: "vibrant"
+          })}
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-[#f97316]" />
+            <span>Orange Vibrant</span>
+          </div>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
+}

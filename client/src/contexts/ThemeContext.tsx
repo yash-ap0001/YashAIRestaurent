@@ -3,6 +3,14 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 // Define the available themes
 export type ThemeOption = 'default' | 'dark' | 'light' | 'royal' | 'forest' | 'sunset';
 
+// ThemeConfig interface for JSON theme settings
+export interface ThemeConfig {
+  primary: string;
+  appearance: 'light' | 'dark' | 'system';
+  radius: number;
+  variant: 'professional' | 'tint' | 'vibrant';
+}
+
 // Custom colors for each theme
 export const themeColors = {
   default: {
@@ -95,15 +103,44 @@ interface ThemeContextType {
   theme: ThemeOption;
   changeTheme: (theme: ThemeOption) => void;
   colors: typeof themeColors.default;
+  // New property to support theme.json format
+  setTheme: (config: ThemeConfig) => void;
 }
 
 // Create the theme context
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Map ThemeConfig to ThemeOption
+const mapConfigToTheme = (config: ThemeConfig): ThemeOption => {
+  // Simple mapping based on primary color and variant
+  if (config.primary.startsWith('#7A01')) return 'default';
+  if (config.primary.startsWith('#22c')) return 'forest';
+  if (config.primary.startsWith('#0ea')) return 'royal';
+  if (config.primary.startsWith('#f97')) return 'sunset';
+  
+  // Default mapping based on appearance
+  return config.appearance === 'light' ? 'light' : 'dark';
+};
+
+// Apply a theme config to document
+const applyThemeConfig = (config: ThemeConfig) => {
+  // This would normally update the theme.json file
+  // For now we'll just apply the theme to localStorage
+  localStorage.setItem('theme-config', JSON.stringify(config));
+  
+  // You could also update the HTML document to reflect the theme changes
+  document.documentElement.style.setProperty('--theme-primary', config.primary);
+  document.documentElement.style.setProperty('--theme-radius', `${config.radius}rem`);
+  
+  // Set data attributes for appearance
+  document.documentElement.setAttribute('data-appearance', config.appearance);
+  document.documentElement.setAttribute('data-variant', config.variant);
+};
+
 // Theme provider component
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Get the theme from localStorage or use default
-  const [theme, setTheme] = useState<ThemeOption>(() => {
+  const [theme, setThemeState] = useState<ThemeOption>(() => {
     const savedTheme = localStorage.getItem('dashboard-theme');
     return (savedTheme as ThemeOption) || 'default';
   });
@@ -113,12 +150,23 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Change theme function
   const changeTheme = (newTheme: ThemeOption) => {
-    setTheme(newTheme);
+    setThemeState(newTheme);
     localStorage.setItem('dashboard-theme', newTheme);
+  };
+  
+  // Set theme using ThemeConfig
+  const setTheme = (config: ThemeConfig) => {
+    // Apply the theme config
+    applyThemeConfig(config);
+    
+    // Map the config to a ThemeOption and update state
+    const mappedTheme = mapConfigToTheme(config);
+    setThemeState(mappedTheme);
+    localStorage.setItem('dashboard-theme', mappedTheme);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme, colors }}>
+    <ThemeContext.Provider value={{ theme, changeTheme, colors, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

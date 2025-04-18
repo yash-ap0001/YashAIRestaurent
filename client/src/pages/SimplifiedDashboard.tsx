@@ -24,6 +24,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import { ThemeColumnHeader, ThemeCard } from "@/components/theme/ThemeStyles";
 
 interface Order {
   id: number;
@@ -746,7 +747,7 @@ export default function SimplifiedDashboard() {
               
               {/* Pending Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-amber-500 to-orange-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className={cn("text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3", colors.pending)}>
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -857,7 +858,7 @@ export default function SimplifiedDashboard() {
               
               {/* Preparing Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-emerald-500 to-green-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className={cn("text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3", colors.preparing)}>
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
