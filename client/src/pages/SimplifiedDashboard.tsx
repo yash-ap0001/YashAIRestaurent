@@ -704,6 +704,22 @@ export default function SimplifiedDashboard() {
               <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
+                    {isSelectMode && (
+                      <div className="mr-2">
+                        <Checkbox 
+                          checked={orders.filter(order => order.status === "pending").every(order => selectedOrders.includes(order.id))}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              selectAllInStatus("pending");
+                            } else {
+                              unselectAllInStatus("pending");
+                            }
+                          }}
+                          aria-label="Select all pending orders"
+                          className="h-4 w-4 rounded-sm"
+                        />
+                      </div>
+                    )}
                     <ClipboardList className="h-5 w-5 mr-2" />
                     Pending Orders
                   </div>
@@ -711,16 +727,6 @@ export default function SimplifiedDashboard() {
                     <div className="text-amber-100 text-sm bg-amber-800 px-2 py-0.5 rounded-full">
                       {orders.filter(order => order.status === "pending").length}
                     </div>
-                    {isSelectMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => selectAllInStatus("pending")}
-                        className="text-xs text-amber-50 hover:text-amber-200 pl-1 h-5"
-                      >
-                        Select All
-                      </Button>
-                    )}
                   </div>
                 </div>
                 <Droppable droppableId="pending">
@@ -817,16 +823,6 @@ export default function SimplifiedDashboard() {
                     <div className="text-emerald-100 text-sm bg-emerald-800 px-2 py-0.5 rounded-full">
                       {orders.filter(order => order.status === "preparing").length}
                     </div>
-                    {isSelectMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => selectAllInStatus("preparing")}
-                        className="text-xs text-emerald-50 hover:text-emerald-200 pl-1 h-5"
-                      >
-                        Select All
-                      </Button>
-                    )}
                   </div>
                 </div>
                 <Droppable droppableId="preparing">
@@ -923,16 +919,6 @@ export default function SimplifiedDashboard() {
                     <div className="text-blue-100 text-sm bg-blue-800 px-2 py-0.5 rounded-full">
                       {orders.filter(order => order.status === "ready").length}
                     </div>
-                    {isSelectMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => selectAllInStatus("ready")}
-                        className="text-xs text-blue-50 hover:text-blue-200 pl-1 h-5"
-                      >
-                        Select All
-                      </Button>
-                    )}
                   </div>
                 </div>
                 <Droppable droppableId="ready">
@@ -1029,16 +1015,6 @@ export default function SimplifiedDashboard() {
                     <div className="text-purple-100 text-sm bg-purple-800 px-2 py-0.5 rounded-full">
                       {orders.filter(order => order.status === "completed").length}
                     </div>
-                    {isSelectMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => selectAllInStatus("completed")}
-                        className="text-xs text-purple-50 hover:text-purple-200 pl-1 h-5"
-                      >
-                        Select All
-                      </Button>
-                    )}
                   </div>
                 </div>
                 <Droppable droppableId="completed">
@@ -1135,16 +1111,6 @@ export default function SimplifiedDashboard() {
                     <div className="text-gray-100 text-sm bg-gray-800 px-2 py-0.5 rounded-full">
                       {orders.filter(order => order.status === "billed").length}
                     </div>
-                    {isSelectMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => selectAllInStatus("billed")}
-                        className="text-xs text-gray-50 hover:text-gray-200 pl-1 h-5"
-                      >
-                        Select All
-                      </Button>
-                    )}
                   </div>
                 </div>
                 <Droppable droppableId="billed">
