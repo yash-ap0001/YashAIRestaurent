@@ -65,9 +65,9 @@ export function CompactOrderSummary({
             <p className="text-center">{emptyStateText}</p>
           </div>
         ) : (
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             {orderItems.map((item, index) => (
-              <div key={index} className="border border-blue-800/50 rounded-lg p-2 space-y-1 hover:bg-blue-900/20 transition-colors">
+              <div key={index} className="border border-blue-800/50 rounded-md p-1.5 space-y-0.5 hover:bg-blue-900/20 transition-colors">
                 <div className="flex justify-between">
                   <h4 className="font-semibold text-white text-sm">{item.menuItemName}</h4>
                   <div className="flex items-center space-x-1">
@@ -75,31 +75,31 @@ export function CompactOrderSummary({
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-5 w-5 text-white hover:bg-blue-800/50 hover:text-white rounded-full p-0"
+                      className="h-4 w-4 text-white hover:bg-blue-800/50 hover:text-white rounded-full p-0"
                       onClick={() => onUpdateQuantity(index, -1)}
                     >
-                      <Minus className="h-3 w-3" />
+                      <Minus className="h-2.5 w-2.5" />
                     </Button>
-                    <span className="text-white text-xs min-w-[20px] text-center">
+                    <span className="text-white text-xs min-w-[16px] text-center">
                       {item.quantity}
                     </span>
                     <Button
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-5 w-5 text-white hover:bg-blue-600 hover:text-white rounded-full p-0"
+                      className="h-4 w-4 text-white hover:bg-blue-600 hover:text-white rounded-full p-0"
                       onClick={() => onUpdateQuantity(index, 1)}
                     >
-                      <Plus className="h-3 w-3" />
+                      <Plus className="h-2.5 w-2.5" />
                     </Button>
                     <Button
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-5 w-5 text-red-500 hover:bg-red-950/50 hover:text-red-400 rounded-full p-0 ml-1"
+                      className="h-4 w-4 text-red-500 hover:bg-red-950/50 hover:text-red-400 rounded-full p-0 ml-1"
                       onClick={() => onRemoveItem(index)}
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-2.5 w-2.5" />
                     </Button>
                   </div>
                 </div>
@@ -124,18 +124,18 @@ export function CompactOrderSummary({
         )}
       </div>
       
-      <div className="pt-2">
-        <div className="rounded-lg border border-gray-800 overflow-hidden">
+      <div className="pt-1">
+        <div className="rounded-md border border-gray-800 overflow-hidden">
           <Textarea
             placeholder="Add notes for this order..."
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}
-            className="bg-black border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none h-16 text-sm placeholder:text-gray-600"
+            className="bg-black border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none h-12 text-xs placeholder:text-gray-600"
           />
         </div>
       </div>
       
-      <div className="mt-2 p-2 bg-blue-900/30 flex justify-between items-center rounded-lg border border-blue-800">
+      <div className="mt-1 p-1.5 bg-blue-900/30 flex justify-between items-center rounded-md border border-blue-800">
         <span className="font-bold text-blue-300 text-sm">Total Amount</span>
         <span className="text-lg font-extrabold text-white">
           {formatCurrency(totalAmount)}
