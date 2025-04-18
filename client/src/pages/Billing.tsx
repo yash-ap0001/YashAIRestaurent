@@ -364,13 +364,8 @@ export default function Billing() {
         {/* Bill Details Dialog */}
         <Dialog open={billDialogOpen} onOpenChange={setBillDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader className="flex flex-row items-center justify-between">
+            <DialogHeader>
               <DialogTitle className="text-xl font-bold text-primary">Bill Details</DialogTitle>
-              <DialogClose asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <X className="h-4 w-4" />
-                </Button>
-              </DialogClose>
             </DialogHeader>
             {selectedOrderId ? (
               <BillDetails orderId={selectedOrderId} />
