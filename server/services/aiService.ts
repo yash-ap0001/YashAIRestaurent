@@ -154,7 +154,7 @@ export async function processNaturalLanguageOrder(
         {
           role: "system",
           content: 
-            "You are an expert restaurant order parser. Extract menu items, quantities, and special instructions from natural language orders. Always ensure that you use the exact menuItemId from the available menu items list."
+            "You are an expert restaurant order parser. Extract menu items, quantities, and special instructions from natural language orders. Always ensure that you use the exact menuItemId from the available menu items list. Pay special attention to identifying all bread items (like naan, roti, paratha) correctly with their exact variants (butter naan, garlic naan, etc.)."
         },
         {
           role: "user",
@@ -199,16 +199,54 @@ export async function processNaturalLanguageOrder(
           // Find closest match
           console.log(`No exact match found for "${item.name}", finding closest match...`);
           
-          // Simple matching logic - check if menu item name contains the ordered item name or vice versa
+          // Enhanced matching logic for compound food names like "Butter Naan"
+          let bestMatch = null;
+          let bestMatchScore = 0;
+          
+          // Split the item name into words for better matching
+          const itemWords = (item.name || '').toLowerCase().split(/\s+/);
+          
           for (const menuItem of menuItems) {
-            if (
-              menuItem.name.toLowerCase().includes((item.name || '').toLowerCase()) ||
-              (item.name || '').toLowerCase().includes(menuItem.name.toLowerCase())
-            ) {
-              console.log(`Found closest match: "${item.name}" matched to "${menuItem.name}" (ID: ${menuItem.id})`);
-              item.menuItemId = menuItem.id;
-              break;
+            const menuItemName = menuItem.name.toLowerCase();
+            // Calculate a matching score
+            let matchScore = 0;
+            
+            // Check if menu item contains full item name
+            if (menuItemName.includes((item.name || '').toLowerCase())) {
+              matchScore += 3; // Strong match
             }
+            
+            // Check if item name contains full menu item name
+            if ((item.name || '').toLowerCase().includes(menuItemName)) {
+              matchScore += 2; // Good match
+            }
+            
+            // Check for partial word matches (like "Butter" in "Butter Naan")
+            for (const word of itemWords) {
+              if (word.length > 2 && menuItemName.includes(word)) { // Only consider meaningful words (>2 chars)
+                matchScore += 1; // Partial match per word
+              }
+            }
+            
+            // Special handling for known problematic items
+            if (
+              (item.name || '').toLowerCase().includes('naan') && 
+              menuItemName.includes('naan')
+            ) {
+              matchScore += 2; // Boost matches for naan items specifically
+            }
+            
+            // Update best match if we found a better one
+            if (matchScore > bestMatchScore) {
+              bestMatch = menuItem;
+              bestMatchScore = matchScore;
+            }
+          }
+          
+          // Use the best match if we found one with a reasonable score
+          if (bestMatch && bestMatchScore >= 1) {
+            console.log(`Found best match (score ${bestMatchScore}): "${item.name}" matched to "${bestMatch.name}" (ID: ${bestMatch.id})`);
+            item.menuItemId = bestMatch.id;
           }
           
           // If still no match, default to the first menu item

@@ -19,18 +19,15 @@ import {
   Trash,
   Loader2,
   ChefHat,
-  Plus,
   ClipboardList,
   Timer
 } from "lucide-react";
-import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
 import type { Order, KitchenToken } from "@shared/schema";
 
 // Simplified Kitchen Page that uses Order numbers instead of token numbers
 export default function KitchenTokens() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -184,21 +181,6 @@ export default function KitchenTokens() {
           </TabsList>
 
           <div className="flex items-center gap-3">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => setSingleOrderOpen(true)}
-              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
-            >
-              <Utensils className="h-4 w-4 mr-1" />
-              <span>Create Order</span>
-            </Button>
-            
-            {/* Single Order Dialog */}
-            <SingleOrderDialog 
-              open={singleOrderOpen} 
-              onClose={() => setSingleOrderOpen(false)} 
-            />
 
             <div className="relative">
               <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
