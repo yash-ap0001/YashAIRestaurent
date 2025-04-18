@@ -22,20 +22,23 @@ const getStatusIcon = (status: string) => {
 };
 
 // Order status descriptions for notifications
-const getStatusDescription = (status: string, orderNumber: string, tableNumber: string) => {
+const getStatusDescription = (status: string, orderNumber: string, tableNumber: string | null) => {
+  // Handle table display text
+  const tableDisplay = tableNumber ? `Table ${tableNumber}` : 'Takeaway';
+  
   switch (status) {
     case "pending":
-      return `Order #${orderNumber} for Table ${tableNumber} has been received and is pending.`;
+      return `Order #${orderNumber} for ${tableDisplay} has been received and is pending.`;
     case "preparing":
-      return `Order #${orderNumber} for Table ${tableNumber} is now being prepared in the kitchen.`;
+      return `Order #${orderNumber} for ${tableDisplay} is now being prepared in the kitchen.`;
     case "ready":
-      return `Order #${orderNumber} for Table ${tableNumber} is ready to be served.`;
+      return `Order #${orderNumber} for ${tableDisplay} is ready to be served.`;
     case "completed":
-      return `Order #${orderNumber} for Table ${tableNumber} has been completed.`;
+      return `Order #${orderNumber} for ${tableDisplay} has been completed.`;
     case "billed":
-      return `Order #${orderNumber} for Table ${tableNumber} has been billed.`;
+      return `Order #${orderNumber} for ${tableDisplay} has been billed.`;
     default:
-      return `Order #${orderNumber} for Table ${tableNumber} status has been updated.`;
+      return `Order #${orderNumber} for ${tableDisplay} status has been updated.`;
   }
 };
 
@@ -139,9 +142,10 @@ export function OrderTrackingToasts() {
           orderStatusMap.set(wsEvent.data.id, "pending");
           
           // Show toast notification
+          const tableDisplay = tableNumber ? `Table ${tableNumber}` : 'Takeaway';
           toast({
             title: "New Order Created",
-            description: `Order #${orderNumber} for Table ${tableNumber} has been received.`,
+            description: `Order #${orderNumber} for ${tableDisplay} has been received.`,
             variant: "default",
           });
           
