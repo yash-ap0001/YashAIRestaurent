@@ -3,7 +3,6 @@ import { queryClient, initializeWebSocket } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/Dashboard";
 import CustomerDashboard from "@/pages/CustomerDashboard";
 import SimplifiedDashboard from "@/pages/SimplifiedDashboard";
 import NewOrder from "@/pages/NewOrder";
@@ -41,7 +40,7 @@ function Router() {
   const { user } = useAuth();
   
   // Determine which component to use for the home route based on user role
-  const HomeComponent = user?.role === "customer" ? CustomerDashboard : Dashboard;
+  const HomeComponent = user?.role === "customer" ? CustomerDashboard : SimplifiedDashboard;
   
   return (
     <Switch>
@@ -72,7 +71,6 @@ function Router() {
       <ProtectedRoute path="/track-order/:orderNumber" component={TrackOrder} allowedRoles={["admin", "manager", "kitchen", "waiter", "delivery", "customer"]} />
       
       {/* Admin, Manager Routes */}
-      <ProtectedRoute path="/simplified-dashboard" component={SimplifiedDashboard} allowedRoles={["admin", "manager", "waiter", "kitchen"]} />
       <ProtectedRoute path="/inventory" component={Inventory} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/customers" component={Customers} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/menu-items" component={MenuItems} allowedRoles={["admin", "manager"]} />

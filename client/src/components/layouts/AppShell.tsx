@@ -33,7 +33,6 @@ interface NavItem {
 
 const mainNavItems: NavItem[] = [
   { label: "Dashboard", href: "/", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { label: "Simple Dashboard", href: "/simplified-dashboard", icon: <UserCog className="w-5 h-5" /> },
   { label: "New Order", href: "/new-order", icon: <PlusSquare className="w-5 h-5" /> },
   { label: "Kitchen Tokens", href: "/kitchen-tokens", icon: <Receipt className="w-5 h-5" /> },
   { label: "Billing", href: "/billing", icon: <CreditCard className="w-5 h-5" /> },
@@ -94,7 +93,6 @@ export function AppShell({ children }: AppShellProps) {
   const routePermissions: Record<string, string[]> = {
     // Main routes
     "/": ["admin", "manager", "waiter", "kitchen", "delivery", "customer"],
-    "/simplified-dashboard": ["admin", "manager", "waiter", "kitchen"],
     "/new-order": ["admin", "manager", "waiter"],
     "/kitchen-tokens": ["admin", "kitchen", "manager"],
     "/billing": ["admin", "manager", "waiter"],
