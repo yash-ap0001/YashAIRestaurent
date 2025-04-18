@@ -3,9 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { 
@@ -18,19 +15,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Label } from "@/components/ui/label";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, Plus, Minus, X, Send, AlignLeft, Search, ListChecks, Sparkles, MessageSquare } from "lucide-react";
+import { Loader2, Plus, Minus, X, Search, ListChecks, Sparkles, MessageSquare } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { CompactOrderSummary } from "./CompactOrderSummary";
 
 interface MenuItem {
   id: number;
@@ -108,7 +97,6 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
     },
     onSuccess: (data) => {
       console.log('Order created successfully:', data);
-      console.log('Order data structure received from server:', JSON.stringify(data, null, 2));
       
       if (!data || !data.id || !data.orderNumber) {
         console.error('Warning: Order data is incomplete. Missing critical fields:', data);
@@ -116,22 +104,16 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
       
       // Optimistically update the orders cache with the new order
       queryClient.setQueryData(['/api/orders'], (oldData: any[] | undefined) => {
-        if (!oldData) {
-          console.log('No existing orders data, creating new array with just this order');
-          return [data];
-        }
-        console.log('Adding new order to existing orders data. New total:', oldData.length + 1);
+        if (!oldData) return [data];
         return [data, ...oldData];
       });
       
       // Then invalidate all related queries 
-      console.log('Invalidating orders query cache');
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/kitchen-tokens'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
       
       // Immediately refetch the orders to ensure consistent data
-      console.log('Triggering immediate refetch of orders');
       queryClient.refetchQueries({ queryKey: ['/api/orders'] });
       
       toast({
@@ -320,9 +302,6 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
       useAIAutomation: wasCreatedWithAI // Enable AI automation for orders created with AI
     };
 
-    // Log the order being created for debugging
-    console.log('Creating order with data:', orderData);
-    
     // Disable button during submission
     createOrderMutation.mutate(orderData);
   };
@@ -417,7 +396,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               <TabsContent value="menu-select" className="mt-0 h-[calc(100vh-280px)]">
                 <div className="flex h-full">
                   {/* Left Column - Menu Items */}
-                  <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
+                  <div className="w-1/2 h-full border-r border-gray-800 p-2 flex flex-col">
                     <div className="flex items-center space-x-2 mb-2">
                       <div className="bg-black rounded-lg flex-1">
                         <div className="flex items-center p-1">
@@ -451,138 +430,61 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                     </div>
 
                     {isLoadingMenu ? (
-                      <div className="flex-1 flex flex-col items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
-                        <p className="text-sm text-gray-500">Loading menu items...</p>
+                      <div className="flex justify-center items-center h-full">
+                        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                       </div>
                     ) : (
-                      <div className="flex-1 overflow-auto rounded-lg border border-gray-800 bg-black p-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {filteredMenuItems.map((menuItem) => {
-                            // Check if this item is already in the order
-                            const existingItem = orderItems.find(item => item.menuItemId === menuItem.id);
-                            const isInOrder = !!existingItem;
-                            
-                            return (
-                              <div
-                                key={menuItem.id}
-                                onClick={() => menuItem.isAvailable && addOrderItem(menuItem)}
-                                className={`
-                                  relative cursor-pointer rounded-lg p-3 transition-all duration-200
-                                  ${!menuItem.isAvailable ? 'opacity-50 cursor-not-allowed bg-black' : 
-                                    isInOrder ? 'bg-blue-900/20 border border-blue-700' : 
-                                    'bg-black hover:bg-blue-900/20 transition-colors flex flex-col border border-blue-900/30'}
-                                `}
-                              >
-                                {isInOrder && (
-                                  <div className="absolute -top-2 -right-2 bg-blue-600 text-white h-5 w-5 rounded-full flex items-center justify-center text-xs font-bold">
-                                    {existingItem.quantity}
+                      <div className="grid grid-cols-1 gap-1.5 overflow-y-auto pb-2 pr-1">
+                        {filteredMenuItems.length === 0 ? (
+                          <div className="text-center p-3 text-gray-500">
+                            No menu items found matching your search criteria.
+                          </div>
+                        ) : (
+                          filteredMenuItems.map((menuItem) => (
+                            <div
+                              key={menuItem.id}
+                              className="bg-black/50 border border-gray-800 rounded-lg p-2 hover:bg-blue-900/10 hover:border-blue-600/50 transition-colors cursor-pointer flex justify-between"
+                              onClick={() => addOrderItem(menuItem)}
+                            >
+                              <div>
+                                <h4 className="font-semibold text-white text-sm">{menuItem.name}</h4>
+                                <p className="text-gray-400 text-xs line-clamp-1">{menuItem.description}</p>
+                                {menuItem.dietaryInfo.length > 0 && (
+                                  <div className="flex gap-1 mt-1">
+                                    {menuItem.dietaryInfo.map((tag) => (
+                                      <span
+                                        key={tag}
+                                        className="text-[9px] bg-blue-900/30 text-blue-300 rounded-full px-1 py-0.5"
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
                                   </div>
                                 )}
-                                
-                                <h4 className="font-medium text-white">{menuItem.name}</h4>
-                                <p className="text-xs text-gray-400 mt-1 mb-1 line-clamp-2">{menuItem.description || 'Fragrant basmati rice dish'}</p>
-                                <span className="text-blue-500 font-semibold mt-auto">{formatCurrency(menuItem.price)}</span>
                               </div>
-                            );
-                          })}
-                        </div>
+                              <div className="pl-2 flex items-start">
+                                <span className="font-bold text-blue-300 text-sm whitespace-nowrap">
+                                  {formatCurrency(menuItem.price)}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        )}
                       </div>
                     )}
                   </div>
-
-                  {/* Right Column - Order Items */}
-                  <div className="w-1/2 h-full p-3 flex flex-col">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-bold text-white">Your Order Summary</h3>
-                      {orderItems.length > 0 && (
-                        <div className="text-sm bg-blue-900/30 px-2 py-1 rounded-full text-blue-300 border border-blue-800/50">
-                          {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-hidden">
-                      {orderItems.length > 0 ? (
-                        <div className="h-full flex flex-col">
-                          <div className="flex-1 overflow-auto p-2 space-y-2">
-                            {orderItems.map((item, index) => {
-                              const menuItem = menuItems.find(mi => mi.id === item.menuItemId);
-                              return (
-                                <div key={index} className="border border-blue-800/50 rounded-lg p-3 space-y-2 hover:bg-blue-900/20 transition-colors">
-                                  <div className="flex justify-between items-center">
-                                    <div>
-                                      <h4 className="font-bold text-white">{item.menuItemName || (menuItem ? menuItem.name : `Item #${item.menuItemId}`)}</h4>
-                                      <p className="text-sm text-blue-300">{formatCurrency(item.price)} per item</p>
-                                    </div>
-                                    <Button 
-                                      type="button"
-                                      variant="ghost" 
-                                      size="icon"
-                                      className="h-7 w-7 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
-                                      onClick={() => removeOrderItem(index)}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                  
-                                  <div className="flex items-center">
-                                    <Button 
-                                      type="button"
-                                      variant="outline" 
-                                      size="icon" 
-                                      className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
-                                      onClick={() => updateItemQuantity(index, -1)}
-                                    >
-                                      <Minus className="h-3 w-3" />
-                                    </Button>
-                                    <span className="mx-3 w-6 text-center font-bold text-white">{item.quantity}</span>
-                                    <Button 
-                                      type="button"
-                                      variant="outline" 
-                                      size="icon" 
-                                      className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
-                                      onClick={() => updateItemQuantity(index, 1)}
-                                    >
-                                      <Plus className="h-3 w-3" />
-                                    </Button>
-                                    <span className="ml-auto font-bold text-blue-400">
-                                      {formatCurrency(item.price * item.quantity)}
-                                    </span>
-                                  </div>
-                                  
-                                  <Input
-                                    placeholder="Special instructions..."
-                                    value={item.specialInstructions || ""}
-                                    onChange={(e) => {
-                                      const updatedItems = [...orderItems];
-                                      updatedItems[index].specialInstructions = e.target.value;
-                                      setOrderItems(updatedItems);
-                                    }}
-                                    className="text-xs h-7 border border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                                  />
-                                </div>
-                              );
-                            })}
-                          </div>
-                          
-                          <div className="p-3 bg-blue-900/30 flex justify-between items-center border-t border-blue-800">
-                            <span className="font-bold text-blue-300">Total Amount</span>
-                            <span className="text-xl font-extrabold text-white">
-                              {formatCurrency(totalAmount)}
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="h-full flex flex-col items-center justify-center">
-                          <Send className="h-12 w-12 text-blue-500 mb-4" />
-                          <h3 className="text-xl font-bold text-white">Your order is empty</h3>
-                          <p className="text-gray-400 text-center mt-2 max-w-xs">
-                            Add items from the menu on the left to create your order
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                  
+                  {/* Right Column - Order Summary */}
+                  <div className="w-1/2 h-full">
+                    <CompactOrderSummary
+                      orderItems={orderItems}
+                      notes={notes}
+                      onNotesChange={setNotes}
+                      onUpdateQuantity={updateItemQuantity}
+                      onRemoveItem={removeOrderItem}
+                      emptyStateIcon={<ListChecks className="h-8 w-8 text-blue-500/70" />}
+                      emptyStateText="Your order is empty. Add items from the menu."
+                    />
                   </div>
                 </div>
               </TabsContent>
@@ -590,209 +492,67 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               {/* AI Natural Language Order Tab Content */}
               <TabsContent value="ai-order" className="mt-0 h-[calc(100vh-280px)]">
                 <div className="flex h-full">
-                  {/* Left Column - AI Natural Language Input */}
-                  <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
-                    <div className="flex items-center mb-3">
-                      <div className="h-10 w-10 bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
-                        <Sparkles className="h-5 w-5 text-blue-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-white">Natural Language Order</h3>
-                        <p className="text-sm text-gray-400">Describe your order in natural language</p>
-                      </div>
+                  {/* Left Column - AI Order Input */}
+                  <div className="w-1/2 h-full border-r border-gray-800 p-2 flex flex-col">
+                    <h3 className="font-semibold text-white text-sm mb-2 flex items-center">
+                      <Sparkles className="h-4 w-4 mr-1.5 text-blue-400" />
+                      Describe Your Order in Natural Language
+                    </h3>
+                    
+                    <div className="bg-black/50 rounded-lg border border-gray-800 p-2 mb-2">
+                      <p className="text-gray-400 text-xs">
+                        Describe exactly what you would like to order. Our AI will understand and process your request.
+                        <br/><br/>
+                        <span className="text-blue-400">Example:</span> "I'd like two masala dosas, one plain dosa, and three glasses of sweet lassi."
+                      </p>
                     </div>
                     
-                    <div className="relative mb-4">
-                      <Textarea 
-                        value={aiOrderInput}
-                        onChange={(e) => setAiOrderInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          // Handle Ctrl+Enter or Cmd+Enter to submit
-                          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                            e.preventDefault();
-                            processAiOrder();
-                          }
-                        }}
-                        placeholder="Type your order here, for example: 'I want 2 Veg Biryani, 1 Butter Chicken with extra spice, 3 Garlic Naan, and 2 Sweet Lassi'"
-                        className="w-full h-32 bg-neutral-950 border-blue-800 rounded-lg text-white placeholder:text-gray-500 focus:border-blue-600 focus:ring-blue-600"
-                      />
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex-1 rounded-lg border border-gray-800 overflow-hidden mb-2">
+                        <Textarea
+                          placeholder="Type your order in natural language here..."
+                          value={aiOrderInput}
+                          onChange={(e) => setAiOrderInput(e.target.value)}
+                          className="h-full bg-black border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none text-white text-sm placeholder:text-gray-600"
+                        />
+                      </div>
+                      
                       <Button
                         type="button"
-                        className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700"
                         onClick={processAiOrder}
                         disabled={isProcessingAiOrder || !aiOrderInput.trim()}
+                        className="w-full font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
                       >
                         {isProcessingAiOrder ? (
                           <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Processing...
                           </>
                         ) : (
                           <>
-                            <Send className="h-4 w-4 mr-2" />
-                            Process Order
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Process Natural Language Order
                           </>
                         )}
                       </Button>
                     </div>
-                    
-                    <div className="bg-blue-950/20 rounded-lg p-3 border border-blue-900/30 mb-3">
-                      <h4 className="text-sm font-medium text-blue-300 mb-1">Tips for Natural Language Orders:</h4>
-                      <ul className="text-sm text-gray-300 space-y-1 list-disc pl-5">
-                        <li>Specify quantity before each item (e.g., "2 Veg Biryani")</li>
-                        <li>Include special instructions after the item name (e.g., "Butter Chicken with extra spice")</li>
-                        <li>You can mix multiple items in a single request</li>
-                        <li>Our AI understands Hindi, Telugu, English, and Spanish</li>
-                        <li><span className="text-blue-300">Pro tip:</span> Use <kbd className="px-1 py-0.5 bg-blue-900/50 rounded text-xs border border-blue-700 mx-1">Ctrl+Enter</kbd> to quickly process your order</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="flex-1 overflow-auto rounded-lg border border-blue-900/30 bg-black p-3">
-                      <div className="flex items-center mb-2">
-                        <MessageSquare className="h-5 w-5 text-blue-400 mr-2" />
-                        <h4 className="font-medium text-white">Example Orders</h4>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="border border-blue-900/30 rounded-md p-2 hover:bg-blue-900/10 cursor-pointer"
-                          onClick={() => setAiOrderInput("3 Veg Biryani, 2 Butter Chicken, 5 Naan, and 2 Mango Lassi")}>
-                          <p className="text-sm text-gray-300">3 Veg Biryani, 2 Butter Chicken, 5 Naan, and 2 Mango Lassi</p>
-                        </div>
-                        <div className="border border-blue-900/30 rounded-md p-2 hover:bg-blue-900/10 cursor-pointer"
-                          onClick={() => setAiOrderInput("मुझे 2 पनीर टिक्का, 1 दाल फ्राई और 3 बटर नान चाहिए")}>
-                          <p className="text-sm text-gray-300">मुझे 2 पनीर टिक्का, 1 दाल फ्राई और 3 बटर नान चाहिए</p>
-                        </div>
-                        <div className="border border-blue-900/30 rounded-md p-2 hover:bg-blue-900/10 cursor-pointer"
-                          onClick={() => setAiOrderInput("Quiero 2 pollo al curry, 1 arroz con verduras y 3 naan de ajo")}>
-                          <p className="text-sm text-gray-300">Quiero 2 pollo al curry, 1 arroz con verduras y 3 naan de ajo</p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                   
-                  {/* Right Column - Order Summary */}
-                  <div className="w-1/2 h-full p-2 flex flex-col">
-                    <div className="flex justify-between items-center mb-1">
-                      <h3 className="font-bold text-white text-sm">Your Order Summary</h3>
-                      {orderItems.length > 0 && (
-                        <div className="text-xs bg-blue-900/30 px-1.5 py-0.5 rounded-full text-blue-300 border border-blue-800/50">
-                          {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-hidden">
-                      {orderItems.length > 0 ? (
-                        <div className="h-full flex flex-col">
-                          <div className="flex-1 overflow-auto p-2 space-y-2">
-                            {orderItems.map((item, index) => {
-                              const menuItem = menuItems.find(mi => mi.id === item.menuItemId);
-                              return (
-                                <div key={index} className="border border-blue-800/50 rounded-lg p-3 space-y-2 hover:bg-blue-900/20 transition-colors">
-                                  <div className="flex justify-between items-center">
-                                    <div>
-                                      <h4 className="font-bold text-white">{item.menuItemName || (menuItem ? menuItem.name : `Item #${item.menuItemId}`)}</h4>
-                                      <p className="text-sm text-blue-300">{formatCurrency(item.price)} per item</p>
-                                    </div>
-                                    <Button 
-                                      type="button"
-                                      variant="ghost" 
-                                      size="icon"
-                                      className="h-7 w-7 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
-                                      onClick={() => removeOrderItem(index)}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                  
-                                  <div className="flex items-center">
-                                    <Button 
-                                      type="button"
-                                      variant="outline" 
-                                      size="icon" 
-                                      className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
-                                      onClick={() => updateItemQuantity(index, -1)}
-                                    >
-                                      <Minus className="h-3 w-3" />
-                                    </Button>
-                                    <span className="mx-3 w-6 text-center font-bold text-white">{item.quantity}</span>
-                                    <Button 
-                                      type="button"
-                                      variant="outline" 
-                                      size="icon" 
-                                      className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
-                                      onClick={() => updateItemQuantity(index, 1)}
-                                    >
-                                      <Plus className="h-3 w-3" />
-                                    </Button>
-                                    <span className="ml-auto font-bold text-blue-400">
-                                      {formatCurrency(item.price * item.quantity)}
-                                    </span>
-                                  </div>
-                                  
-                                  <Input
-                                    placeholder="Special instructions..."
-                                    value={item.specialInstructions || ""}
-                                    onChange={(e) => {
-                                      const updatedItems = [...orderItems];
-                                      updatedItems[index].specialInstructions = e.target.value;
-                                      setOrderItems(updatedItems);
-                                    }}
-                                    className="text-xs h-7 border border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                                  />
-                                </div>
-                              );
-                            })}
-                          </div>
-                          
-                          <div className="p-3 bg-blue-900/30 flex justify-between items-center border-t border-blue-800">
-                            <span className="font-bold text-blue-300">Total Amount</span>
-                            <span className="text-xl font-extrabold text-white">
-                              {formatCurrency(totalAmount)}
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="h-full flex flex-col items-center justify-center">
-                          <Send className="h-12 w-12 text-blue-500 mb-4" />
-                          <h3 className="text-xl font-bold text-white">Your order is empty</h3>
-                          <p className="text-gray-400 text-center mt-2 max-w-xs">
-                            Process your natural language order to see items here
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                  {/* Right Column - Order Summary (same as in the menu tab) */}
+                  <div className="w-1/2 h-full">
+                    <CompactOrderSummary
+                      orderItems={orderItems}
+                      notes={notes}
+                      onNotesChange={setNotes}
+                      onUpdateQuantity={updateItemQuantity}
+                      onRemoveItem={removeOrderItem}
+                      emptyStateIcon={<MessageSquare className="h-8 w-8 text-blue-500/70" />}
+                      emptyStateText="Describe your order using natural language and let our AI do the work!"
+                    />
                   </div>
                 </div>
               </TabsContent>
             </Tabs>
-          </div>
-        </div>
-        
-
-
-        {/* Footer with Notes */}
-        <div className="border-t border-gray-800 p-3 bg-neutral-950">
-          <div className="flex gap-3 items-start">
-            <div className="flex-1">
-              <div className="flex border rounded border-blue-600 px-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 bg-black">
-                <AlignLeft className="h-4 w-4 text-blue-500 mr-2 mt-3" />
-                <Textarea
-                  placeholder="Order notes... (dietary preferences, allergies, special requirements)"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[80px] bg-transparent text-white placeholder:text-gray-500 py-2"
-                />
-              </div>
-            </div>
-            
-            <Button
-              type="button" 
-              variant="outline"
-              onClick={onClose}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 mt-3"
-            >
-              Cancel
-            </Button>
           </div>
         </div>
       </DialogContent>
