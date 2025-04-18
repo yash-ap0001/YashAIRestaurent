@@ -40,10 +40,10 @@ export default function Billing() {
   const pendingBillCount = completedOrders?.length || 0;
   
   return (
-    <div className="container mx-auto px-4 py-6">
-      <TabsComponent defaultValue="board">
-        <div className="flex items-center justify-between mb-6">
-          <TabsList>
+    <div className="container mx-auto p-2 sm:p-4 h-screen flex flex-col">
+      <TabsComponent defaultValue="board" className="flex flex-col h-full">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+          <TabsList className="mb-2 md:mb-0">
             <TabsTrigger value="board" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ClipboardList className="h-4 w-4 mr-2" />
               Billing Dashboard
@@ -54,105 +54,110 @@ export default function Billing() {
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex items-center gap-3">
-
-            <div className="relative">
-              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by order # or table..."
-                className="pl-10 w-64"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+          <div className="relative w-full md:w-auto">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search by order # or table..."
+              className="pl-10 w-full md:w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
 
-        <TabsContent value="board" className="space-y-6 mt-2">
-          <div className="flex flex-wrap gap-4 mb-6">
-            <div className="flex-1 min-w-[200px] bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg text-white p-4 shadow-md">
-              <h3 className="text-lg font-semibold mb-1">Pending Bills</h3>
-              <p className="text-3xl font-bold">{pendingBillCount}</p>
-            </div>
-            <div className="flex-1 min-w-[200px] bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg text-white p-4 shadow-md">
-              <h3 className="text-lg font-semibold mb-1">Billed</h3>
-              <p className="text-3xl font-bold">{billedCount}</p>
-            </div>
-            <div className="flex-1 min-w-[200px] bg-gradient-to-r from-green-500 to-green-700 rounded-lg text-white p-4 shadow-md">
-              <h3 className="text-lg font-semibold mb-1">Total Revenue</h3>
-              <p className="text-3xl font-bold">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[70vh]">
-            <Card className="lg:col-span-1 h-full flex flex-col">
-              <CardHeader className="pb-3 flex-shrink-0 border-b">
-                <CardTitle className="text-xl font-bold text-primary">Billable Orders</CardTitle>
-                <p className="text-sm text-muted-foreground">Select an order to generate a bill</p>
-              </CardHeader>
-              <CardContent className="flex-grow overflow-hidden flex flex-col">
-                <div className="space-y-4 flex-grow flex flex-col">                  
-                  {isLoading ? (
-                    <p className="text-center py-8 text-muted-foreground">Loading orders...</p>
-                  ) : completedOrders && completedOrders.length > 0 ? (
-                    <div className="space-y-2 overflow-y-auto pr-2 flex-grow">
-                      {completedOrders.map(order => {
-                        // Check if order already has a bill
-                        const hasBill = bills.some(bill => bill.orderId === order.id);
-                        const cardClass = hasBill 
-                          ? "bg-gray-100 border-gray-300" 
-                          : "bg-green-50 border-green-200 hover:border-green-300";
-                        
-                        return (
-                          <div 
-                            key={order.id}
-                            onClick={() => setSelectedOrderId(order.id)}
-                            className={`p-4 border rounded-md cursor-pointer transition-colors ${
-                              selectedOrderId === order.id 
-                                ? "border-primary border-2" 
-                                : cardClass
-                            }`}
-                          >
-                            <div className="flex justify-between mb-2">
-                              <div>
-                                <h3 className="font-medium text-base">#{order.orderNumber}</h3>
-                                <p className="text-sm text-muted-foreground mt-1">{order.tableNumber || "Takeaway"}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-medium text-base">₹{order.totalAmount?.toLocaleString() || '0'}</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {order.createdAt ? format(new Date(order.createdAt), "HH:mm") : ""}
-                                </p>
-                              </div>
-                            </div>
-                            {hasBill && (
-                              <Badge className="mt-1 bg-gray-600">Already Billed</Badge>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-center py-8 text-muted-foreground">
-                      {searchTerm ? "No matching orders found" : "No billable orders available"}
-                    </p>
-                  )}
-                </div>
+        <TabsContent value="board" className="flex flex-col h-full space-y-3 pt-1 overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-shrink-0">
+            <Card className="bg-gradient-to-r from-purple-500 to-purple-700 text-white border-0 shadow">
+              <CardContent className="p-3">
+                <h3 className="text-base font-semibold">Pending Bills</h3>
+                <p className="text-2xl font-bold">{pendingBillCount}</p>
               </CardContent>
             </Card>
             
-            <Card className="lg:col-span-2 h-full flex flex-col">
-              <CardHeader className="pb-3 flex-shrink-0 border-b">
-                <CardTitle className="text-xl font-bold text-primary">Bill Details</CardTitle>
-                <p className="text-sm text-muted-foreground">Generate and print bills</p>
+            <Card className="bg-gradient-to-r from-gray-600 to-gray-800 text-white border-0 shadow">
+              <CardContent className="p-3">
+                <h3 className="text-base font-semibold">Billed</h3>
+                <p className="text-2xl font-bold">{billedCount}</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-r from-green-500 to-green-700 text-white border-0 shadow">
+              <CardContent className="p-3">
+                <h3 className="text-base font-semibold">Total Revenue</h3>
+                <p className="text-2xl font-bold">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-grow overflow-hidden">
+            <Card className="lg:col-span-1 flex flex-col border shadow overflow-hidden">
+              <CardHeader className="bg-muted/40 py-2 px-4 flex-shrink-0">
+                <CardTitle className="text-lg font-bold text-primary">Billable Orders</CardTitle>
+                <p className="text-xs text-muted-foreground">Select an order to generate a bill</p>
               </CardHeader>
-              <CardContent className="flex-grow overflow-auto">
+              
+              <CardContent className="p-3 flex-grow overflow-hidden">
+                {isLoading ? (
+                  <p className="text-center py-4 text-muted-foreground text-sm">Loading orders...</p>
+                ) : completedOrders && completedOrders.length > 0 ? (
+                  <div className="space-y-2 h-full overflow-y-auto pr-1">
+                    {completedOrders.map(order => {
+                      // Check if order already has a bill
+                      const hasBill = bills.some(bill => bill.orderId === order.id);
+                      const cardClass = hasBill 
+                        ? "bg-gray-100 border-gray-300" 
+                        : "bg-green-50 border-green-200 hover:border-green-300";
+                      
+                      return (
+                        <div 
+                          key={order.id}
+                          onClick={() => setSelectedOrderId(order.id)}
+                          className={`p-3 border rounded cursor-pointer transition-colors ${
+                            selectedOrderId === order.id 
+                              ? "border-primary border-2" 
+                              : cardClass
+                          }`}
+                        >
+                          <div className="flex justify-between">
+                            <div>
+                              <h3 className="font-medium text-base">#{order.orderNumber}</h3>
+                              <p className="text-xs text-muted-foreground mt-0.5">{order.tableNumber || "Takeaway"}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-sm">₹{order.totalAmount?.toLocaleString() || '0'}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {order.createdAt ? format(new Date(order.createdAt), "HH:mm") : ""}
+                              </p>
+                            </div>
+                          </div>
+                          {hasBill && (
+                            <Badge className="mt-1 bg-gray-600 text-xs">Already Billed</Badge>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-center py-4 text-muted-foreground text-sm">
+                    {searchTerm ? "No matching orders found" : "No billable orders available"}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+            
+            <Card className="lg:col-span-2 flex flex-col border shadow overflow-hidden">
+              <CardHeader className="bg-muted/40 py-2 px-4 flex-shrink-0">
+                <CardTitle className="text-lg font-bold text-primary">Bill Details</CardTitle>
+                <p className="text-xs text-muted-foreground">Generate and print bills</p>
+              </CardHeader>
+              
+              <CardContent className="p-3 flex-grow overflow-auto">
                 {selectedOrderId ? (
                   <BillDetails orderId={selectedOrderId} />
                 ) : (
-                  <div className="text-center py-20 text-muted-foreground">
-                    <ReceiptText className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium mb-2">No order selected</p>
+                  <div className="text-center py-12 text-muted-foreground">
+                    <ReceiptText className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                    <p className="text-base font-medium mb-1">No order selected</p>
                     <p className="text-sm">Select an order from the list to view bill details</p>
                   </div>
                 )}
@@ -161,24 +166,24 @@ export default function Billing() {
           </div>
         </TabsContent>
 
-        <TabsContent value="stats" className="space-y-6 mt-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Billing Statistics</CardTitle>
+        <TabsContent value="stats" className="flex-grow h-full overflow-auto">
+          <Card className="border shadow h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl font-bold text-primary">Billing Statistics</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-r from-purple-500 to-purple-700 p-4 rounded-lg text-white">
-                  <h3 className="text-xl font-bold">Today's Bills</h3>
-                  <p className="text-3xl font-bold mt-2">{billedCount}</p>
+                <div className="bg-gradient-to-r from-purple-500 to-purple-700 p-4 rounded-md text-white">
+                  <h3 className="text-lg font-bold">Today's Bills</h3>
+                  <p className="text-2xl font-bold mt-2">{billedCount}</p>
                 </div>
-                <div className="bg-gradient-to-r from-green-500 to-green-700 p-4 rounded-lg text-white">
-                  <h3 className="text-xl font-bold">Total Revenue</h3>
-                  <p className="text-3xl font-bold mt-2">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
+                <div className="bg-gradient-to-r from-green-500 to-green-700 p-4 rounded-md text-white">
+                  <h3 className="text-lg font-bold">Total Revenue</h3>
+                  <p className="text-2xl font-bold mt-2">₹{bills.reduce((acc, bill) => acc + (bill.total || 0), 0).toLocaleString()}</p>
                 </div>
-                <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-4 rounded-lg text-white">
-                  <h3 className="text-xl font-bold">Pending Bills</h3>
-                  <p className="text-3xl font-bold mt-2">{pendingBillCount}</p>
+                <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-4 rounded-md text-white">
+                  <h3 className="text-lg font-bold">Pending Bills</h3>
+                  <p className="text-2xl font-bold mt-2">{pendingBillCount}</p>
                 </div>
               </div>
             </CardContent>
