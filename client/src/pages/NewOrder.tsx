@@ -21,33 +21,33 @@ export default function NewOrder() {
   
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden">
-      <div className="bg-neutral-950 p-2 border-b border-gray-800 flex justify-between items-center flex-shrink-0">
-        <div>
+      <div className="bg-neutral-950 p-1 border-b border-gray-800 flex justify-between items-center flex-shrink-0">
+        <div className="flex items-center">
           <Link href="/">
-            <Button variant="ghost" className="-ml-3 text-gray-500 hover:text-gray-700">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+            <Button variant="ghost" size="sm" className="-ml-2 text-gray-500 hover:text-gray-700">
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-xl font-bold text-white ml-2">
             Create New Order
           </h1>
         </div>
         
-        <div className="hidden md:flex items-center gap-6 text-gray-500">
-          <div className="flex items-center gap-2">
-            <Utensils className="h-5 w-5 text-blue-500" />
-            <span className="text-sm">Easy Menu Selection</span>
+        <div className="hidden md:flex items-center gap-4 text-gray-500">
+          <div className="flex items-center gap-1">
+            <Utensils className="h-4 w-4 text-blue-500" />
+            <span className="text-xs">Menu Selection</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Clipboard className="h-5 w-5 text-blue-500" />
-            <span className="text-sm">AI-Powered Order Processing</span>
+          <div className="flex items-center gap-1">
+            <Clipboard className="h-4 w-4 text-blue-500" />
+            <span className="text-xs">AI Processing</span>
           </div>
         </div>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="bg-blue-950/40 h-9 w-full p-1 justify-start gap-2 m-2 rounded">
+        <TabsList className="bg-blue-950/40 h-7 w-full p-1 justify-start gap-2 m-1 rounded">
           <TabsTrigger value="menu-order" className="h-7 text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white">
             <Utensils className="h-3.5 w-3.5 mr-1.5" /> 
             Menu Order
@@ -63,13 +63,13 @@ export default function NewOrder() {
         </TabsList>
         
         <div className="flex-1 overflow-hidden bg-neutral-900">
-          <TabsContent value="menu-order" className="h-[calc(100vh-120px)] m-0 data-[state=active]:block overflow-hidden">
+          <TabsContent value="menu-order" className="h-[calc(100vh-90px)] m-0 data-[state=active]:block overflow-hidden">
             <div className="h-full overflow-hidden">
               <OrderForm />
             </div>
           </TabsContent>
           
-          <TabsContent value="voice-order" className="h-[calc(100vh-120px)] m-0 data-[state=active]:block overflow-hidden">
+          <TabsContent value="voice-order" className="h-[calc(100vh-90px)] m-0 data-[state=active]:block overflow-hidden">
             <div className="flex h-full overflow-hidden">
               {/* Left Column - Voice Order Input */}
               <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
@@ -147,7 +147,7 @@ export default function NewOrder() {
             </div>
           </TabsContent>
           
-          <TabsContent value="external-order" className="h-[calc(100vh-120px)] m-0 p-8 data-[state=active]:flex flex-col">
+          <TabsContent value="external-order" className="h-[calc(100vh-90px)] m-0 p-6 data-[state=active]:flex flex-col">
             <div className="bg-neutral-950 rounded-xl p-6 border border-gray-800 flex flex-col items-center">
               <ReceiptText className="h-16 w-16 text-blue-500 mb-4" />
               <h2 className="text-2xl font-bold text-white">External Order</h2>

@@ -169,37 +169,37 @@ export default function WhatsApp() {
   };
 
   return (
-    <div className="container mx-auto py-4">
-      <header className="mb-4">
-        <h1 className="text-2xl font-bold">WhatsApp Integration</h1>
-        <p className="text-gray-500">Test and monitor WhatsApp messaging functionality</p>
+    <div className="container mx-auto py-2">
+      <header className="mb-2">
+        <h1 className="text-xl font-bold">WhatsApp Integration</h1>
+        <p className="text-gray-500 text-sm">Test and monitor WhatsApp messaging functionality</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* WhatsApp Status Card */}
         <div className="md:col-span-3">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between py-3">
+            <CardHeader className="flex flex-row items-center justify-between py-2">
               <div>
-                <CardTitle>WhatsApp Service Status</CardTitle>
-                <CardDescription>Current status of the WhatsApp integration</CardDescription>
+                <CardTitle className="text-base">WhatsApp Service Status</CardTitle>
+                <CardDescription className="text-xs">Current status of the WhatsApp integration</CardDescription>
               </div>
-              <Button variant="outline" size="icon" onClick={refreshData}>
-                <RefreshCcw className="h-4 w-4" />
+              <Button variant="outline" size="icon" className="h-7 w-7" onClick={refreshData}>
+                <RefreshCcw className="h-3.5 w-3.5" />
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="py-1.5">
               {statusLoading ? (
-                <p>Loading status...</p>
+                <p className="text-sm">Loading status...</p>
               ) : statusData ? (
                 <div className="flex items-center gap-2">
-                  <div className={`h-3 w-3 rounded-full ${statusData.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                  <p>{statusData.message}</p>
+                  <div className={`h-2.5 w-2.5 rounded-full ${statusData.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <p className="text-sm">{statusData.message}</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
-                  <p>Status unknown</p>
+                  <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
+                  <p className="text-sm">Status unknown</p>
                 </div>
               )}
             </CardContent>
