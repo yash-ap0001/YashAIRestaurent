@@ -117,22 +117,8 @@ export default function NewOrder() {
   };
   
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden">
-      <div className="bg-neutral-950 p-1 border-b border-gray-800 flex justify-between items-center flex-shrink-0">
-        <div className="flex items-center">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="-ml-2 text-gray-500 hover:text-gray-700">
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>
-          </Link>
-          <h1 className="text-xl font-bold text-white ml-2">
-            Create New Order
-          </h1>
-        </div>
-        
-        {/* Removed the icons and text in the header */}
-      </div>
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* Removed the header with Back button and Create New Order text */}
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
         <TabsList className="bg-blue-950/40 h-7 w-full p-1 justify-start gap-2 m-1 rounded">
@@ -155,14 +141,14 @@ export default function NewOrder() {
         </TabsList>
         
         <div className="flex-1 overflow-hidden bg-neutral-900">
-          <TabsContent value="menu-order" className="h-[calc(100vh-90px)] m-0 data-[state=active]:block overflow-hidden">
+          <TabsContent value="menu-order" className="h-full m-0 data-[state=active]:block overflow-hidden">
             <div className="h-full overflow-hidden">
               <OrderForm />
             </div>
           </TabsContent>
           
           {/* AI Natural Language Order Tab Content */}
-          <TabsContent value="ai-order" className="h-[calc(100vh-90px)] m-0 data-[state=active]:block overflow-hidden">
+          <TabsContent value="ai-order" className="h-full m-0 data-[state=active]:block overflow-hidden">
             <div className="flex h-full overflow-hidden">
               {/* Left Column - AI Order Input */}
               <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
@@ -280,7 +266,7 @@ export default function NewOrder() {
             </div>
           </TabsContent>
           
-          <TabsContent value="voice-order" className="h-[calc(100vh-90px)] m-0 data-[state=active]:block overflow-hidden">
+          <TabsContent value="voice-order" className="h-full m-0 data-[state=active]:block overflow-hidden">
             <div className="flex h-full overflow-hidden">
               {/* Left Column - Voice Order Input */}
               <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
@@ -358,7 +344,7 @@ export default function NewOrder() {
             </div>
           </TabsContent>
           
-          <TabsContent value="external-order" className="h-[calc(100vh-90px)] m-0 p-6 data-[state=active]:flex flex-col">
+          <TabsContent value="external-order" className="h-full m-0 p-6 data-[state=active]:flex flex-col">
             <div className="bg-neutral-950 rounded-xl p-6 border border-gray-800 flex flex-col items-center">
               <ReceiptText className="h-16 w-16 text-blue-500 mb-4" />
               <h2 className="text-2xl font-bold text-white">External Order</h2>
