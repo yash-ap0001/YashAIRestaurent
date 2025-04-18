@@ -45,7 +45,7 @@ export default function NewOrder() {
     
     try {
       const response = await apiRequest("POST", "/api/ai/process-order", {
-        text: aiOrderInput
+        orderText: aiOrderInput
       });
       
       const data = await response.json();
@@ -212,9 +212,9 @@ export default function NewOrder() {
                   </div>
                 </div>
                 
-                <div className="flex-1 bg-black/70 rounded-lg border border-gray-800 overflow-hidden">
+                <div className="flex-1 bg-black/70 rounded-lg border border-gray-800 overflow-auto">
                   {orderItems.length > 0 ? (
-                    <div className="h-full p-3 overflow-auto">
+                    <div className="h-full p-3">
                       {orderItems.map((item, index) => (
                         <div key={index} className="mb-3 p-2 border border-purple-900/20 rounded-md bg-purple-950/10">
                           <div className="flex justify-between">
@@ -331,7 +331,7 @@ export default function NewOrder() {
                   </div>
                 </div>
                 
-                <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-hidden">
+                <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-auto">
                   <div className="h-full flex flex-col items-center justify-center">
                     <MessageSquareText className="h-12 w-12 text-blue-500 mb-4" />
                     <h3 className="text-xl font-bold text-white">Your order is empty</h3>
@@ -344,7 +344,7 @@ export default function NewOrder() {
             </div>
           </TabsContent>
           
-          <TabsContent value="external-order" className="h-full m-0 p-6 data-[state=active]:flex flex-col">
+          <TabsContent value="external-order" className="h-full m-0 p-6 data-[state=active]:flex flex-col overflow-auto">
             <div className="bg-neutral-950 rounded-xl p-6 border border-gray-800 flex flex-col items-center">
               <ReceiptText className="h-16 w-16 text-blue-500 mb-4" />
               <h2 className="text-2xl font-bold text-white">External Order</h2>
