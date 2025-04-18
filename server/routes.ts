@@ -712,7 +712,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       if (updatedBill) {
         // If marking as paid, this is an important event to broadcast
         if (req.body.paymentStatus === "paid") {
-          broadcastMessage({ 
+          broadcastToAllClients({ 
             type: "bill_paid", 
             data: updatedBill 
           });
