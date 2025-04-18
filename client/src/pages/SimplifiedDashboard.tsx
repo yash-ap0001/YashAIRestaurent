@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useColumnColors } from "@/contexts/ColumnColorContext";
 import { format } from "date-fns";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,6 @@ import { SiZomato, SiSwiggy } from "react-icons/si";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
 import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
-import { useColumnColors } from "@/contexts/ColumnColorContext";
 import { cn } from "@/lib/utils";
 import { ColumnHeader, OrderCard } from "@/components/orders/OrderColumn";
 
