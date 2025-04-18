@@ -583,67 +583,16 @@ export default function SimplifiedDashboard() {
               <h1 className="text-2xl font-bold mr-4">Today's Orders</h1>
               
               {isSelectMode && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Badge variant="outline" className="text-xs px-1 py-0 h-5 bg-background">
-                      {orders.length} Total
+                <div className="inline-flex items-center gap-1 bg-muted/5 rounded-md px-2 py-1 border border-muted/20">
+                  <span className="text-xs text-muted-foreground mr-1">
+                    {orders.length} Total
+                  </span>
+                  
+                  {selectedOrders.length > 0 ? (
+                    <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary border-primary/30">
+                      {selectedOrders.length} Selected
                     </Badge>
-                    
-                    {selectedOrders.length > 0 && (
-                      <Badge variant="secondary" className="text-xs px-1 py-0 h-5 bg-primary text-primary-foreground">
-                        {selectedOrders.length} Selected
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="destructive" size="sm" className="h-8 px-2 text-xs">
-                        Selection Controls <ChevronsUpDown className="h-3 w-3 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48">
-                      <DropdownMenuItem onClick={toggleSelectMode} className="cursor-pointer text-xs">
-                        Exit Select Mode
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={selectAllOrders} className="cursor-pointer text-xs">
-                        Select All Orders
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setSelectedOrders([])} className="cursor-pointer text-xs">
-                        Clear Selection
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  
-                  {selectedOrders.length > 0 && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="secondary" size="sm" className="h-8 px-2 text-xs bg-primary text-primary-foreground hover:bg-primary/90">
-                          Bulk Actions <ChevronsUpDown className="h-3 w-3 ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuLabel className="text-xs">Move Selected Orders To</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")} className="cursor-pointer text-xs">
-                          Pending
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")} className="cursor-pointer text-xs">
-                          Preparing
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")} className="cursor-pointer text-xs">
-                          Ready
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")} className="cursor-pointer text-xs">
-                          Completed
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")} className="cursor-pointer text-xs">
-                          Billed
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
+                  ) : null}
                 </div>
               )}
             </div>
@@ -669,49 +618,117 @@ export default function SimplifiedDashboard() {
               </Button>
               
               {/* Select Orders dropdown */}
-              {!isSelectMode && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" size="sm" className="h-9 px-2">
-                      <CheckSquare className="h-4 w-4 mr-1" />
-                      <span>Select Orders</span>
-                      <ChevronsUpDown className="h-3 w-3 ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel>Order Selection Options</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={toggleSelectMode} className="cursor-pointer">
-                      <CheckSquare className="h-4 w-4 mr-2" />
-                      Select All Orders
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      toggleSelectMode();
-                      setTimeout(() => selectAllInStatus("pending"), 100);
-                    }} className="cursor-pointer">
-                      Select Pending Orders
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      toggleSelectMode();
-                      setTimeout(() => selectAllInStatus("preparing"), 100);
-                    }} className="cursor-pointer">
-                      Select Preparing Orders
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      toggleSelectMode();
-                      setTimeout(() => selectAllInStatus("ready"), 100);
-                    }} className="cursor-pointer">
-                      Select Ready Orders
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      toggleSelectMode();
-                      setTimeout(() => selectAllInStatus("completed"), 100);
-                    }} className="cursor-pointer">
-                      Select Completed Orders
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant={isSelectMode ? "destructive" : "secondary"} size="sm" className="h-9 px-2">
+                    <CheckSquare className="h-4 w-4 mr-1" />
+                    <span>{isSelectMode ? "Selection Menu" : "Select Orders"}</span>
+                    <ChevronsUpDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {isSelectMode ? (
+                    <>
+                      <div className="flex items-center justify-between px-2 py-1.5">
+                        <span className="text-xs font-medium">Selection Tools</span>
+                        <div className="flex gap-1 items-center">
+                          <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 bg-background">
+                            {orders.length} Total
+                          </Badge>
+                          {selectedOrders.length > 0 && (
+                            <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 bg-primary/20 text-primary">
+                              {selectedOrders.length} Selected
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={toggleSelectMode} className="cursor-pointer text-destructive font-medium">
+                        <X className="h-4 w-4 mr-2" />
+                        Exit Selection Mode
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={selectAllOrders} className="cursor-pointer">
+                        <CheckSquare className="h-4 w-4 mr-2" />
+                        Select All Orders
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSelectedOrders([])} className="cursor-pointer">
+                        <X className="h-4 w-4 mr-2" />
+                        Clear Selection
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Select by Status</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => selectAllInStatus("pending")} className="cursor-pointer">
+                        Select All Pending
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => selectAllInStatus("preparing")} className="cursor-pointer">
+                        Select All Preparing
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => selectAllInStatus("ready")} className="cursor-pointer">
+                        Select All Ready
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => selectAllInStatus("completed")} className="cursor-pointer">
+                        Select All Completed
+                      </DropdownMenuItem>
+                      
+                      {selectedOrders.length > 0 && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("pending")} className="cursor-pointer">
+                            Move to Pending
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("preparing")} className="cursor-pointer">
+                            Move to Preparing
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("ready")} className="cursor-pointer">
+                            Move to Ready
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("completed")} className="cursor-pointer">
+                            Move to Completed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => bulkUpdateOrderStatus("billed")} className="cursor-pointer">
+                            Move to Billed
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuLabel>Order Selection Options</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={toggleSelectMode} className="cursor-pointer">
+                        <CheckSquare className="h-4 w-4 mr-2" />
+                        Select All Orders
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        toggleSelectMode();
+                        setTimeout(() => selectAllInStatus("pending"), 100);
+                      }} className="cursor-pointer">
+                        Select Pending Orders
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        toggleSelectMode();
+                        setTimeout(() => selectAllInStatus("preparing"), 100);
+                      }} className="cursor-pointer">
+                        Select Preparing Orders
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        toggleSelectMode();
+                        setTimeout(() => selectAllInStatus("ready"), 100);
+                      }} className="cursor-pointer">
+                        Select Ready Orders
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        toggleSelectMode();
+                        setTimeout(() => selectAllInStatus("completed"), 100);
+                      }} className="cursor-pointer">
+                        Select Completed Orders
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
