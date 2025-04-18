@@ -22,6 +22,8 @@ import { SiZomato, SiSwiggy } from "react-icons/si";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
 import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 interface Order {
   id: number;
@@ -133,6 +135,7 @@ export default function SimplifiedDashboard() {
   const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { colors } = useTheme();
   
   // Set up WebSocket connection for real-time updates
   useEffect(() => {

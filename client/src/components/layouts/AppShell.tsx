@@ -25,6 +25,8 @@ import UserMenu from "@/components/auth/UserMenu";
 import { RoleBasedContent } from "@/components/auth/ProtectedRoute";
 import { ConnectionStatus } from "@/components/ui/ConnectionStatus";
 import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
+import { ThemeSelector } from "@/components/theme/ThemeSelector";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   Accordion,
   AccordionContent,
@@ -343,6 +345,9 @@ export function AppShell({ children }: AppShellProps) {
             <div className="relative">
               <ConnectionStatus />
             </div>
+            
+            {/* Theme selector dropdown */}
+            <ThemeSelector />
             
             {/* User menu - always visible in top right corner */}
             <UserMenu />
