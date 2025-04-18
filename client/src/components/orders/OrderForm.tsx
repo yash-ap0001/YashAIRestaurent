@@ -432,7 +432,7 @@ export function OrderForm() {
         </div>
         
         {/* Main Content Area */}
-        <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 220px)' }}>
+        <div className="flex overflow-hidden">
           {/* Menu Items (Left Side) */}
           <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
             <div className="flex items-center space-x-2 mb-2">

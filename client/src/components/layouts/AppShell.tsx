@@ -119,7 +119,7 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-neutral-900 text-neutral-200">
+    <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-neutral-900 text-neutral-200">
       {/* Sidebar - hidden on mobile */}
       <aside className="hidden md:flex md:w-64 flex-col bg-black border-r border-neutral-800 h-full">
         <div className="p-4 flex items-center space-x-3 border-b border-neutral-800">
