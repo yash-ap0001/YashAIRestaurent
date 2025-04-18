@@ -407,6 +407,13 @@ export default function SimplifiedDashboard() {
     setSelectedOrders(orderIdsInStatus);
   };
   
+  const unselectAllInStatus = (status: string) => {
+    const orderIdsInStatus = orders
+      .filter(order => order.status === status)
+      .map(order => order.id);
+    setSelectedOrders(prev => prev.filter(id => !orderIdsInStatus.includes(id)));
+  };
+  
   // Select all orders across all statuses
   const selectAllOrders = () => {
     const allOrderIds = orders.map(order => order.id);
@@ -816,6 +823,22 @@ export default function SimplifiedDashboard() {
               <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
+                    {isSelectMode && (
+                      <div className="mr-2">
+                        <Checkbox 
+                          checked={orders.filter(order => order.status === "preparing").every(order => selectedOrders.includes(order.id))}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              selectAllInStatus("preparing");
+                            } else {
+                              unselectAllInStatus("preparing");
+                            }
+                          }}
+                          aria-label="Select all preparing orders"
+                          className="h-4 w-4 rounded-sm"
+                        />
+                      </div>
+                    )}
                     <ChefHat className="h-5 w-5 mr-2" />
                     Preparing
                   </div>
@@ -912,6 +935,22 @@ export default function SimplifiedDashboard() {
               <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
+                    {isSelectMode && (
+                      <div className="mr-2">
+                        <Checkbox 
+                          checked={orders.filter(order => order.status === "ready").every(order => selectedOrders.includes(order.id))}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              selectAllInStatus("ready");
+                            } else {
+                              unselectAllInStatus("ready");
+                            }
+                          }}
+                          aria-label="Select all ready orders"
+                          className="h-4 w-4 rounded-sm"
+                        />
+                      </div>
+                    )}
                     <Utensils className="h-5 w-5 mr-2" />
                     Ready to Serve
                   </div>
@@ -1008,6 +1047,22 @@ export default function SimplifiedDashboard() {
               <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
+                    {isSelectMode && (
+                      <div className="mr-2">
+                        <Checkbox 
+                          checked={orders.filter(order => order.status === "completed").every(order => selectedOrders.includes(order.id))}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              selectAllInStatus("completed");
+                            } else {
+                              unselectAllInStatus("completed");
+                            }
+                          }}
+                          aria-label="Select all completed orders"
+                          className="h-4 w-4 rounded-sm"
+                        />
+                      </div>
+                    )}
                     <CircleCheck className="h-5 w-5 mr-2" />
                     Completed
                   </div>
@@ -1104,6 +1159,22 @@ export default function SimplifiedDashboard() {
               <div className="flex flex-col w-full min-w-0 max-w-full">
                 <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
+                    {isSelectMode && (
+                      <div className="mr-2">
+                        <Checkbox 
+                          checked={orders.filter(order => order.status === "billed").every(order => selectedOrders.includes(order.id))}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              selectAllInStatus("billed");
+                            } else {
+                              unselectAllInStatus("billed");
+                            }
+                          }}
+                          aria-label="Select all billed orders"
+                          className="h-4 w-4 rounded-sm"
+                        />
+                      </div>
+                    )}
                     <CreditCard className="h-5 w-5 mr-2" />
                     Billed
                   </div>
