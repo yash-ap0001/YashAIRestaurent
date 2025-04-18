@@ -175,7 +175,7 @@ export default function WhatsApp() {
         <p className="text-gray-500 text-sm">Test and monitor WhatsApp messaging functionality</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {/* WhatsApp Status Card */}
         <div className="md:col-span-3">
           <Card>
@@ -209,81 +209,86 @@ export default function WhatsApp() {
         {/* Message Form */}
         <div className="md:col-span-1">
           <Card>
-            <CardHeader className="py-3">
-              <CardTitle>Send WhatsApp Message</CardTitle>
-              <CardDescription>
+            <CardHeader className="py-2">
+              <CardTitle className="text-base">Send WhatsApp Message</CardTitle>
+              <CardDescription className="text-xs">
                 {activeTab === 'simulate' 
                   ? 'Simulate receiving a message from a customer' 
                   : 'Send a direct message to a customer'}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="py-2">
               <Tabs defaultValue="simulate" value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="simulate">Simulate Incoming</TabsTrigger>
-                  <TabsTrigger value="send">Send Direct</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 h-7">
+                  <TabsTrigger value="simulate" className="text-xs">Simulate</TabsTrigger>
+                  <TabsTrigger value="send" className="text-xs">Send Direct</TabsTrigger>
                 </TabsList>
-                <TabsContent value="simulate" className="space-y-4 mt-4">
-                  <form onSubmit={handleSendMessage} className="space-y-4">
+                <TabsContent value="simulate" className="space-y-2 mt-2">
+                  <form onSubmit={handleSendMessage} className="space-y-2">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Phone Number</label>
+                      <label className="block text-xs font-medium mb-0.5">Phone Number</label>
                       <Input 
                         value={phone} 
                         onChange={(e) => setPhone(e.target.value)} 
                         placeholder="e.g., 918765432100"
+                        className="h-7 text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Customer Name</label>
+                      <label className="block text-xs font-medium mb-0.5">Customer Name</label>
                       <Input 
                         value={name} 
                         onChange={(e) => setName(e.target.value)} 
                         placeholder="Customer name"
+                        className="h-7 text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Message</label>
+                      <label className="block text-xs font-medium mb-0.5">Message</label>
                       <Textarea 
                         value={message} 
                         onChange={(e) => setMessage(e.target.value)} 
                         placeholder="Type a message..."
-                        rows={3}
+                        rows={2}
+                        className="text-xs min-h-[50px]"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 mt-0.5">
                         Try "Order: 2 butter chicken, 3 naan" or "bill"
                       </p>
                     </div>
                     <Button 
                       type="submit" 
-                      className="w-full"
+                      className="w-full h-7 text-xs"
                       disabled={simulateMessageMutation.isPending}
                     >
                       {simulateMessageMutation.isPending ? 'Sending...' : 'Simulate Message'}
                     </Button>
                   </form>
                 </TabsContent>
-                <TabsContent value="send" className="space-y-4 mt-4">
-                  <form onSubmit={handleSendMessage} className="space-y-4">
+                <TabsContent value="send" className="space-y-2 mt-2">
+                  <form onSubmit={handleSendMessage} className="space-y-2">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Phone Number</label>
+                      <label className="block text-xs font-medium mb-0.5">Phone Number</label>
                       <Input 
                         value={phone} 
                         onChange={(e) => setPhone(e.target.value)} 
                         placeholder="e.g., 918765432100"
+                        className="h-7 text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Message</label>
+                      <label className="block text-xs font-medium mb-0.5">Message</label>
                       <Textarea 
                         value={message} 
                         onChange={(e) => setMessage(e.target.value)} 
                         placeholder="Type a message..."
-                        rows={3}
+                        rows={2}
+                        className="text-xs min-h-[50px]"
                       />
                     </div>
                     <Button 
                       type="submit" 
-                      className="w-full"
+                      className="w-full h-7 text-xs"
                       disabled={sendMessageMutation.isPending}
                     >
                       {sendMessageMutation.isPending ? 'Sending...' : 'Send Message'}
@@ -295,40 +300,42 @@ export default function WhatsApp() {
           </Card>
           
           {/* Bill with Health Tips Form */}
-          <Card className="mt-4">
-            <CardHeader className="py-2">
-              <CardTitle className="flex items-center gap-2">
-                <HeartPulse className="h-5 w-5" />
+          <Card className="mt-2">
+            <CardHeader className="py-1.5">
+              <CardTitle className="flex items-center gap-1.5 text-base">
+                <HeartPulse className="h-4 w-4" />
                 Send Bill with Health Tips
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 Send bill with nutritional info and health tips
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSendBillWithHealthTips} className="space-y-4">
+            <CardContent className="py-2">
+              <form onSubmit={handleSendBillWithHealthTips} className="space-y-2">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Phone Number</label>
+                  <label className="block text-xs font-medium mb-0.5">Phone Number</label>
                   <Input 
                     value={phone} 
                     onChange={(e) => setPhone(e.target.value)} 
                     placeholder="e.g., 918765432100"
+                    className="h-7 text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Bill ID</label>
+                  <label className="block text-xs font-medium mb-0.5">Bill ID</label>
                   <Input 
                     value={billId} 
                     onChange={(e) => setBillId(e.target.value)} 
                     placeholder="Enter Bill ID"
+                    className="h-7 text-xs"
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full"
+                  className="w-full h-7 text-xs"
                   disabled={sendBillWithHealthTipsMutation.isPending}
                 >
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="h-3.5 w-3.5 mr-1.5" />
                   {sendBillWithHealthTipsMutation.isPending ? 'Sending...' : 'Send Bill with Health Tips'}
                 </Button>
               </form>
@@ -340,38 +347,37 @@ export default function WhatsApp() {
         {/* Message History */}
         <div className="md:col-span-2">
           <Card className="h-full">
-            <CardHeader className="py-3">
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
+            <CardHeader className="py-2">
+              <CardTitle className="flex items-center gap-1.5 text-base">
+                <MessageCircle className="h-4 w-4" />
                 Message History
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 Recent WhatsApp messages sent by the system
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="py-1">
               {messagesLoading ? (
-                <p>Loading messages...</p>
+                <p className="text-xs">Loading messages...</p>
               ) : messages && messages.length > 0 ? (
-                <div className="overflow-auto max-h-[450px]">
+                <div className="overflow-auto max-h-[350px]">
                   <Table>
-                    <TableCaption>Recent WhatsApp messages</TableCaption>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[100px]">Time</TableHead>
-                        <TableHead className="w-[150px]">Recipient</TableHead>
-                        <TableHead>Message</TableHead>
+                      <TableRow className="text-xs">
+                        <TableHead className="w-[80px] py-1.5">Time</TableHead>
+                        <TableHead className="w-[120px] py-1.5">Recipient</TableHead>
+                        <TableHead className="py-1.5">Message</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody className="text-xs">
                       {messages.map((msg, index) => (
                         <TableRow key={index}>
-                          <TableCell className="font-medium whitespace-nowrap">
+                          <TableCell className="font-medium whitespace-nowrap py-1.5">
                             {formatTimestamp(msg.timestamp)}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap">{msg.to}</TableCell>
-                          <TableCell className="break-words">
-                            <div className="p-3 bg-muted rounded-lg whitespace-pre-wrap">
+                          <TableCell className="whitespace-nowrap py-1.5">{msg.to}</TableCell>
+                          <TableCell className="break-words py-1.5">
+                            <div className="p-2 bg-muted rounded-lg whitespace-pre-wrap">
                               {msg.text}
                             </div>
                           </TableCell>
@@ -381,15 +387,15 @@ export default function WhatsApp() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-6">
-                  <p className="text-gray-500">No messages found</p>
-                  <p className="text-sm text-gray-400">Try sending a message to see it here</p>
+                <div className="text-center py-4">
+                  <p className="text-gray-500 text-sm">No messages found</p>
+                  <p className="text-xs text-gray-400">Try sending a message to see it here</p>
                 </div>
               )}
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" onClick={refreshData} className="w-full">
-                <RefreshCcw className="h-4 w-4 mr-2" />
+            <CardFooter className="py-1.5">
+              <Button variant="outline" onClick={refreshData} className="w-full h-7 text-xs">
+                <RefreshCcw className="h-3.5 w-3.5 mr-1.5" />
                 Refresh Messages
               </Button>
             </CardFooter>
