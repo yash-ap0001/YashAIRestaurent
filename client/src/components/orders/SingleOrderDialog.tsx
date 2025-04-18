@@ -393,7 +393,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               </TabsList>
               
               {/* Menu Selection Tab Content */}
-              <TabsContent value="menu-select" className="mt-0 h-[calc(100vh-280px)]">
+              <TabsContent value="menu-select" className="mt-0 h-full">
                 <div className="flex h-full">
                   {/* Left Column - Menu Items */}
                   <div className="w-1/2 h-full border-r border-gray-800 p-2 flex flex-col">
@@ -490,7 +490,7 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
               </TabsContent>
               
               {/* AI Natural Language Order Tab Content */}
-              <TabsContent value="ai-order" className="mt-0 h-[calc(100vh-280px)]">
+              <TabsContent value="ai-order" className="mt-0 h-full">
                 <div className="flex h-full">
                   {/* Left Column - AI Order Input */}
                   <div className="w-1/2 h-full border-r border-gray-800 p-2 flex flex-col">
