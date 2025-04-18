@@ -2,30 +2,21 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { BillDetails } from "@/components/billing/BillDetails";
 import { Order, Bill } from "@shared/schema";
 import { 
   Search, 
   ReceiptText, 
-  Clock,
-  CheckCircle,
-  Printer,
-  Download,
   ClipboardList,
-  BarChart3,
-  DollarSign,
-  ArrowRight
+  BarChart3
 } from "lucide-react";
 import { Tabs as TabsComponent, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
 
 export default function Billing() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-  const [singleOrderOpen, setSingleOrderOpen] = useState(false);
 
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
@@ -64,21 +55,6 @@ export default function Billing() {
           </TabsList>
 
           <div className="flex items-center gap-3">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => setSingleOrderOpen(true)}
-              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
-            >
-              <ReceiptText className="h-4 w-4 mr-1" />
-              <span>Create Order</span>
-            </Button>
-            
-            {/* Single Order Dialog */}
-            <SingleOrderDialog 
-              open={singleOrderOpen} 
-              onClose={() => setSingleOrderOpen(false)} 
-            />
 
             <div className="relative">
               <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
