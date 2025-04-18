@@ -86,8 +86,8 @@ export default function Billing() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[70vh]">
             <Card className="lg:col-span-1 h-full flex flex-col">
-              <CardHeader className="pb-2 flex-shrink-0">
-                <CardTitle className="text-lg">Billable Orders</CardTitle>
+              <CardHeader className="pb-3 flex-shrink-0 border-b">
+                <CardTitle className="text-xl font-bold text-primary">Billable Orders</CardTitle>
                 <p className="text-sm text-muted-foreground">Select an order to generate a bill</p>
               </CardHeader>
               <CardContent className="flex-grow overflow-hidden flex flex-col">
@@ -107,26 +107,26 @@ export default function Billing() {
                           <div 
                             key={order.id}
                             onClick={() => setSelectedOrderId(order.id)}
-                            className={`p-3 border rounded-md cursor-pointer transition-colors ${
+                            className={`p-4 border rounded-md cursor-pointer transition-colors ${
                               selectedOrderId === order.id 
                                 ? "border-primary border-2" 
                                 : cardClass
                             }`}
                           >
-                            <div className="flex justify-between">
+                            <div className="flex justify-between mb-2">
                               <div>
-                                <h3 className="font-medium">#{order.orderNumber}</h3>
-                                <p className="text-sm text-muted-foreground">{order.tableNumber || "Takeaway"}</p>
+                                <h3 className="font-medium text-base">#{order.orderNumber}</h3>
+                                <p className="text-sm text-muted-foreground mt-1">{order.tableNumber || "Takeaway"}</p>
                               </div>
                               <div className="text-right">
-                                <p className="font-medium">₹{order.totalAmount?.toLocaleString() || 'NaN'}</p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="font-medium text-base">₹{order.totalAmount?.toLocaleString() || '0'}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
                                   {order.createdAt ? format(new Date(order.createdAt), "HH:mm") : ""}
                                 </p>
                               </div>
                             </div>
                             {hasBill && (
-                              <Badge className="mt-2 bg-gray-600">Already Billed</Badge>
+                              <Badge className="mt-1 bg-gray-600">Already Billed</Badge>
                             )}
                           </div>
                         );
@@ -142,8 +142,8 @@ export default function Billing() {
             </Card>
             
             <Card className="lg:col-span-2 h-full flex flex-col">
-              <CardHeader className="pb-2 flex-shrink-0">
-                <CardTitle className="text-lg">Bill Details</CardTitle>
+              <CardHeader className="pb-3 flex-shrink-0 border-b">
+                <CardTitle className="text-xl font-bold text-primary">Bill Details</CardTitle>
                 <p className="text-sm text-muted-foreground">Generate and print bills</p>
               </CardHeader>
               <CardContent className="flex-grow overflow-auto">
