@@ -467,16 +467,16 @@ export function OrderForm() {
             </div>
 
             <div className="flex-1 overflow-auto rounded-lg border border-gray-800 bg-black p-2">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {filteredMenuItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-black rounded-lg p-3 cursor-pointer hover:bg-blue-900/20 transition-colors flex flex-col border border-blue-900/30"
+                    className="bg-black rounded-lg p-1.5 cursor-pointer hover:bg-blue-900/20 transition-colors flex flex-col border border-blue-900/30"
                     onClick={() => addMenuItem(item.id)}
                   >
-                    <h4 className="font-medium text-white">{item.name}</h4>
-                    <p className="text-xs text-gray-400 mt-1 mb-1 line-clamp-2">{item.description || 'Fragrant basmati rice dish'}</p>
-                    <span className="text-blue-500 font-semibold mt-auto">₹{item.price}</span>
+                    <h4 className="font-medium text-white text-xs">{item.name}</h4>
+                    <p className="text-xs text-gray-400 mt-0.5 mb-0.5 line-clamp-1">{item.description || 'Fragrant basmati rice dish'}</p>
+                    <span className="text-blue-500 font-semibold text-xs mt-auto">₹{item.price}</span>
                   </div>
                 ))}
               </div>
@@ -485,10 +485,10 @@ export function OrderForm() {
 
           {/* Order Summary (Right Side) */}
           <div className="w-1/2 h-full p-3 flex flex-col">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-bold text-white">Your Order Summary</h3>
+            <div className="flex justify-between items-center mb-1.5">
+              <h3 className="font-bold text-white text-sm">Your Order Summary</h3>
               {selectedItems.length > 0 && (
-                <div className="text-sm bg-blue-900/30 px-2 py-1 rounded-full text-blue-300 border border-blue-800/50">
+                <div className="text-xs bg-blue-900/30 px-1.5 py-0.5 rounded-full text-blue-300 border border-blue-800/50">
                   {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
                 </div>
               )}
@@ -499,61 +499,66 @@ export function OrderForm() {
                 <div className="h-full flex flex-col">
                   <div className="flex-1 overflow-auto p-2 space-y-2">
                     {selectedItems.map((item, index) => (
-                      <div key={index} className="border border-blue-800/50 rounded-lg p-3 space-y-2 hover:bg-blue-900/20 transition-colors">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-bold text-white">{item.name}</h4>
-                            <p className="text-sm text-blue-300">₹{item.price} per item</p>
+                      <div key={index} className="border border-blue-800/50 rounded-lg p-2 hover:bg-blue-900/20 transition-colors">
+                        <div className="flex justify-between items-center mb-1">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-bold text-white text-xs">{item.name}</h4>
+                              <Button 
+                                type="button"
+                                variant="ghost" 
+                                size="icon"
+                                className="h-5 w-5 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full ml-2"
+                                onClick={() => removeItem(index)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs text-blue-300">₹{item.price}</p>
+                              <span className="text-xs font-bold text-blue-400">
+                                ₹{(item.price * item.quantity).toFixed(2)}
+                              </span>
+                            </div>
                           </div>
-                          <Button 
-                            type="button"
-                            variant="ghost" 
-                            size="icon"
-                            className="h-7 w-7 text-red-500 hover:bg-red-900/30 hover:text-red-300 rounded-full"
-                            onClick={() => removeItem(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
                         </div>
                         
-                        <div className="flex items-center">
-                          <Button 
-                            type="button"
-                            variant="outline" 
-                            size="icon" 
-                            className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
-                            onClick={() => updateItemQuantity(index, Math.max(1, item.quantity - 1))}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="mx-3 w-6 text-center font-bold text-white">{item.quantity}</span>
-                          <Button 
-                            type="button"
-                            variant="outline" 
-                            size="icon" 
-                            className="h-6 w-6 rounded-full border-blue-600 text-blue-400 hover:bg-blue-900 hover:text-white"
-                            onClick={() => updateItemQuantity(index, item.quantity + 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                          <span className="ml-auto font-bold text-blue-400">
-                            ₹{(item.price * item.quantity).toFixed(2)}
-                          </span>
+                        <div className="flex gap-2 items-center">
+                          <div className="flex items-center border border-blue-800 rounded-md px-1">
+                            <Button 
+                              type="button"
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 text-blue-400 hover:bg-blue-900 hover:text-white p-0"
+                              onClick={() => updateItemQuantity(index, Math.max(1, item.quantity - 1))}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="w-4 text-center font-bold text-white text-xs">{item.quantity}</span>
+                            <Button 
+                              type="button"
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 text-blue-400 hover:bg-blue-900 hover:text-white p-0"
+                              onClick={() => updateItemQuantity(index, item.quantity + 1)}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <Input
+                            placeholder="Instructions..."
+                            value={item.notes}
+                            onChange={(e) => updateItemNotes(index, e.target.value)}
+                            className="text-xs h-6 text-xs border border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 flex-1"
+                          />
                         </div>
-                        
-                        <Input
-                          placeholder="Special instructions..."
-                          value={item.notes}
-                          onChange={(e) => updateItemNotes(index, e.target.value)}
-                          className="text-xs h-7 border border-blue-600 bg-black text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        />
                       </div>
                     ))}
                   </div>
                   
-                  <div className="p-3 bg-blue-900/30 flex justify-between items-center border-t border-blue-800">
-                    <span className="font-bold text-blue-300">Total Amount</span>
-                    <span className="text-xl font-extrabold text-white">
+                  <div className="p-2 bg-blue-900/30 flex justify-between items-center border-t border-blue-800">
+                    <span className="font-bold text-blue-300 text-xs">Total Amount</span>
+                    <span className="text-lg font-extrabold text-white">
                       ₹{calculateTotal().toFixed(2)}
                     </span>
                   </div>
@@ -585,7 +590,7 @@ export function OrderForm() {
                         <List className="h-4 w-4 text-blue-500 mr-2 mt-3" />
                         <Textarea
                           placeholder="Order notes... (dietary preferences, allergies, special requirements)"
-                          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[80px] bg-transparent text-white placeholder:text-gray-500 py-2"
+                          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[50px] bg-transparent text-white placeholder:text-gray-500 py-2 text-xs"
                           {...field}
                         />
                       </div>
