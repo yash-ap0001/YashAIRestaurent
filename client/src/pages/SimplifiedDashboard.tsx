@@ -1020,12 +1020,14 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-500 to-indigo-700 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
                                     ...provided.draggableProps.style,
-                                    backgroundColor: snapshot.isDragging ? '#ff87b9' : undefined,
+                                    background: snapshot.isDragging ? '#ff87b9' : getColumnStyle('ready').backgroundColor,
+                                    color: getColumnStyle('ready').textColor,
+                                    borderLeft: `4px solid ${getColumnStyle('ready').borderColor}`,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
                                   onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
@@ -1134,12 +1136,14 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-500 to-fuchsia-700 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
                                     ...provided.draggableProps.style,
-                                    backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
+                                    background: snapshot.isDragging ? '#c440a0' : getColumnStyle('completed').backgroundColor,
+                                    color: getColumnStyle('completed').textColor,
+                                    borderLeft: `4px solid ${getColumnStyle('completed').borderColor}`,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
                                   onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
@@ -1249,12 +1253,14 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-slate-500 to-slate-700 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
                                     ...provided.draggableProps.style,
-                                    backgroundColor: snapshot.isDragging ? '#a4a4a4' : undefined,
+                                    background: snapshot.isDragging ? '#a4a4a4' : getColumnStyle('completed').backgroundColor,
+                                    color: getColumnStyle('completed').textColor,
+                                    borderLeft: `4px solid ${getColumnStyle('completed').borderColor}`,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
                                   onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
