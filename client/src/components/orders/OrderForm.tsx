@@ -347,7 +347,7 @@ export function OrderForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="h-[calc(100vh-150px)] flex flex-col">
+      <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Header Area with Table/Source Selection */}
         <div className="flex px-4 py-2 border-b border-gray-800 gap-4 bg-neutral-950 h-14">
           <div className="flex items-center gap-3 w-full">
@@ -432,7 +432,7 @@ export function OrderForm() {
         </div>
         
         {/* Main Content Area */}
-        <div className="flex-1 flex h-[calc(100vh-190px)] overflow-hidden">
+        <div className="flex-1 flex overflow-hidden">
           {/* Menu Items (Left Side) */}
           <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
             <div className="flex items-center space-x-2 mb-2">
