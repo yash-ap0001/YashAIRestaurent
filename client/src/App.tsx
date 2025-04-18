@@ -35,6 +35,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LoadingIndicator from "@/components/ui/LoadingIndicator";
 import { useEffect } from "react";
 import { OrderTrackingToasts } from "@/components/orders/OrderTrackingToasts";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 function Router() {
   const { user } = useAuth();
@@ -94,8 +95,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AppContent />
-        <Toaster />
+        <ThemeProvider>
+          <AppContent />
+          <Toaster />
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
