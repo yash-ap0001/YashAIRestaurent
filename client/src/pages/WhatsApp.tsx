@@ -169,9 +169,9 @@ export default function WhatsApp() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">WhatsApp Integration</h1>
+    <div className="container mx-auto py-4">
+      <header className="mb-4">
+        <h1 className="text-2xl font-bold">WhatsApp Integration</h1>
         <p className="text-gray-500">Test and monitor WhatsApp messaging functionality</p>
       </header>
 
@@ -179,7 +179,7 @@ export default function WhatsApp() {
         {/* WhatsApp Status Card */}
         <div className="md:col-span-3">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between py-3">
               <div>
                 <CardTitle>WhatsApp Service Status</CardTitle>
                 <CardDescription>Current status of the WhatsApp integration</CardDescription>
@@ -209,7 +209,7 @@ export default function WhatsApp() {
         {/* Message Form */}
         <div className="md:col-span-1">
           <Card>
-            <CardHeader>
+            <CardHeader className="py-3">
               <CardTitle>Send WhatsApp Message</CardTitle>
               <CardDescription>
                 {activeTab === 'simulate' 
@@ -353,7 +353,7 @@ export default function WhatsApp() {
               {messagesLoading ? (
                 <p>Loading messages...</p>
               ) : messages && messages.length > 0 ? (
-                <div className="overflow-auto max-h-[500px]">
+                <div className="overflow-auto max-h-[450px]">
                   <Table>
                     <TableCaption>Recent WhatsApp messages</TableCaption>
                     <TableHeader>
