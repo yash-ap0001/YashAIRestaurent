@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ChatInterface, MinimizedChatButton } from "@/components/chatbot/ChatInterface";
+import { ThemeSelector } from "@/components/theme/ThemeSelector";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +26,6 @@ import UserMenu from "@/components/auth/UserMenu";
 import { RoleBasedContent } from "@/components/auth/ProtectedRoute";
 import { ConnectionStatus } from "@/components/ui/ConnectionStatus";
 import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
-import { ThemeSelector } from "@/components/theme/ThemeSelector";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   Accordion,
@@ -68,6 +68,7 @@ const testingNavItems: NavItem[] = [
   { label: "Voice Assistant", href: "/voice-assistant", icon: <Mic className="w-5 h-5" /> },
   { label: "n8n Integration", href: "/n8n-integration", icon: <Workflow className="w-5 h-5" /> },
   { label: "Notification Test", href: "/notification-test", icon: <Bell className="w-5 h-5" /> },
+  { label: "Theme Test", href: "/test-theme", icon: <UserCog className="w-5 h-5" /> },
 ];
 
 interface AppShellProps {
@@ -83,8 +84,9 @@ export function AppShell({ children }: AppShellProps) {
   const { user, currentRole, setCurrentRole } = useAuth();
 
   const currentPage = mainNavItems.find(item => item.href === location) || 
-                      managementNavItems.find(item => item.href === location) ||
-                      { label: "Dashboard" };
+                    managementNavItems.find(item => item.href === location) ||
+                    testingNavItems.find(item => item.href === location) ||
+                    { label: "Dashboard" };
   
   // Determine the user type based on the current role for chatbot
   const getUserType = () => {
@@ -125,7 +127,8 @@ export function AppShell({ children }: AppShellProps) {
     "/voice-assistant": ["admin", "manager"],
     "/n8n-integration": ["admin", "manager"],
     "/diet-plan": ["admin", "manager", "customer"],
-    "/notification-test": ["admin", "manager"]
+    "/notification-test": ["admin", "manager"],
+    "/test-theme": ["admin", "manager"]
   };
 
   return (
@@ -459,88 +462,40 @@ export function AppShell({ children }: AppShellProps) {
             </Accordion>
           </nav>
           
-          {/* Footer section with app version */}
           <div className="p-4 border-t border-neutral-800">
-            <div className="text-xs text-neutral-400 text-center">
-              <p>YashHotelBot v1.2.0</p>
-              <p className="mt-1">© 2025 Yash Solutions</p>
-            </div>
+            <Button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setChatVisible(true);
+              }}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Chat with AI Assistant
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
       
-      {/* Mobile Bottom Navigation - visible only on small screens */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-neutral-800 px-4 py-2 z-10">
-        <div className="flex justify-around">
-          {getFilteredNavItems(mainNavItems, currentRole).slice(0, 4).map((item) => (
-            <Link 
-              key={item.href} 
-              href={item.href}
-              className={cn(
-                "flex flex-col items-center px-2 py-1",
-                location === item.href ? "text-purple-400" : "text-neutral-400"
-              )}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span className="text-xs mt-1">{item.label.split(' ')[0]}</span>
-            </Link>
-          ))}
-          
-          {routePermissions["/test-ai-order"].includes(currentRole) && (
-            <Link 
-              href="/test-ai-order"
-              className={cn(
-                "flex flex-col items-center px-2 py-1",
-                location === "/test-ai-order" ? "text-purple-400" : "text-neutral-400"
-              )}
-            >
-              <span className="text-xl"><Cpu className="w-5 h-5" /></span>
-              <span className="text-xs mt-1">Test AI</span>
-            </Link>
-          )}
-          
-          {routePermissions["/whatsapp"].includes(currentRole) && (
-            <Link 
-              href="/whatsapp"
-              className={cn(
-                "flex flex-col items-center px-2 py-1",
-                location === "/whatsapp" ? "text-purple-400" : "text-neutral-400"
-              )}
-            >
-              <span className="text-xl"><MessageCircle className="w-5 h-5" /></span>
-              <span className="text-xs mt-1">WhatsApp</span>
-            </Link>
-          )}
-          
-          {routePermissions["/phone-orders"].includes(currentRole) && (
-            <Link 
-              href="/phone-orders"
-              className={cn(
-                "flex flex-col items-center px-2 py-1",
-                location === "/phone-orders" ? "text-purple-400" : "text-neutral-400"
-              )}
-            >
-              <span className="text-xl"><Phone className="w-5 h-5" /></span>
-              <span className="text-xs mt-1">Phone</span>
-            </Link>
-          )}
-        </div>
-      </nav>
-      
       {/* Chat Interface */}
       {chatVisible ? (
-        <div className="fixed bottom-16 md:bottom-4 right-4 z-20">
-          <ChatInterface 
+        <div className="fixed bottom-4 right-4 z-50">
+          <ChatInterface
+            onClose={() => setChatVisible(false)}
             userType={getUserType()}
-            minimized={false}
-            onMinimize={() => setChatVisible(false)}
           />
         </div>
       ) : (
-        <div className="fixed bottom-20 md:bottom-4 right-4 z-20">
+        <div className="fixed bottom-4 right-4 z-50">
           <MinimizedChatButton onClick={() => setChatVisible(true)} />
         </div>
       )}
+      
+      {/* Single Order Dialog (global) */}
+      <SingleOrderDialog 
+        open={singleOrderOpen} 
+        onClose={() => setSingleOrderOpen(false)} 
+      />
     </div>
   );
 }
