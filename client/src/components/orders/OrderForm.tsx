@@ -432,7 +432,7 @@ export function OrderForm() {
         </div>
         
         {/* Main Content Area */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 220px)' }}>
           {/* Menu Items (Left Side) */}
           <div className="w-1/2 h-full border-r border-gray-800 p-3 flex flex-col">
             <div className="flex items-center space-x-2 mb-2">
@@ -466,7 +466,7 @@ export function OrderForm() {
               </Select>
             </div>
 
-            <div className="flex-1 overflow-auto rounded-lg border border-gray-800 bg-black p-2">
+            <div className="flex-1 overflow-auto rounded-lg border border-gray-800 bg-black p-2 max-h-[300px]">
               <div className="grid grid-cols-3 gap-1.5">
                 {filteredMenuItems.map((item) => (
                   <div
@@ -494,7 +494,7 @@ export function OrderForm() {
               )}
             </div>
             
-            <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-hidden">
+            <div className="flex-1 bg-black rounded-lg border border-gray-800 overflow-hidden max-h-[300px]">
               {selectedItems.length > 0 ? (
                 <div className="h-full flex flex-col">
                   <div className="flex-1 overflow-auto p-2 space-y-2">
@@ -577,7 +577,8 @@ export function OrderForm() {
         </div>
         
         {/* Footer Area with Notes and Checkboxes */}
-        <div className="border-t border-gray-800 p-3 bg-neutral-950">
+        <div className="border-t border-gray-800 p-3 bg-neutral-950 mt-2">
+          <h3 className="font-bold text-white text-sm mb-2">Order Notes & Options</h3>
           <div className="flex gap-3 items-start">
             <div className="flex-1">
               <FormField
