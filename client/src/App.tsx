@@ -29,14 +29,14 @@ import LoginPage from "@/pages/LoginPage";
 import CustomerRegistration from "@/pages/CustomerRegistration";
 import LoadingDemo from "@/pages/LoadingDemo";
 import NotificationTest from "@/pages/NotificationTest";
-import TestTheme from "@/pages/TestTheme";
+import ColorDemo from "@/pages/ColorDemo";
 import { AppShell } from "@/components/layouts/AppShell";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LoadingIndicator from "@/components/ui/LoadingIndicator";
 import { useEffect } from "react";
 import { OrderTrackingToasts } from "@/components/orders/OrderTrackingToasts";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ColumnColorProvider } from "@/contexts/ColumnColorContext";
 
 function Router() {
   const { user } = useAuth();
@@ -85,7 +85,7 @@ function Router() {
       <ProtectedRoute path="/ar-menu" component={ARMenuPage} allowedRoles={["admin", "manager", "waiter", "customer"]} />
       <ProtectedRoute path="/loading-demo" component={LoadingDemo} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/notification-test" component={NotificationTest} allowedRoles={["admin", "manager"]} />
-      <ProtectedRoute path="/test-theme" component={TestTheme} allowedRoles={["admin", "manager"]} />
+      <ProtectedRoute path="/color-demo" component={ColorDemo} allowedRoles={["admin", "manager"]} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
@@ -97,10 +97,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider>
+        <ColumnColorProvider>
           <AppContent />
           <Toaster />
-        </ThemeProvider>
+        </ColumnColorProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

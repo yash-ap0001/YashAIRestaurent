@@ -22,9 +22,9 @@ import { SiZomato, SiSwiggy } from "react-icons/si";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
 import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useColumnColors } from "@/contexts/ColumnColorContext";
 import { cn } from "@/lib/utils";
-import { ThemeColumnHeader, ThemeCard } from "@/components/theme/ThemeStyles";
+import { ColumnHeader, OrderCard } from "@/components/orders/OrderColumn";
 
 interface Order {
   id: number;
@@ -136,7 +136,7 @@ export default function SimplifiedDashboard() {
   const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { colors } = useTheme();
+  const { getColumnStyle } = useColumnColors();
   
   // Set up WebSocket connection for real-time updates
   useEffect(() => {
@@ -747,7 +747,10 @@ export default function SimplifiedDashboard() {
               
               {/* Pending Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className={cn("text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3", colors.pending)}>
+                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3", 
+                  getColumnStyle('pending').backgroundColor,
+                  getColumnStyle('pending').textColor
+                )}>
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -858,7 +861,10 @@ export default function SimplifiedDashboard() {
               
               {/* Preparing Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className={cn("text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3", colors.preparing)}>
+                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3", 
+                  getColumnStyle('preparing').backgroundColor,
+                  getColumnStyle('preparing').textColor
+                )}>
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -969,7 +975,10 @@ export default function SimplifiedDashboard() {
               
               {/* Ready Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-blue-500 to-indigo-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3",
+                  getColumnStyle('ready').backgroundColor,
+                  getColumnStyle('ready').textColor
+                )}>
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -1080,7 +1089,10 @@ export default function SimplifiedDashboard() {
               
               {/* Completed Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-purple-500 to-fuchsia-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3",
+                  getColumnStyle('completed').backgroundColor,
+                  getColumnStyle('completed').textColor
+                )}>
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -1191,7 +1203,11 @@ export default function SimplifiedDashboard() {
               
               {/* Billed Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-slate-500 to-slate-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3",
+                  // For billed, we'll just use the completed column style for now since there isn't a 'billed' column type
+                  getColumnStyle('completed').backgroundColor,
+                  getColumnStyle('completed').textColor
+                )}>
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">

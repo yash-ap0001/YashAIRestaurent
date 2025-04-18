@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ChatInterface, MinimizedChatButton } from "@/components/chatbot/ChatInterface";
-import { ThemeSelector } from "@/components/theme/ThemeSelector";
+import { ColumnColorSettings } from "@/components/settings/ColumnColorSettings";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +26,7 @@ import UserMenu from "@/components/auth/UserMenu";
 import { RoleBasedContent } from "@/components/auth/ProtectedRoute";
 import { ConnectionStatus } from "@/components/ui/ConnectionStatus";
 import { SingleOrderDialog } from "@/components/orders/SingleOrderDialog";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useColumnColors } from "@/contexts/ColumnColorContext";
 import {
   Accordion,
   AccordionContent,
@@ -350,7 +350,7 @@ export function AppShell({ children }: AppShellProps) {
             </div>
             
             {/* Theme selector dropdown */}
-            <ThemeSelector />
+            <ColumnColorSettings />
             
             {/* User menu - always visible in top right corner */}
             <UserMenu />
