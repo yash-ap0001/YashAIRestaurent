@@ -687,11 +687,11 @@ export default function SimplifiedDashboard() {
           />
 
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4 w-full max-w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 mt-4 w-full max-w-full">
               
               {/* Pending Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-amber-600 to-amber-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className="bg-gradient-to-r from-amber-500 to-orange-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -733,7 +733,7 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-amber-600 to-amber-800 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-amber-500 to-orange-700 order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
@@ -802,7 +802,7 @@ export default function SimplifiedDashboard() {
               
               {/* Preparing Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className="bg-gradient-to-r from-emerald-500 to-green-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -844,7 +844,7 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-600 to-emerald-800 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-500 to-green-700 order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
@@ -913,7 +913,7 @@ export default function SimplifiedDashboard() {
               
               {/* Ready Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -955,7 +955,7 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-600 to-blue-800 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-blue-500 to-indigo-700 order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
@@ -1024,7 +1024,7 @@ export default function SimplifiedDashboard() {
               
               {/* Completed Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className="bg-gradient-to-r from-purple-500 to-fuchsia-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -1066,7 +1066,7 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-600 to-purple-800 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-500 to-fuchsia-700 order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
@@ -1135,7 +1135,7 @@ export default function SimplifiedDashboard() {
               
               {/* Billed Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
+                <div className="bg-gradient-to-r from-slate-500 to-slate-700 text-white font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3">
                   <div className="flex items-center">
                     {isSelectMode && (
                       <div className="mr-2">
