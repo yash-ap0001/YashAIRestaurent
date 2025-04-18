@@ -456,42 +456,44 @@ export function SingleOrderDialog({ open, onClose }: SingleOrderDialogProps) {
                         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 gap-1.5 overflow-y-auto pb-2 pr-1">
-                        {filteredMenuItems.length === 0 ? (
-                          <div className="text-center p-3 text-gray-500">
-                            No menu items found matching your search criteria.
-                          </div>
-                        ) : (
-                          filteredMenuItems.map((menuItem) => (
-                            <div
-                              key={menuItem.id}
-                              className="bg-black/50 border border-gray-800 rounded-lg p-2 hover:bg-blue-900/10 hover:border-blue-600/50 transition-colors cursor-pointer flex justify-between"
-                              onClick={() => addOrderItem(menuItem)}
-                            >
-                              <div>
-                                <h4 className="font-semibold text-white text-sm">{menuItem.name}</h4>
-                                <p className="text-gray-400 text-xs line-clamp-1">{menuItem.description}</p>
-                                {menuItem.dietaryInfo && menuItem.dietaryInfo.length > 0 && (
-                                  <div className="flex gap-1 mt-1">
-                                    {menuItem.dietaryInfo.map((tag) => (
-                                      <span
-                                        key={tag}
-                                        className="text-[9px] bg-blue-900/30 text-blue-300 rounded-full px-1 py-0.5"
-                                      >
-                                        {tag}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="pl-2 flex items-start">
-                                <span className="font-bold text-blue-300 text-sm whitespace-nowrap">
-                                  {formatCurrency(menuItem.price)}
-                                </span>
-                              </div>
+                      <div className="flex-1 overflow-hidden">
+                        <div className="h-full overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent grid grid-cols-1 gap-1.5">
+                          {filteredMenuItems.length === 0 ? (
+                            <div className="text-center p-3 text-gray-500">
+                              No menu items found matching your search criteria.
                             </div>
-                          ))
-                        )}
+                          ) : (
+                            filteredMenuItems.map((menuItem) => (
+                              <div
+                                key={menuItem.id}
+                                className="bg-black/50 border border-gray-800 rounded-lg p-2 hover:bg-blue-900/10 hover:border-blue-600/50 transition-colors cursor-pointer flex justify-between"
+                                onClick={() => addOrderItem(menuItem)}
+                              >
+                                <div>
+                                  <h4 className="font-semibold text-white text-sm">{menuItem.name}</h4>
+                                  <p className="text-gray-400 text-xs line-clamp-1">{menuItem.description}</p>
+                                  {menuItem.dietaryInfo && menuItem.dietaryInfo.length > 0 && (
+                                    <div className="flex gap-1 mt-1">
+                                      {menuItem.dietaryInfo.map((tag) => (
+                                        <span
+                                          key={tag}
+                                          className="text-[9px] bg-blue-900/30 text-blue-300 rounded-full px-1 py-0.5"
+                                        >
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="pl-2 flex items-start">
+                                  <span className="font-bold text-blue-300 text-sm whitespace-nowrap">
+                                    {formatCurrency(menuItem.price)}
+                                  </span>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
