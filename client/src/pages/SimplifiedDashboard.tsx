@@ -747,11 +747,8 @@ export default function SimplifiedDashboard() {
               
               {/* Pending Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3", 
-                  getColumnStyle('pending').backgroundColor,
-                  getColumnStyle('pending').textColor
-                )}>
-                  <div className="flex items-center">
+                <div className="font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3 bg-gradient-to-r from-amber-500 to-orange-700 order-card-text">
+                  <div className="flex items-center text-white">
                     {isSelectMode && (
                       <div className="mr-2">
                         <Checkbox 
@@ -771,9 +768,9 @@ export default function SimplifiedDashboard() {
                     Pending Orders
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="text-amber-100 text-sm bg-amber-800 px-2 py-0.5 rounded-full">
+                    <span className="rounded-full bg-white/20 min-w-[1.5rem] h-6 flex items-center justify-center px-1 text-sm text-white">
                       {orders.filter(order => order.status === "pending").length}
-                    </div>
+                    </span>
                   </div>
                 </div>
                 <Droppable droppableId="pending">
@@ -861,11 +858,8 @@ export default function SimplifiedDashboard() {
               
               {/* Preparing Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3", 
-                  getColumnStyle('preparing').backgroundColor,
-                  getColumnStyle('preparing').textColor
-                )}>
-                  <div className="flex items-center">
+                <div className="font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3 bg-gradient-to-r from-blue-500 to-blue-700 order-card-text">
+                  <div className="flex items-center text-white">
                     {isSelectMode && (
                       <div className="mr-2">
                         <Checkbox 
@@ -885,9 +879,9 @@ export default function SimplifiedDashboard() {
                     Preparing
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="text-emerald-100 text-sm bg-emerald-800 px-2 py-0.5 rounded-full">
+                    <span className="rounded-full bg-white/20 min-w-[1.5rem] h-6 flex items-center justify-center px-1 text-sm text-white">
                       {orders.filter(order => order.status === "preparing").length}
-                    </div>
+                    </span>
                   </div>
                 </div>
                 <Droppable droppableId="preparing">
@@ -975,11 +969,8 @@ export default function SimplifiedDashboard() {
               
               {/* Ready Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3",
-                  getColumnStyle('ready').backgroundColor,
-                  getColumnStyle('ready').textColor
-                )}>
-                  <div className="flex items-center">
+                <div className="font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3 bg-gradient-to-r from-green-500 to-green-700 order-card-text">
+                  <div className="flex items-center text-white">
                     {isSelectMode && (
                       <div className="mr-2">
                         <Checkbox 
@@ -999,9 +990,9 @@ export default function SimplifiedDashboard() {
                     Ready to Serve
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="text-blue-100 text-sm bg-blue-800 px-2 py-0.5 rounded-full">
+                    <span className="rounded-full bg-white/20 min-w-[1.5rem] h-6 flex items-center justify-center px-1 text-sm text-white">
                       {orders.filter(order => order.status === "ready").length}
-                    </div>
+                    </span>
                   </div>
                 </div>
                 <Droppable droppableId="ready">
@@ -1091,11 +1082,8 @@ export default function SimplifiedDashboard() {
               
               {/* Completed Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3",
-                  getColumnStyle('completed').backgroundColor,
-                  getColumnStyle('completed').textColor
-                )}>
-                  <div className="flex items-center">
+                <div className="font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3 bg-gradient-to-r from-purple-500 to-purple-700 order-card-text">
+                  <div className="flex items-center text-white">
                     {isSelectMode && (
                       <div className="mr-2">
                         <Checkbox 
@@ -1115,9 +1103,9 @@ export default function SimplifiedDashboard() {
                     Completed
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="text-purple-100 text-sm bg-purple-800 px-2 py-0.5 rounded-full">
+                    <span className="rounded-full bg-white/20 min-w-[1.5rem] h-6 flex items-center justify-center px-1 text-sm text-white">
                       {orders.filter(order => order.status === "completed").length}
-                    </div>
+                    </span>
                   </div>
                 </div>
                 <Droppable droppableId="completed">
@@ -1207,12 +1195,8 @@ export default function SimplifiedDashboard() {
               
               {/* Billed Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className={cn("font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3",
-                  // For billed, we'll just use the completed column style for now since there isn't a 'billed' column type
-                  getColumnStyle('completed').backgroundColor,
-                  getColumnStyle('completed').textColor
-                )}>
-                  <div className="flex items-center">
+                <div className="font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3 bg-gradient-to-r from-gray-500 to-gray-700 order-card-text">
+                  <div className="flex items-center text-white">
                     {isSelectMode && (
                       <div className="mr-2">
                         <Checkbox 
@@ -1232,9 +1216,9 @@ export default function SimplifiedDashboard() {
                     Billed
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="text-gray-100 text-sm bg-gray-800 px-2 py-0.5 rounded-full">
+                    <span className="rounded-full bg-white/20 min-w-[1.5rem] h-6 flex items-center justify-center px-1 text-sm text-white">
                       {orders.filter(order => order.status === "billed").length}
-                    </div>
+                    </span>
                   </div>
                 </div>
                 <Droppable droppableId="billed">
@@ -1253,14 +1237,11 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text bg-gradient-to-r from-gray-500 to-gray-700 text-white ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
                                     ...provided.draggableProps.style,
-                                    background: snapshot.isDragging ? '#a4a4a4' : getColumnStyle('completed').backgroundColor,
-                                    color: getColumnStyle('completed').textColor,
-                                    borderLeft: `4px solid ${getColumnStyle('completed').borderColor}`,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
                                   onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
