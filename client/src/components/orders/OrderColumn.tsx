@@ -11,10 +11,7 @@ interface ColumnHeaderProps {
 }
 
 export function ColumnHeader({ title, count, columnType, className }: ColumnHeaderProps) {
-  const { getColumnStyle } = useColumnColors();
-  const style = getColumnStyle(columnType);
-  
-  // Define gradient backgrounds for each column type
+  // Define gradient backgrounds for each column type - using the exact class provided
   const gradientMap = {
     'pending': 'bg-gradient-to-r from-amber-500 to-orange-700',
     'preparing': 'bg-gradient-to-r from-blue-500 to-blue-700',
@@ -24,12 +21,7 @@ export function ColumnHeader({ title, count, columnType, className }: ColumnHead
   
   return (
     <div 
-      className={cn(
-        "font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3",
-        gradientMap[columnType],
-        "order-card-text",
-        className
-      )}
+      className={`font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3 ${gradientMap[columnType]} order-card-text`}
     >
       <h3 className="font-semibold text-white">{title}</h3>
       <span className="rounded-full bg-white/20 min-w-[1.5rem] h-6 flex items-center justify-center px-1 text-sm text-white">
