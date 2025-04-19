@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -58,13 +58,26 @@ interface ColorPickerProps {
 export function ColorPicker({ value, onChange, label, id }: ColorPickerProps) {
   const [customValue, setCustomValue] = useState(value);
 
+  // Sync customValue with external value when it changes
+  useEffect(() => {
+    setCustomValue(value);
+  }, [value]);
+
   const handleColorSelect = (color: string) => {
+    setCustomValue(color);
     onChange(color);
   };
 
   const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setCustomValue(newValue);
+    
+    // Real-time update for preview while typing
+    if (newValue.match(/^#([0-9A-F]{3}){1,2}$/i) || 
+        newValue.match(/^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$/i) ||
+        newValue.match(/^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\s*\)$/i)) {
+      onChange(newValue);
+    }
   };
 
   const handleCustomColorBlur = () => {

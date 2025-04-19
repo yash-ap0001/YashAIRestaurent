@@ -117,9 +117,9 @@ export function ColumnColorPicker({ columnType, label }: ColorPickerProps) {
         />
       </div>
       
-      <div className="flex mt-1">
+      <div className="flex mt-2">
         <div 
-          className="text-xs p-1 rounded flex-1 text-center"
+          className="text-sm py-2 px-3 rounded-md flex-1 text-center font-medium"
           style={{ 
             backgroundColor: style.backgroundColor,
             color: style.textColor,
@@ -128,7 +128,20 @@ export function ColumnColorPicker({ columnType, label }: ColorPickerProps) {
             borderStyle: "solid"
           }}
         >
-          Preview
+          Column Preview
+        </div>
+      </div>
+      
+      <div className="flex mt-1">
+        <div 
+          className="text-sm p-2 rounded-md flex-1 border-l-4"
+          style={{ 
+            backgroundColor: "white",
+            borderLeftColor: style.borderColor,
+            color: "black"
+          }}
+        >
+          Card Preview
         </div>
       </div>
     </div>
