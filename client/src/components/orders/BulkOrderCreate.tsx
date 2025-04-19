@@ -94,11 +94,11 @@ interface TemplateCardProps {
 function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
   return (
     <div 
-      className={`rounded-lg p-4 mb-3 cursor-pointer transition-all bg-gradient-to-r 
-        ${template.name.includes('Breakfast') ? 'from-amber-400 to-orange-500' : 
-          template.name.includes('Lunch') ? 'from-indigo-400 to-blue-500' : 
-          template.name.includes('Dinner') ? 'from-purple-400 to-violet-500' : 
-          'from-emerald-400 to-green-500'} 
+      className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text 
+        ${template.name.includes('Breakfast') ? 'bg-gradient-to-r from-amber-400 to-orange-500' : 
+          template.name.includes('Lunch') ? 'bg-gradient-to-r from-indigo-400 to-blue-500' : 
+          template.name.includes('Dinner') ? 'bg-gradient-to-r from-purple-400 to-violet-500' : 
+          'bg-gradient-to-r from-emerald-400 to-green-500'} 
         text-white ${isSelected ? 'ring-2 ring-white' : ''}`}
       onClick={onClick}
     >
