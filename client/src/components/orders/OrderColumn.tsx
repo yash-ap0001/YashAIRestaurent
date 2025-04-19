@@ -14,19 +14,24 @@ export function ColumnHeader({ title, count, columnType, className }: ColumnHead
   const { getColumnStyle } = useColumnColors();
   const style = getColumnStyle(columnType);
   
+  console.log(`ColumnHeader for ${columnType}:`, style);
+  
+  // Get stronger colors for header backgrounds
+  const headerStyle = {
+    backgroundColor: style.backgroundColor,
+    color: style.textColor,
+    borderColor: style.borderColor,
+    borderWidth: "1px",
+    borderStyle: "solid"
+  };
+  
   return (
     <div 
       className={cn(
         "px-4 py-3 rounded-md flex items-center justify-between",
         className
       )}
-      style={{
-        backgroundColor: style.backgroundColor,
-        color: style.textColor,
-        borderColor: style.borderColor,
-        borderWidth: "1px",
-        borderStyle: "solid"
-      }}
+      style={headerStyle}
     >
       <h3 className="font-semibold">{title}</h3>
       <span className="rounded-full bg-background/20 min-w-[1.5rem] h-6 flex items-center justify-center px-1 text-sm">
