@@ -11,12 +11,12 @@ interface ColumnHeaderProps {
 }
 
 export function ColumnHeader({ title, count, columnType, className }: ColumnHeaderProps) {
-  // Define gradient backgrounds for each column type - using the exact class provided
+  // Define professional gradient backgrounds with matched colors
   const gradientMap = {
     'pending': 'bg-gradient-to-r from-amber-500 to-orange-700',
-    'preparing': 'bg-gradient-to-r from-blue-500 to-blue-700',
-    'ready': 'bg-gradient-to-r from-green-500 to-green-700',
-    'completed': 'bg-gradient-to-r from-purple-500 to-purple-700'
+    'preparing': 'bg-gradient-to-r from-indigo-500 to-blue-700',
+    'ready': 'bg-gradient-to-r from-emerald-500 to-green-700',
+    'completed': 'bg-gradient-to-r from-purple-500 to-violet-700'
   };
   
   return (
@@ -40,12 +40,12 @@ interface OrderCardProps {
 }
 
 export function OrderCard({ columnType, className, children, onClick, isSelected }: OrderCardProps) {
-  // Define color backgrounds for each column type
+  // Define gradient backgrounds for order cards that match headers
   const colorMap = {
-    'pending': 'bg-amber-100 text-amber-900 border-amber-300',
-    'preparing': 'bg-blue-100 text-blue-900 border-blue-300',
-    'ready': 'bg-green-100 text-green-900 border-green-300',
-    'completed': 'bg-purple-100 text-purple-900 border-purple-300'
+    'pending': 'bg-gradient-to-r from-amber-400 to-orange-500 text-white border-amber-600',
+    'preparing': 'bg-gradient-to-r from-indigo-400 to-blue-500 text-white border-blue-600',
+    'ready': 'bg-gradient-to-r from-emerald-400 to-green-500 text-white border-green-600',
+    'completed': 'bg-gradient-to-r from-purple-400 to-violet-500 text-white border-purple-600'
   };
   
   return (

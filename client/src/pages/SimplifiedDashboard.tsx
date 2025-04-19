@@ -1195,7 +1195,7 @@ export default function SimplifiedDashboard() {
               
               {/* Billed Orders Column */}
               <div className="flex flex-col w-full min-w-0 max-w-full">
-                <div className="font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3 bg-gradient-to-r from-gray-500 to-gray-700 order-card-text">
+                <div className="font-bold py-2 rounded-t-md text-center flex items-center justify-between w-full px-3 bg-gradient-to-r from-pink-500 to-rose-700 order-card-text">
                   <div className="flex items-center text-white">
                     {isSelectMode && (
                       <div className="mr-2">
@@ -1237,7 +1237,7 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text bg-gradient-to-r from-gray-500 to-gray-700 text-white ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text bg-gradient-to-r from-pink-400 to-rose-500 text-white ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
