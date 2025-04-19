@@ -84,6 +84,38 @@ const TEMPLATES: OrderTemplate[] = [
   }
 ];
 
+// TemplateCard component with gradient styling
+interface TemplateCardProps {
+  template: OrderTemplate;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
+  return (
+    <div 
+      className={`rounded-lg p-4 mb-3 cursor-pointer transition-all bg-gradient-to-r 
+        ${template.name.includes('Breakfast') ? 'from-amber-400 to-orange-500' : 
+          template.name.includes('Lunch') ? 'from-indigo-400 to-blue-500' : 
+          template.name.includes('Dinner') ? 'from-purple-400 to-violet-500' : 
+          'from-emerald-400 to-green-500'} 
+        text-white ${isSelected ? 'ring-2 ring-white' : ''}`}
+      onClick={onClick}
+    >
+      <h3 className="font-bold text-lg">{template.name}</h3>
+      <p className="text-sm text-white/80">{template.description}</p>
+      <div className="mt-2 flex justify-between items-center">
+        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+          {template.itemsCount} items
+        </span>
+        <span className="text-xs font-medium">
+          Tables: {template.tablePrefix}1-{template.tablePrefix}{template.name.match(/\d+/)?.[0] || '10'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   const [activeTab, setActiveTab] = useState<string>("standard");
   const [orderCount, setOrderCount] = useState<number>(10);
@@ -354,24 +386,26 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                   onChange={(e) => setOrderCount(parseInt(e.target.value) || 1)}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 col-span-2">
                 <Label htmlFor="template">Apply Template (Optional)</Label>
-                <Select value={selectedTemplate} onValueChange={(value) => {
-                  setSelectedTemplate(value);
-                  applyTemplate(value);
-                }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {TEMPLATES.map((template) => (
-                      <SelectItem key={template.name} value={template.name}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  {TEMPLATES.map((template) => (
+                    <TemplateCard 
+                      key={template.name}
+                      template={template}
+                      isSelected={selectedTemplate === template.name}
+                      onClick={() => {
+                        if (selectedTemplate === template.name) {
+                          setSelectedTemplate('none');
+                          applyTemplate('none');
+                        } else {
+                          setSelectedTemplate(template.name);
+                          applyTemplate(template.name);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tablePrefix">Table Prefix</Label>
