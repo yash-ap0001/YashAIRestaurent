@@ -1,9 +1,7 @@
 import { useColumnColors } from "@/contexts/ColumnColorContext";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
-import { Label } from "@/components/ui/label";
 import { ColumnType } from "@/contexts/ColumnColorContext";
-import { ColorPicker } from "@/components/ui/color-picker";
 
 interface ColumnHeaderProps {
   title: string;
@@ -58,92 +56,15 @@ export function OrderCard({ columnType, className, children, onClick, isSelected
         className
       )}
       style={{
-        backgroundColor: "white",
-        borderLeftWidth: "4px",
-        borderLeftStyle: "solid",
-        borderLeftColor: style.borderColor
+        backgroundColor: style.backgroundColor,
+        color: style.textColor,
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: style.borderColor
       }}
       onClick={onClick}
     >
       {children}
-    </div>
-  );
-}
-
-interface ColorPickerProps {
-  columnType: ColumnType;
-  label: string;
-}
-
-export function ColumnColorPicker({ columnType, label }: ColorPickerProps) {
-  const { getColumnStyle, updateColumnStyle } = useColumnColors();
-  const style = getColumnStyle(columnType);
-  
-  const handleBgColorChange = (value: string) => {
-    updateColumnStyle(columnType, { ...style, backgroundColor: value });
-  };
-  
-  const handleTextColorChange = (value: string) => {
-    updateColumnStyle(columnType, { ...style, textColor: value });
-  };
-  
-  const handleBorderColorChange = (value: string) => {
-    updateColumnStyle(columnType, { ...style, borderColor: value });
-  };
-  
-  return (
-    <div className="space-y-2">
-      <div className="font-medium text-sm">{label}</div>
-      <div className="grid grid-cols-1 gap-3">
-        <ColorPicker
-          id={`${columnType}-bg`}
-          label="Background"
-          value={style.backgroundColor}
-          onChange={handleBgColorChange}
-        />
-        
-        <ColorPicker
-          id={`${columnType}-text`}
-          label="Text"
-          value={style.textColor}
-          onChange={handleTextColorChange}
-        />
-        
-        <ColorPicker
-          id={`${columnType}-border`}
-          label="Border"
-          value={style.borderColor}
-          onChange={handleBorderColorChange}
-        />
-      </div>
-      
-      <div className="flex mt-2">
-        <div 
-          className="text-sm py-2 px-3 rounded-md flex-1 text-center font-medium"
-          style={{ 
-            backgroundColor: style.backgroundColor,
-            color: style.textColor,
-            borderColor: style.borderColor,
-            borderWidth: "1px",
-            borderStyle: "solid"
-          }}
-        >
-          Column Preview
-        </div>
-      </div>
-      
-      <div className="flex mt-1">
-        <div 
-          className="text-sm p-2 rounded-md flex-1 border-l-4"
-          style={{ 
-            backgroundColor: "white",
-            borderLeftColor: style.borderColor,
-            color: "black"
-          }}
-        >
-          Card Preview
-        </div>
-      </div>
     </div>
   );
 }

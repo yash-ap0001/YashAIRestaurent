@@ -10,58 +10,47 @@ export interface ColumnStyle {
 
 interface ColumnColorContextType {
   getColumnStyle: (column: ColumnType) => ColumnStyle;
-  updateColumnStyle: (column: ColumnType, style: ColumnStyle) => void;
   resetColors: () => void;
 }
 
 const defaultStyles: Record<ColumnType, ColumnStyle> = {
   pending: {
-    backgroundColor: "#FEF3C7", // Amber 100
-    textColor: "#92400E",       // Amber 800
-    borderColor: "#F59E0B"      // Amber 500
+    backgroundColor: "#FFA500", // Amber/Orange
+    textColor: "#FFFFFF",       // White
+    borderColor: "#FF7A00"      // Darker Orange
   },
   preparing: {
-    backgroundColor: "#DBEAFE", // Blue 100
-    textColor: "#1E40AF",       // Blue 800
-    borderColor: "#3B82F6"      // Blue 500
+    backgroundColor: "#4F94CD", // Royal Blue
+    textColor: "#FFFFFF",       // White
+    borderColor: "#3A70A0"      // Darker Blue
   },
   ready: {
-    backgroundColor: "#D1FAE5", // Green 100
-    textColor: "#065F46",       // Green 800
-    borderColor: "#10B981"      // Green 500
+    backgroundColor: "#2ECC71", // Emerald Green
+    textColor: "#FFFFFF",       // White
+    borderColor: "#27AE60"      // Darker Green
   },
   completed: {
-    backgroundColor: "#E0E7FF", // Indigo 100
-    textColor: "#3730A3",       // Indigo 800
-    borderColor: "#6366F1"      // Indigo 500
+    backgroundColor: "#9370DB", // Medium Purple
+    textColor: "#FFFFFF",       // White
+    borderColor: "#7D5EC8"      // Darker Purple
   }
 };
 
 const ColumnColorContext = createContext<ColumnColorContextType | undefined>(undefined);
 
 export function ColumnColorProvider({ children }: { children: ReactNode }) {
-  const [columnStyles, setColumnStyles] = useState<Record<ColumnType, ColumnStyle>>(
-    // Load from localStorage if available, otherwise use defaults
-    JSON.parse(localStorage.getItem('yash_hotel_column_styles') || JSON.stringify(defaultStyles))
-  );
+  const [columnStyles, setColumnStyles] = useState<Record<ColumnType, ColumnStyle>>(defaultStyles);
   
   const getColumnStyle = (column: ColumnType): ColumnStyle => {
     return columnStyles[column];
   };
   
-  const updateColumnStyle = (column: ColumnType, style: ColumnStyle) => {
-    const newStyles = { ...columnStyles, [column]: style };
-    setColumnStyles(newStyles);
-    localStorage.setItem('yash_hotel_column_styles', JSON.stringify(newStyles));
-  };
-  
   const resetColors = () => {
     setColumnStyles(defaultStyles);
-    localStorage.setItem('yash_hotel_column_styles', JSON.stringify(defaultStyles));
   };
   
   return (
-    <ColumnColorContext.Provider value={{ getColumnStyle, updateColumnStyle, resetColors }}>
+    <ColumnColorContext.Provider value={{ getColumnStyle, resetColors }}>
       {children}
     </ColumnColorContext.Provider>
   );

@@ -2,12 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChefHat, ClipboardCheck, Receipt, CheckCheck, Settings } from "lucide-react";
+import { ChefHat, ClipboardCheck, Receipt, CheckCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ColumnHeader, OrderCard } from "./OrderColumn";
-import { ColumnColorSettings } from "../settings/ColumnColorSettings";
 
 interface Order {
   id: number;
