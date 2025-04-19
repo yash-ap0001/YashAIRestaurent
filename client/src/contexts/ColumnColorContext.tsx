@@ -15,24 +15,24 @@ interface ColumnColorContextType {
 
 const defaultStyles: Record<ColumnType, ColumnStyle> = {
   pending: {
-    backgroundColor: "#FFA500", // Amber/Orange
-    textColor: "#FFFFFF",       // White
-    borderColor: "#FF7A00"      // Darker Orange
+    backgroundColor: "#FFE0B2", // Light Orange/Amber
+    textColor: "#E65100",       // Dark Orange text
+    borderColor: "#FFB74D"      // Medium Orange border
   },
   preparing: {
-    backgroundColor: "#4F94CD", // Royal Blue
-    textColor: "#FFFFFF",       // White
-    borderColor: "#3A70A0"      // Darker Blue
+    backgroundColor: "#BBDEFB", // Light Blue
+    textColor: "#1565C0",       // Dark Blue text
+    borderColor: "#64B5F6"      // Medium Blue border
   },
   ready: {
-    backgroundColor: "#2ECC71", // Emerald Green
-    textColor: "#FFFFFF",       // White
-    borderColor: "#27AE60"      // Darker Green
+    backgroundColor: "#C8E6C9", // Light Green
+    textColor: "#2E7D32",       // Dark Green text
+    borderColor: "#81C784"      // Medium Green border
   },
   completed: {
-    backgroundColor: "#9370DB", // Medium Purple
-    textColor: "#FFFFFF",       // White
-    borderColor: "#7D5EC8"      // Darker Purple
+    backgroundColor: "#D1C4E9", // Light Purple
+    textColor: "#4527A0",       // Dark Purple text
+    borderColor: "#9575CD"      // Medium Purple border
   }
 };
 
