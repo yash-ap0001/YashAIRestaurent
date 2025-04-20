@@ -233,20 +233,25 @@ div[data-state="unchecked"] {
   
   /* All card text styling for gradient backgrounds */
   [droppableId] .rounded-lg .text-xs,
-  [droppableId] .rounded-lg .text-neutral-500 {
+  [droppableId] .rounded-lg .text-neutral-500,
+  .bg-gradient-to-r .text-xs,
+  .bg-gradient-to-r .text-neutral-500 {
     color: white !important;
     opacity: 0.8;
   }
   
   /* Font bold handling for all cards */
-  [droppableId] .rounded-lg .font-bold {
+  [droppableId] .rounded-lg .font-bold,
+  .bg-gradient-to-r .font-bold {
     color: white !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
   
   /* Headings for all cards */
   [droppableId] .rounded-lg h3,
-  [droppableId] .rounded-lg .text-\[\#7A0177\] {
+  [droppableId] .rounded-lg .text-\[\#7A0177\],
+  .bg-gradient-to-r h3,
+  .bg-gradient-to-r .text-\[\#7A0177\] {
     color: white !important;
     font-weight: 700;
     font-size: 1.125rem;
