@@ -95,10 +95,10 @@ function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
   return (
     <div 
       className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text 
-        ${template.name.includes('Breakfast') ? 'bg-gradient-to-r from-amber-400 to-orange-500' : 
-          template.name.includes('Lunch') ? 'bg-gradient-to-r from-indigo-400 to-blue-500' : 
-          template.name.includes('Dinner') ? 'bg-gradient-to-r from-purple-400 to-violet-500' : 
-          'bg-gradient-to-r from-emerald-400 to-green-500'} 
+        ${template.name.includes('Breakfast') ? 'bg-gradient-to-r from-amber-500 to-orange-700' : 
+          template.name.includes('Lunch') ? 'bg-gradient-to-r from-indigo-500 to-blue-700' : 
+          template.name.includes('Dinner') ? 'bg-gradient-to-r from-purple-500 to-violet-700' : 
+          'bg-gradient-to-r from-emerald-500 to-green-700'} 
         text-white ${isSelected ? 'ring-2 ring-white' : ''}`}
       onClick={onClick}
     >
