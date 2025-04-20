@@ -900,7 +900,7 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-500 to-green-700 order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-indigo-500 to-blue-700 order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
@@ -1011,14 +1011,12 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-emerald-500 to-green-700 order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
                                     ...provided.draggableProps.style,
-                                    background: snapshot.isDragging ? '#ff87b9' : getColumnStyle('ready').backgroundColor,
-                                    color: getColumnStyle('ready').textColor,
-                                    borderLeft: `4px solid ${getColumnStyle('ready').borderColor}`,
+                                    backgroundColor: snapshot.isDragging ? '#72da8d' : undefined,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
                                   onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
@@ -1124,14 +1122,12 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all bg-gradient-to-r from-purple-500 to-violet-700 order-card-text ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{
                                     ...provided.draggableProps.style,
-                                    background: snapshot.isDragging ? '#c440a0' : getColumnStyle('completed').backgroundColor,
-                                    color: getColumnStyle('completed').textColor,
-                                    borderLeft: `4px solid ${getColumnStyle('completed').borderColor}`,
+                                    backgroundColor: snapshot.isDragging ? '#c440a0' : undefined,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
                                   onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
@@ -1237,7 +1233,7 @@ export default function SimplifiedDashboard() {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...(isSelectMode ? {} : provided.dragHandleProps)}
-                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text bg-gradient-to-r from-pink-400 to-rose-500 text-white ${
+                                  className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text bg-gradient-to-r from-pink-500 to-rose-700 text-white ${
                                     isSelectMode && selectedOrders.includes(order.id) ? 'ring-2 ring-primary' : ''
                                   }`}
                                   style={{

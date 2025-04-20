@@ -92,6 +92,13 @@ interface TemplateCardProps {
 }
 
 function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
+  /* 
+   * Matching exact gradient styles from column headers:
+   * - Pending/Breakfast: from-amber-500 to-orange-700
+   * - Preparing/Lunch: from-indigo-500 to-blue-700
+   * - Ready/Coffee: from-emerald-500 to-green-700
+   * - Completed/Dinner: from-purple-500 to-violet-700
+   */
   return (
     <div 
       className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text 
@@ -99,16 +106,16 @@ function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
           template.name.includes('Lunch') ? 'bg-gradient-to-r from-indigo-500 to-blue-700' : 
           template.name.includes('Dinner') ? 'bg-gradient-to-r from-purple-500 to-violet-700' : 
           'bg-gradient-to-r from-emerald-500 to-green-700'} 
-        text-white ${isSelected ? 'ring-2 ring-white' : ''}`}
+        text-white ${isSelected ? 'ring-2 ring-white shadow-lg' : ''}`}
       onClick={onClick}
     >
-      <h3 className="font-bold text-lg">{template.name}</h3>
-      <p className="text-sm text-white/80">{template.description}</p>
+      <h3 className="font-bold text-lg text-white text-shadow-sm">{template.name}</h3>
+      <p className="text-sm text-white/90">{template.description}</p>
       <div className="mt-2 flex justify-between items-center">
-        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+        <span className="text-xs bg-white/20 px-2 py-1 rounded-full text-white font-medium">
           {template.itemsCount} items
         </span>
-        <span className="text-xs font-medium">
+        <span className="text-xs font-medium text-white">
           Tables: {template.tablePrefix}1-{template.tablePrefix}{template.name.match(/\d+/)?.[0] || '10'}
         </span>
       </div>
