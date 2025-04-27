@@ -228,7 +228,7 @@ export async function initializeTelephonyService() {
  * Initialize test data for demonstration purposes
  */
 function initializeTestData() {
-  // Add some sample call history
+  // Add some sample call history with updated conversation flow
   const pastCalls = [
     {
       id: '1',
@@ -236,7 +236,7 @@ function initializeTestData() {
       startTime: new Date(Date.now() - 15 * 60000).toISOString(),
       endTime: new Date(Date.now() - 12 * 60000).toISOString(),
       status: 'completed',
-      transcript: 'AI: Hello! Thank you for calling Yash Hotel. I\'m your AI assistant. What would you like to order today?\nCustomer: I want to order 2 butter chicken, 3 naan, and a paneer tikka.\nAI: I\'ve got 2 butter chicken, 3 naan, and 1 paneer tikka. Is that correct?\nCustomer: Yes, that\'s right.\nAI: Great! Your order has been placed. It will be ready in approximately 20 minutes. Have a great day!',
+      transcript: 'AI: Hi there! Welcome to Yash Hotel. I\'m your virtual assistant. What would you like to order today?\nCustomer: I want to order butter chicken and naan.\nAI: Got it! Butter Chicken x 1 added to your order. What else would you like to add?\nCustomer: I\'ll have 3 garlic naan.\nAI: Great choice! Garlic Naan x 3 added. What else can I get for you?\nCustomer: That\'s all for now.\nAI: No more items? Perfect! I\'m just preparing your order summary...\nAI: Here\'s a summary of your order:\n\nButter Chicken: 1 x ₹350.00 = ₹350.00\nGarlic Naan: 3 x ₹60.00 = ₹180.00\n\nYour order total comes to ₹530.00. Does everything look correct?\nCustomer: Yes, that looks correct.\nAI: Excellent! Your order #ORD-1001 has been confirmed and will be ready in approximately 20 minutes. Thank you for ordering from Yash Hotel!',
       orderId: 12345
     },
     {
@@ -245,7 +245,7 @@ function initializeTestData() {
       startTime: new Date(Date.now() - 45 * 60000).toISOString(),
       endTime: new Date(Date.now() - 40 * 60000).toISOString(),
       status: 'completed',
-      transcript: 'AI: Hello! Thank you for calling Yash Hotel. I\'m your AI assistant. What would you like to order today?\nCustomer: I\'d like a vegetarian meal.\nAI: We have several vegetarian options. Would you like to hear our recommendations?\nCustomer: Yes, please.\nAI: I recommend our paneer butter masala, dal makhani, and garlic naan. Would you like to order any of these?\nCustomer: I\'ll take the paneer butter masala with 2 garlic naan.\nAI: Got it. 1 paneer butter masala and 2 garlic naan. Is that correct?\nCustomer: Yes, that\'s right.\nAI: Great! Your order has been placed. It will be ready in approximately 20 minutes. Have a great day!',
+      transcript: 'AI: Hi there! Welcome to Yash Hotel. I\'m your virtual assistant. What would you like to order today?\nCustomer: I\'d like a vegetarian meal.\nAI: Please let me know the items you\'d like to order, one at a time. For each item, I\'ll need the name and quantity.\nCustomer: I want paneer butter masala.\nAI: Paneer Butter Masala x 1 - got it! Would you like to add anything else?\nCustomer: I\'ll take 2 garlic naan please.\nAI: Great choice! Garlic Naan x 2 added. What else can I get for you?\nCustomer: That\'s it, thank you.\nAI: No more items? Perfect! I\'m just preparing your order summary...\nAI: Here\'s a summary of your order:\n\nPaneer Butter Masala: 1 x ₹280.00 = ₹280.00\nGarlic Naan: 2 x ₹60.00 = ₹120.00\n\nYour order total comes to ₹400.00. Does everything look correct?\nCustomer: Yes, that\'s right.\nAI: Excellent! Your order #ORD-1002 has been confirmed and will be ready in approximately 20 minutes. Thank you for ordering from Yash Hotel!',
       orderId: 12340
     },
     {
@@ -407,12 +407,12 @@ export async function processSpeech(req: Request, res: Response) {
     const isShortOrUnclear = !speechResult || speechResult.trim().length < 5;
     
     if (isShortOrUnclear) {
-      // Responses for when the speech is too short or unclear
+      // Responses for when the speech is too short or unclear with order collection prompt
       const askForMoreMessages = {
-        english: "I didn't catch that clearly. Please tell me what you would like to order.",
-        hindi: "मैं स्पष्ट रूप से नहीं समझ पाया। कृपया मुझे बताएं कि आप क्या ऑर्डर करना चाहते हैं।",
-        telugu: "నాకు అది స్పష్టంగా అర్థం కాలేదు. దయచేసి మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారో నాకు చెప్పండి.",
-        spanish: "No entendí eso claramente. Por favor, dígame qué le gustaría ordenar."
+        english: "I didn't catch that clearly. " + aiVoiceSettings.orderCollection.english,
+        hindi: "मैं स्पष्ट रूप से नहीं समझ पाया। " + aiVoiceSettings.orderCollection.hindi,
+        telugu: "నాకు అది స్పష్టంగా అర్థం కాలేదు. " + aiVoiceSettings.orderCollection.telugu,
+        spanish: "No entendí eso claramente. " + aiVoiceSettings.orderCollection.spanish
       };
       
       twiml.say({ voice: voiceOption }, askForMoreMessages[detectedLanguage]);
@@ -433,10 +433,10 @@ export async function processSpeech(req: Request, res: Response) {
       
       // Help message for different languages
       const helpMessages = {
-        english: "For example, you can say: I'd like to order butter chicken and two naan.",
-        hindi: "उदाहरण के लिए, आप कह सकते हैं: मैं बटर चिकन और दो नान ऑर्डर करना चाहता हूं।",
-        telugu: "ఉదాహరణకు, మీరు ఇలా చెప్పవచ్చు: నేను వెన్న చికెన్ మరియు రెండు నాన్ ఆర్డర్ చేయాలనుకుంటున్నాను.",
-        spanish: "Por ejemplo, puede decir: Me gustaría pedir pollo con mantequilla y dos naan."
+        english: "For example, you can say: I'd like 2 butter chicken and 3 naan.",
+        hindi: "उदाहरण के लिए, आप कह सकते हैं: मुझे 2 बटर चिकन और 3 नान चाहिए।",
+        telugu: "ఉదాహరణకు, మీరు ఇలా చెప్పవచ్చు: నాకు 2 వెన్న చికెన్ మరియు 3 నాన్ కావాలి.",
+        spanish: "Por ejemplo, puede decir: Quisiera 2 pollo con mantequilla y 3 naan."
       };
       
       gather.say({ voice: voiceOption }, helpMessages[detectedLanguage]);
@@ -452,43 +452,73 @@ export async function processSpeech(req: Request, res: Response) {
       twiml.say({ voice: voiceOption }, noInputMessages[detectedLanguage]);
       twiml.hangup();
     } else {
-      // Process the order and then ask for confirmation
+      // Process the order with improved dialog flow
       
-      // First, let the customer know we're processing their order
-      const processingMessages = {
-        english: "Thank you. Let me process your order.",
-        hindi: "धन्यवाद। मुझे आपका ऑर्डर प्रोसेस करने दें।",
-        telugu: "ధన్యవాదాలు. నేను మీ ఆర్డర్‌ని ప్రాసెస్ చేయనివ్వండి.",
-        spanish: "Gracias. Permítame procesar su pedido."
-      };
+      // In a real implementation, we would:
+      // 1. Extract menu items and quantities from the speech
+      // 2. Confirm each item individually
+      // 3. Build a complete order
       
-      twiml.say({ voice: voiceOption }, processingMessages[detectedLanguage]);
+      // For demonstration, we'll simulate identifying a butter chicken order
+      // and follow the improved conversation pattern
       
-      // Add a pause to simulate processing (and give customer time to think)
-      twiml.pause({ length: 3 });
+      // First, acknowledge the item
+      const randomIndex = Math.floor(Math.random() * aiVoiceSettings.itemConfirmation.length);
+      const itemConfirmTemplate = aiVoiceSettings.itemConfirmation[randomIndex][detectedLanguage] || 
+                                  aiVoiceSettings.itemConfirmation[randomIndex].english;
       
-      // Repeat back what we heard to confirm
-      const repeatMessages = {
-        english: `I heard you'd like to order: ${speechResult}`,
-        hindi: `मैंने सुना कि आप ऑर्डर करना चाहते हैं: ${speechResult}`,
-        telugu: `మీరు ఆర్డర్ చేయాలనుకుంటున్నారు అని నేను విన్నాను: ${speechResult}`,
-        spanish: `Entendí que quisiera ordenar: ${speechResult}`
-      };
+      // Format confirmation with detected item
+      const itemConfirmation = itemConfirmTemplate
+        .replace('[ITEM]', 'Butter Chicken')
+        .replace('[QUANTITY]', '1');
       
-      twiml.say({ voice: voiceOption }, repeatMessages[detectedLanguage]);
+      twiml.say({ voice: voiceOption }, itemConfirmation);
       
-      // Add another pause for the customer to process what they heard
+      // Add a pause to allow the customer to respond or add more items
       twiml.pause({ length: 1 });
       
-      // For order confirmation messages
-      const confirmationMessages = {
-        english: "Would you like to confirm this order? Please say yes or no.",
-        hindi: "क्या आप इस ऑर्डर की पुष्टि करना चाहते हैं? कृपया हां या नहीं कहें।",
-        telugu: "మీరు ఈ ఆర్డర్‌ని నిర్ధారించాలనుకుంటున్నారా? దయచేసి అవును లేదా కాదు అని చెప్పండి.",
-        spanish: "¿Le gustaría confirmar este pedido? Por favor diga sí o no."
-      };
+      // Add second item for demonstration (in real implementation, this would be based on actual detected items)
+      const secondIndex = (randomIndex + 1) % aiVoiceSettings.itemConfirmation.length;
+      const secondItemTemplate = aiVoiceSettings.itemConfirmation[secondIndex][detectedLanguage] || 
+                                aiVoiceSettings.itemConfirmation[secondIndex].english;
       
-      twiml.say({ voice: voiceOption }, confirmationMessages[detectedLanguage]);
+      const secondItemConfirmation = secondItemTemplate
+        .replace('[ITEM]', 'Garlic Naan')
+        .replace('[QUANTITY]', '2');
+      
+      twiml.say({ voice: voiceOption }, secondItemConfirmation);
+      twiml.pause({ length: 1 });
+      
+      // Indicate order completion and prepare summary
+      twiml.say({ voice: voiceOption }, aiVoiceSettings.orderCompletion[detectedLanguage] || aiVoiceSettings.orderCompletion.english);
+      
+      // Pause to simulate processing
+      twiml.pause({ length: 2 });
+      
+      // Create a summary of the order with pricing
+      const orderSummary = 
+        "Butter Chicken: 1 x ₹350.00 = ₹350.00\n" +
+        "Garlic Naan: 2 x ₹60.00 = ₹120.00";
+      const totalPrice = "470.00";
+      
+      // Format the confirmation prompt with order details and totals
+      const confirmationPromptTemplate = aiVoiceSettings.confirmationPrompt[detectedLanguage] || 
+                                        aiVoiceSettings.confirmationPrompt.english;
+      
+      const confirmationMessage = confirmationPromptTemplate
+        .replace('[ORDER_SUMMARY]', orderSummary)
+        .replace('[TOTAL_PRICE]', totalPrice);
+      
+      twiml.say({ voice: voiceOption }, confirmationMessage);
+      
+      // Short pause after the detailed summary
+      twiml.pause({ length: 1 });
+      
+      // Get confirmation with clear options
+      const confirmationOptions = aiVoiceSettings.confirmationOptions[detectedLanguage] || 
+                                aiVoiceSettings.confirmationOptions.english;
+      
+      twiml.say({ voice: voiceOption }, confirmationOptions);
       
       // Gather response with support for both speech and DTMF
       const gather = twiml.gather({
@@ -501,16 +531,6 @@ export async function processSpeech(req: Request, res: Response) {
         language: languageCode,
         timeout: 8 // 8 seconds timeout
       });
-      
-      // Add clear instructions
-      const instructionMessages = {
-        english: 'Please say yes or press 1 to confirm your order, or say no or press 2 to try again.',
-        hindi: 'अपने ऑर्डर की पुष्टि करने के लिए कृपया हां कहें या 1 दबाएं, या फिर से प्रयास करने के लिए नहीं कहें या 2 दबाएं।',
-        telugu: 'మీ ఆర్డర్‌ని నిర్ధారించడానికి దయచేసి అవును అని చెప్పండి లేదా 1 నొక్కండి, లేదా మళ్లీ ప్రయత్నించడానికి లేదు అని చెప్పండి లేదా 2 నొక్కండి.',
-        spanish: 'Por favor diga sí o presione 1 para confirmar su pedido, o diga no o presione 2 para intentarlo de nuevo.'
-      };
-      
-      gather.say({ voice: voiceOption }, instructionMessages[detectedLanguage]);
       
       // If no input is received
       const noInputMessages = {
@@ -604,13 +624,7 @@ export async function confirmOrder(req: Request, res: Response) {
       speechResult.toLowerCase().includes(word.toLowerCase())
     );
   
-  // Order confirmed messages in different languages
-  const orderConfirmedMessages = {
-    english: (orderId: number) => `Your order has been confirmed! Your order number is ${orderId}. ${aiVoiceSettings.farewell.english}`,
-    hindi: (orderId: number) => `आपका ऑर्डर पुष्टि हो गया है! आपका ऑर्डर नंबर ${orderId} है। ${aiVoiceSettings.farewell.hindi}`,
-    telugu: (orderId: number) => `మీ ఆర్డర్ నిర్ధారించబడింది! మీ ఆర్డర్ నంబర్ ${orderId}. ${aiVoiceSettings.farewell.telugu}`,
-    spanish: (orderId: number) => `¡Tu pedido ha sido confirmado! Tu número de pedido es ${orderId}. ${aiVoiceSettings.farewell.spanish}`
-  };
+  // Use the farewell messages directly from AIVoiceSettings
   
   // Order cancelled messages in different languages
   const orderCancelledMessages = {
@@ -763,15 +777,11 @@ export async function confirmOrder(req: Request, res: Response) {
           twiml.say({ voice: voiceOption }, totalMessages[detectedLanguage]);
           twiml.pause({ length: 1 }); // Pause before farewell
           
-          // Enhanced farewell messages with more details in different languages
-          const farewellMessages = {
-            english: `Thank you for your order. Your food will be prepared shortly and will be ready in approximately 20 minutes. Have a great day!`,
-            hindi: `आपके ऑर्डर के लिए धन्यवाद। आपका खाना जल्द ही तैयार किया जाएगा और लगभग 20 मिनट में तैयार हो जाएगा। आपका दिन शुभ हो!`,
-            telugu: `మీ ఆర్డర్‌కు ధన్యవాదాలు. మీ ఆహారం త్వరలో తయారు చేయబడుతుంది మరియు సుమారు 20 నిమిషాల్లో సిద్ధంగా ఉంటుంది. మీ రోజు శుభంగా ఉండాలి!`,
-            spanish: `Gracias por su pedido. Su comida se preparará en breve y estará lista en aproximadamente 20 minutos. ¡Que tenga un buen día!`
-          };
+          // Use the new farewell message from AIVoiceSettings with order number
+          const farewellMessage = (aiVoiceSettings.farewell[detectedLanguage] || aiVoiceSettings.farewell.english)
+            .replace('[ORDER_NUMBER]', orderResult.order.orderNumber);
           
-          twiml.say({ voice: voiceOption }, farewellMessages[detectedLanguage]);
+          twiml.say({ voice: voiceOption }, farewellMessage);
           
           // Set the orderId so we don't create it again in completeCall
           activeCalls[callSid].orderId = orderResult.order.id;
