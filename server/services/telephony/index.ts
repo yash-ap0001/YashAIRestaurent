@@ -450,17 +450,18 @@ export async function confirmOrder(req: Request, res: Response) {
   
   if (isConfirmed) {
     // Order confirmed
-    // In a real implementation, we would create the order in our system
-    const orderId = Math.floor(10000 + Math.random() * 90000);
+    // We'll use a temporary order ID for now
+    // The actual database order ID and order number will be set when we create the real order
+    const tempOrderId = Math.floor(10000 + Math.random() * 90000);
     
-    // Update call with order ID
+    // Update call with temporary order ID
     if (activeCalls[callSid]) {
-      activeCalls[callSid].orderId = orderId;
+      activeCalls[callSid].orderId = tempOrderId;
       
       // Also update in history
       const historyCall = callHistory.find(call => call.id === callSid);
       if (historyCall) {
-        historyCall.orderId = orderId;
+        historyCall.orderId = tempOrderId;
       }
     }
     
