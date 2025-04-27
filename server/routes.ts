@@ -2000,21 +2000,27 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       } catch (storageError) {
         console.error("Storage error creating order:", storageError);
         
-        // Fallback response with mock order for testing
+        // Create a fallback order
+        const fallbackOrder = {
+          id: Math.floor(1000 + Math.random() * 9000),
+          orderNumber,
+          status: "pending",
+          totalAmount,
+          items: orderItems,
+          orderSource: "phone",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        // Broadcast the fallback order too
+        console.log("Broadcasting fallback order:", fallbackOrder);
+        broadcastNewOrder(fallbackOrder);
+        
         res.json({
           success: true,
           message: "Immediate order simulated from call (storage error occurred)",
           callData,
-          order: {
-            id: Math.floor(1000 + Math.random() * 9000),
-            orderNumber,
-            status: "pending",
-            totalAmount,
-            items: orderItems,
-            orderSource: "phone",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
+          order: fallbackOrder
         });
       }
     } catch (err) {
