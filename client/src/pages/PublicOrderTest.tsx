@@ -78,10 +78,23 @@ export default function PublicOrderTest() {
     initializeWebSocket();
   }, []);
 
-  // Query to fetch all orders
+  // Query to fetch all orders directly from the API
   const { data: orders = [], isLoading, isError, refetch } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
     refetchInterval: 5000, // Poll every 5 seconds
+    retry: 3,
+    staleTime: 0,
+    // Force bypass any cache to ensure we get fresh data
+    queryFn: async () => {
+      console.log("Directly fetching orders for PublicOrderTest page");
+      const response = await fetch("/api/orders");
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders");
+      }
+      const data = await response.json();
+      console.log("Fetched orders:", data);
+      return data;
+    }
   });
   
   // Filter orders based on search term
@@ -100,15 +113,38 @@ export default function PublicOrderTest() {
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Public Order Test Page</h1>
-        <Button onClick={() => refetch()} variant="outline" size="sm">
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => {
+              console.log("Manual refresh clicked");
+              refetch();
+              toast({
+                title: "Refreshing orders",
+                description: "Fetching latest orders from the server...",
+              });
+            }} 
+            variant="default"
+          >
+            <Loader2 className="h-4 w-4 mr-2" />
+            Refresh Orders
+          </Button>
+        </div>
       </div>
       
       <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 mb-4">
         <p className="font-bold">🔍 Testing Mode</p>
         <p>This is a public page for testing order display without authentication. All orders in the system are shown here.</p>
+        <p className="mt-2 text-sm">Total orders loaded: {orders.length}</p>
+        {orders.length > 0 && (
+          <details className="mt-2 text-xs">
+            <summary className="cursor-pointer hover:underline">Debug: Show order sources</summary>
+            <ul className="mt-1 list-disc list-inside">
+              {Array.from(new Set(orders.map(o => o.orderSource))).map(source => (
+                <li key={source}>{source || "undefined"}: {orders.filter(o => o.orderSource === source).length} orders</li>
+              ))}
+            </ul>
+          </details>
+        )}
       </div>
       
       <div className="mb-4">
