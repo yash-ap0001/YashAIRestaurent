@@ -388,8 +388,26 @@ export async function processSpeech(req: Request, res: Response) {
     // Process the speech result - normalize and prepare for analysis
     const orderText = speechResult?.trim() || '';
     
+    console.log(`Processing speech for call ${callSid}. Order text: "${orderText}"`);
+    
     // ENHANCED ORDER ANALYSIS
     // Extract key information from the order using advanced pattern matching
+    
+    // Keywords in different languages for help/menu
+    const helpKeywords = {
+      english: ['help', 'menu', 'options', 'what', 'recommend'],
+      hindi: ['मदद', 'मेनू', 'विकल्प', 'क्या', 'सिफारिश'],
+      telugu: ['సహాయం', 'మెనూ', 'ఎంపికలు', 'ఏమి', 'సిఫార్సు'],
+      spanish: ['ayuda', 'menú', 'opciones', 'qué', 'recomendar']
+    };
+    
+    // Keywords in different languages for cancel
+    const cancelKeywords = {
+      english: ['cancel', 'stop', 'no', 'don\'t'],
+      hindi: ['रद्द', 'बंद', 'नहीं', 'मत'],
+      telugu: ['రద్దు', 'ఆపు', 'లేదు', 'వద్దు'],
+      spanish: ['cancelar', 'detener', 'no', 'parar']
+    };
     
     // 1. INTENT CLASSIFICATION - Identify the primary intent of the user
     const intentPatterns = {
@@ -489,22 +507,6 @@ export async function processSpeech(req: Request, res: Response) {
       // @ts-ignore - adding dynamic property
       activeCalls[callSid].orderData = orderSummary;
     }
-        
-    // Keywords in different languages for help/menu
-    const helpKeywords = {
-      english: ['help', 'menu', 'options', 'what', 'recommend'],
-      hindi: ['मदद', 'मेनू', 'विकल्प', 'क्या', 'सिफारिश'],
-      telugu: ['సహాయం', 'మెనూ', 'ఎంపికలు', 'ఏమి', 'సిఫార్సు'],
-      spanish: ['ayuda', 'menú', 'opciones', 'qué', 'recomendar']
-    };
-    
-    // Keywords in different languages for cancel
-    const cancelKeywords = {
-      english: ['cancel', 'stop', 'no', 'don\'t'],
-      hindi: ['रद्द', 'बंद', 'नहीं', 'मत'],
-      telugu: ['రద్దు', 'ఆపు', 'లేదు', 'వద్దు'],
-      spanish: ['cancelar', 'detener', 'no', 'parar']
-    };
     
     // Enhanced menu categories in different languages
     const menuItems = {
