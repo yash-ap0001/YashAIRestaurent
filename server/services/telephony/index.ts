@@ -1,6 +1,7 @@
 import twilio from 'twilio';
 import { Request, Response } from 'express';
 import { storage } from '../../storage';
+import fetch from 'node-fetch';
 
 // Initialize Twilio client
 const twilioClient = twilio(
@@ -468,7 +469,20 @@ export async function confirmOrder(req: Request, res: Response) {
       const orderText = activeCalls[callSid]?.orderData?.orderText || 'Food order';
       console.log(`Creating order for text: ${orderText}`);
       
-      // This would normally create the order in the database
+      // Store order information to be created in the database by the completeCall function
+      // Add order data to call object if not already present
+      if (!activeCalls[callSid].orderData) {
+        activeCalls[callSid].orderData = {
+          orderText: orderText,
+          orderSource: 'phone',
+          phoneNumber: activeCalls[callSid].phoneNumber,
+          callId: callSid,
+          simulatedCall: false,
+          useAIAutomation: true,
+          tableNumber: null,
+          preferredLanguage: detectedLanguage
+        };
+      }
       
       // Simple message without function call that was causing errors
       const message = detectedLanguage === 'english' 
@@ -710,7 +724,14 @@ export async function createOrderFromCall(call: CallData) {
     
     // Extract key information from orderText using patterns
     const quantityPattern = /(\d+)\s+(butter chicken|chicken|naan|rice|biryani|paneer|roti|samosa|pakora|curry|dal|tandoori|tikka)/gi;
-    const matches = [...orderText.matchAll(quantityPattern)];
+    
+    // Manually gather matches to avoid TypeScript issues with matchAll
+    const matches: Array<RegExpExecArray> = [];
+    let match: RegExpExecArray | null;
+    while ((match = quantityPattern.exec(orderText)) !== null) {
+      matches.push(match);
+    }
+    
     const extractedItems = matches.length > 0 ? 
       matches.map(match => `${match[1]} ${match[2]}`).join(', ') : 
       null;
@@ -763,15 +784,45 @@ export async function createOrderFromCall(call: CallData) {
     
     console.log('Order data prepared from call:', orderData);
     
-    // Return order data - actual order will be created by the create-immediate-order endpoint
-    const result = { 
-      success: true, 
-      message: 'Order data prepared from call',
-      orderData
-    };
-    console.log('Order data prepared successfully:', result);
-    
-    return result;
+    // Create the actual order in the database via the API
+    try {
+      // Make an API request to create the order
+      const response = await fetch('http://localhost:5000/api/telephony/create-immediate-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          callId: call.id,
+          orderText: orderText,
+          phoneNumber: call.phoneNumber
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create order: ${response.status} ${response.statusText}`);
+      }
+      
+      const responseData = await response.json();
+      console.log('Order created via API:', responseData);
+      
+      return {
+        success: true,
+        message: 'Order successfully created in database',
+        orderData,
+        order: responseData.order
+      };
+    } catch (apiError) {
+      console.error('Error creating order via API:', apiError);
+      
+      // Return order data even if API call failed
+      return { 
+        success: false, 
+        message: 'Failed to create order in database, but order data was prepared',
+        orderData,
+        error: apiError
+      };
+    }
   } catch (error) {
     console.error('Error creating order from call transcript:', error);
     throw error;
