@@ -303,7 +303,19 @@ export async function processSpeech(req: Request, res: Response) {
     activeCalls[callSid].transcript += `Customer: ${speechResult}\n`;
     
     // Store the order data as simple text
-    activeCalls[callSid].orderData = { text: speechResult };
+    activeCalls[callSid].orderData = { 
+      orderText: speechResult,
+      extractedItems: null,
+      hasSpecialRequests: false,
+      isDeliveryRequest: false,
+      orderSource: 'phone',
+      phoneNumber: activeCalls[callSid].phoneNumber,
+      callId: callSid,
+      simulatedCall: callSid.startsWith('SIM'),
+      useAIAutomation: true,
+      tableNumber: null,
+      preferredLanguage: detectedLanguage
+    };
     
     // Update history record
     const historyCall = callHistory.find(call => call.id === callSid);
@@ -453,7 +465,7 @@ export async function confirmOrder(req: Request, res: Response) {
     // Create an order in the system from the call data
     try {
       // Get order text from call data
-      const orderText = activeCalls[callSid]?.orderData?.text || 'Food order';
+      const orderText = activeCalls[callSid]?.orderData?.orderText || 'Food order';
       console.log(`Creating order for text: ${orderText}`);
       
       // This would normally create the order in the database
