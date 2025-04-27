@@ -80,6 +80,15 @@ interface NewOrderFormData {
   }[];
 }
 
+// Creating a wrapper component to handle conditional rendering while avoiding hook order issues
+function DashboardStatsWrapper({ isVisible }: { isVisible: boolean }) {
+  return (
+    <div style={{ display: isVisible ? "block" : "none" }}>
+      <DashboardStats />
+    </div>
+  );
+}
+
 // Utility function to format currency
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-IN', {
@@ -1332,9 +1341,8 @@ export default function SimplifiedDashboard() {
               )}
             </p>
           </div>
-          <div style={{ display: activeTab === "stats" ? "block" : "none" }}>
-            <DashboardStats />
-          </div>
+          {/* The following approach helps avoid hook order issues with the DashboardStats component */}
+          <DashboardStatsWrapper isVisible={activeTab === "stats"} />
         </TabsContent>
       </Tabs>
 
