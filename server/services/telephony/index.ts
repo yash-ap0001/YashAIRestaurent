@@ -20,6 +20,11 @@ export interface CallData {
   transcript?: string;
   orderId?: number;
   language?: SupportedLanguage;
+  // Add orderData property to store order information from speech
+  orderData?: {
+    text: string;
+    [key: string]: any;
+  };
 }
 
 const activeCalls: Record<string, CallData> = {};
@@ -207,17 +212,17 @@ function initializeTestData() {
  */
 export function handleIncomingCall(req: Request, res: Response) {
   const callSid = req.body.CallSid;
-  const callFrom = req.body.From;
+  const callFrom = req.body.From || '1234567890'; // Default if not provided
   
   console.log(`Incoming call from ${callFrom}, SID: ${callSid}`);
   
-  // Store call data with default language
+  // Store call data with default language (English for simplicity)
   const callData: CallData = {
     id: callSid,
     phoneNumber: callFrom,
     startTime: new Date().toISOString(),
     status: 'active',
-    language: aiVoiceSettings.defaultLanguage
+    language: 'english'
   };
   
   activeCalls[callSid] = callData;
@@ -227,104 +232,42 @@ export function handleIncomingCall(req: Request, res: Response) {
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
   
-  if (aiVoiceSettings.autoAnswerCalls) {
-    if (aiVoiceSettings.autoDetectLanguage) {
-      // Use direct greeting in default language and wait for speech to detect language
-      const defaultLanguage = aiVoiceSettings.defaultLanguage;
-      const voiceOption = defaultLanguage === 'english' ? 'Polly.Joanna' : 
-                          defaultLanguage === 'spanish' ? 'Polly.Lupe' : 'Polly.Aditi';
-      
-      // Begin with a language-specific greeting
-      twiml.say({ voice: voiceOption }, aiVoiceSettings.greeting[defaultLanguage]);
-      
-      // Language code for speech recognition
-      const languageCode = defaultLanguage === 'english' ? 'en-US' : 
-                          defaultLanguage === 'hindi' ? 'hi-IN' :
-                          defaultLanguage === 'telugu' ? 'te-IN' : 'es-ES';
-      
-      // Please tell me messages in different languages
-      const pleaseOrderMessages = {
-        english: 'Please tell me what you would like to order.',
-        hindi: 'कृपया मुझे बताएं कि आप क्या ऑर्डर करना चाहेंगे।',
-        telugu: 'దయచేసి మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారో నాకు చెప్పండి.',
-        spanish: 'Por favor dime qué te gustaría ordenar.'
-      };
-      
-      // Gather customer input - the system will automatically detect language from speech
-      const gather = twiml.gather({
-        input: 'speech',
-        speechTimeout: 'auto',
-        speechModel: 'phone_call',
-        action: '/api/telephony/process-speech',
-        method: 'POST',
-        language: languageCode
-      });
-      
-      gather.say({ voice: voiceOption }, pleaseOrderMessages[defaultLanguage]);
-      
-      // No input received messages
-      const noInputMessages = {
-        english: 'I didn\'t receive your order. Please call again later. Goodbye!',
-        hindi: 'मुझे आपका ऑर्डर नहीं मिला। कृपया बाद में फिर से कॉल करें। अलविदा!',
-        telugu: 'నేను మీ ఆర్డర్‌ని స్వీకరించలేదు. దయచేసి తర్వాత మళ్లీ కాల్ చేయండి. వీడ్కోలు!',
-        spanish: 'No recibí tu pedido. Por favor llama más tarde. ¡Adiós!'
-      };
-      
-      // If no input is received
-      twiml.say({ voice: voiceOption }, noInputMessages[defaultLanguage]);
-      twiml.hangup();
-    } else {
-      // Provide a language selection menu
-      twiml.say({ voice: 'Polly.Joanna' }, 'Welcome to Yash Hotel. Please select your language.');
-      
-      // Prompt in multiple languages for selection
-      twiml.say({ voice: 'Polly.Joanna' }, 'For English, press 1.');
-      twiml.say({ voice: 'Polly.Aditi' }, 'हिंदी के लिए, 2 दबाएं।'); // Hindi
-      twiml.say({ voice: 'Polly.Aditi' }, 'తెలుగు కోసం, 3 నొక్కండి.'); // Telugu 
-      twiml.say({ voice: 'Polly.Lupe' }, 'Para español, presione 4.'); // Spanish
-      
-      // Gather language selection via keypad
-      const gather = twiml.gather({
-        input: 'dtmf',
-        numDigits: 1,
-        action: '/api/telephony/select-language',
-        method: 'POST',
-        timeout: 10
-      });
-      
-      // If no selection is made
-      twiml.say({ voice: 'Polly.Joanna' }, 'No language selection received. Defaulting to English.');
-      
-      // Use default language and proceed
-      const defaultGather = twiml.gather({
-        input: 'speech',
-        speechTimeout: 'auto',
-        speechModel: 'phone_call',
-        action: '/api/telephony/process-speech',
-        method: 'POST',
-        language: 'en-US'
-      });
-      
-      defaultGather.say({ voice: 'Polly.Joanna' }, aiVoiceSettings.greeting.english);
-      defaultGather.say({ voice: 'Polly.Joanna' }, 'Please tell me what you would like to order.');
-      
-      // If no input is received
-      twiml.say({ voice: 'Polly.Joanna' }, 'I didn\'t receive your order. Please call again later. Goodbye!');
-      twiml.hangup();
-    }
-  } else {
-    // Auto-answer is disabled - play a message in multiple languages
-    twiml.say({ voice: 'Polly.Joanna' }, 'Thank you for calling Yash Hotel. Our AI assistant is currently unavailable. Please call back later.');
-    twiml.say({ voice: 'Polly.Aditi' }, 'यश होटल को कॉल करने के लिए धन्यवाद। हमारा AI सहायक वर्तमान में अनुपलब्ध है। कृपया बाद में कॉल करें।');
-    twiml.say({ voice: 'Polly.Aditi' }, 'యష్ హోటల్‌కి కాల్ చేసినందుకు ధన్యవాదాలు. మా AI అసిస్టెంట్ ప్రస్తుతం అందుబాటులో లేదు. దయచేసి తర్వాత కాల్ చేయండి.');
-    twiml.say({ voice: 'Polly.Lupe' }, 'Gracias por llamar a Yash Hotel. Nuestro asistente de IA no está disponible actualmente. Por favor llame más tarde.');
+  try {
+    // Simplified greeting and prompt
+    twiml.say(
+      { voice: 'Polly.Joanna' },
+      'Welcome to Yash Hotel. Please tell me what you would like to order.'
+    );
+    
+    // Gather customer input - simplified
+    twiml.gather({
+      input: 'speech',
+      speechTimeout: 'auto',
+      action: '/api/telephony/process-speech',
+      method: 'POST'
+    });
+    
+    // If no input is received
+    twiml.say(
+      { voice: 'Polly.Joanna' },
+      'I didn\'t receive your order. Please call again later. Goodbye!'
+    );
+    twiml.hangup();
+    
+    // Add initial greeting to transcript
+    callData.transcript = 'AI: Welcome to Yash Hotel. Please tell me what you would like to order.\n';
+  } catch (error) {
+    console.error('Error handling incoming call:', error);
+    
+    // Emergency fallback response
+    twiml.say(
+      { voice: 'Polly.Joanna' },
+      'We\'re sorry, but we\'re experiencing technical difficulties. Please try again later.'
+    );
     twiml.hangup();
   }
   
-  // Add initial AI greeting to transcript
-  const language = callData.language || aiVoiceSettings.defaultLanguage;
-  callData.transcript = `AI: ${aiVoiceSettings.greeting[language]}\n`;
-  
+  // Return TwiML response
   res.type('text/xml');
   res.send(twiml.toString());
 }
