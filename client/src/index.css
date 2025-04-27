@@ -211,39 +211,39 @@ div[data-state="unchecked"] {
     @apply font-sans antialiased bg-background text-foreground;
   }
   
-  /* Card and elements styles for dark purple theme */
+  /* Card and elements styles with theme variable support */
   .card {
-    @apply bg-neutral-900 border-neutral-800 shadow-md;
+    @apply bg-card border-border shadow-md;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply text-white;
+    @apply text-foreground;
   }
   
-  /* Button styles for dark purple theme */
+  /* Button styles with theme variable support */
   .btn-primary {
-    @apply bg-purple-600 hover:bg-purple-700 text-white;
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground;
   }
   
   .btn-outline {
-    @apply border-purple-600 text-purple-400 hover:bg-purple-900 hover:bg-opacity-30;
+    @apply border-primary text-primary hover:bg-primary/10;
   }
   
-  /* Table styles for dark theme */
+  /* Table styles with theme variable support */
   table {
-    @apply bg-neutral-900 border-neutral-800;
+    @apply bg-card border-border;
   }
   
   th {
-    @apply bg-neutral-800 text-neutral-300;
+    @apply bg-muted text-muted-foreground;
   }
   
   td {
-    @apply border-neutral-800 text-neutral-300;
+    @apply border-border text-card-foreground;
   }
   
   tr:hover {
-    @apply bg-neutral-800;
+    @apply bg-muted/50;
   }
   
   /* Order card styles */

@@ -31,6 +31,7 @@ import CustomerRegistration from "@/pages/CustomerRegistration";
 import LoadingDemo from "@/pages/LoadingDemo";
 import NotificationTest from "@/pages/NotificationTest";
 import ColorDemo from "@/pages/ColorDemo";
+import ThemeTest from "@/pages/ThemeTest";
 import { AppShell } from "@/components/layouts/AppShell";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -93,6 +94,7 @@ function Router() {
       <ProtectedRoute path="/loading-demo" component={LoadingDemo} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/notification-test" component={NotificationTest} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/color-demo" component={ColorDemo} allowedRoles={["admin", "manager"]} />
+      <ProtectedRoute path="/theme-test" component={ThemeTest} allowedRoles={["admin", "manager"]} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
