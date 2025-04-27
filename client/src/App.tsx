@@ -50,8 +50,12 @@ function Router() {
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={CustomerRegistration} />
       
+      {/* Unprotected Testing Routes */}
+      <Route path="/test-dashboard" component={SimplifiedDashboard} />
+      
       {/* Protected Routes - Home page based on role */}
       <ProtectedRoute path="/" component={HomeComponent} />
+      <ProtectedRoute path="/simplified-dashboard" component={SimplifiedDashboard} allowedRoles={["admin", "manager", "waiter", "kitchen"]} />
       
       {/* Customer specific routes */}
       <ProtectedRoute path="/customer-dashboard" component={CustomerDashboard} allowedRoles={["customer"]} />
@@ -109,15 +113,15 @@ function App() {
 // AppContent component to conditionally render AppShell based on authentication
 function AppContent() {
   const { user, isLoading } = useAuth();
+  const isTestDashboard = window.location.pathname.includes('test-dashboard');
   
-  // Initialize WebSocket connection when the component mounts
+  // Single combined WebSocket initialization for both authenticated and test routes
   useEffect(() => {
-    if (user) {
-      // Only initialize WebSocket if user is logged in
+    if (user || isTestDashboard) {
       console.log('Initializing WebSocket connection for real-time updates');
       initializeWebSocket();
     }
-  }, [user]);
+  }, [user, isTestDashboard]);
   
   // If loading, show our custom animated mascot loading indicator
   if (isLoading) {
@@ -132,7 +136,21 @@ function AppContent() {
     );
   }
   
-  // If user is not logged in, render router without AppShell
+  // Special case for test dashboard - show without login
+  if (!user && isTestDashboard) {
+    return (
+      <>
+        <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 mb-4">
+          <p className="font-bold">Test Dashboard Mode</p>
+          <p>Viewing dashboard without authentication. Phone orders will display here.</p>
+        </div>
+        <Router />
+        <OrderTrackingToasts />
+      </>
+    );
+  }
+
+  // Normal non-authenticated case
   if (!user) {
     return <Router />;
   }
