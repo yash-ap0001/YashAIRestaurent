@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CircleCheck, ChefHat, Utensils, ClipboardList, ClipboardCheck, Timer, Phone, Smartphone, Search, Globe, User, UserPlus, ReceiptText, CreditCard, PanelLeft, PanelRight, Mail, X, CheckSquare, ChevronsUpDown, Receipt, Plus } from "lucide-react";
+import { Loader2, CircleCheck, ChefHat, Utensils, ClipboardList, ClipboardCheck, Timer, Phone, Smartphone, Search, Globe, User, UserPlus, ReceiptText, CreditCard, PanelLeft, PanelRight, Mail, X, CheckSquare, ChevronsUpDown, Receipt, Plus, BarChart3 } from "lucide-react";
 import { SiZomato, SiSwiggy } from "react-icons/si";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
@@ -1329,20 +1329,26 @@ export default function SimplifiedDashboard() {
             <h1 className="text-2xl font-bold">Today's Stats</h1>
             <p className="text-muted-foreground">
               Real-time statistics updated automatically 
-              {activeTab === "stats" && (
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="text-primary hover:text-primary/90 p-0 ml-2 inline-flex items-center" 
-                  onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] })}
-                >
-                  <span className="underline text-sm">Refresh Now</span>
-                </Button>
-              )}
+              <Button 
+                variant="link" 
+                size="sm" 
+                className="text-primary hover:text-primary/90 p-0 ml-2 inline-flex items-center" 
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] })}
+              >
+                <span className="underline text-sm">Refresh Now</span>
+              </Button>
             </p>
           </div>
-          {/* The following approach helps avoid hook order issues with the DashboardStats component */}
-          <DashboardStatsWrapper isVisible={activeTab === "stats"} />
+          <Link href="/dashboard-stats" className="block mb-4">
+            <Button className="w-full">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Open Full Stats Dashboard
+            </Button>
+          </Link>
+          <p className="text-sm text-muted-foreground">
+            We've moved the stats to a separate page to improve performance.
+            Click the button above to view real-time statistics.
+          </p>
         </TabsContent>
       </Tabs>
 
