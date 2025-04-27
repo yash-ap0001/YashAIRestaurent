@@ -133,10 +133,10 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-neutral-900 text-neutral-200">
+    <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-background text-foreground">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-black border-r border-neutral-800 h-full transition-all duration-300",
+        "hidden md:flex flex-col bg-card border-r border-border h-full transition-all duration-300",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
       )}>
         <div className="p-4 flex items-center justify-between border-b border-neutral-800">
@@ -318,7 +318,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 border-b border-neutral-800 bg-black flex items-center justify-between px-4 sm:px-6">
+        <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 sm:px-6">
           <div className="flex items-center md:hidden">
             <Button 
               variant="ghost" 
@@ -350,7 +350,12 @@ export function AppShell({ children }: AppShellProps) {
               <ConnectionStatus />
             </div>
             
-            {/* Theme selector dropdown */}
+            {/* Theme toggle for light/dark mode */}
+            <div className="relative">
+              <ThemeToggle />
+            </div>
+            
+            {/* Theme selector dropdown for column colors */}
             <ColumnColorSettings />
             
             {/* User menu - always visible in top right corner */}
@@ -359,19 +364,19 @@ export function AppShell({ children }: AppShellProps) {
         </header>
         
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-neutral-900">
+        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-background">
           {children}
         </div>
       </main>
 
       {/* Mobile menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0 bg-black border-r-neutral-800">
-          <div className="p-4 flex items-center space-x-3 border-b border-neutral-800">
+        <SheetContent side="left" className="w-64 p-0 bg-card border-r border-border">
+          <div className="p-4 flex items-center space-x-3 border-b border-border">
             <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
               <HandPlatter size={20} />
             </div>
-            <h1 className="text-lg font-semibold text-white">YashHotelBot</h1>
+            <h1 className="text-lg font-semibold text-card-foreground">YashHotelBot</h1>
           </div>
           
           <nav className="flex-1 pt-4 pb-4 overflow-hidden">
@@ -463,13 +468,13 @@ export function AppShell({ children }: AppShellProps) {
             </Accordion>
           </nav>
           
-          <div className="p-4 border-t border-neutral-800">
+          <div className="p-4 border-t border-border">
             <Button
               onClick={() => {
                 setMobileMenuOpen(false);
                 setChatVisible(true);
               }}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Chat with AI Assistant
