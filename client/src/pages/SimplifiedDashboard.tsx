@@ -141,6 +141,7 @@ export default function SimplifiedDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { getColumnStyle } = useColumnColors();
+  const { theme } = useTheme(); // Add useTheme hook at the same level as other hooks
   
   // Set up WebSocket connection for real-time updates
   useEffect(() => {
