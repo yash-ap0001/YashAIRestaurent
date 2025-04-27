@@ -58,14 +58,12 @@ export function OrderDetailsDialog({ orderId, open, onOpenChange }: OrderDetails
   const { data: orderItems = [], isLoading: isLoadingItems } = useQuery<OrderItem[]>({
     queryKey: ['/api/orders', orderId, 'items'],
     queryFn: async () => {
-      // For this demo, we'll fetch all order items and filter client-side
-      // In a real app, you might have a dedicated endpoint for order items
-      const response = await fetch('/api/order-items');
+      // Use the dedicated endpoint for order items by order ID
+      const response = await fetch(`/api/orders/${orderId}/items`);
       if (!response.ok) {
         throw new Error('Failed to fetch order items');
       }
-      const items = await response.json();
-      return items.filter((item: OrderItem) => item.orderId === orderId);
+      return response.json();
     },
     enabled: !!orderId && open,
   });
