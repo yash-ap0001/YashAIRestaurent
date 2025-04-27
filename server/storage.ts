@@ -31,6 +31,7 @@ export interface IStorage {
   getOrderByNumber(orderNumber: string): Promise<Order | undefined>;
   getOrders(): Promise<Order[]>;
   getOrdersByCustomerId(customerId: number): Promise<Order[]>;
+  getLastOrderNumber(): Promise<string | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrder(id: number, order: Partial<InsertOrder>): Promise<Order | undefined>;
   
@@ -218,6 +219,34 @@ export class MemStorage implements IStorage {
         const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return dateB - dateA;
       });
+  }
+  
+  async getLastOrderNumber(): Promise<string | undefined> {
+    // Get all orders
+    const allOrders = Array.from(this.orders.values());
+    console.log(`DEBUG: Found ${allOrders.length} total orders`);
+    
+    // Get all orders that follow the ORD-XXXX pattern
+    const orders = allOrders
+      .filter(order => order.orderNumber.startsWith('ORD-'))
+      .sort((a, b) => {
+        // Extract the numeric part of the order number
+        const numA = parseInt(a.orderNumber.replace('ORD-', ''));
+        const numB = parseInt(b.orderNumber.replace('ORD-', ''));
+        // Sort in descending order to get the highest number first
+        return numB - numA;
+      });
+    
+    console.log(`DEBUG: Found ${orders.length} orders with ORD- prefix`);
+    if (orders.length > 0) {
+      console.log(`DEBUG: Highest order number: ${orders[0].orderNumber}`);
+    } else {
+      console.log(`DEBUG: No orders with ORD- prefix found`);
+      console.log(`DEBUG: All order numbers: ${allOrders.map(o => o.orderNumber).join(', ')}`);
+    }
+    
+    // Return the order number with the highest numeric value
+    return orders.length > 0 ? orders[0].orderNumber : undefined;
   }
   
   async createOrder(order: InsertOrder): Promise<Order> {

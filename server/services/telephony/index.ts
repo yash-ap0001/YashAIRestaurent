@@ -862,8 +862,22 @@ export async function createOrderFromCall(call: CallData) {
       // Calculate total amount
       const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
-      // Generate a unique phone order number with PH- prefix
-      const orderNumber = `PH-${Math.floor(1000 + Math.random() * 9000)}`;
+      // Get the next sequential order number from storage
+      const lastOrderNumber = await storage.getLastOrderNumber();
+      console.log("Got last order number:", lastOrderNumber);
+      let orderNumber;
+      
+      if (lastOrderNumber && lastOrderNumber.startsWith('ORD-')) {
+        // Extract the number part and increment it
+        const lastNumber = parseInt(lastOrderNumber.replace('ORD-', ''));
+        const nextNumber = lastNumber + 1;
+        orderNumber = `ORD-${nextNumber}`;
+        console.log(`Generating sequential order number: ${orderNumber} from last: ${lastOrderNumber}`);
+      } else {
+        // Fallback if no previous order exists
+        orderNumber = 'ORD-1001';
+        console.log(`No valid last order number found, using default: ${orderNumber}`);
+      }
       
       // Create order object
       const newOrder = {
