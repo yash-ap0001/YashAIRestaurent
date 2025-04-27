@@ -387,7 +387,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const orderItems = await storage.getOrderItems(orderId);
-      res.json(orderItems);
+      
+      // For each order item, fetch menu item details to get the name if not present
+      const itemsWithDetails = await Promise.all(
+        orderItems.map(async (item) => {
+          // If the item already has a name, use it
+          if (item.name) {
+            return item;
+          }
+          
+          // Otherwise, get the name from the menu item
+          try {
+            const menuItem = await storage.getMenuItem(item.menuItemId);
+            return {
+              ...item,
+              name: menuItem?.name || `Item #${item.menuItemId}`
+            };
+          } catch (err) {
+            console.error(`Error fetching menu item ${item.menuItemId}:`, err);
+            return {
+              ...item,
+              name: `Item #${item.menuItemId}`
+            };
+          }
+        })
+      );
+      
+      res.json(itemsWithDetails);
     } catch (err) {
       errorHandler(err, res);
     }

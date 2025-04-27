@@ -492,26 +492,40 @@ export async function confirmOrder(req: Request, res: Response) {
         const orderResult = await createOrderFromCall(activeCalls[callSid]);
         
         if (orderResult.success && orderResult.order) {
-          // Extract the order items from the result
-          const orderItems = orderResult.order && orderResult.orderData && orderResult.orderData.extractedItems
-            ? orderResult.orderData.extractedItems.split(', ').map(itemText => {
-                const [quantity, ...name] = itemText.split(' ');
-                return { 
-                  quantity: parseInt(quantity) || 1, 
-                  name: name.join(' ') 
-                };
-              })
-            : [];
-            
+          // Get the items that were actually created in the database
+          const orderItems = await storage.getOrderItems(orderResult.order.id);
+          
           // Format the order items for the customer
           const orderItemsText = orderItems.length > 0
-            ? orderItems.map(item => `${item.quantity} ${item.name}`).join(', ')
+            ? await Promise.all(orderItems.map(async (item) => {
+                // Get menu item name if not present in the order item
+                let itemName = '';
+                if (item.name) {
+                  itemName = item.name;
+                } else {
+                  try {
+                    const menuItem = await storage.getMenuItem(item.menuItemId);
+                    itemName = menuItem?.name || `Item #${item.menuItemId}`;
+                  } catch (err) {
+                    console.error(`Error fetching menu item ${item.menuItemId}:`, err);
+                    itemName = `Item #${item.menuItemId}`;
+                  }
+                }
+                return `${item.quantity} ${itemName}`;
+              })).then(items => items.join(', '))
             : "your items";
           
-          // Tell the customer their order number and items
+          // Calculate total amount
+          const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          const formattedTotal = new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR'
+          }).format(totalAmount);
+          
+          // Tell the customer their order number, items, and total
           const message = detectedLanguage === 'english' 
-            ? `Your order has been confirmed! Your order number is ${orderResult.order.orderNumber}. You ordered ${orderItemsText}. Thank you for calling.`
-            : `Order ${orderResult.order.orderNumber} confirmed. You ordered ${orderItemsText}. Thank you.`;
+            ? `Your order has been confirmed! Your order number is ${orderResult.order.orderNumber}. You ordered ${orderItemsText}. Your total is ${formattedTotal}. Thank you for calling.`
+            : `Order ${orderResult.order.orderNumber} confirmed. You ordered ${orderItemsText}. Total: ${formattedTotal}. Thank you.`;
           
           twiml.say({ voice: voiceOption }, message);
           
@@ -904,14 +918,22 @@ export async function createOrderFromCall(call: CallData) {
         );
         
         if (menuItem) {
-          orderItems.push({
-            menuItemId: menuItem.id,
-            name: menuItem.name,
-            quantity: extracted.quantity,
-            price: menuItem.price
-          });
-          
-          console.log(`Added item to order from extracted matches: ${menuItem.name} x${extracted.quantity}`);
+          // Check if this item already exists in the order
+          const existingItem = orderItems.find(item => item.menuItemId === menuItem.id);
+          if (existingItem) {
+            // If it exists, just increase the quantity
+            existingItem.quantity += extracted.quantity;
+            console.log(`Updated quantity for existing item: ${menuItem.name}, new quantity: ${existingItem.quantity}`);
+          } else {
+            // Otherwise add as a new item
+            orderItems.push({
+              menuItemId: menuItem.id,
+              name: menuItem.name,
+              quantity: extracted.quantity,
+              price: menuItem.price
+            });
+            console.log(`Added item to order from extracted matches: ${menuItem.name} x${extracted.quantity}`);
+          }
         }
       }
       
