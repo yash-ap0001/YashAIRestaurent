@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ChatInterface, MinimizedChatButton } from "@/components/chatbot/ChatInterface";
 import { ColumnColorSettings } from "@/components/settings/ColumnColorSettings";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,

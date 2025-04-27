@@ -38,6 +38,7 @@ import LoadingIndicator from "@/components/ui/LoadingIndicator";
 import { useEffect } from "react";
 import { OrderTrackingToasts } from "@/components/orders/OrderTrackingToasts";
 import { ColumnColorProvider } from "@/contexts/ColumnColorContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 function Router() {
   const { user } = useAuth();
@@ -102,12 +103,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ColumnColorProvider>
-          <AppContent />
-          <Toaster />
-        </ColumnColorProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ColumnColorProvider>
+            <AppContent />
+            <Toaster />
+          </ColumnColorProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
