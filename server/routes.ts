@@ -388,15 +388,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const orderItems = await storage.getOrderItems(orderId);
       
-      // For each order item, fetch menu item details to get the name if not present
+      // For each order item, fetch menu item details to get the name
       const itemsWithDetails = await Promise.all(
         orderItems.map(async (item) => {
-          // If the item already has a name, use it
-          if (item.name) {
-            return item;
-          }
-          
-          // Otherwise, get the name from the menu item
+          // Get the menu item info to retrieve the name
           try {
             const menuItem = await storage.getMenuItem(item.menuItemId);
             return {
@@ -413,6 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
       
+      console.log(`Retrieved ${itemsWithDetails.length} items for order ${orderId}:`, itemsWithDetails);
       res.json(itemsWithDetails);
     } catch (err) {
       errorHandler(err, res);
