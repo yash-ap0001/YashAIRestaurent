@@ -41,6 +41,7 @@ import { useEffect } from "react";
 import { OrderTrackingToasts } from "@/components/orders/OrderTrackingToasts";
 import { ColumnColorProvider } from "@/contexts/ColumnColorContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function Router() {
   const { user } = useAuth();
@@ -110,7 +111,9 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <ColumnColorProvider>
-            <AppContent />
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
             <Toaster />
           </ColumnColorProvider>
         </AuthProvider>
@@ -174,11 +177,13 @@ function AppContent() {
   
   // If user is logged in, render router with AppShell and OrderTrackingToasts
   return (
-    <AppShell>
-      <Router />
-      <OrderTrackingToasts />
-      {/* Toast display for notifications */}
-    </AppShell>
+    <ErrorBoundary>
+      <AppShell>
+        <Router />
+        <OrderTrackingToasts />
+        {/* Toast display for notifications */}
+      </AppShell>
+    </ErrorBoundary>
   );
 }
 

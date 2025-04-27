@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 import { queryClient } from "@/lib/queryClient";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface DashboardStatsProps {
   className?: string;
@@ -21,7 +22,8 @@ interface DashboardStats {
   urgentTokensCount: number;
 }
 
-export function DashboardStats({ className }: DashboardStatsProps) {
+// Actual implementation
+function DashboardStatsImpl({ className }: DashboardStatsProps) {
   const { data, isLoading, refetch } = useQuery<DashboardStats>({
     queryKey: ['/api/dashboard/stats'],
     refetchInterval: 5000, // Refetch data every 5 seconds
@@ -266,5 +268,21 @@ export function DashboardStats({ className }: DashboardStatsProps) {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// Wrap the implementation with ErrorBoundary for safe rendering
+export function DashboardStats(props: DashboardStatsProps) {
+  return (
+    <ErrorBoundary
+      fallback={
+        <div className="p-4 bg-red-100 border border-red-300 rounded-md text-red-800">
+          <h3 className="font-semibold mb-2">Something went wrong loading dashboard statistics</h3>
+          <p className="text-sm">Try refreshing the page or check browser console for details.</p>
+        </div>
+      }
+    >
+      <DashboardStatsImpl {...props} />
+    </ErrorBoundary>
   );
 }

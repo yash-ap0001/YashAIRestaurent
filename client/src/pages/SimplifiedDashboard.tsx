@@ -25,6 +25,7 @@ import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
 import { cn } from "@/lib/utils";
 import { ColumnHeader, OrderCard } from "@/components/orders/OrderColumn";
 import { OrderDetailsDialog } from "@/components/orders/OrderDetailsDialog";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface Order {
   id: number;
@@ -1312,30 +1313,32 @@ export default function SimplifiedDashboard() {
         </TabsContent>
 
         <TabsContent value="stats" className="mt-2">
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold">Today's Stats</h1>
-            <p className="text-muted-foreground">
-              Real-time statistics updated automatically 
-              <Button 
-                variant="link" 
-                size="sm" 
-                className="text-primary hover:text-primary/90 p-0 ml-2 inline-flex items-center" 
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] })}
-              >
-                <span className="underline text-sm">Refresh Now</span>
+          <ErrorBoundary>
+            <div className="mb-4">
+              <h1 className="text-2xl font-bold">Today's Stats</h1>
+              <p className="text-muted-foreground">
+                Real-time statistics updated automatically 
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="text-primary hover:text-primary/90 p-0 ml-2 inline-flex items-center" 
+                  onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] })}
+                >
+                  <span className="underline text-sm">Refresh Now</span>
+                </Button>
+              </p>
+            </div>
+            <Link href="/dashboard-stats" className="block mb-4">
+              <Button className="w-full">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Open Full Stats Dashboard
               </Button>
+            </Link>
+            <p className="text-sm text-muted-foreground">
+              We've moved the stats to a separate page to improve performance.
+              Click the button above to view real-time statistics.
             </p>
-          </div>
-          <Link href="/dashboard-stats" className="block mb-4">
-            <Button className="w-full">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Open Full Stats Dashboard
-            </Button>
-          </Link>
-          <p className="text-sm text-muted-foreground">
-            We've moved the stats to a separate page to improve performance.
-            Click the button above to view real-time statistics.
-          </p>
+          </ErrorBoundary>
         </TabsContent>
       </Tabs>
 

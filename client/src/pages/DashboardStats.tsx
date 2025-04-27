@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function DashboardStatsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -40,7 +41,9 @@ export default function DashboardStatsPage() {
 
       <Card className="mb-8">
         <CardContent className="pt-6">
-          <DashboardStats />
+          <ErrorBoundary>
+            <DashboardStats />
+          </ErrorBoundary>
         </CardContent>
       </Card>
 
