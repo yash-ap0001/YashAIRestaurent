@@ -541,7 +541,36 @@ export default function AICallCenter() {
                                   : ''
                             }`}
                           >
-                            {line}
+                            {/* Format order summaries with better presentation */}
+                            {isAI && line.includes('summary') && line.includes('₹') ? (
+                              <div>
+                                <div className="font-medium mb-1">
+                                  {line.split('\n')[0]} {/* Display the header */}
+                                </div>
+                                <div className="pl-3 border-l-2 border-primary/30 space-y-1 whitespace-pre-wrap">
+                                  {line.split('\n').slice(1).map((summaryLine, i) => (
+                                    summaryLine.includes('₹') ? (
+                                      <div key={i} className="font-mono text-sm flex justify-between">
+                                        <span>{summaryLine.split('=')[0]}</span>
+                                        <span className="font-medium">{summaryLine.split('=')[1]?.trim()}</span>
+                                      </div>
+                                    ) : (
+                                      <div key={i}>{summaryLine}</div>
+                                    )
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              // For standard messages
+                              <div className={
+                                isAI && line.includes('Excellent!') ? 'text-green-600 font-medium' : 
+                                isAI && line.includes('Hi there! Welcome to') ? 'text-blue-600 font-medium' : 
+                                isAI && line.includes('Thank you for your order') ? 'text-green-600 font-medium' : 
+                                ''
+                              }>
+                                {line}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
