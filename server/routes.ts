@@ -18,6 +18,7 @@ import {
   handleSendBillWithHealthTips
 } from "./services/whatsapp";
 
+// Import individual functions
 import {
   initializeTelephonyService,
   handleIncomingCall,
@@ -33,6 +34,9 @@ import {
   makeOutboundCall,
   CallData
 } from "./services/telephony";
+
+// Import the entire module for direct function calls
+import * as telephonyService from "./services/telephony";
 import { processChatbotRequest } from "./services/chatbot";
 import { WebSocketServer } from 'ws';
 import { initializeRealTimeService, broadcastStatsUpdate, broadcastToAllClients } from './services/realtime';

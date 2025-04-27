@@ -22,7 +22,17 @@ export interface CallData {
   language?: SupportedLanguage;
   // Add orderData property to store order information from speech
   orderData?: {
-    text: string;
+    orderText: string;
+    extractedItems?: string | null;
+    hasSpecialRequests?: boolean;
+    isDeliveryRequest?: boolean;
+    orderSource?: string;
+    phoneNumber?: string;
+    callId?: string;
+    simulatedCall?: boolean;
+    useAIAutomation?: boolean;
+    tableNumber?: string | null;
+    preferredLanguage?: SupportedLanguage;
     [key: string]: any;
   };
 }
@@ -747,21 +757,7 @@ export async function createOrderFromCall(call: CallData) {
       message: 'Order data prepared from call',
       orderData
     };
-    console.log('Order creation successful:', result);
-    
-    // Update the call with the actual order info from the created order
-    if (result.order && result.order.id) {
-      call.orderId = result.order.id;
-      
-      // Also update in history
-      const historyCall = callHistory.find(c => c.id === call.id);
-      if (historyCall) {
-        historyCall.orderId = result.order.id;
-      }
-      
-      // Log order created
-      console.log(`Order #${result.order.orderNumber} created successfully from call ${call.id}`);
-    }
+    console.log('Order data prepared successfully:', result);
     
     return result;
   } catch (error) {
