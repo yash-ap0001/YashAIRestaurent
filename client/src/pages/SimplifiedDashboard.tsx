@@ -25,6 +25,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
 import { cn } from "@/lib/utils";
 import { ColumnHeader, OrderCard } from "@/components/orders/OrderColumn";
+import { OrderDetailsDialog } from "@/components/orders/OrderDetailsDialog";
 
 interface Order {
   id: number;
@@ -134,6 +135,8 @@ export default function SimplifiedDashboard() {
   const [bulkActionAnchor, setBulkActionAnchor] = useState<HTMLElement | null>(null);
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const [singleOrderOpen, setSingleOrderOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { getColumnStyle } = useColumnColors();
@@ -401,6 +404,12 @@ export default function SimplifiedDashboard() {
     if (isSelectMode) {
       setSelectedOrders([]);
     }
+  };
+  
+  // Handler for viewing order details
+  const handleViewOrderDetails = (orderId: number) => {
+    setSelectedOrderId(orderId);
+    setIsOrderDetailsOpen(true);
   };
   
   // Select all orders in a specific status

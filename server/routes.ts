@@ -378,6 +378,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       errorHandler(err, res);
     }
   });
+  
+  app.get("/api/orders/:id/items", async (req: Request, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ error: "Invalid order ID" });
+      }
+      
+      const orderItems = await storage.getOrderItems(orderId);
+      res.json(orderItems);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
 
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {
