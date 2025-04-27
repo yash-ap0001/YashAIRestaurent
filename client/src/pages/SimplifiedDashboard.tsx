@@ -806,7 +806,7 @@ export default function SimplifiedDashboard() {
                                     backgroundColor: snapshot.isDragging ? '#ffc107' : undefined,
                                     transform: snapshot.isDragging ? `${provided.draggableProps.style?.transform} scale(1.05)` : provided.draggableProps.style?.transform
                                   }}
-                                  onClick={isSelectMode ? () => toggleOrderSelection(order.id) : undefined}
+                                  onClick={isSelectMode ? () => toggleOrderSelection(order.id) : () => handleViewOrderDetails(order.id)}
                                 >
                                   <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-start gap-2">
