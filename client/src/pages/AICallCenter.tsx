@@ -537,7 +537,7 @@ export default function AICallCenter() {
                               isAI 
                                 ? 'bg-primary/10 text-primary border-l-4 border-primary' 
                                 : isCustomer 
-                                  ? 'bg-gray-200 ml-8' 
+                                  ? 'bg-gray-200 text-gray-800 ml-8 border-r-4 border-gray-400' 
                                   : ''
                             }`}
                           >
