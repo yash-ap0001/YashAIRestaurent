@@ -628,39 +628,85 @@ export async function confirmOrder(req: Request, res: Response) {
           // Get the items that were actually created in the database
           const orderItems = await storage.getOrderItems(orderResult.order.id);
           
-          // Format the order items for the customer
-          const orderItemsText = orderItems.length > 0
-            ? await Promise.all(orderItems.map(async (item) => {
-                // Get menu item name if not present in the order item
-                let itemName = '';
-                if (item.name) {
-                  itemName = item.name;
-                } else {
-                  try {
-                    const menuItem = await storage.getMenuItem(item.menuItemId);
-                    itemName = menuItem?.name || `Item #${item.menuItemId}`;
-                  } catch (err) {
-                    console.error(`Error fetching menu item ${item.menuItemId}:`, err);
-                    itemName = `Item #${item.menuItemId}`;
-                  }
-                }
-                return `${item.quantity} ${itemName}`;
-              })).then(items => items.join(', '))
-            : "your items";
+          // Start by acknowledging the confirmation
+          const confirmationIntro = detectedLanguage === 'english' 
+            ? `Thank you for confirming. I'm processing your order now.`
+            : `Thank you. Processing your order.`;
           
-          // Calculate total amount
+          twiml.say({ voice: voiceOption }, confirmationIntro);
+          twiml.pause({ length: 1 }); // Short pause between sentences
+          
+          // Announce the order number
+          const orderNumberMsg = detectedLanguage === 'english' 
+            ? `Your order number is ${orderResult.order.orderNumber}.`
+            : `Order number ${orderResult.order.orderNumber}.`;
+          
+          twiml.say({ voice: voiceOption }, orderNumberMsg);
+          twiml.pause({ length: 1 }); // Short pause between sentences
+          
+          // Format and announce each item individually with proper pauses
+          if (orderItems.length > 0) {
+            const itemsIntro = detectedLanguage === 'english' 
+              ? `Here's what you've ordered:`
+              : `Your items:`;
+            
+            twiml.say({ voice: voiceOption }, itemsIntro);
+            twiml.pause({ length: 1 }); // Pause before listing items
+            
+            // Process each item individually with its own pause
+            for (const item of orderItems) {
+              // Get menu item name if not present in the order item
+              let itemName = '';
+              if (item.name) {
+                itemName = item.name;
+              } else {
+                try {
+                  const menuItem = await storage.getMenuItem(item.menuItemId);
+                  itemName = menuItem?.name || `Item #${item.menuItemId}`;
+                } catch (err) {
+                  console.error(`Error fetching menu item ${item.menuItemId}:`, err);
+                  itemName = `Item #${item.menuItemId}`;
+                }
+              }
+              
+              // Format the price for this item
+              const itemTotal = item.price * item.quantity;
+              const formattedItemPrice = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+              }).format(itemTotal);
+              
+              // Announce this item with quantity and price
+              const itemDetails = detectedLanguage === 'english' 
+                ? `${item.quantity} ${itemName}, ${formattedItemPrice}.`
+                : `${item.quantity} ${itemName}, ${formattedItemPrice}.`;
+              
+              twiml.say({ voice: voiceOption }, itemDetails);
+              twiml.pause({ length: 1 }); // Pause between items
+            }
+          }
+          
+          // Calculate and announce total amount
           const totalAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
           const formattedTotal = new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR'
           }).format(totalAmount);
           
-          // Tell the customer their order number, items, and total
-          const message = detectedLanguage === 'english' 
-            ? `Your order has been confirmed! Your order number is ${orderResult.order.orderNumber}. You ordered ${orderItemsText}. Your total is ${formattedTotal}. Thank you for calling.`
-            : `Order ${orderResult.order.orderNumber} confirmed. You ordered ${orderItemsText}. Total: ${formattedTotal}. Thank you.`;
+          // Announce the total
+          const totalMsg = detectedLanguage === 'english' 
+            ? `Your total is ${formattedTotal}.`
+            : `Total: ${formattedTotal}.`;
           
-          twiml.say({ voice: voiceOption }, message);
+          twiml.say({ voice: voiceOption }, totalMsg);
+          twiml.pause({ length: 1 }); // Pause before farewell
+          
+          // Farewell message
+          const farewellMsg = detectedLanguage === 'english' 
+            ? `Thank you for your order. Your food will be prepared shortly.`
+            : `Thank you for your order.`;
+          
+          twiml.say({ voice: voiceOption }, farewellMsg);
           
           // Set the orderId so we don't create it again in completeCall
           activeCalls[callSid].orderId = orderResult.order.id;
@@ -925,16 +971,26 @@ export async function createOrderFromCall(call: CallData) {
     }
     
     // Extract key information from orderText using multiple patterns for more flexible matching
-    // Pattern 1: Direct quantity before item name ("2 butter chicken")
-    const directQuantityPattern = /(\d+)\s+(butter chicken|chicken|naan|rice|biryani|paneer|roti|samosa|pakora|curry|dal|tandoori|tikka)/gi;
     
-    // Pattern 2: Quantity anywhere in sentence with item name ("I want butter chicken, make it 2 please")
-    const itemNames = ["butter chicken", "chicken", "naan", "rice", "biryani", "paneer", "roti", "samosa", "pakora", "curry", "dal", "tandoori", "tikka"];
+    // Enhanced patterns for better item and quantity recognition
+    // Get common menu items from our library
+    const menuItemPatterns = [
+      "butter chicken", "chicken biryani", "chicken tikka", "tandoori chicken", 
+      "chicken", "biryani", "mutton biryani", "veg biryani", "pulao", "kashmiri pulao",
+      "naan", "garlic naan", "butter naan", "plain naan", "roti", "chapati",
+      "paneer tikka", "paneer butter masala", "paneer", "dal makhani", "dal",
+      "tandoori roti", "samosa", "pakora", "curry", "tikka", "ice cream", "gulab jamun",
+      "rice", "jeera rice", "aloo gobi", "aloo paratha", "masala dosa"
+    ];
+    
+    // Pattern 1: Direct quantity before item name ("2 butter chicken")
+    // Make the pattern more flexible to catch more variations
+    const directQuantityPattern = new RegExp(`(\\d+)\\s+(${menuItemPatterns.join('|')})`, 'gi');
     
     // Manually gather matches to avoid TypeScript issues with matchAll
     const matches: Array<{quantity: number, item: string}> = [];
     
-    // First try the direct pattern
+    // First try the direct quantity pattern
     let directMatch: RegExpExecArray | null;
     while ((directMatch = directQuantityPattern.exec(orderText)) !== null) {
       matches.push({
@@ -944,31 +1000,68 @@ export async function createOrderFromCall(call: CallData) {
       console.log(`Direct match found: ${directMatch[1]} ${directMatch[2]}`);
     }
     
-    // For each item in our menu, look for mentions
-    for (const item of itemNames) {
-      // Skip if we already found this item with the direct pattern
+    // Pattern 2: For phrases like "2 plates of chicken biryani" or "3 portions of dal"
+    const platesPattern = new RegExp(`(\\d+)\\s+(plates?|portions?|servings?|bowls?|cups?)\\s+(?:of\\s+)?(${menuItemPatterns.join('|')})`, 'gi');
+    
+    let platesMatch: RegExpExecArray | null;
+    while ((platesMatch = platesPattern.exec(orderText)) !== null) {
+      matches.push({
+        quantity: parseInt(platesMatch[1]),
+        item: platesMatch[3]
+      });
+      console.log(`Plates match found: ${platesMatch[1]} plates of ${platesMatch[3]}`);
+    }
+    
+    // Pattern 3: Check for specific item mentions with contextual quantity detection
+    for (const item of menuItemPatterns) {
+      // Skip if we already found this item with the direct patterns
       if (matches.some(m => m.item.toLowerCase() === item.toLowerCase())) {
         continue;
       }
       
-      // If the item is mentioned
-      if (orderText.toLowerCase().includes(item.toLowerCase())) {
-        // Look for any numbers in the order text
-        const numberPattern = /\b(\d+)\b/g;
-        let numberMatch: RegExpExecArray | null;
+      // If the item is mentioned in the order text
+      const itemIndex = orderText.toLowerCase().indexOf(item.toLowerCase());
+      if (itemIndex !== -1) {
         let quantity = 1; // Default to 1 if no number found
         
-        // Try to find the closest number to the item mention
-        while ((numberMatch = numberPattern.exec(orderText)) !== null) {
-          // If we find a number, use it as the quantity
+        // Look for numbers in the nearby context (within 10 characters)
+        const contextStart = Math.max(0, itemIndex - 10);
+        const contextEnd = Math.min(orderText.length, itemIndex + item.length + 10);
+        const context = orderText.substring(contextStart, contextEnd);
+        
+        // Pattern for finding a number
+        const numberPattern = /\b(\d+)\b/g;
+        let numberMatch: RegExpExecArray | null;
+        
+        // Find the closest number to the item mention
+        while ((numberMatch = numberPattern.exec(context)) !== null) {
           quantity = parseInt(numberMatch[1]);
+          console.log(`Found quantity ${quantity} near ${item} in context: "${context}"`);
+        }
+        
+        // If no number in close context, check entire sentence
+        if (quantity === 1) {
+          // Find all numbers in the full text
+          const fullTextNumbers: number[] = [];
+          let fullTextMatch: RegExpExecArray | null;
+          const fullTextNumberPattern = /\b(\d+)\b/g;
+          
+          while ((fullTextMatch = fullTextNumberPattern.exec(orderText)) !== null) {
+            fullTextNumbers.push(parseInt(fullTextMatch[1]));
+          }
+          
+          // If we found exactly one number in the whole text, associate it with this item
+          if (fullTextNumbers.length === 1) {
+            quantity = fullTextNumbers[0];
+            console.log(`Using single number ${quantity} in order for ${item}`);
+          }
         }
         
         matches.push({
           quantity: quantity,
           item: item
         });
-        console.log(`Indirect match found: ${quantity} ${item}`);
+        console.log(`Item mention match found: ${quantity} ${item}`);
       }
     }
     
