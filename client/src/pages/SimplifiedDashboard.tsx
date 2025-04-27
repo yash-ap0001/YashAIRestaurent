@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useColumnColors } from "@/contexts/ColumnColorContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { format } from "date-fns";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Badge } from "@/components/ui/badge";
@@ -141,7 +140,6 @@ export default function SimplifiedDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { getColumnStyle } = useColumnColors();
-  const { theme } = useTheme(); // Add useTheme hook at the same level as other hooks
   
   // Set up WebSocket connection for real-time updates
   useEffect(() => {
