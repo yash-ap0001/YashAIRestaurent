@@ -486,10 +486,11 @@ export async function confirmOrder(req: Request, res: Response) {
         };
       }
       
-      // Simple message without function call that was causing errors
+      // Tell the customer their order is being processed
+      // We'll avoid mentioning a specific order number until we create it in the database
       const message = detectedLanguage === 'english' 
-        ? `Your order has been confirmed! Your order number is ${orderId}. Thank you for calling.`
-        : `Order ${orderId} confirmed. Thank you.`;
+        ? `Your order has been confirmed! We're processing your order now. Thank you for calling.`
+        : `Order confirmed. Thank you for calling.`;
         
       twiml.say({ voice: voiceOption }, message);
     } catch (error) {
@@ -724,18 +725,56 @@ export async function createOrderFromCall(call: CallData) {
       orderText = "I'd like to order butter chicken with naan";
     }
     
-    // Extract key information from orderText using patterns
-    const quantityPattern = /(\d+)\s+(butter chicken|chicken|naan|rice|biryani|paneer|roti|samosa|pakora|curry|dal|tandoori|tikka)/gi;
+    // Extract key information from orderText using multiple patterns for more flexible matching
+    // Pattern 1: Direct quantity before item name ("2 butter chicken")
+    const directQuantityPattern = /(\d+)\s+(butter chicken|chicken|naan|rice|biryani|paneer|roti|samosa|pakora|curry|dal|tandoori|tikka)/gi;
+    
+    // Pattern 2: Quantity anywhere in sentence with item name ("I want butter chicken, make it 2 please")
+    const itemNames = ["butter chicken", "chicken", "naan", "rice", "biryani", "paneer", "roti", "samosa", "pakora", "curry", "dal", "tandoori", "tikka"];
     
     // Manually gather matches to avoid TypeScript issues with matchAll
-    const matches: Array<RegExpExecArray> = [];
-    let match: RegExpExecArray | null;
-    while ((match = quantityPattern.exec(orderText)) !== null) {
-      matches.push(match);
+    const matches: Array<{quantity: number, item: string}> = [];
+    
+    // First try the direct pattern
+    let directMatch: RegExpExecArray | null;
+    while ((directMatch = directQuantityPattern.exec(orderText)) !== null) {
+      matches.push({
+        quantity: parseInt(directMatch[1]),
+        item: directMatch[2]
+      });
+      console.log(`Direct match found: ${directMatch[1]} ${directMatch[2]}`);
+    }
+    
+    // For each item in our menu, look for mentions
+    for (const item of itemNames) {
+      // Skip if we already found this item with the direct pattern
+      if (matches.some(m => m.item.toLowerCase() === item.toLowerCase())) {
+        continue;
+      }
+      
+      // If the item is mentioned
+      if (orderText.toLowerCase().includes(item.toLowerCase())) {
+        // Look for any numbers in the order text
+        const numberPattern = /\b(\d+)\b/g;
+        let numberMatch: RegExpExecArray | null;
+        let quantity = 1; // Default to 1 if no number found
+        
+        // Try to find the closest number to the item mention
+        while ((numberMatch = numberPattern.exec(orderText)) !== null) {
+          // If we find a number, use it as the quantity
+          quantity = parseInt(numberMatch[1]);
+        }
+        
+        matches.push({
+          quantity: quantity,
+          item: item
+        });
+        console.log(`Indirect match found: ${quantity} ${item}`);
+      }
     }
     
     const extractedItems = matches.length > 0 ? 
-      matches.map(match => `${match[1]} ${match[2]}`).join(', ') : 
+      matches.map(match => `${match.quantity} ${match.item}`).join(', ') : 
       null;
     
     // Detect special requests
@@ -804,22 +843,39 @@ export async function createOrderFromCall(call: CallData) {
       const orderItems = [];
       const orderTextLower = orderText.toLowerCase();
       
-      // Try to match menu items from the text
-      for (const item of menuItems) {
-        if (orderTextLower.includes((item.name || '').toLowerCase())) {
-          // Try to extract quantity with regex
-          const quantityRegex = new RegExp(`(\\d+)\\s+${item.name}`, 'i');
-          const quantityMatch = orderTextLower.match(quantityRegex);
-          const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
-          
+      // Use our improved matches list to create order items
+      for (const extracted of matches) {
+        // Find the matching menu item for this extracted item
+        const menuItem = menuItems.find(m => 
+          m.name.toLowerCase().includes(extracted.item.toLowerCase()) || 
+          extracted.item.toLowerCase().includes(m.name.toLowerCase())
+        );
+        
+        if (menuItem) {
           orderItems.push({
-            menuItemId: item.id,
-            name: item.name,
-            quantity: quantity,
-            price: item.price
+            menuItemId: menuItem.id,
+            name: menuItem.name,
+            quantity: extracted.quantity,
+            price: menuItem.price
           });
           
-          console.log(`Added item to order: ${item.name} x${quantity}`);
+          console.log(`Added item to order from extracted matches: ${menuItem.name} x${extracted.quantity}`);
+        }
+      }
+      
+      // If no matches were found with our improved algorithm, fall back to basic text matching
+      if (orderItems.length === 0) {
+        for (const item of menuItems) {
+          if (orderTextLower.includes((item.name || '').toLowerCase())) {
+            orderItems.push({
+              menuItemId: item.id,
+              name: item.name,
+              quantity: 1, // Default to 1 if no quantity specified
+              price: item.price
+            });
+            
+            console.log(`Added item to order with fallback method: ${item.name} x1`);
+          }
         }
       }
       
