@@ -486,13 +486,48 @@ export async function confirmOrder(req: Request, res: Response) {
         };
       }
       
-      // Tell the customer their order is being processed
-      // We'll avoid mentioning a specific order number until we create it in the database
-      const message = detectedLanguage === 'english' 
-        ? `Your order has been confirmed! We're processing your order now. Thank you for calling.`
-        : `Order confirmed. Thank you for calling.`;
+      // Create the order right away so we can tell the customer their actual order number
+      try {
+        // Create the order using AI service
+        const orderResult = await createOrderFromCall(activeCalls[callSid]);
         
-      twiml.say({ voice: voiceOption }, message);
+        if (orderResult.success && orderResult.order) {
+          // Format the order items for the customer
+          const orderItemsText = orderResult.order.items
+            ? orderResult.order.items.map(item => `${item.quantity} ${item.name}`).join(', ')
+            : "your items";
+          
+          // Tell the customer their order number and items
+          const message = detectedLanguage === 'english' 
+            ? `Your order has been confirmed! Your order number is ${orderResult.order.orderNumber}. You ordered ${orderItemsText}. Thank you for calling.`
+            : `Order ${orderResult.order.orderNumber} confirmed. You ordered ${orderItemsText}. Thank you.`;
+          
+          twiml.say({ voice: voiceOption }, message);
+          
+          // Set the orderId so we don't create it again in completeCall
+          activeCalls[callSid].orderId = orderResult.order.id;
+          
+          // Update in call history
+          const historyCall = callHistory.find(call => call.id === callSid);
+          if (historyCall) {
+            historyCall.orderId = orderResult.order.id;
+          }
+        } else {
+          // If there was an error creating the order
+          const fallbackMessage = detectedLanguage === 'english' 
+            ? `Your order has been confirmed! We're processing your order now. Thank you for calling.`
+            : `Order confirmed. Thank you for calling.`;
+          
+          twiml.say({ voice: voiceOption }, fallbackMessage);
+        }
+      } catch (error) {
+        console.error("Error creating order:", error);
+        const fallbackMessage = detectedLanguage === 'english' 
+          ? `Your order has been confirmed! We're processing your order now. Thank you for calling.`
+          : `Order confirmed. Thank you for calling.`;
+        
+        twiml.say({ voice: voiceOption }, fallbackMessage);
+      }
     } catch (error) {
       console.error("Error processing order:", error);
       twiml.say({ voice: voiceOption }, "Your order has been received. Thank you for calling.");
@@ -680,21 +715,27 @@ async function completeCall(callSid: string) {
       historyCall.endTime = activeCalls[callSid].endTime;
     }
     
-    // Always create an actual order when a call is completed,
-    // regardless of whether it's a simulated call or real call
+    // Create an order only if one hasn't been created yet
     try {
-      console.log(`Creating order from completed call ${callSid}...`);
+      // Check if we have a numeric order ID (which means it's already in the database)
+      const hasExistingOrder = typeof activeCalls[callSid].orderId === 'number';
       
-      // Create the order using AI service
-      if (!activeCalls[callSid].orderId) {
-        // Assign a temporary order ID if one hasn't been assigned yet
-        activeCalls[callSid].orderId = `ORDER-SIM-${Date.now()}`;
+      if (!hasExistingOrder) {
+        console.log(`Creating order from completed call ${callSid}...`);
+        
+        // Create the order using AI service
+        if (!activeCalls[callSid].orderId) {
+          // Assign a temporary order ID if one hasn't been assigned yet
+          activeCalls[callSid].orderId = `ORDER-SIM-${Date.now()}`;
+        }
+        
+        // Create the actual order in the system
+        await createOrderFromCall(activeCalls[callSid]);
+        
+        console.log(`Successfully created order from call ${callSid}`);
+      } else {
+        console.log(`Order already created for call ${callSid}, skipping order creation`);
       }
-      
-      // Create the actual order in the system
-      await createOrderFromCall(activeCalls[callSid]);
-      
-      console.log(`Successfully created order from call ${callSid}`);
     } catch (error) {
       console.error('Error creating order from call:', error);
     }
