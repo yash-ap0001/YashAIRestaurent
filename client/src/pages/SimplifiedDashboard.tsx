@@ -521,9 +521,19 @@ export default function SimplifiedDashboard() {
     );
   }
 
+  // Track active tab for better control over stat refreshes
+  const [activeTab, setActiveTab] = useState("board");
+
+  // Refresh dashboard stats when switching to stats tab
+  useEffect(() => {
+    if (activeTab === "stats") {
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+    }
+  }, [activeTab, queryClient]);
+
   return (
     <div className="container mx-auto px-4 py-6">
-      <Tabs defaultValue="board">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex items-center justify-between mb-6">
           <TabsList>
             <TabsTrigger value="board" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
@@ -1308,9 +1318,21 @@ export default function SimplifiedDashboard() {
         <TabsContent value="stats" className="mt-2">
           <div className="mb-4">
             <h1 className="text-2xl font-bold">Today's Stats</h1>
-            <p className="text-muted-foreground">Real-time statistics updated automatically</p>
+            <p className="text-muted-foreground">
+              Real-time statistics updated automatically 
+              {activeTab === "stats" && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="text-primary hover:text-primary/90 p-0 ml-2 inline-flex items-center" 
+                  onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] })}
+                >
+                  <span className="underline text-sm">Refresh Now</span>
+                </Button>
+              )}
+            </p>
           </div>
-          <DashboardStats />
+          {activeTab === "stats" ? <DashboardStats /> : null}
         </TabsContent>
       </Tabs>
 

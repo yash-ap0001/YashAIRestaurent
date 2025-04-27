@@ -30,57 +30,127 @@ export function DashboardStats({ className }: DashboardStatsProps) {
   
   // Set up WebSocket listener for real-time stats updates
   useEffect(() => {
-    // Connect to WebSocket for real-time updates
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
-    const socket = new WebSocket(wsUrl);
-    
-    socket.onopen = () => {
-      console.log('WebSocket connected for dashboard stats');
-    };
-    
-    // Listen for real-time updates that should trigger a stats refresh
-    socket.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        console.log("WebSocket message received:", message);
-        
-        // Directly update stats if we receive a stats_updated event
-        if (message.type === 'stats_updated' && message.data) {
-          // Directly update the cache with the new stats
-          queryClient.setQueryData(['/api/dashboard/stats'], message.data);
-          console.log("Dashboard stats updated via WebSocket:", message.data);
-        } 
-        // Otherwise, trigger a refetch for these events
-        else if (
-          message.type === 'order_created' || 
-          message.type === 'order_updated' || 
-          message.type === 'bill_created' || 
-          message.type === 'kitchen_token_updated' ||
-          message.type === 'new_order' ||
-          message.type === 'new_bill' ||
-          message.type === 'new_kitchen_token'
-        ) {
-          refetch();
-        }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+    let socket: WebSocket | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    let reconnectTimeout: NodeJS.Timeout;
+    let pingInterval: NodeJS.Timeout;
+    let isComponentMounted = true;
+
+    // Function to connect WebSocket
+    const connectWebSocket = () => {
+      if (!isComponentMounted) return;
+      
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+      
+      // Close existing socket if it exists
+      if (socket) {
+        socket.close();
       }
+      
+      socket = new WebSocket(wsUrl);
+      
+      socket.onopen = () => {
+        console.log('WebSocket connected for dashboard stats');
+        reconnectAttempts = 0; // Reset counter on successful connection
+        
+        // Set up ping interval to keep connection alive
+        if (pingInterval) clearInterval(pingInterval);
+        pingInterval = setInterval(() => {
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'ping' }));
+          }
+        }, 20000); // Send ping every 20 seconds
+      };
+      
+      // Listen for real-time updates that should trigger a stats refresh
+      socket.onmessage = (event) => {
+        if (!isComponentMounted) return;
+        
+        try {
+          const message = JSON.parse(event.data);
+          console.log("WebSocket message received:", message);
+          
+          // Directly update stats if we receive a stats_updated event
+          if (message.type === 'stats_updated' && message.data) {
+            // Force a deep copy to ensure React detects the change
+            const statsData = JSON.parse(JSON.stringify(message.data));
+            // Directly update the cache with the new stats
+            queryClient.setQueryData(['/api/dashboard/stats'], statsData);
+            console.log("Dashboard stats updated via WebSocket:", statsData);
+            
+            // Force a refetch periodically to ensure data consistency
+            if (message.timestamp % 10 === 0) {
+              setTimeout(() => {
+                if (isComponentMounted) {
+                  refetch();
+                }
+              }, 500);
+            }
+          } 
+          // Otherwise, trigger a refetch for these events with a slight delay to ensure server has latest data
+          else if (
+            message.type === 'order_created' || 
+            message.type === 'order_updated' || 
+            message.type === 'bill_created' || 
+            message.type === 'kitchen_token_updated' ||
+            message.type === 'new_order' ||
+            message.type === 'new_bill' ||
+            message.type === 'new_kitchen_token'
+          ) {
+            // Delay refetch to ensure server data is updated
+            setTimeout(() => {
+              if (isComponentMounted) {
+                console.log("Executing delayed refetch of dashboard stats");
+                refetch();
+              }
+            }, 500);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+      
+      socket.onerror = (error) => {
+        console.error('Dashboard stats WebSocket error:', error);
+      };
+      
+      socket.onclose = (event) => {
+        console.log('Dashboard stats WebSocket closed:', event.code, event.reason);
+        clearInterval(pingInterval);
+        
+        // Attempt to reconnect unless we've reached max attempts or component unmounted
+        if (reconnectAttempts < maxReconnectAttempts && isComponentMounted) {
+          reconnectAttempts++;
+          console.log(`Attempting to reconnect dashboard stats (${reconnectAttempts}/${maxReconnectAttempts})...`);
+          
+          // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 16000);
+          reconnectTimeout = setTimeout(connectWebSocket, delay);
+        }
+      };
     };
-    
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+
+    // Initial connection
+    connectWebSocket();
     
     // Also set up an interval as a fallback for when WebSocket might be disconnected
-    const intervalId = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+    const refetchIntervalId = setInterval(() => {
+      if (isComponentMounted) {
+        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      }
     }, 10000); // Every 10 seconds as a fallback
     
     // Clean up on component unmount
     return () => {
-      socket.close();
-      clearInterval(intervalId);
+      isComponentMounted = false;
+      if (socket) {
+        socket.close();
+      }
+      clearTimeout(reconnectTimeout);
+      clearInterval(pingInterval);
+      clearInterval(refetchIntervalId);
     };
   }, [refetch]);
 
