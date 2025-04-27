@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import CustomerDashboard from "@/pages/CustomerDashboard";
 import SimplifiedDashboard from "@/pages/SimplifiedDashboard";
+import PublicOrderTest from "@/pages/PublicOrderTest";
 import NewOrder from "@/pages/NewOrder";
 import KitchenTokens from "@/pages/KitchenTokens";
 import Billing from "@/pages/Billing";
@@ -52,6 +53,7 @@ function Router() {
       
       {/* Unprotected Testing Routes */}
       <Route path="/test-dashboard" component={SimplifiedDashboard} />
+      <Route path="/public-order-test" component={PublicOrderTest} />
       
       {/* Protected Routes - Home page based on role */}
       <ProtectedRoute path="/" component={HomeComponent} />
@@ -114,14 +116,16 @@ function App() {
 function AppContent() {
   const { user, isLoading } = useAuth();
   const isTestDashboard = window.location.pathname.includes('test-dashboard');
+  const isPublicOrderTest = window.location.pathname.includes('public-order-test');
+  const isPublicRoute = isTestDashboard || isPublicOrderTest;
   
-  // Single combined WebSocket initialization for both authenticated and test routes
+  // Single combined WebSocket initialization for both authenticated and public routes
   useEffect(() => {
-    if (user || isTestDashboard) {
+    if (user || isPublicRoute) {
       console.log('Initializing WebSocket connection for real-time updates');
       initializeWebSocket();
     }
-  }, [user, isTestDashboard]);
+  }, [user, isPublicRoute]);
   
   // If loading, show our custom animated mascot loading indicator
   if (isLoading) {
@@ -136,14 +140,20 @@ function AppContent() {
     );
   }
   
-  // Special case for test dashboard - show without login
-  if (!user && isTestDashboard) {
+  // Special case for public test routes - show without login
+  if (!user && isPublicRoute) {
+    let bannerMessage = isPublicOrderTest ? 
+      "Public Order Testing Page - View all orders without authentication" : 
+      "Test Dashboard Mode - Viewing dashboard without authentication";
+    
     return (
       <>
-        <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 mb-4">
-          <p className="font-bold">Test Dashboard Mode</p>
-          <p>Viewing dashboard without authentication. Phone orders will display here.</p>
-        </div>
+        {!isPublicOrderTest && (
+          <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 mb-4">
+            <p className="font-bold">Test Mode</p>
+            <p>{bannerMessage}</p>
+          </div>
+        )}
         <Router />
         <OrderTrackingToasts />
       </>
