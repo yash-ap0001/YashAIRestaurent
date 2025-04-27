@@ -492,9 +492,20 @@ export async function confirmOrder(req: Request, res: Response) {
         const orderResult = await createOrderFromCall(activeCalls[callSid]);
         
         if (orderResult.success && orderResult.order) {
+          // Extract the order items from the result
+          const orderItems = orderResult.order && orderResult.orderData && orderResult.orderData.extractedItems
+            ? orderResult.orderData.extractedItems.split(', ').map(itemText => {
+                const [quantity, ...name] = itemText.split(' ');
+                return { 
+                  quantity: parseInt(quantity) || 1, 
+                  name: name.join(' ') 
+                };
+              })
+            : [];
+            
           // Format the order items for the customer
-          const orderItemsText = orderResult.order.items
-            ? orderResult.order.items.map(item => `${item.quantity} ${item.name}`).join(', ')
+          const orderItemsText = orderItems.length > 0
+            ? orderItems.map(item => `${item.quantity} ${item.name}`).join(', ')
             : "your items";
           
           // Tell the customer their order number and items
