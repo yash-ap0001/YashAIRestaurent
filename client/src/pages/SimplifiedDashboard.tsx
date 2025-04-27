@@ -1334,7 +1334,9 @@ export default function SimplifiedDashboard() {
               )}
             </p>
           </div>
-          {activeTab === "stats" ? <DashboardStats /> : null}
+          <div style={{ display: activeTab === "stats" ? "block" : "none" }}>
+            <DashboardStats />
+          </div>
         </TabsContent>
       </Tabs>
 
