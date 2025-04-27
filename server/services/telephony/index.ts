@@ -718,15 +718,18 @@ export async function confirmOrder(req: Request, res: Response) {
             spanish: `El importe total de su pedido es ${formattedTotal}. Esto incluye todos los artículos e impuestos aplicables.`
           };
           
-          twiml.say({ voice: voiceOption }, totalMsg);
+          twiml.say({ voice: voiceOption }, totalMessages[detectedLanguage]);
           twiml.pause({ length: 1 }); // Pause before farewell
           
-          // Farewell message
-          const farewellMsg = detectedLanguage === 'english' 
-            ? `Thank you for your order. Your food will be prepared shortly.`
-            : `Thank you for your order.`;
+          // Enhanced farewell messages with more details in different languages
+          const farewellMessages = {
+            english: `Thank you for your order. Your food will be prepared shortly and will be ready in approximately 20 minutes. Have a great day!`,
+            hindi: `आपके ऑर्डर के लिए धन्यवाद। आपका खाना जल्द ही तैयार किया जाएगा और लगभग 20 मिनट में तैयार हो जाएगा। आपका दिन शुभ हो!`,
+            telugu: `మీ ఆర్డర్‌కు ధన్యవాదాలు. మీ ఆహారం త్వరలో తయారు చేయబడుతుంది మరియు సుమారు 20 నిమిషాల్లో సిద్ధంగా ఉంటుంది. మీ రోజు శుభంగా ఉండాలి!`,
+            spanish: `Gracias por su pedido. Su comida se preparará en breve y estará lista en aproximadamente 20 minutos. ¡Que tenga un buen día!`
+          };
           
-          twiml.say({ voice: voiceOption }, farewellMsg);
+          twiml.say({ voice: voiceOption }, farewellMessages[detectedLanguage]);
           
           // Set the orderId so we don't create it again in completeCall
           activeCalls[callSid].orderId = orderResult.order.id;
