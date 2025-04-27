@@ -140,16 +140,16 @@ interface AIVoiceSettings {
 
 let aiVoiceSettings: AIVoiceSettings = {
   greeting: {
-    english: "Hello! Thank you for calling Yash Hotel. I'm your AI assistant. What would you like to order today?",
-    hindi: "नमस्ते! यश होटल को कॉल करने के लिए धन्यवाद। मैं आपका AI सहायक हूँ। आज आप क्या ऑर्डर करना चाहेंगे?",
-    telugu: "నమస్కారం! యష్ హోటల్‌కి కాల్ చేసినందుకు ధన్యవాదాలు. నేను మీ AI అసిస్టెంట్‌ని. ఈరోజు మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారు?",
-    spanish: "¡Hola! Gracias por llamar a Yash Hotel. Soy tu asistente de IA. ¿Qué te gustaría ordenar hoy?"
+    english: "Hello! Thank you for calling Yash Hotel. I'm your AI assistant. Please tell me what dishes you'd like to order today along with quantities. For example, you can say '2 butter chicken and 3 garlic naan'.",
+    hindi: "नमस्ते! यश होटल को कॉल करने के लिए धन्यवाद। मैं आपका AI सहायक हूँ। कृपया मुझे बताएं कि आज आप कौन से व्यंजन और कितनी मात्रा में ऑर्डर करना चाहेंगे। उदाहरण के लिए, आप कह सकते हैं '2 बटर चिकन और 3 गार्लिक नान'।",
+    telugu: "నమస్కారం! యష్ హోటల్‌కి కాల్ చేసినందుకు ధన్యవాదాలు. నేను మీ AI అసిస్టెంట్‌ని. దయచేసి మీరు ఈరోజు ఏ వంటకాలు ఆర్డర్ చేయాలనుకుంటున్నారో పరిమాణాలతో సహా చెప్పండి. ఉదాహరణకు, మీరు '2 వెన్న చికెన్ మరియు 3 వెల్లులి నాన్' అని చెప్పవచ్చు.",
+    spanish: "¡Hola! Gracias por llamar a Yash Hotel. Soy tu asistente de IA. Por favor, dime qué platos te gustaría pedir hoy junto con las cantidades. Por ejemplo, puedes decir '2 pollo con mantequilla y 3 naan de ajo'."
   },
   confirmationPrompt: {
-    english: "Let me confirm your order. Is that correct?",
-    hindi: "मुझे आपके ऑर्डर की पुष्टि करने दें। क्या यह सही है?",
-    telugu: "మీ ఆర్డర్‌ని నిర్ధారించనివ్వండి. అది సరైనదేనా?",
-    spanish: "Permíteme confirmar tu orden. ¿Es correcto?"
+    english: "Let me confirm your order item by item. Please listen carefully and say 'yes' or press 1 if correct, or 'no' or press 2 if incorrect.",
+    hindi: "मुझे आपके ऑर्डर की प्रत्येक वस्तु की पुष्टि करने दें। कृपया ध्यान से सुनें और यदि सही है तो 'हां' कहें या 1 दबाएं, या यदि गलत है तो 'नहीं' कहें या 2 दबाएं।",
+    telugu: "మీ ఆర్డర్‌ని ఒక్కొక్క వస్తువుగా నిర్ధారించనివ్వండి. దయచేసి జాగ్రత్తగా వినండి మరియు సరైనదైతే 'అవును' అని చెప్పండి లేదా 1 నొక్కండి, లేదా తప్పు అయితే 'కాదు' అని చెప్పండి లేదా 2 నొక్కండి.",
+    spanish: "Permíteme confirmar tu pedido artículo por artículo. Por favor, escucha atentamente y di 'sí' o presiona 1 si es correcto, o 'no' o presiona 2 si es incorrecto."
   },
   farewell: {
     english: "Thank you for your order! It will be ready in approximately 20 minutes. Have a great day!",
@@ -245,18 +245,23 @@ export function handleIncomingCall(req: Request, res: Response) {
   const twiml = new VoiceResponse();
   
   try {
-    // Simplified greeting and prompt
+    // Use our improved greeting from voice settings
     twiml.say(
       { voice: 'Polly.Joanna' },
-      'Welcome to Yash Hotel. Please tell me what you would like to order.'
+      aiVoiceSettings.greeting.english
     );
     
-    // Gather customer input - simplified
+    // Add a short pause to give customer time to think
+    twiml.pause({ length: 1 });
+    
+    // Gather customer input with improved speech processing
     twiml.gather({
       input: 'speech',
       speechTimeout: 'auto',
+      speechModel: 'phone_call',
       action: '/api/telephony/process-speech',
-      method: 'POST'
+      method: 'POST',
+      language: 'en-US'
     });
     
     // If no input is received
@@ -267,7 +272,7 @@ export function handleIncomingCall(req: Request, res: Response) {
     twiml.hangup();
     
     // Add initial greeting to transcript
-    callData.transcript = 'AI: Welcome to Yash Hotel. Please tell me what you would like to order.\n';
+    callData.transcript = `AI: ${aiVoiceSettings.greeting.english}\n`;
   } catch (error) {
     console.error('Error handling incoming call:', error);
     
@@ -646,11 +651,15 @@ export async function confirmOrder(req: Request, res: Response) {
           
           // Format and announce each item individually with proper pauses
           if (orderItems.length > 0) {
-            const itemsIntro = detectedLanguage === 'english' 
-              ? `Here's what you've ordered:`
-              : `Your items:`;
+            // Better introduction messages with language variants
+            const itemsIntro = {
+              english: `Here's a summary of your order with all items and prices:`,
+              hindi: `आपके ऑर्डर का सारांश सभी आइटम और कीमतों के साथ यहां है:`,
+              telugu: `మీ ఆర్డర్ యొక్క సారాంశం అన్ని వస్తువులు మరియు ధరలతో:`,
+              spanish: `Aquí hay un resumen de su pedido con todos los artículos y precios:` 
+            };
             
-            twiml.say({ voice: voiceOption }, itemsIntro);
+            twiml.say({ voice: voiceOption }, itemsIntro[detectedLanguage]);
             twiml.pause({ length: 1 }); // Pause before listing items
             
             // Process each item individually with its own pause
@@ -669,19 +678,27 @@ export async function confirmOrder(req: Request, res: Response) {
                 }
               }
               
-              // Format the price for this item
+              // Format the individual item price and total
+              const singleItemPrice = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+              }).format(item.price);
+              
               const itemTotal = item.price * item.quantity;
-              const formattedItemPrice = new Intl.NumberFormat('en-IN', {
+              const formattedItemTotal = new Intl.NumberFormat('en-IN', {
                 style: 'currency',
                 currency: 'INR'
               }).format(itemTotal);
               
-              // Announce this item with quantity and price
-              const itemDetails = detectedLanguage === 'english' 
-                ? `${item.quantity} ${itemName}, ${formattedItemPrice}.`
-                : `${item.quantity} ${itemName}, ${formattedItemPrice}.`;
+              // Enhanced item details with individual price
+              const itemDetailsMessages = {
+                english: `${item.quantity} ${itemName} at ${singleItemPrice} each, subtotal: ${formattedItemTotal}`,
+                hindi: `${item.quantity} ${itemName}, प्रत्येक ${singleItemPrice}, कुल: ${formattedItemTotal}`,
+                telugu: `${item.quantity} ${itemName}, ఒక్కొక్కటి ${singleItemPrice}, మొత్తం: ${formattedItemTotal}`,
+                spanish: `${item.quantity} ${itemName} a ${singleItemPrice} cada uno, subtotal: ${formattedItemTotal}`
+              };
               
-              twiml.say({ voice: voiceOption }, itemDetails);
+              twiml.say({ voice: voiceOption }, itemDetailsMessages[detectedLanguage]);
               twiml.pause({ length: 1 }); // Pause between items
             }
           }
@@ -693,10 +710,13 @@ export async function confirmOrder(req: Request, res: Response) {
             currency: 'INR'
           }).format(totalAmount);
           
-          // Announce the total
-          const totalMsg = detectedLanguage === 'english' 
-            ? `Your total is ${formattedTotal}.`
-            : `Total: ${formattedTotal}.`;
+          // Enhanced total announcement with better language support
+          const totalMessages = {
+            english: `The total amount for your order is ${formattedTotal}. This includes all items and applicable taxes.`,
+            hindi: `आपके ऑर्डर की कुल राशि ${formattedTotal} है। इसमें सभी आइटम और लागू कर शामिल हैं।`,
+            telugu: `మీ ఆర్డర్‌ మొత్తం విలువ ${formattedTotal}. ఇందులో అన్ని వస్తువులు మరియు వర్తించే పన్నులు ఉన్నాయి.`,
+            spanish: `El importe total de su pedido es ${formattedTotal}. Esto incluye todos los artículos e impuestos aplicables.`
+          };
           
           twiml.say({ voice: voiceOption }, totalMsg);
           twiml.pause({ length: 1 }); // Pause before farewell
