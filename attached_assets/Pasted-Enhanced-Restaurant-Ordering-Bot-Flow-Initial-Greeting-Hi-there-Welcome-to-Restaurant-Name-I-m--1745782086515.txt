@@ -1,0 +1,65 @@
+Enhanced Restaurant Ordering Bot Flow
+Initial Greeting
+"Hi there! Welcome to [Restaurant Name]. I'm your virtual ordering assistant. What would you like to order today?"
+Order Collection Phase
+"Please let me know the items you'd like to order, one at a time. For each item, I'll need the name and quantity."
+After each item:
+"Got it! [Item] x [Quantity] added to your order. What else would you like to add?"
+Alternative responses to keep it conversational:
+
+"Added [Item] x [Quantity]. Anything else you'd like?"
+"Great choice! [Item] x [Quantity] added. What else can I get for you?"
+"[Item] x [Quantity] - got it! Would you like to add anything else?"
+
+Order Completion Indication
+"No more items? Perfect! I'm just preparing your order summary..."
+[SYSTEM INSTRUCTION: Insert a 2-3 second pause here to simulate processing]
+Order Summary Presentation
+"Here's a summary of your order:
+
+[Item 1]: [Quantity] x $[Unit Price] = $[Subtotal 1]
+[Item 2]: [Quantity] x $[Unit Price] = $[Subtotal 2]
+[Item 3]: [Quantity] x $[Unit Price] = $[Subtotal 3]
+
+Your order total comes to $[Total Price]."
+Confirmation Request
+"Does everything look correct? Would you like me to review your order again?"
+If yes:
+"Sure thing. Your order includes: [repeat order details]"
+If no:
+"Great! Let's continue with your order."
+Order Modification Options
+"Would you like to:
+
+Add more items
+Remove or change an item
+Proceed with this order as is"
+
+Example Complete Interaction
+Bot: "Hi there! Welcome to Tasty Bites. I'm your virtual ordering assistant. What would you like to order today?"
+Customer: "I'd like 2 cheeseburgers."
+Bot: "Got it! 2 Cheeseburgers added to your order. What else would you like to add?"
+Customer: "One large fries."
+Bot: "Great choice! Large Fries x 1 added. What else can I get for you?"
+Customer: "And 2 Cokes please."
+Bot: "Cokes x 2 - got it! Would you like to add anything else?"
+Customer: "No, that's it."
+Bot: "Perfect! I'm just preparing your order summary..."
+[2-3 second pause]
+Bot: "Here's a summary of your order:
+
+Cheeseburger: 2 x $5.00 = $10.00
+Large Fries: 1 x $3.50 = $3.50
+Coke: 2 x $2.00 = $4.00
+
+Your order total comes to $17.50."
+Bot: "Does everything look correct? Would you like me to review your order again?"
+Customer: "No, it's correct."
+Bot: "Great! Would you like to:
+
+Add more items
+Remove or change an item
+Proceed with this order as is"
+
+Customer: "Proceed with the order."
+Bot: "Excellent! Your order has been confirmed and will be ready for [pickup/delivery] in approximately [time estimate]. Thank you for ordering from Tasty Bites!"

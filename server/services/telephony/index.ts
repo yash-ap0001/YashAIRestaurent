@@ -127,10 +127,14 @@ const languagePatterns = {
   ]
 };
 
-// AI Voice settings with multi-language support
+// AI Voice settings with multi-language support and improved conversation flow
 interface AIVoiceSettings {
   greeting: {[key in SupportedLanguage]: string};
+  orderCollection: {[key in SupportedLanguage]: string};
+  itemConfirmation: Array<{[key in SupportedLanguage]: string}>;
+  orderCompletion: {[key in SupportedLanguage]: string};
   confirmationPrompt: {[key in SupportedLanguage]: string};
+  confirmationOptions: {[key in SupportedLanguage]: string};
   farewell: {[key in SupportedLanguage]: string};
   maxRetries: number;
   autoAnswerCalls: boolean;
@@ -140,22 +144,60 @@ interface AIVoiceSettings {
 
 let aiVoiceSettings: AIVoiceSettings = {
   greeting: {
-    english: "Hello! Thank you for calling Yash Hotel. I'm your AI assistant. Please tell me what dishes you'd like to order today along with quantities. For example, you can say '2 butter chicken and 3 garlic naan'.",
-    hindi: "नमस्ते! यश होटल को कॉल करने के लिए धन्यवाद। मैं आपका AI सहायक हूँ। कृपया मुझे बताएं कि आज आप कौन से व्यंजन और कितनी मात्रा में ऑर्डर करना चाहेंगे। उदाहरण के लिए, आप कह सकते हैं '2 बटर चिकन और 3 गार्लिक नान'।",
-    telugu: "నమస్కారం! యష్ హోటల్‌కి కాల్ చేసినందుకు ధన్యవాదాలు. నేను మీ AI అసిస్టెంట్‌ని. దయచేసి మీరు ఈరోజు ఏ వంటకాలు ఆర్డర్ చేయాలనుకుంటున్నారో పరిమాణాలతో సహా చెప్పండి. ఉదాహరణకు, మీరు '2 వెన్న చికెన్ మరియు 3 వెల్లులి నాన్' అని చెప్పవచ్చు.",
-    spanish: "¡Hola! Gracias por llamar a Yash Hotel. Soy tu asistente de IA. Por favor, dime qué platos te gustaría pedir hoy junto con las cantidades. Por ejemplo, puedes decir '2 pollo con mantequilla y 3 naan de ajo'."
+    english: "Hi there! Welcome to Yash Hotel. I'm your virtual assistant. What would you like to order today?",
+    hindi: "नमस्ते! यश होटल में आपका स्वागत है। मैं आपका वर्चुअल सहायक हूं। आज आप क्या ऑर्डर करना चाहेंगे?",
+    telugu: "హలో! యష్ హోటల్‌కి స్వాగతం. నేను మీ వర్చువల్ అసిస్టెంట్‌ని. ఈరోజు మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారు?",
+    spanish: "¡Hola! Bienvenido al Hotel Yash. Soy su asistente virtual. ¿Qué le gustaría ordenar hoy?"
+  },
+  orderCollection: {
+    english: "Please let me know the items you'd like to order, one at a time. For each item, I'll need the name and quantity.",
+    hindi: "कृपया मुझे एक-एक करके उन आइटमों के बारे में बताएं जिन्हें आप ऑर्डर करना चाहते हैं। प्रत्येक आइटम के लिए, मुझे नाम और मात्रा की आवश्यकता होगी।",
+    telugu: "దయచేసి మీరు ఆర్డర్ చేయాలనుకుంటున్న ఐటెమ్‌లను ఒకొక్కటిగా నాకు తెలియజేయండి. ప్రతి ఐటెమ్‌కు, నాకు పేరు మరియు పరిమాణం అవసరం.",
+    spanish: "Por favor, hágame saber los artículos que desea ordenar, uno a la vez. Para cada artículo, necesitaré el nombre y la cantidad."
+  },
+  itemConfirmation: [
+    {
+      english: "Got it! [ITEM] x [QUANTITY] added to your order. What else would you like to add?",
+      hindi: "समझ गया! [ITEM] x [QUANTITY] आपके ऑर्डर में जोड़ दिया गया है। आप और क्या जोड़ना चाहेंगे?",
+      telugu: "అర్థమైంది! [ITEM] x [QUANTITY] మీ ఆర్డర్‌కి జోడించబడింది. మీరు ఇంకేమి జోడించాలనుకుంటున్నారు?",
+      spanish: "¡Entendido! [ITEM] x [QUANTITY] añadido a su pedido. ¿Qué más le gustaría añadir?"
+    },
+    {
+      english: "Great choice! [ITEM] x [QUANTITY] added. What else can I get for you?",
+      hindi: "बढ़िया पसंद! [ITEM] x [QUANTITY] जोड़ दिया गया। मैं आपके लिए और क्या ला सकता हूँ?",
+      telugu: "గొప్ప ఎంపిక! [ITEM] x [QUANTITY] జోడించబడింది. నేను మీకు మరేమి తీసుకోగలను?",
+      spanish: "¡Excelente elección! [ITEM] x [QUANTITY] añadido. ¿Qué más puedo traerle?"
+    },
+    {
+      english: "[ITEM] x [QUANTITY] - got it! Would you like to add anything else?",
+      hindi: "[ITEM] x [QUANTITY] - समझ गया! क्या आप कुछ और जोड़ना चाहेंगे?",
+      telugu: "[ITEM] x [QUANTITY] - అర్థమైంది! మీరు మరేదైనా జోడించాలనుకుంటున్నారా?",
+      spanish: "[ITEM] x [QUANTITY] - ¡entendido! ¿Le gustaría añadir algo más?"
+    }
+  ],
+  orderCompletion: {
+    english: "No more items? Perfect! I'm just preparing your order summary...",
+    hindi: "और कोई आइटम नहीं? बढ़िया! मैं आपके ऑर्डर का सारांश तैयार कर रहा हूँ...",
+    telugu: "ఇక ఐటెమ్‌లు లేవా? పర్ఫెక్ట్! నేను మీ ఆర్డర్ సారాంశాన్ని తయారు చేస్తున్నాను...",
+    spanish: "¿No más artículos? ¡Perfecto! Estoy preparando el resumen de su pedido..."
   },
   confirmationPrompt: {
-    english: "Let me confirm your order item by item. Please listen carefully and say 'yes' or press 1 if correct, or 'no' or press 2 if incorrect.",
-    hindi: "मुझे आपके ऑर्डर की प्रत्येक वस्तु की पुष्टि करने दें। कृपया ध्यान से सुनें और यदि सही है तो 'हां' कहें या 1 दबाएं, या यदि गलत है तो 'नहीं' कहें या 2 दबाएं।",
-    telugu: "మీ ఆర్డర్‌ని ఒక్కొక్క వస్తువుగా నిర్ధారించనివ్వండి. దయచేసి జాగ్రత్తగా వినండి మరియు సరైనదైతే 'అవును' అని చెప్పండి లేదా 1 నొక్కండి, లేదా తప్పు అయితే 'కాదు' అని చెప్పండి లేదా 2 నొక్కండి.",
-    spanish: "Permíteme confirmar tu pedido artículo por artículo. Por favor, escucha atentamente y di 'sí' o presiona 1 si es correcto, o 'no' o presiona 2 si es incorrecto."
+    english: "Here's a summary of your order:\n\n[ORDER_SUMMARY]\n\nYour order total comes to ₹[TOTAL_PRICE]. Does everything look correct?",
+    hindi: "आपके ऑर्डर का सारांश यहां दिया गया है:\n\n[ORDER_SUMMARY]\n\nआपके ऑर्डर का कुल मूल्य ₹[TOTAL_PRICE] है। क्या सब कुछ सही लग रहा है?",
+    telugu: "మీ ఆర్డర్ సారాంశం ఇక్కడ ఉంది:\n\n[ORDER_SUMMARY]\n\nమీ ఆర్డర్ మొత్తం ₹[TOTAL_PRICE]కి వస్తుంది. అన్నీ సరిగ్గా ఉన్నాయా?",
+    spanish: "Aquí está el resumen de su pedido:\n\n[ORDER_SUMMARY]\n\nEl total de su pedido asciende a ₹[TOTAL_PRICE]. ¿Todo parece correcto?"
+  },
+  confirmationOptions: {
+    english: "Please say yes to confirm your order, or no if you'd like to make changes.",
+    hindi: "अपने ऑर्डर की पुष्टि करने के लिए कृपया हां कहें, या यदि आप बदलाव करना चाहते हैं तो नहीं कहें।",
+    telugu: "మీ ఆర్డర్‌ని నిర్ధారించడానికి దయచేసి అవును అని చెప్పండి, లేదా మీరు మార్పులు చేయాలనుకుంటే కాదు అని చెప్పండి.",
+    spanish: "Por favor, diga sí para confirmar su pedido, o no si desea hacer cambios."
   },
   farewell: {
-    english: "Thank you for your order! It will be ready in approximately 20 minutes. Have a great day!",
-    hindi: "आपके ऑर्डर के लिए धन्यवाद! यह लगभग 20 मिनट में तैयार हो जाएगा। आपका दिन शुभ हो!",
-    telugu: "మీ ఆర్డర్‌కు ధన్యవాదాలు! ఇది సుమారు 20 నిమిషాల్లో సిద్ధంగా ఉంటుంది. మీ రోజు శుభంగా ఉండాలి!",
-    spanish: "¡Gracias por tu pedido! Estará listo en aproximadamente 20 minutos. ¡Que tengas un buen día!"
+    english: "Excellent! Your order #[ORDER_NUMBER] has been confirmed and will be ready in approximately 20 minutes. Thank you for ordering from Yash Hotel!",
+    hindi: "उत्तम! आपका ऑर्डर #[ORDER_NUMBER] पुष्टि कर दिया गया है और लगभग 20 मिनट में तैयार हो जाएगा। यश होटल से ऑर्डर करने के लिए धन्यवाद!",
+    telugu: "అద్భుతం! మీ ఆర్డర్ #[ORDER_NUMBER] నిర్ధారించబడింది మరియు సుమారు 20 నిమిషాల్లో సిద్ధంగా ఉంటుంది. యష్ హోటల్ నుండి ఆర్డర్ చేసినందుకు ధన్యవాదాలు!",
+    spanish: "¡Excelente! Su pedido #[ORDER_NUMBER] ha sido confirmado y estará listo en aproximadamente 20 minutos. ¡Gracias por ordenar en el Hotel Yash!"
   },
   maxRetries: 3,
   autoAnswerCalls: true,
