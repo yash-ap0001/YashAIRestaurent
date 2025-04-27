@@ -1313,6 +1313,13 @@ export default function SimplifiedDashboard() {
           <DashboardStats />
         </TabsContent>
       </Tabs>
+
+      {/* Order Details Dialog */}
+      <OrderDetailsDialog 
+        orderId={selectedOrderId} 
+        open={isOrderDetailsOpen}
+        onOpenChange={setIsOrderDetailsOpen}
+      />
     </div>
   );
 }
