@@ -1825,34 +1825,60 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     }
   });
   
-  // Create an immediate order from a simulated call (for testing only)
+  // Create an immediate order from a phone call
   app.post("/api/telephony/create-immediate-order", async (req: Request, res: Response) => {
     try {
-      const { phoneNumber, orderText } = req.body;
+      const { phoneNumber, orderText = "", callId } = req.body;
       
       console.log(`Processing immediate order request with text: ${orderText || "No text provided"}`);
       
-      // Create a simulated call with the specified order text
-      const callSid = 'SIM-IMMEDIATE-' + Date.now().toString();
+      let callData: any;
+      let callSid: string;
       
-      // Create a call data object with the phone number and transcript
-      const callData = {
-        id: callSid,
-        phoneNumber: phoneNumber || '+919876543210',
-        startTime: new Date().toISOString(),
-        status: 'completed',
-        transcript: `AI: Welcome to our restaurant! How can I help you today?\nCustomer: ${orderText || "I'd like to order butter chicken and garlic naan"}\nAI: Your order has been confirmed!`,
-        endTime: new Date().toISOString(), // Already completed
-        orderData: {
-          text: orderText || "I'd like to order butter chicken and garlic naan"
+      // If an existing call ID is provided, use that call
+      if (callId) {
+        console.log(`Looking for existing call with ID: ${callId}`);
+        // Get the call from telephony service
+        const calls = telephonyService.getCalls();
+        callData = calls.find(c => c.id === callId);
+        
+        if (!callData) {
+          return res.status(404).json({
+            success: false,
+            message: "Call not found",
+            error: `No call found with ID ${callId}`
+          });
         }
-      };
+        
+        callSid = callId;
+        console.log(`Found existing call: ${callSid}`);
+      } else {
+        // Create a simulated call with the specified order text
+        callSid = 'SIM-IMMEDIATE-' + Date.now().toString();
+        
+        // Create a call data object with the phone number and transcript
+        callData = {
+          id: callSid,
+          phoneNumber: phoneNumber || '+919876543210',
+          startTime: new Date().toISOString(),
+          status: 'completed',
+          transcript: `AI: Welcome to our restaurant! How can I help you today?\nCustomer: ${orderText || "I'd like to order butter chicken and garlic naan"}\nAI: Your order has been confirmed!`,
+          endTime: new Date().toISOString(), // Already completed
+          orderData: {
+            orderText: orderText || "I'd like to order butter chicken and garlic naan"
+          }
+        };
+        
+        console.log(`Created new simulated call: ${callSid}`);
+      }
       
       console.log(`Creating immediate order from call ${callSid} with text: ${orderText || "default order text"}`);
       
-      // Simplified direct order creation instead of using AI service
-      // Create order items based on a simple text parsing
-      const menuItems = [
+      // Get all menu items from database for better matching
+      const dbMenuItems = await storage.getMenuItems();
+      
+      // Use menu items from database if available, fallback to hardcoded demo items
+      const menuItems = dbMenuItems.length > 0 ? dbMenuItems : [
         { id: 1, name: "Butter Chicken", price: 350 },
         { id: 2, name: "Garlic Naan", price: 60 },
         { id: 3, name: "Paneer Tikka", price: 300 },
@@ -1860,19 +1886,30 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         { id: 5, name: "Dal Makhani", price: 220 }
       ];
       
+      // Use text from orderData if available, otherwise use provided orderText
+      const processText = callData.orderData?.orderText || orderText || "butter chicken and garlic naan";
+      console.log(`Processing order text: "${processText}"`);
+      
       // Basic text matching for demo purposes
       const orderItems = [];
-      const orderTextLower = (orderText || "butter chicken and garlic naan").toLowerCase();
+      const orderTextLower = processText.toLowerCase();
       
       for (const item of menuItems) {
-        if (orderTextLower.includes(item.name.toLowerCase())) {
-          const quantity = Math.floor(Math.random() * 3) + 1; // Random quantity 1-3
+        // Check if item name appears in order text
+        if (orderTextLower.includes((item.name || '').toLowerCase())) {
+          // Try to extract quantity with regex
+          const quantityRegex = new RegExp(`(\\d+)\\s+${item.name}`, 'i');
+          const match = orderTextLower.match(quantityRegex);
+          const quantity = match ? parseInt(match[1]) : 1;
+          
           orderItems.push({
             menuItemId: item.id,
             name: item.name,
             quantity: quantity,
             price: item.price
           });
+          
+          console.log(`Added item to order: ${item.name} x${quantity}`);
         }
       }
       
@@ -1914,7 +1951,26 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         
         console.log("Order created successfully:", order);
         
-        // We don't need to save call history since it's handled by telephony service
+        // Update the call with the order ID
+        if (!callData.orderId) {
+          // Update the call in telephony service
+          const activeCalls = telephonyService.getActiveCalls();
+          const activeCall = activeCalls.find(c => c.id === callSid);
+          if (activeCall) {
+            activeCall.orderId = order.id;
+            console.log(`Updated active call ${callSid} with order ID ${order.id}`);
+          }
+          
+          // Update the call in call history
+          const calls = telephonyService.getCalls();
+          const historyCall = calls.find(c => c.id === callSid);
+          if (historyCall) {
+            historyCall.orderId = order.id;
+            console.log(`Updated call history for ${callSid} with order ID ${order.id}`);
+          } else {
+            console.log(`Call ${callSid} not found in call history`);
+          }
+        }
         
         // Create activity for the order
         await storage.createActivity({
@@ -1924,9 +1980,15 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
           entityType: "order"
         });
         
+        // Broadcast the new order to all connected clients
+        broadcastNewOrder({
+          ...order,
+          items: orderItems
+        });
+        
         res.json({
           success: true,
-          message: "Immediate order created successfully from simulated call",
+          message: "Order created successfully from phone call",
           callData,
           order,
           orderItems

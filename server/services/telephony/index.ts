@@ -730,24 +730,23 @@ export async function createOrderFromCall(call: CallData) {
       preferredLanguage: language
     };
     
-    // Call the AI order processing endpoint
-    const fullUrl = 'http://localhost:5000/api/ai/create-order';
-    console.log(`Sending order request to ${fullUrl}`);
+    // Store orderData in the call object for use in direct order creation
+    call.orderData = orderData;
     
-    const response = await fetch(fullUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(orderData)
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to create order (${response.status}): ${errorText}`);
+    // Save to history
+    const historyCall = callHistory.find(c => c.id === call.id);
+    if (historyCall) {
+      historyCall.orderData = orderData;
     }
     
-    const result = await response.json();
+    console.log('Order data prepared from call:', orderData);
+    
+    // Return order data - actual order will be created by the create-immediate-order endpoint
+    const result = { 
+      success: true, 
+      message: 'Order data prepared from call',
+      orderData
+    };
     console.log('Order creation successful:', result);
     
     // Update the call with the actual order info from the created order
