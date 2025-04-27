@@ -295,8 +295,12 @@ export async function processSpeech(req: Request, res: Response) {
   
   console.log(`Speech received from call ${callSid}: "${speechResult}"`);
   
-  // Detect language from the speech 
-  const detectedLanguage = 'english';  // For simplicity
+  // Detect language from the speech using our language detection function
+  const detectedLanguage = aiVoiceSettings.autoDetectLanguage && speechResult.trim().length > 0
+    ? detectLanguage(speechResult)
+    : aiVoiceSettings.defaultLanguage;
+  
+  console.log(`Detected language for call ${callSid}: ${detectedLanguage}`);
   
   // Store the order text and update transcript
   if (activeCalls[callSid]) {
@@ -324,34 +328,157 @@ export async function processSpeech(req: Request, res: Response) {
     if (historyCall) {
       historyCall.language = detectedLanguage;
       historyCall.transcript = activeCalls[callSid].transcript;
+      historyCall.orderData = activeCalls[callSid].orderData;
     }
   }
   
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
   
+  // Map languages to Twilio voice options
+  const voiceMap = {
+    english: 'Polly.Joanna',
+    hindi: 'Polly.Aditi', // Hindi voice
+    telugu: 'Polly.Aditi', // Use Hindi voice for Telugu as Twilio doesn't have Telugu
+    spanish: 'Polly.Lupe'  // Spanish voice
+  };
+  
+  // Map languages to Twilio language code for speech recognition
+  const languageCodeMap = {
+    english: 'en-US',
+    hindi: 'hi-IN',
+    telugu: 'te-IN',
+    spanish: 'es-ES'
+  };
+  
+  // Set voice based on detected language
+  const voiceOption = voiceMap[detectedLanguage] || 'Polly.Joanna';
+  const languageCode = languageCodeMap[detectedLanguage] || 'en-US';
+  
   try {
-    // Simplified confirmation message
-    twiml.say({ voice: 'Polly.Joanna' }, `I heard you'd like to order: ${speechResult}`);
-    twiml.say({ voice: 'Polly.Joanna' }, "Would you like to confirm this order?");
+    // Check if the speech is too short or unclear
+    const isShortOrUnclear = !speechResult || speechResult.trim().length < 5;
     
-    // Response gathering
-    const gather = twiml.gather({
-      input: 'dtmf speech',
-      speechTimeout: 'auto',
-      numDigits: 1,
-      action: '/api/telephony/confirm-order',
-      method: 'POST'
-    });
-    
-    gather.say({ voice: 'Polly.Joanna' }, 'Please say yes or press 1 to confirm your order, or say no or press 2 to try again.');
-    
-    // Default if no input received
-    twiml.say({ voice: 'Polly.Joanna' }, "I didn't receive your response. Please call again later. Goodbye!");
-    twiml.hangup();
+    if (isShortOrUnclear) {
+      // Responses for when the speech is too short or unclear
+      const askForMoreMessages = {
+        english: "I didn't catch that clearly. Please tell me what you would like to order.",
+        hindi: "मैं स्पष्ट रूप से नहीं समझ पाया। कृपया मुझे बताएं कि आप क्या ऑर्डर करना चाहते हैं।",
+        telugu: "నాకు అది స్పష్టంగా అర్థం కాలేదు. దయచేసి మీరు ఏమి ఆర్డర్ చేయాలనుకుంటున్నారో నాకు చెప్పండి.",
+        spanish: "No entendí eso claramente. Por favor, dígame qué le gustaría ordenar."
+      };
+      
+      twiml.say({ voice: voiceOption }, askForMoreMessages[detectedLanguage]);
+      
+      // Add a longer pause to give customer time to think
+      twiml.pause({ length: 2 });
+      
+      // Gather the response again
+      const gather = twiml.gather({
+        input: 'speech',
+        speechTimeout: 'auto',
+        speechModel: 'phone_call',
+        action: '/api/telephony/process-speech',
+        method: 'POST',
+        language: languageCode,
+        timeout: 10 // 10 seconds timeout
+      });
+      
+      // Help message for different languages
+      const helpMessages = {
+        english: "For example, you can say: I'd like to order butter chicken and two naan.",
+        hindi: "उदाहरण के लिए, आप कह सकते हैं: मैं बटर चिकन और दो नान ऑर्डर करना चाहता हूं।",
+        telugu: "ఉదాహరణకు, మీరు ఇలా చెప్పవచ్చు: నేను వెన్న చికెన్ మరియు రెండు నాన్ ఆర్డర్ చేయాలనుకుంటున్నాను.",
+        spanish: "Por ejemplo, puede decir: Me gustaría pedir pollo con mantequilla y dos naan."
+      };
+      
+      gather.say({ voice: voiceOption }, helpMessages[detectedLanguage]);
+      
+      // If no input is received after retry
+      const noInputMessages = {
+        english: "I didn't receive any response. Please call again later. Goodbye!",
+        hindi: "मुझे कोई जवाब नहीं मिला। कृपया बाद में फिर से कॉल करें। अलविदा!",
+        telugu: "నాకు ఎటువంటి ప్రతిస్పందన రాలేదు. దయచేసి తర్వాత మళ్లీ కాల్ చేయండి. వీడ్కోలు!",
+        spanish: "No recibí ninguna respuesta. Por favor llame más tarde. ¡Adiós!"
+      };
+      
+      twiml.say({ voice: voiceOption }, noInputMessages[detectedLanguage]);
+      twiml.hangup();
+    } else {
+      // Process the order and then ask for confirmation
+      
+      // First, let the customer know we're processing their order
+      const processingMessages = {
+        english: "Thank you. Let me process your order.",
+        hindi: "धन्यवाद। मुझे आपका ऑर्डर प्रोसेस करने दें।",
+        telugu: "ధన్యవాదాలు. నేను మీ ఆర్డర్‌ని ప్రాసెస్ చేయనివ్వండి.",
+        spanish: "Gracias. Permítame procesar su pedido."
+      };
+      
+      twiml.say({ voice: voiceOption }, processingMessages[detectedLanguage]);
+      
+      // Add a pause to simulate processing (and give customer time to think)
+      twiml.pause({ length: 3 });
+      
+      // Repeat back what we heard to confirm
+      const repeatMessages = {
+        english: `I heard you'd like to order: ${speechResult}`,
+        hindi: `मैंने सुना कि आप ऑर्डर करना चाहते हैं: ${speechResult}`,
+        telugu: `మీరు ఆర్డర్ చేయాలనుకుంటున్నారు అని నేను విన్నాను: ${speechResult}`,
+        spanish: `Entendí que quisiera ordenar: ${speechResult}`
+      };
+      
+      twiml.say({ voice: voiceOption }, repeatMessages[detectedLanguage]);
+      
+      // Add another pause for the customer to process what they heard
+      twiml.pause({ length: 1 });
+      
+      // For order confirmation messages
+      const confirmationMessages = {
+        english: "Would you like to confirm this order? Please say yes or no.",
+        hindi: "क्या आप इस ऑर्डर की पुष्टि करना चाहते हैं? कृपया हां या नहीं कहें।",
+        telugu: "మీరు ఈ ఆర్డర్‌ని నిర్ధారించాలనుకుంటున్నారా? దయచేసి అవును లేదా కాదు అని చెప్పండి.",
+        spanish: "¿Le gustaría confirmar este pedido? Por favor diga sí o no."
+      };
+      
+      twiml.say({ voice: voiceOption }, confirmationMessages[detectedLanguage]);
+      
+      // Gather response with support for both speech and DTMF
+      const gather = twiml.gather({
+        input: 'dtmf speech',
+        speechTimeout: 'auto',
+        speechModel: 'phone_call',
+        numDigits: 1,
+        action: '/api/telephony/confirm-order',
+        method: 'POST',
+        language: languageCode,
+        timeout: 8 // 8 seconds timeout
+      });
+      
+      // Add clear instructions
+      const instructionMessages = {
+        english: 'Please say yes or press 1 to confirm your order, or say no or press 2 to try again.',
+        hindi: 'अपने ऑर्डर की पुष्टि करने के लिए कृपया हां कहें या 1 दबाएं, या फिर से प्रयास करने के लिए नहीं कहें या 2 दबाएं।',
+        telugu: 'మీ ఆర్డర్‌ని నిర్ధారించడానికి దయచేసి అవును అని చెప్పండి లేదా 1 నొక్కండి, లేదా మళ్లీ ప్రయత్నించడానికి లేదు అని చెప్పండి లేదా 2 నొక్కండి.',
+        spanish: 'Por favor diga sí o presione 1 para confirmar su pedido, o diga no o presione 2 para intentarlo de nuevo.'
+      };
+      
+      gather.say({ voice: voiceOption }, instructionMessages[detectedLanguage]);
+      
+      // If no input is received
+      const noInputMessages = {
+        english: "I didn't receive your response. Please call again later. Goodbye!",
+        hindi: "मुझे आपका जवाब नहीं मिला। कृपया बाद में फिर से कॉल करें। अलविदा!",
+        telugu: "నాకు మీ ప్రతిస్పందన అందలేదు. దయచేసి తర్వాత మళ్లీ కాల్ చేయండి. వీడ్కోలు!",
+        spanish: "No recibí su respuesta. Por favor llame más tarde. ¡Adiós!"
+      };
+      
+      twiml.say({ voice: voiceOption }, noInputMessages[detectedLanguage]);
+      twiml.hangup();
+    }
   } catch (error) {
     console.error('Error processing speech:', error);
-    twiml.say({ voice: 'Polly.Joanna' }, "I'm sorry, I had trouble processing your order. Please try again later.");
+    twiml.say({ voice: voiceOption }, "I'm sorry, I had trouble processing your order. Please try again later.");
     twiml.hangup();
   }
   
@@ -359,6 +486,12 @@ export async function processSpeech(req: Request, res: Response) {
   if (activeCalls[callSid]) {
     const aiResponse = twiml.toString().replace(/<[^>]*>/g, '');
     activeCalls[callSid].transcript += `AI: ${aiResponse}\n`;
+    
+    // Also update in call history
+    const historyCall = callHistory.find(call => call.id === callSid);
+    if (historyCall) {
+      historyCall.transcript = activeCalls[callSid].transcript;
+    }
   }
   
   res.type('text/xml');
