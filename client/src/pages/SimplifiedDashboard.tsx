@@ -20,7 +20,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CircleCheck, ChefHat, Utensils, ClipboardList, ClipboardCheck, Timer, Phone, Smartphone, Search, Globe, User, UserPlus, ReceiptText, CreditCard, PanelLeft, PanelRight, Mail, X, CheckSquare, ChevronsUpDown, Receipt, Plus, BarChart3 } from "lucide-react";
 import { SiZomato, SiSwiggy } from "react-icons/si";
-import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { apiRequest } from "@/lib/queryClient";
 import { BulkOrderCreate } from "@/components/orders/BulkOrderCreate";
 import { cn } from "@/lib/utils";
@@ -80,14 +79,7 @@ interface NewOrderFormData {
   }[];
 }
 
-// Creating a wrapper component to handle conditional rendering while avoiding hook order issues
-function DashboardStatsWrapper({ isVisible }: { isVisible: boolean }) {
-  return (
-    <div style={{ display: isVisible ? "block" : "none" }}>
-      <DashboardStats />
-    </div>
-  );
-}
+// This component has been replaced by a direct link to the separate dashboard stats page
 
 // Utility function to format currency
 const formatCurrency = (amount: number) => {
@@ -533,12 +525,7 @@ export default function SimplifiedDashboard() {
   // Track active tab for better control over stat refreshes
   const [activeTab, setActiveTab] = useState("board");
 
-  // Refresh dashboard stats when switching to stats tab
-  useEffect(() => {
-    if (activeTab === "stats") {
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
-    }
-  }, [activeTab, queryClient]);
+  // Simple tab tracking - no side effects that might cause hook issues
 
   return (
     <div className="container mx-auto px-4 py-6">
