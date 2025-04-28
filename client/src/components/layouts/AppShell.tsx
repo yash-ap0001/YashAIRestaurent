@@ -136,12 +136,12 @@ export function AppShell({ children }: AppShellProps) {
     <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-white text-[#111827]">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-[#F3F4F6] border-r border-[#E5E7EB] h-full transition-all duration-300",
+        "hidden md:flex flex-col bg-[#EEF2FF] border-r border-[#E5E7EB] h-full transition-all duration-300",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
       )}>
         <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB]">
           <div className={cn("flex items-center", sidebarCollapsed ? "justify-center w-full" : "")}>
-            <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
+            <div className="h-8 w-8 rounded-md bg-[#4F46E5] flex items-center justify-center text-white">
               <HandPlatter size={20} />
             </div>
             {!sidebarCollapsed && <h1 className="text-lg font-semibold text-[#111827] ml-3">YashHotelBot</h1>}
@@ -318,7 +318,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 border-b border-[#E5E7EB] bg-[#F9FAFB] flex items-center justify-between px-4 sm:px-6">
+        <header className="h-16 border-b border-[#E5E7EB] bg-[#F5F7FF] flex items-center justify-between px-4 sm:px-6">
           <div className="flex items-center md:hidden">
             <Button 
               variant="ghost" 
@@ -340,7 +340,7 @@ export function AppShell({ children }: AppShellProps) {
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5 text-[#6B7280]" />
-                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-purple-500"></span>
+                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-[#4F46E5]"></span>
                 <span className="sr-only">Notifications</span>
               </Button>
             </div>
@@ -371,9 +371,9 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Mobile menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0 bg-[#F3F4F6] border-r border-[#E5E7EB]">
+        <SheetContent side="left" className="w-64 p-0 bg-[#EEF2FF] border-r border-[#E5E7EB]">
           <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB]">
-            <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
+            <div className="h-8 w-8 rounded-md bg-[#4F46E5] flex items-center justify-center text-white">
               <HandPlatter size={20} />
             </div>
             <h1 className="text-lg font-semibold text-[#111827]">YashHotelBot</h1>
@@ -474,7 +474,7 @@ export function AppShell({ children }: AppShellProps) {
                 setMobileMenuOpen(false);
                 setChatVisible(true);
               }}
-              className="w-full bg-[#4B5563] hover:bg-[#374151] text-white"
+              className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Chat with AI Assistant
