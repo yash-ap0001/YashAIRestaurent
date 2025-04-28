@@ -7,6 +7,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogOverlay,
+  DialogPortal,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,7 +191,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
       onOpenChange={onClose}
     >
       <DialogContent 
-        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-zinc-900/90 border border-purple-600/30 shadow-xl p-0 backdrop-blur-sm">
+        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-zinc-900/90 border border-purple-600/30 shadow-xl p-0">
         <DialogHeader className="relative p-4 bg-gradient-to-r from-purple-900/60 to-purple-800/60 rounded-t-lg border-b border-purple-600/30">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
