@@ -4,45 +4,61 @@
 
 /* Theme colors for light and dark mode */
 :root {
-  /* New color scheme based on the provided image */
-  --navy: #3A40E7; /* Dark navy blue color */
-  --blue: #C091F4; /* Bright blue color */
-  --black: #261451; /* Pure black color */
-  --white: #F1F5F3; /* Off-white color */
+  /* Fresh & elegant color scheme */
+  --primary: #3366FF; /* Vibrant blue for primary elements */
+  --primary-dark: #2954CC; /* Darker blue for hover states */
+  --primary-light: #E6EDFF; /* Light blue for backgrounds */
   
-  /* Theme variables using the color scheme */
-  --background: 0 0% 100%; /* White background */
-  --foreground: 222.2 84% 4.9%; /* Dark text */
+  /* Status colors with better contrast and harmony */
+  --pending: #FF9500; /* Warm amber/orange for pending */
+  --preparing: #3366FF; /* Primary blue for preparing */
+  --ready: #30C165; /* Fresh green for ready */
+  --completed: #9D4EDD; /* Elegant purple for completed */
+  --billed: #F9345E; /* Vibrant red for billed */
+  
+  /* Neutral palette */
+  --white: #FFFFFF; /* Pure white */
+  --gray-50: #F9FAFB; /* Very light gray - background */
+  --gray-100: #F3F4F6; /* Light gray - card background */
+  --gray-200: #E5E7EB; /* Border color */
+  --gray-300: #D1D5DB; /* Subtle elements */
+  --gray-500: #6B7280; /* Muted text */
+  --gray-700: #374151; /* Secondary text */
+  --gray-900: #111827; /* Primary text */
+  
+  /* Theme variables using the fresh color scheme */
+  --background: 210 20% 98%; /* Light gray background */
+  --foreground: 220 20% 10%; /* Dark text */
   --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
+  --card-foreground: 220 20% 10%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 238 79% 57%; /* #3A40E7 Navy blue */
-  --primary-foreground: 210 40% 98%;
-  --secondary: 242 82% 76%; /* #C091F4 Blue */
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 238 79% 57%; /* Navy accent */
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 238 79% 57%;
+  --popover-foreground: 220 20% 10%;
+  --primary: 223 100% 60%; /* Vibrant blue primary color */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 223 80% 95%;
+  --secondary-foreground: 223 100% 30%;
+  --muted: 210 20% 96%;
+  --muted-foreground: 220 10% 40%;
+  --accent: 223 100% 95%;
+  --accent-foreground: 223 100% 40%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 13% 90%;
+  --input: 220 13% 90%;
+  --ring: 223 100% 60%;
   --radius: 0.5rem;
   
   /* Column color definitions for light mode */
-  --pending-bg: 30 100% 54%; /* Orange */
-  --preparing-bg: 217 91% 60%; /* Blue */
-  --ready-bg: 152 60% 40%; /* Green */
-  --completed-bg: 270 95% 65%; /* Purple */
-  --billed-bg: 0 84% 60%; /* Red */
+  --pending-bg: 32 100% 50%; /* #FF9500 Amber/Orange */
+  --preparing-bg: 223 100% 60%; /* #3366FF Blue */
+  --ready-bg: 145 65% 47%; /* #30C165 Green */
+  --completed-bg: 270 75% 59%; /* #9D4EDD Purple */
+  --billed-bg: 345 95% 59%; /* #F9345E Red */
   
-  /* New specific layout colors from the image */
-  --navbar-bg: 238 79% 57%; /* #3A40E7 - Navy blue for navbar */
-  --sidebar-bg: 242 82% 76%; /* #C091F4 - Blue for sidebar */
-  --main-bg: 0 0% 100%; /* White background */
+  /* Specific layout colors */
+  --navbar-bg: 223 100% 60%; /* #3366FF Blue for navbar */
+  --sidebar-bg: 220 13% 95%; /* #F1F2F4 Light gray for sidebar */
+  --main-bg: 210 20% 98%; /* #F9FAFB Light gray for main content */
 }
 
 .dark {
@@ -589,67 +605,176 @@ div[data-state="unchecked"] {
     @apply font-bold text-white;
   }
   
-  /* Sidebar styling to match the new color scheme from the image */
+  /* Sidebar styling with a fresh new look */
   .main-nav {
-    @apply bg-[#C091F4] border-r border-[#A064EF] text-white;
+    @apply bg-[#F1F2F4] border-r border-[#E5E7EB] text-[#374151];
   }
 
   .main-nav a {
-    @apply text-white hover:bg-[#A064EF] rounded-md px-3 py-2 flex items-center gap-2;
+    @apply text-[#6B7280] hover:bg-white hover:text-[#3366FF] rounded-md px-3 py-2 mb-1 flex items-center gap-2 transition-colors;
   }
 
   .main-nav a.active {
-    @apply bg-[#3A40E7] text-white font-medium;
+    @apply bg-[#3366FF] text-white font-medium;
   }
   
-  /* Navbar (top) styling to match the new color scheme */
+  /* Navbar (top) styling */
   .navbar, 
   header, 
   .header-container,
   [role="banner"] {
-    @apply bg-[#3A40E7] text-white border-b border-[#2930D8];
+    @apply bg-[#3366FF] text-white shadow-sm z-10 relative;
   }
   
   /* Main content area */
   .main-content,
   main,
   [role="main"] {
-    @apply bg-[#F1F5F3];
+    @apply bg-[#F9FAFB];
+  }
+  
+  /* Page title styling */
+  .page-title {
+    @apply text-xl font-semibold text-[#111827];
+  }
+  
+  /* Tab styling */
+  [role="tab"] {
+    @apply text-[#6B7280] hover:text-[#3366FF] transition-colors px-3 py-2;
+  }
+  
+  [role="tab"][data-state="active"] {
+    @apply text-[#3366FF] font-medium border-b-2 border-[#3366FF];
+  }
+  
+  /* Order status headers */
+  .column-header {
+    @apply font-medium text-[#374151] flex items-center mb-2;
+  }
+  
+  /* Status badges for column headers */
+  .status-count {
+    @apply ml-2 bg-white text-[#374151] px-2 py-0.5 rounded-full text-xs font-medium;
   }
 
-  /* Order card styling based on the new color scheme */
+  /* Order card styling with fresh new colors */
   .pending-card {
-    @apply bg-[#3A40E7] shadow-md text-white;
+    @apply bg-[#FF9500] rounded-lg shadow-sm text-white;
   }
 
   .preparing-card {
-    @apply bg-[#C091F4] shadow-md text-white;
+    @apply bg-[#3366FF] rounded-lg shadow-sm text-white;
   }
 
   .ready-card {
-    @apply bg-[#261451] shadow-md text-white;
+    @apply bg-[#30C165] rounded-lg shadow-sm text-white;
   }
 
   .completed-card {
-    @apply bg-[#3A40E7] shadow-md text-white;
+    @apply bg-[#9D4EDD] rounded-lg shadow-sm text-white;
   }
 
   .billed-card {
-    @apply bg-[#C091F4] shadow-md text-white;
+    @apply bg-[#F9345E] rounded-lg shadow-sm text-white;
+  }
+  
+  /* Button styling with improved aesthetics */
+  .button, button[type="submit"], button[type="button"] {
+    @apply rounded-md font-medium transition-colors shadow-sm;
+  }
+  
+  /* Primary buttons (blue) */
+  .button-primary,
+  button[class*="bg-primary"],
+  button[class*="bg-blue-600"],
+  button[class*="bg-purple-600"] {
+    @apply bg-[#3366FF] text-white hover:bg-[#2954CC];
+  }
+  
+  /* Create order button (purple) */
+  button[class*="create-order"],
+  button[class*="bg-purple-700"] {
+    @apply bg-[#9D4EDD] text-white hover:bg-[#8338EC];
+  }
+  
+  /* Bulk create button (blue) */
+  button[class*="bulk-create"],
+  button[class*="bg-blue-500"] {
+    @apply bg-[#3366FF] text-white hover:bg-[#2954CC];
+  }
+  
+  /* Select orders button (gray/slate) */
+  button[class*="select-orders"],
+  button[class*="bg-slate-500"] {
+    @apply bg-[#6B7280] text-white hover:bg-[#4B5563];
+  }
+  
+  /* Status column headers */
+  .pending-header {
+    @apply text-[#FF9500] font-medium;
+  }
+  
+  .preparing-header {
+    @apply text-[#3366FF] font-medium;
+  }
+  
+  .ready-header {
+    @apply text-[#30C165] font-medium;
+  }
+  
+  .completed-header {
+    @apply text-[#9D4EDD] font-medium;
+  }
+  
+  .billed-header {
+    @apply text-[#F9345E] font-medium;
+  }
+  
+  /* Status badge styling */
+  .status-badge, 
+  .status-pill,
+  .status-tag,
+  span[class*="status"] {
+    @apply px-2 py-0.5 rounded-full text-xs font-medium inline-flex items-center;
   }
   
   /* Card styling for dashboards and other components */
   .stats-card, 
   .dashboard-card {
-    @apply bg-white shadow-md border border-[#F1F5F3];
+    @apply bg-white shadow-sm rounded-lg border border-[#E2E8F0];
   }
   
-  .button-primary {
-    @apply bg-[#3A40E7] text-white hover:bg-[#2930D8];
+  /* Search input styles */
+  input[type="search"], 
+  [placeholder*="Search"] {
+    @apply bg-white border border-[#E5E7EB] rounded-lg shadow-sm focus:ring-2 focus:ring-[#3366FF] focus:border-[#3366FF] text-[#111827] placeholder:text-[#6B7280];
   }
   
-  .button-secondary {
-    @apply bg-[#C091F4] text-white hover:bg-[#A064EF];
+  /* Order columns styling */
+  .order-columns-container {
+    @apply grid gap-4;
+  }
+  
+  .order-column {
+    @apply bg-white rounded-lg shadow-sm p-4 border border-[#E5E7EB];
+  }
+  
+  /* Header actions area */
+  .header-actions {
+    @apply flex items-center gap-2 my-4;
+  }
+  
+  /* Custom scrollbar styling for all columns */
+  ::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[#D1D5DB] rounded-full hover:bg-[#9CA3AF];
   }
   
   /* Apply these styles to all text elements in cards, regardless of class names */
