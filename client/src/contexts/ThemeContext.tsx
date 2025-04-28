@@ -5,6 +5,8 @@ type Theme = "light" | "dark" | "system";
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  currentMode: "light" | "dark";
+  getThemeStyles: (component: "header" | "sidebar") => React.CSSProperties;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -15,6 +17,33 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const storedTheme = localStorage.getItem("theme") as Theme;
     return storedTheme || "system";
   });
+  
+  const [currentMode, setCurrentMode] = useState<"light" | "dark">(() => {
+    // Initial calculation of dark/light mode
+    if (typeof window === "undefined") return "light"; // SSR fallback
+    
+    return theme === "dark" || 
+      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ? "dark" 
+      : "light";
+  });
+
+  // Get appropriate styles based on current theme
+  const getThemeStyles = (component: "header" | "sidebar"): React.CSSProperties => {
+    if (component === "header") {
+      return {
+        background: currentMode === "dark" ? 'var(--header-bg-dark)' : 'var(--header-bg)',
+        borderColor: 'var(--border-color)',
+        boxShadow: 'var(--header-shadow)'
+      };
+    } else {
+      return {
+        background: currentMode === "dark" ? 'var(--sidebar-bg-dark)' : 'var(--sidebar-bg)',
+        borderColor: 'var(--border-color)',
+        boxShadow: 'var(--sidebar-shadow)'
+      };
+    }
+  };
 
   // Apply theme changes
   useEffect(() => {
@@ -25,6 +54,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     root.classList.remove("light", "dark");
     root.classList.add(isDark ? "dark" : "light");
+    
+    // Update current mode
+    setCurrentMode(isDark ? "dark" : "light");
     
     // Save theme to localStorage
     localStorage.setItem("theme", theme);
@@ -42,6 +74,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       
       root.classList.remove("light", "dark");
       root.classList.add(isDark ? "dark" : "light");
+      
+      // Update current mode when system preference changes
+      setCurrentMode(isDark ? "dark" : "light");
     };
     
     mediaQuery.addEventListener("change", handleChange);
@@ -49,7 +84,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, currentMode, getThemeStyles }}>
       {children}
     </ThemeContext.Provider>
   );

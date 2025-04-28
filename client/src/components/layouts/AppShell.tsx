@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useTheme } from "@/contexts/ThemeContext";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
@@ -83,6 +84,7 @@ export function AppShell({ children }: AppShellProps) {
   const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user, currentRole, setCurrentRole } = useAuth();
+  const { currentMode, getThemeStyles } = useTheme();
 
   const currentPage = mainNavItems.find(item => item.href === location) || 
                     managementNavItems.find(item => item.href === location) ||
@@ -133,16 +135,12 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="app-container flex min-h-[600px] h-full w-full overflow-hidden bg-white text-[#111827]">
+    <div className="app-container flex min-h-[600px] h-full w-full overflow-hidden bg-white dark:bg-gray-900 text-[#111827] dark:text-white">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
         "hidden md:flex flex-col border-r h-full transition-all duration-300 dark:border-gray-700",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
-      )} style={{ 
-        background: document.documentElement.classList.contains('dark') ? 'var(--sidebar-bg-dark)' : 'var(--sidebar-bg)', 
-        borderColor: 'var(--border-color)',
-        boxShadow: 'var(--sidebar-shadow)'
-      }}>
+      )} style={getThemeStyles("sidebar")}>
         <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB]">
           <div className={cn("flex items-center", sidebarCollapsed ? "justify-center w-full" : "")}>
             <div className="h-8 w-8 rounded-md flex items-center justify-center text-white app-logo">
@@ -322,11 +320,8 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 border-b flex items-center justify-between px-4 sm:px-6 dark:border-gray-700" style={{ 
-          background: document.documentElement.classList.contains('dark') ? 'var(--header-bg-dark)' : 'var(--header-bg)', 
-          borderColor: 'var(--border-color)',
-          boxShadow: 'var(--header-shadow)'
-        }}>
+        <header className="h-16 border-b flex items-center justify-between px-4 sm:px-6 dark:border-gray-700" 
+          style={getThemeStyles("header")}>
           <div className="flex items-center md:hidden">
             <Button 
               variant="ghost" 
@@ -336,7 +331,7 @@ export function AppShell({ children }: AppShellProps) {
               <Menu className="h-5 w-5 text-[#111827]" />
               <span className="sr-only">Open menu</span>
             </Button>
-            <h1 className="ml-3 text-lg font-semibold text-[#111827]">{currentPage.label}</h1>
+            <h1 className="ml-3 text-lg font-semibold text-[#111827] dark:text-white">{currentPage.label}</h1>
           </div>
           
           <div className="hidden md:block">
@@ -379,11 +374,8 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Mobile menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0 border-r" style={{ 
-          background: 'var(--sidebar-bg)', 
-          borderColor: 'var(--border-color)',
-          boxShadow: 'var(--sidebar-shadow)'
-        }}>
+        <SheetContent side="left" className="w-64 p-0 border-r dark:border-gray-700" 
+          style={getThemeStyles("sidebar")}>
           <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB]">
             <div className="h-8 w-8 rounded-md flex items-center justify-center text-white app-logo">
               <HandPlatter size={20} className="nav-item-icon" />
