@@ -8,6 +8,7 @@ import {
   Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils,
   ChevronRight, PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
+import { NotificationSystem } from "@/components/notifications/NotificationSystem";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -345,12 +346,8 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <div className="flex items-center space-x-3">
-            {/* Notifications icon */}
-            <Button variant="ghost" size="icon" className="relative bg-transparent hover:bg-purple-800">
-              <Bell className="h-5 w-5 text-white" />
-              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-blue-500"></span>
-              <span className="sr-only">Notifications</span>
-            </Button>
+            {/* Notifications system */}
+            <NotificationSystem />
             
             {/* Theme toggle */}
             <div className="relative">
