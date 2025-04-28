@@ -52,6 +52,7 @@ const mainNavItems: NavItem[] = [
   { label: "WhatsApp", href: "/whatsapp", icon: <MessageCircle className="w-5 h-5" /> },
   { label: "Phone Orders", href: "/phone-orders", icon: <Phone className="w-5 h-5" /> },
   { label: "AI Call Center", href: "/ai-call-center", icon: <PhoneCall className="w-5 h-5" /> },
+  { label: "Restaurant Chatbot", href: "/chatbot", icon: <Utensils className="w-5 h-5" /> },
 ];
 
 const managementNavItems: NavItem[] = [
@@ -118,6 +119,7 @@ export function AppShell({ children }: AppShellProps) {
     "/test-ai-order": ["admin", "manager", "waiter"],
     "/live-tracking": ["admin", "manager", "kitchen", "waiter", "delivery", "customer"],
     "/track-order": ["admin", "manager", "kitchen", "waiter", "delivery", "customer"],
+    "/chatbot": ["admin", "manager", "waiter", "customer"],
     
     // Management routes
     "/inventory": ["admin", "manager", "kitchen"],
