@@ -4,7 +4,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
-  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils, Camera,
+  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils,
   ChevronRight, PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -132,23 +132,23 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="app-container flex min-h-screen h-screen w-full overflow-hidden bg-[#0f172a] text-white">
+    <div className="app-container flex min-h-screen h-screen w-full overflow-hidden bg-black text-white">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
-        "hidden md:flex flex-col border-r h-screen transition-all duration-300 dark:border-gray-700",
+        "hidden md:flex flex-col h-screen transition-all duration-300 bg-purple-700",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
-      )} style={getThemeStyles("sidebar")}>
-        <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB] dark:border-gray-700">
+      )}>
+        <div className="p-4 flex items-center justify-between border-b border-purple-800">
           <div className={cn("flex items-center", sidebarCollapsed ? "justify-center w-full" : "")}>
             <div className="h-8 w-8 rounded-md flex items-center justify-center text-white app-logo">
               <HandPlatter size={20} className="nav-item-icon" />
             </div>
-            {!sidebarCollapsed && <h1 className="text-lg font-semibold ml-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">YashHotelBot</h1>}
+            {!sidebarCollapsed && <h1 className="text-lg font-semibold ml-3 text-white">YashHotelBot</h1>}
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="p-1"
+            className="p-1 text-white hover:bg-purple-800"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           >
             {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
@@ -166,8 +166,8 @@ export function AppShell({ children }: AppShellProps) {
                     className={cn(
                       "flex justify-center items-center p-2 rounded-md",
                       location === item.href 
-                        ? "text-[#111827] font-medium underline" 
-                        : "text-[#6B7280] hover:text-[#111827]"
+                        ? "text-white font-medium bg-purple-800" 
+                        : "text-white hover:bg-purple-800"
                     )}
                     title={item.label}
                   >
@@ -184,8 +184,8 @@ export function AppShell({ children }: AppShellProps) {
                       className={cn(
                         "flex justify-center items-center p-2 rounded-md",
                         location === item.href 
-                          ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 font-medium" 
-                          : "text-neutral-400 hover:bg-neutral-800"
+                          ? "text-white font-medium bg-purple-800" 
+                          : "text-white hover:bg-purple-800"
                       )}
                       title={item.label}
                     >
@@ -319,17 +319,17 @@ export function AppShell({ children }: AppShellProps) {
       
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden h-screen">
-        {/* Top Bar - Simplified to match screenshot */}
-        <header className="h-16 flex items-center justify-between px-4 sm:px-6 dark:bg-[#0f172a] bg-white border-b border-gray-200 dark:border-none">
+        {/* Top Bar - Black header */}
+        <header className="h-16 flex items-center justify-between px-4 sm:px-6 bg-black text-white border-b border-gray-800">
           <div className="flex items-center gap-3">
             <div className="flex items-center md:hidden mr-2">
               <Button 
                 variant="ghost" 
                 size="icon"
                 onClick={() => setMobileMenuOpen(true)}
-                className="bg-transparent dark:hover:bg-blue-900/20 hover:bg-gray-100"
+                className="bg-transparent hover:bg-purple-800"
               >
-                <Menu className="h-5 w-5 dark:text-white text-gray-800" />
+                <Menu className="h-5 w-5 text-white" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </div>
@@ -338,13 +338,13 @@ export function AppShell({ children }: AppShellProps) {
               <HandPlatter size={20} className="nav-item-icon" />
             </div>
             
-            <h1 className="text-lg font-semibold dark:text-white text-gray-800">{currentPage.label}</h1>
+            <h1 className="text-lg font-semibold text-white">{currentPage.label}</h1>
           </div>
           
           <div className="flex items-center space-x-3">
             {/* Notifications icon */}
-            <Button variant="ghost" size="icon" className="relative bg-transparent dark:hover:bg-blue-900/20 hover:bg-gray-100">
-              <Bell className="h-5 w-5 dark:text-white text-gray-800" />
+            <Button variant="ghost" size="icon" className="relative bg-transparent hover:bg-purple-800">
+              <Bell className="h-5 w-5 text-white" />
               <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-blue-500"></span>
               <span className="sr-only">Notifications</span>
             </Button>
@@ -364,8 +364,8 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </header>
         
-        {/* Page Content - Dark navy blue background from screenshot (dark mode) and white for light mode */}
-        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 dark:bg-[#111827] bg-gray-50 min-h-0">
+        {/* Page Content - Black background */}
+        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-black min-h-0">
           {children}
         </div>
       </main>
