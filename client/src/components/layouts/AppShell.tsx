@@ -187,7 +187,7 @@ export function AppShell({ children }: AppShellProps) {
                       className={cn(
                         "flex justify-center items-center p-2 rounded-md",
                         location === item.href 
-                          ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                          ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 font-medium" 
                           : "text-neutral-400 hover:bg-neutral-800"
                       )}
                       title={item.label}
@@ -262,8 +262,8 @@ export function AppShell({ children }: AppShellProps) {
                             className={cn(
                               "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                               location === item.href 
-                                ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                                : "text-neutral-400 hover:bg-neutral-800"
+                                ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 font-medium" 
+                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
                             )}
                           >
                             <span className="mr-3 text-current">{item.icon}</span>
@@ -290,8 +290,8 @@ export function AppShell({ children }: AppShellProps) {
                             className={cn(
                               "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                               location === item.href 
-                                ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                                : "text-neutral-400 hover:bg-neutral-800"
+                                ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 font-medium" 
+                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
                             )}
                           >
                             <span className="mr-3 text-current">{item.icon}</span>
