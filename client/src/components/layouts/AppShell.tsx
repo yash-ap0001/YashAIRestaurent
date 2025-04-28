@@ -141,12 +141,12 @@ export function AppShell({ children }: AppShellProps) {
         "hidden md:flex flex-col border-r h-full transition-all duration-300 dark:border-gray-700",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
       )} style={getThemeStyles("sidebar")}>
-        <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB]">
+        <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB] dark:border-gray-700">
           <div className={cn("flex items-center", sidebarCollapsed ? "justify-center w-full" : "")}>
             <div className="h-8 w-8 rounded-md flex items-center justify-center text-white app-logo">
               <HandPlatter size={20} className="nav-item-icon" />
             </div>
-            {!sidebarCollapsed && <h1 className="text-lg font-semibold text-[#111827] ml-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">YashHotelBot</h1>}
+            {!sidebarCollapsed && <h1 className="text-lg font-semibold ml-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">YashHotelBot</h1>}
           </div>
           <Button 
             variant="ghost" 
@@ -308,8 +308,8 @@ export function AppShell({ children }: AppShellProps) {
         )}
         
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-[#E5E7EB]">
-            <div className="text-xs text-[#6B7280] text-center">
+          <div className="p-4 border-t border-[#E5E7EB] dark:border-gray-700">
+            <div className="text-xs text-[#6B7280] dark:text-gray-400 text-center">
               <p>YashHotelBot v1.2.0</p>
               <p className="mt-1">© 2025 Yash Solutions</p>
             </div>
@@ -328,21 +328,21 @@ export function AppShell({ children }: AppShellProps) {
               size="icon"
               onClick={() => setMobileMenuOpen(true)}
             >
-              <Menu className="h-5 w-5 text-[#111827]" />
+              <Menu className="h-5 w-5 text-[#111827] dark:text-white" />
               <span className="sr-only">Open menu</span>
             </Button>
             <h1 className="ml-3 text-lg font-semibold text-[#111827] dark:text-white">{currentPage.label}</h1>
           </div>
           
           <div className="hidden md:block">
-            <h1 className="text-lg font-semibold text-[#111827]">{currentPage.label}</h1>
+            <h1 className="text-lg font-semibold text-[#111827] dark:text-white">{currentPage.label}</h1>
           </div>
           
           <div className="flex items-center space-x-4">
             
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5 text-[#6B7280]" />
+                <Bell className="h-5 w-5 text-[#6B7280] dark:text-gray-400" />
                 <span className="absolute top-0 right-0 h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--primary-color)' }}></span>
                 <span className="sr-only">Notifications</span>
               </Button>
@@ -376,7 +376,7 @@ export function AppShell({ children }: AppShellProps) {
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetContent side="left" className="w-64 p-0 border-r dark:border-gray-700" 
           style={getThemeStyles("sidebar")}>
-          <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB]">
+          <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB] dark:border-gray-700">
             <div className="h-8 w-8 rounded-md flex items-center justify-center text-white app-logo">
               <HandPlatter size={20} className="nav-item-icon" />
             </div>
@@ -472,7 +472,7 @@ export function AppShell({ children }: AppShellProps) {
             </Accordion>
           </nav>
           
-          <div className="p-4 border-t border-[#E5E7EB]">
+          <div className="p-4 border-t border-[#E5E7EB] dark:border-gray-700">
             <Button
               onClick={() => {
                 setMobileMenuOpen(false);
