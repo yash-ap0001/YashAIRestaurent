@@ -130,6 +130,7 @@ const getStatusColor = (status: string) => {
 };
 
 export default function SimplifiedDashboard() {
+  // Initialize all state variables first to maintain consistent hook order
   const [searchTerm, setSearchTerm] = useState("");
   const [orderSourceFilter, setOrderSourceFilter] = useState<string | null>(null);
   const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
@@ -139,6 +140,7 @@ export default function SimplifiedDashboard() {
   const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("board"); // Moved up to ensure consistent hook order
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { getColumnStyle } = useColumnColors();
@@ -523,10 +525,8 @@ export default function SimplifiedDashboard() {
     );
   }
 
-  // Track active tab for better control over stat refreshes
-  const [activeTab, setActiveTab] = useState("board");
-
   // Simple tab tracking - no side effects that might cause hook issues
+  // State has been moved to the top of the component to ensure consistent hook order
 
   return (
     <div className="container mx-auto px-4 py-6">
