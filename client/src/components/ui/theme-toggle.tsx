@@ -15,29 +15,33 @@ export function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="bg-background">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="bg-primary/10 hover:bg-primary/20 border-primary/30 rounded-full h-9 w-9 animate-pulse-subtle"
+        >
           {theme === "light" ? (
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 text-amber-500 transition-all dark:-rotate-90 dark:scale-0" />
+            <Sun className="h-5 w-5 rotate-0 scale-100 text-amber-500 transition-all hover:rotate-12" />
           ) : theme === "dark" ? (
-            <Moon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 text-blue-500 transition-all dark:rotate-0 dark:scale-100" />
+            <Moon className="h-5 w-5 rotate-0 scale-100 text-blue-500 transition-all hover:-rotate-12" />
           ) : (
-            <Monitor className="h-[1.2rem] w-[1.2rem] text-gray-500" />
+            <Monitor className="h-5 w-5 text-gray-500" />
           )}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="min-w-[150px]">
         <DropdownMenuItem onClick={() => setTheme("light")} className="flex items-center gap-2 cursor-pointer">
           <Sun className="h-4 w-4 text-amber-500" />
-          <span>Light</span>
+          <span>Light Mode</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("dark")} className="flex items-center gap-2 cursor-pointer">
           <Moon className="h-4 w-4 text-blue-500" />
-          <span>Dark</span>
+          <span>Dark Mode</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("system")} className="flex items-center gap-2 cursor-pointer">
           <Monitor className="h-4 w-4" />
-          <span>System</span>
+          <span>System Default</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
