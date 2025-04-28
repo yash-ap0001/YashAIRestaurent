@@ -24,8 +24,6 @@ import ExternalIntegration from "@/pages/ExternalIntegration";
 import VoiceAssistant from "@/pages/VoiceAssistant";
 import N8nIntegration from "@/pages/N8nIntegration";
 import DietPlan from "@/pages/DietPlan";
-import ARMenuPreview from "@/pages/ARMenuPreview";
-import ARMenuPage from "@/pages/ARMenuPage";
 import LoginPage from "@/pages/LoginPage";
 import CustomerRegistration from "@/pages/CustomerRegistration";
 import LoadingDemo from "@/pages/LoadingDemo";
