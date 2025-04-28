@@ -3,19 +3,24 @@
 @tailwind utilities;
 
 :root {
-  /* Enhanced color palette with gradients */
-  --header-bg: linear-gradient(to right, #F5F7FF, #EEF2FF);
-  --sidebar-bg: linear-gradient(to bottom, #EEF2FF, #E4E9FF);
-  --border-color: #E5E7EB;
+  /* Enhanced color palette with more vibrant gradients */
+  --header-bg: linear-gradient(to right, #F0F4FF, #EEF2FF, #E4E9FF);
+  --sidebar-bg: linear-gradient(135deg, #EEF2FF 0%, #E4E9FF 50%, #DDE3FF 100%);
+  --border-color: rgba(79, 70, 229, 0.15);
   --primary-color: #4F46E5;
   --primary-color-hover: #4338CA;
   --heading-text: #111827;
   --body-text: #6B7280;
   
-  /* Shadow variables for depth */
-  --header-shadow: 0 1px 3px rgba(79, 70, 229, 0.1);
-  --sidebar-shadow: 1px 0 5px rgba(79, 70, 229, 0.08);
-  --card-shadow: 0 2px 8px rgba(79, 70, 229, 0.12);
+  /* Enhanced shadow variables for more depth */
+  --header-shadow: 0 2px 6px rgba(79, 70, 229, 0.15);
+  --sidebar-shadow: 2px 0 8px rgba(79, 70, 229, 0.12);
+  --card-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+  
+  /* Additional styling variables */
+  --menu-item-hover: rgba(79, 70, 229, 0.08);
+  --menu-item-active-bg: linear-gradient(to right, rgba(79, 70, 229, 0.15), rgba(79, 70, 229, 0.05));
+  --logo-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
 }
 
 /* Custom primary button with CSS variables */
@@ -34,9 +39,32 @@
 /* Active navigation item styling */
 .nav-link-active {
   position: relative;
-  background: linear-gradient(to right, rgba(79, 70, 229, 0.1), rgba(79, 70, 229, 0.05));
+  background: var(--menu-item-active-bg);
   font-weight: 600 !important;
   border-left: 3px solid var(--primary-color);
+  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.08);
+  padding-left: calc(0.75rem - 3px) !important;
+}
+
+/* Enhance the navigation links on hover */
+a:hover .nav-item-icon {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+  color: var(--primary-color);
+}
+
+/* Logo styling */
+.app-logo {
+  background: var(--logo-gradient);
+  box-shadow: 0 3px 6px rgba(79, 70, 229, 0.25);
+  transition: all 0.3s ease;
+}
+.app-logo:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.35);
+}
+.app-logo svg {
+  filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.2));
 }
 
 /* Theme colors for light and dark mode */
