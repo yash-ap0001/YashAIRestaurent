@@ -41,94 +41,7 @@ interface BulkOrderCreateProps {
   onClose: () => void;
 }
 
-interface OrderTemplate {
-  name: string;
-  description: string;
-  itemsCount: number;
-  tablePrefix: string;
-  defaultItems: {
-    menuItemId: number;
-    quantity: number;
-  }[];
-}
 
-// Pre-defined templates for common order patterns
-const TEMPLATES: OrderTemplate[] = [
-  {
-    name: "Breakfast - 10 Tables",
-    description: "Standard breakfast items for 10 tables",
-    itemsCount: 3,
-    tablePrefix: "B",
-    defaultItems: []  // Will be populated with breakfast items
-  },
-  {
-    name: "Lunch - 20 Tables",
-    description: "Lunch combo for 20 tables",
-    itemsCount: 3,
-    tablePrefix: "L",
-    defaultItems: []  // Will be populated with lunch items
-  },
-  {
-    name: "Dinner - 15 Tables",
-    description: "Full dinner service for 15 tables",
-    itemsCount: 4,
-    tablePrefix: "D",
-    defaultItems: []  // Will be populated with dinner items
-  },
-  {
-    name: "Coffee Break - 30 Tables",
-    description: "Coffee and snacks for 30 tables",
-    itemsCount: 2,
-    tablePrefix: "C",
-    defaultItems: []  // Will be populated with coffee items
-  }
-];
-
-// TemplateCard component with gradient styling
-interface TemplateCardProps {
-  template: OrderTemplate;
-  isSelected: boolean;
-  onClick: () => void;
-}
-
-function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
-  /* 
-   * Matching exact gradient styles from column headers:
-   * - Pending/Breakfast: from-amber-500 to-orange-700
-   * - Preparing/Lunch: from-indigo-500 to-blue-700
-   * - Ready/Coffee: from-emerald-500 to-green-700
-   * - Completed/Dinner: from-purple-500 to-violet-700
-   */
-  return (
-    <div 
-      className={`rounded-lg p-3 hover:shadow-xl transition-all cursor-pointer 
-        ${template.name.includes('Breakfast') ? 'bg-gradient-to-r from-amber-500/90 to-orange-700/90' : 
-          template.name.includes('Lunch') ? 'bg-gradient-to-r from-indigo-500/90 to-blue-700/90' : 
-          template.name.includes('Dinner') ? 'bg-gradient-to-r from-purple-500/90 to-violet-700/90' : 
-          'bg-gradient-to-r from-emerald-500/90 to-green-700/90'} 
-        text-white ${isSelected ? 'ring-2 ring-white shadow-lg scale-[1.02]' : ''}`}
-      onClick={onClick}
-    >
-      <div className="flex items-center justify-between mb-0.5">
-        <h3 className="font-bold text-lg text-white drop-shadow-md">{template.name}</h3>
-        {isSelected && (
-          <div className="rounded-full bg-white/30 p-0.5 shadow-md">
-            <Check className="h-3.5 w-3.5 text-white" />
-          </div>
-        )}
-      </div>
-      <p className="text-xs text-white/90 font-medium">{template.description}</p>
-      <div className="mt-2 flex justify-between items-center gap-1">
-        <span className="text-xs bg-black/30 px-2 py-0.5 rounded-full text-white font-medium shadow-sm">
-          {template.itemsCount} items
-        </span>
-        <span className="text-xs bg-black/30 px-2 py-0.5 rounded-full text-white font-medium shadow-sm">
-          {template.tablePrefix}1-{template.tablePrefix}{template.name.match(/\d+/)?.[0] || '10'}
-        </span>
-      </div>
-    </div>
-  );
-}
 
 export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   const [activeTab, setActiveTab] = useState<string>("standard");
@@ -137,7 +50,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   const [tableStart, setTableStart] = useState<number>(1);
   const [selectedMenuItems, setSelectedMenuItems] = useState<number[]>([]);
   const [aiPrompt, setAiPrompt] = useState<string>("");
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -235,102 +148,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
     });
   };
   
-  // Apply template
-  const applyTemplate = (templateName: string) => {
-    // If "none" is selected, reset to defaults
-    if (templateName === "none") {
-      setTablePrefix("T");
-      setOrderCount(10);
-      setSelectedMenuItems([]);
-      return;
-    }
-    
-    const template = TEMPLATES.find(t => t.name === templateName);
-    if (!template) return;
-    
-    setTablePrefix(template.tablePrefix);
-    setOrderCount(templateName.includes("Breakfast") ? 10 : 
-                 templateName.includes("Lunch") ? 20 : 
-                 templateName.includes("Dinner") ? 15 : 30);
-    
-    // Select menu items based on template
-    const newSelectedItems: number[] = [];
-    
-    if (templateName.includes("Breakfast")) {
-      // Find breakfast items
-      menuItems.forEach(item => {
-        const nameLower = item.name.toLowerCase();
-        const categoryLower = item.category.toLowerCase();
-        if (
-          nameLower.includes("breakfast") || 
-          categoryLower.includes("breakfast") ||
-          nameLower.includes("coffee") || 
-          nameLower.includes("tea") || 
-          nameLower.includes("juice") ||
-          nameLower.includes("egg") ||
-          nameLower.includes("dosa") ||
-          nameLower.includes("idli") ||
-          nameLower.includes("toast")
-        ) {
-          newSelectedItems.push(item.id);
-        }
-      });
-    } else if (templateName.includes("Lunch")) {
-      // Find lunch items
-      menuItems.forEach(item => {
-        const nameLower = item.name.toLowerCase();
-        const categoryLower = item.category.toLowerCase();
-        if (
-          nameLower.includes("lunch") || 
-          categoryLower.includes("lunch") ||
-          nameLower.includes("curry") || 
-          nameLower.includes("rice") || 
-          nameLower.includes("naan") ||
-          nameLower.includes("roti") ||
-          nameLower.includes("thali")
-        ) {
-          newSelectedItems.push(item.id);
-        }
-      });
-    } else if (templateName.includes("Dinner")) {
-      // Find dinner items
-      menuItems.forEach(item => {
-        const nameLower = item.name.toLowerCase();
-        const categoryLower = item.category.toLowerCase();
-        if (
-          nameLower.includes("dinner") || 
-          categoryLower.includes("dinner") ||
-          nameLower.includes("special") || 
-          nameLower.includes("signature") || 
-          nameLower.includes("main") ||
-          nameLower.includes("biryani") ||
-          nameLower.includes("curry")
-        ) {
-          newSelectedItems.push(item.id);
-        }
-      });
-    } else if (templateName.includes("Coffee")) {
-      // Find coffee and snack items
-      menuItems.forEach(item => {
-        const nameLower = item.name.toLowerCase();
-        const categoryLower = item.category.toLowerCase();
-        if (
-          nameLower.includes("coffee") || 
-          categoryLower.includes("coffee") ||
-          nameLower.includes("tea") || 
-          nameLower.includes("snack") || 
-          nameLower.includes("pastry") ||
-          nameLower.includes("cake") ||
-          nameLower.includes("cookie")
-        ) {
-          newSelectedItems.push(item.id);
-        }
-      });
-    }
-    
-    // Limit to 3-4 items depending on template
-    setSelectedMenuItems(newSelectedItems.slice(0, template.itemsCount));
-  };
+
   
   // Create bulk orders with standard method
   const handleCreateBulkOrders = () => {
