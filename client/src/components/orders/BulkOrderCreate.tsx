@@ -229,6 +229,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                   max={100}
                   value={orderCount}
                   onChange={(e) => setOrderCount(parseInt(e.target.value) || 1)}
+                  className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
                 />
               </div>
 
@@ -239,6 +240,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                   value={tablePrefix}
                   onChange={(e) => setTablePrefix(e.target.value)}
                   maxLength={3}
+                  className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
                 />
               </div>
               <div className="space-y-2">
@@ -249,6 +251,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                   min={1}
                   value={tableStart}
                   onChange={(e) => setTableStart(parseInt(e.target.value) || 1)}
+                  className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
                 />
               </div>
             </div>
@@ -311,7 +314,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
           <TabsContent value="ai" className="space-y-4 mt-4">
             <div className="space-y-3">
               <div className="flex items-center">
-                <Label htmlFor="aiPrompt" className="text-base font-medium">Describe Your Order Requirements</Label>
+                <Label htmlFor="aiPrompt" className="text-base font-medium text-white">Describe Your Order Requirements</Label>
               </div>
               <Textarea
                 id="aiPrompt"
