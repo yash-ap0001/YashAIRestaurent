@@ -346,11 +346,65 @@ div[data-state="unchecked"] {
       @apply bg-white text-gray-800 !important;
     }
     
+    /* Fix text colors in dialogs and tab panels */
+    [data-state="active"] [class*="text-white"],
+    [data-state="active"] [class*="text-gray-200"],
+    [data-state="active"] [class*="text-gray-300"],
+    [data-state="active"] [class*="text-gray-400"],
+    [data-state="active"] [class*="text-neutral-300"],
+    [data-state="active"] [class*="text-purple-200"],
+    [data-state="active"] [class*="text-purple-300"],
+    [data-state="active"] [class*="text-blue-300"],
+    [data-state="active"] [class*="text-blue-400"],
+    [data-state="active"] [class*="text-green-300"] {
+      @apply text-gray-800 !important;
+    }
+    
     /* Fix background and borders in tab panels */
     [data-state="active"] div[class*="border-gray-800"],
     [data-state="active"] div[class*="border-gray-700"],
-    [data-state="active"] div[class*="border-purple-900"] {
+    [data-state="active"] div[class*="border-purple-900"],
+    [data-state="active"] div[class*="border-blue-900"],
+    [data-state="active"] div[class*="border-green-900"] {
       @apply border-gray-200 !important;
+    }
+    
+    /* Fix card backgrounds in tab panels */
+    [data-state="active"] div[class*="bg-gray-800"],
+    [data-state="active"] div[class*="bg-gray-900"],
+    [data-state="active"] div[class*="bg-purple-900"],
+    [data-state="active"] div[class*="bg-blue-900"],
+    [data-state="active"] div[class*="bg-green-900"] {
+      @apply bg-gray-100 !important;
+    }
+    
+    /* Fix specific bill details dialog */
+    table[class*="min-w-full"] {
+      @apply border-gray-300 !important;
+    }
+    
+    table[class*="min-w-full"] thead {
+      @apply bg-gray-100 !important;
+    }
+    
+    table[class*="min-w-full"] th,
+    table[class*="min-w-full"] td {
+      @apply text-gray-800 !important;
+    }
+    
+    /* Target specific backgrounds in bill details and order create */
+    [role="dialog"] [class*="bg-purple-900"],
+    [role="dialog"] [class*="bg-gray-900"],
+    [role="dialog"] [class*="bg-gray-800"],
+    [role="dialog"] [class*="bg-black"] {
+      @apply bg-white !important;
+    }
+    
+    /* Ensure buttons in dialogs maintain text color */
+    [role="dialog"] button[class*="bg-purple-700"] span,
+    [role="dialog"] button[class*="bg-blue-600"] span,
+    [role="dialog"] button[class*="bg-green-600"] span {
+      @apply text-white !important;
     }
     
     /* Fix for card backface in light mode */
@@ -484,7 +538,7 @@ div[data-state="unchecked"] {
   [droppableId] .rounded-lg .font-bold,
   .bg-gradient-to-r .font-bold {
     color: white !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   }
   
   /* Headings for all cards */
@@ -496,6 +550,13 @@ div[data-state="unchecked"] {
     font-weight: 700;
     font-size: 1.125rem;
     line-height: 1.75rem;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  
+  /* Enhance all white text on colored backgrounds for better readability */
+  [data-state="active"] [class*="text-white"],
+  [droppableId] [class*="text-white"],
+  .bg-gradient-to-r [class*="text-white"] {
+    @apply shadow-sm;
   }
 }

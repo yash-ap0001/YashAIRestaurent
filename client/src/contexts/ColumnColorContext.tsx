@@ -10,7 +10,6 @@ export interface ColumnStyle {
 
 interface ColumnColorContextType {
   getColumnStyle: (column: ColumnType) => ColumnStyle;
-  resetColors: () => void;
   updateColumnStyle: (column: ColumnType, style: ColumnStyle) => void;
 }
 
@@ -50,11 +49,6 @@ export function ColumnColorProvider({ children }: { children: ReactNode }) {
     return columnStyles[column];
   }, [columnStyles]);
   
-  // Reset all colors to defaults
-  const resetColors = useCallback(() => {
-    setColumnStyles({...defaultStyles});
-  }, []);
-  
   // Update a specific column's style
   const updateColumnStyle = useCallback((column: ColumnType, style: ColumnStyle) => {
     setColumnStyles(prev => ({
@@ -64,7 +58,7 @@ export function ColumnColorProvider({ children }: { children: ReactNode }) {
   }, []);
   
   return (
-    <ColumnColorContext.Provider value={{ getColumnStyle, resetColors, updateColumnStyle }}>
+    <ColumnColorContext.Provider value={{ getColumnStyle, updateColumnStyle }}>
       {children}
     </ColumnColorContext.Provider>
   );
