@@ -4,25 +4,32 @@
 
 /* Theme colors for light and dark mode */
 :root {
-  --background: 0 0% 98%;
-  --foreground: 222.2 84% 4.9%;
+  /* New color scheme based on the provided image */
+  --navy: #3A40E7; /* Dark navy blue color */
+  --blue: #C091F4; /* Bright blue color */
+  --black: #261451; /* Pure black color */
+  --white: #F1F5F3; /* Off-white color */
+  
+  /* Theme variables using the color scheme */
+  --background: 0 0% 100%; /* White background */
+  --foreground: 222.2 84% 4.9%; /* Dark text */
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 265 89% 62%; /* Purple primary color to match sidebar selected item */
+  --primary: 238 79% 57%; /* #3A40E7 Navy blue */
   --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
+  --secondary: 242 82% 76%; /* #C091F4 Blue */
   --secondary-foreground: 222.2 47.4% 11.2%;
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 265 89% 92%; /* Light purple accent color */
-  --accent-foreground: 265 89% 40%;
+  --accent: 238 79% 57%; /* Navy accent */
+  --accent-foreground: 210 40% 98%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 265 89% 62%;
+  --ring: 238 79% 57%;
   --radius: 0.5rem;
   
   /* Column color definitions for light mode */
@@ -31,6 +38,11 @@
   --ready-bg: 152 60% 40%; /* Green */
   --completed-bg: 270 95% 65%; /* Purple */
   --billed-bg: 0 84% 60%; /* Red */
+  
+  /* New specific layout colors from the image */
+  --navbar-bg: 238 79% 57%; /* #3A40E7 - Navy blue for navbar */
+  --sidebar-bg: 242 82% 76%; /* #C091F4 - Blue for sidebar */
+  --main-bg: 0 0% 100%; /* White background */
 }
 
 .dark {
@@ -447,25 +459,51 @@ div[data-state="unchecked"] {
       @apply bg-white border-b border-gray-200 py-2;
     }
     
-    /* Apply card styles matching the screenshot */
+    /* Apply card styles matching the new color scheme */
     .pending-column .order-card {
-      @apply bg-orange-500;
+      @apply bg-[#3A40E7];
     }
     
     .preparing-column .order-card {
-      @apply bg-blue-500;
+      @apply bg-[#C091F4];
     }
     
     .ready-column .order-card {
-      @apply bg-green-600;
+      @apply bg-[#261451];
     }
     
     .completed-column .order-card {
-      @apply bg-purple-600;
+      @apply bg-[#3A40E7];
     }
     
     .billed-column .order-card {
-      @apply bg-red-500;
+      @apply bg-[#C091F4];
+    }
+    
+    /* Override specific UI components with the new color scheme */
+    button[class*="bg-primary"],
+    button[class*="bg-blue-600"],
+    button[class*="bg-purple-600"] {
+      @apply bg-[#3A40E7] hover:bg-[#2930D8];
+    }
+    
+    button[class*="bg-secondary"],
+    button[class*="bg-blue-500"],
+    button[class*="bg-purple-500"] {
+      @apply bg-[#C091F4] hover:bg-[#A064EF];
+    }
+    
+    /* Background colors for various components */
+    header, .header, [role="banner"] {
+      @apply bg-[#3A40E7] text-white;
+    }
+    
+    aside, .sidebar, nav[role="navigation"] {
+      @apply bg-[#C091F4] text-white;
+    }
+    
+    main, .content, [role="main"] {
+      @apply bg-[#F1F5F3];
     }
   }
   
@@ -551,38 +589,67 @@ div[data-state="unchecked"] {
     @apply font-bold text-white;
   }
   
-  /* Sidebar styling to match the design */
+  /* Sidebar styling to match the new color scheme from the image */
   .main-nav {
-    @apply bg-white border-r border-gray-200;
+    @apply bg-[#C091F4] border-r border-[#A064EF] text-white;
   }
 
   .main-nav a {
-    @apply text-gray-600 hover:bg-gray-100 rounded-md px-3 py-2 flex items-center gap-2;
+    @apply text-white hover:bg-[#A064EF] rounded-md px-3 py-2 flex items-center gap-2;
   }
 
   .main-nav a.active {
-    @apply bg-gradient-to-r from-purple-600 to-purple-500 text-white font-medium;
+    @apply bg-[#3A40E7] text-white font-medium;
+  }
+  
+  /* Navbar (top) styling to match the new color scheme */
+  .navbar, 
+  header, 
+  .header-container,
+  [role="banner"] {
+    @apply bg-[#3A40E7] text-white border-b border-[#2930D8];
+  }
+  
+  /* Main content area */
+  .main-content,
+  main,
+  [role="main"] {
+    @apply bg-[#F1F5F3];
   }
 
-  /* Order card styling based on screenshot */
+  /* Order card styling based on the new color scheme */
   .pending-card {
-    @apply bg-gradient-to-r from-orange-500 to-orange-600 shadow-md;
+    @apply bg-[#3A40E7] shadow-md text-white;
   }
 
   .preparing-card {
-    @apply bg-gradient-to-r from-blue-500 to-blue-600 shadow-md;
+    @apply bg-[#C091F4] shadow-md text-white;
   }
 
   .ready-card {
-    @apply bg-gradient-to-r from-green-600 to-green-500 shadow-md;
+    @apply bg-[#261451] shadow-md text-white;
   }
 
   .completed-card {
-    @apply bg-gradient-to-r from-purple-600 to-purple-500 shadow-md;
+    @apply bg-[#3A40E7] shadow-md text-white;
   }
 
   .billed-card {
-    @apply bg-gradient-to-r from-red-500 to-red-600 shadow-md;
+    @apply bg-[#C091F4] shadow-md text-white;
+  }
+  
+  /* Card styling for dashboards and other components */
+  .stats-card, 
+  .dashboard-card {
+    @apply bg-white shadow-md border border-[#F1F5F3];
+  }
+  
+  .button-primary {
+    @apply bg-[#3A40E7] text-white hover:bg-[#2930D8];
+  }
+  
+  .button-secondary {
+    @apply bg-[#C091F4] text-white hover:bg-[#A064EF];
   }
   
   /* Apply these styles to all text elements in cards, regardless of class names */
