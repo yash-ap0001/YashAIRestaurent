@@ -93,8 +93,6 @@ function Router() {
       <ProtectedRoute path="/voice-assistant" component={VoiceAssistant} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/n8n-integration" component={N8nIntegration} allowedRoles={["admin"]} />
       <ProtectedRoute path="/diet-plan" component={DietPlan} allowedRoles={["admin", "manager", "waiter", "customer"]} />
-      <ProtectedRoute path="/ar-menu-preview" component={ARMenuPreview} allowedRoles={["admin", "manager", "waiter", "customer"]} />
-      <ProtectedRoute path="/ar-menu" component={ARMenuPage} allowedRoles={["admin", "manager", "waiter", "customer"]} />
       <ProtectedRoute path="/loading-demo" component={LoadingDemo} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/notification-test" component={NotificationTest} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/color-demo" component={ColorDemo} allowedRoles={["admin", "manager"]} />
