@@ -367,7 +367,9 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto backdrop-blur-xl bg-black/70 border border-gray-600/50 shadow-lg">
+      <DialogContent 
+        className="sm:max-w-[600px] max-h-[650px] overflow-y-auto backdrop-blur-xl bg-black/30 border border-purple-600/20 shadow-xl"
+        style={{backdropFilter: 'blur(8px)'}}>
         <DialogHeader className="relative">
           <div className="absolute right-0 top-0">
             <Button 
@@ -461,7 +463,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                   Selected {selectedMenuItems.length} items
                 </div>
               </div>
-              <div className="border border-gray-700 rounded-md p-4 max-h-[300px] overflow-y-auto bg-black/50 shadow-inner">
+              <div className="border border-gray-700 rounded-md p-3 max-h-[180px] overflow-y-auto bg-black/50 shadow-inner">
                 {isLoadingMenuItems ? (
                   <div className="flex justify-center items-center h-20">
                     <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
