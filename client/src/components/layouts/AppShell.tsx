@@ -371,18 +371,18 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Mobile menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0 bg-card border-r border-border">
-          <div className="p-4 flex items-center space-x-3 border-b border-border">
+        <SheetContent side="left" className="w-64 p-0 bg-transparent border-r border-[#E5E7EB]">
+          <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB]">
             <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
               <HandPlatter size={20} />
             </div>
-            <h1 className="text-lg font-semibold text-card-foreground">YashHotelBot</h1>
+            <h1 className="text-lg font-semibold text-[#111827]">YashHotelBot</h1>
           </div>
           
           <nav className="flex-1 pt-4 pb-4 overflow-hidden">
             <Accordion type="multiple" defaultValue={["main"]} className="border-none">
               <AccordionItem value="main" className="border-none">
-                <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                <AccordionTrigger className="py-2 px-3 text-xs font-medium text-[#6B7280] uppercase tracking-wider hover:no-underline">
                   Main
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
@@ -394,8 +394,8 @@ export function AppShell({ children }: AppShellProps) {
                           className={cn(
                             "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                             location === item.href 
-                              ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                              : "text-neutral-400 hover:bg-neutral-800"
+                              ? "text-[#111827] font-medium underline" 
+                              : "text-[#6B7280] hover:text-[#111827]"
                           )}
                           onClick={() => setMobileMenuOpen(false)}
                         >
@@ -410,7 +410,7 @@ export function AppShell({ children }: AppShellProps) {
               
               {getFilteredNavItems(managementNavItems, currentRole).length > 0 && (
                 <AccordionItem value="management" className="border-none">
-                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-[#6B7280] uppercase tracking-wider hover:no-underline">
                     Management
                   </AccordionTrigger>
                   <AccordionContent className="pt-0 pb-1">
@@ -422,8 +422,8 @@ export function AppShell({ children }: AppShellProps) {
                             className={cn(
                               "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                               location === item.href 
-                                ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                                : "text-neutral-400 hover:bg-neutral-800"
+                                ? "text-[#111827] font-medium underline" 
+                                : "text-[#6B7280] hover:text-[#111827]"
                             )}
                             onClick={() => setMobileMenuOpen(false)}
                           >
@@ -439,7 +439,7 @@ export function AppShell({ children }: AppShellProps) {
               
               {(currentRole === "admin" || currentRole === "manager") && (
                 <AccordionItem value="testing" className="border-none">
-                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-[#6B7280] uppercase tracking-wider hover:no-underline">
                     Testing
                   </AccordionTrigger>
                   <AccordionContent className="pt-0 pb-1">
@@ -451,8 +451,8 @@ export function AppShell({ children }: AppShellProps) {
                             className={cn(
                               "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                               location === item.href 
-                                ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                                : "text-neutral-400 hover:bg-neutral-800"
+                                ? "text-[#111827] font-medium underline" 
+                                : "text-[#6B7280] hover:text-[#111827]"
                             )}
                             onClick={() => setMobileMenuOpen(false)}
                           >
@@ -468,13 +468,13 @@ export function AppShell({ children }: AppShellProps) {
             </Accordion>
           </nav>
           
-          <div className="p-4 border-t border-border">
+          <div className="p-4 border-t border-[#E5E7EB]">
             <Button
               onClick={() => {
                 setMobileMenuOpen(false);
                 setChatVisible(true);
               }}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="w-full bg-[#4B5563] hover:bg-[#374151] text-white"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Chat with AI Assistant
