@@ -101,21 +101,28 @@ function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
    */
   return (
     <div 
-      className={`rounded-lg p-3 hover:shadow-xl transition-all order-card-text 
-        ${template.name.includes('Breakfast') ? 'bg-gradient-to-r from-amber-500 to-orange-700' : 
-          template.name.includes('Lunch') ? 'bg-gradient-to-r from-indigo-500 to-blue-700' : 
-          template.name.includes('Dinner') ? 'bg-gradient-to-r from-purple-500 to-violet-700' : 
-          'bg-gradient-to-r from-emerald-500 to-green-700'} 
-        text-white ${isSelected ? 'ring-2 ring-white shadow-lg' : ''}`}
+      className={`rounded-lg p-4 hover:shadow-xl transition-all cursor-pointer 
+        ${template.name.includes('Breakfast') ? 'bg-gradient-to-r from-amber-500/90 to-orange-700/90' : 
+          template.name.includes('Lunch') ? 'bg-gradient-to-r from-indigo-500/90 to-blue-700/90' : 
+          template.name.includes('Dinner') ? 'bg-gradient-to-r from-purple-500/90 to-violet-700/90' : 
+          'bg-gradient-to-r from-emerald-500/90 to-green-700/90'} 
+        text-white ${isSelected ? 'ring-2 ring-white shadow-lg scale-[1.02]' : ''}`}
       onClick={onClick}
     >
-      <h3 className="font-bold text-lg text-white text-shadow-sm">{template.name}</h3>
-      <p className="text-sm text-white/90">{template.description}</p>
-      <div className="mt-2 flex justify-between items-center">
-        <span className="text-xs bg-white/20 px-2 py-1 rounded-full text-white font-medium">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="font-bold text-xl text-white drop-shadow-md">{template.name}</h3>
+        {isSelected && (
+          <div className="rounded-full bg-white/30 p-1 shadow-md">
+            <Check className="h-4 w-4 text-white" />
+          </div>
+        )}
+      </div>
+      <p className="text-sm text-white/90 font-medium">{template.description}</p>
+      <div className="mt-3 flex justify-between items-center">
+        <span className="text-xs bg-black/30 px-3 py-1 rounded-full text-white font-medium shadow-sm">
           {template.itemsCount} items
         </span>
-        <span className="text-xs font-medium text-white">
+        <span className="text-xs bg-black/30 px-3 py-1 rounded-full text-white font-medium shadow-sm">
           Tables: {template.tablePrefix}1-{template.tablePrefix}{template.name.match(/\d+/)?.[0] || '10'}
         </span>
       </div>
@@ -360,7 +367,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px] bg-black border border-gray-800 shadow-lg">
         <DialogHeader>
           <DialogTitle>Bulk Order Creation</DialogTitle>
           <DialogDescription>
@@ -436,33 +443,47 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
             </div>
             
             <div className="space-y-2">
-              <Label>Select Menu Items</Label>
-              <div className="border rounded-md p-4 max-h-[300px] overflow-y-auto">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-medium">Select Menu Items</Label>
+                <div className="bg-purple-600/20 text-purple-400 text-xs px-3 py-1 rounded-full border border-purple-600/30">
+                  Selected {selectedMenuItems.length} items
+                </div>
+              </div>
+              <div className="border border-gray-700 rounded-md p-4 max-h-[300px] overflow-y-auto bg-black/50 shadow-inner">
                 {isLoadingMenuItems ? (
                   <div className="flex justify-center items-center h-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {categories.map((category) => (
                       <div key={category} className="space-y-2">
-                        <h3 className="text-sm font-medium">{category}</h3>
+                        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide px-1">
+                          {category}
+                        </h3>
                         <div className="grid grid-cols-2 gap-2">
                           {menuItemsByCategory[category].map((item) => (
                             <div 
                               key={item.id} 
-                              className={`flex items-center space-x-2 border rounded-md p-2 cursor-pointer hover:bg-accent transition-colors ${
-                                selectedMenuItems.includes(item.id) ? 'bg-primary/10 border-primary' : ''
+                              className={`flex items-center space-x-2 border rounded-md p-2.5 cursor-pointer transition-all ${
+                                selectedMenuItems.includes(item.id) 
+                                  ? 'bg-purple-900/30 border-purple-500 shadow-md' 
+                                  : 'border-gray-800 hover:border-gray-700 hover:bg-gray-900/50'
                               }`}
                               onClick={() => toggleMenuItem(item.id)}
                             >
                               <Checkbox 
                                 checked={selectedMenuItems.includes(item.id)} 
                                 onCheckedChange={() => toggleMenuItem(item.id)}
+                                className={selectedMenuItems.includes(item.id) ? "border-purple-500" : ""}
                               />
                               <div className="flex-1 truncate">
-                                <span className="text-sm font-medium">{item.name}</span>
-                                <span className="text-sm text-muted-foreground ml-2">₹{item.price}</span>
+                                <span className={`text-sm font-medium ${selectedMenuItems.includes(item.id) ? "text-white" : "text-gray-200"}`}>
+                                  {item.name}
+                                </span>
+                                <span className={`text-sm ml-2 ${selectedMenuItems.includes(item.id) ? "text-purple-300" : "text-gray-400"}`}>
+                                  ₹{item.price}
+                                </span>
                               </div>
                             </div>
                           ))}
@@ -472,42 +493,50 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                   </div>
                 )}
               </div>
-              <div className="text-sm text-muted-foreground">
-                Selected {selectedMenuItems.length} items
-              </div>
             </div>
           </TabsContent>
           
           {/* AI-powered creation tab */}
           <TabsContent value="ai" className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="aiPrompt">Describe Your Order Requirements</Label>
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <Label htmlFor="aiPrompt" className="text-base font-medium">Describe Your Order Requirements</Label>
+              </div>
               <Textarea
                 id="aiPrompt"
                 placeholder="Example: Create breakfast orders for 20 tables (T1-T20) with coffee, dosa and idli"
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                className="h-32"
+                className="h-32 border-gray-700 bg-black/50 focus:border-purple-500 focus:ring-purple-500/30 shadow-inner"
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-400 bg-purple-900/10 p-3 rounded-md border border-purple-900/30">
                 Provide details like number of orders, table numbers, menu items, and any special requirements.
-                Our AI will analyze your request and create the appropriate orders.
+                Our AI will analyze your request and create the appropriate orders automatically.
               </p>
             </div>
             
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium">Examples:</h3>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• "Create lunch orders for tables L1 through L30 with curry and rice"</li>
-                <li>• "20 breakfast orders for tables starting at B10 with coffee and snacks"</li>
-                <li>• "15 dinner reservations with our signature biryani dishes"</li>
-              </ul>
+            <div className="bg-black/30 rounded-lg border border-gray-800 p-4 mt-2">
+              <h3 className="text-sm font-semibold text-white mb-3">Try these examples:</h3>
+              <div className="grid grid-cols-1 gap-2">
+                <div onClick={() => setAiPrompt("Create lunch orders for tables L1 through L30 with curry and rice")} 
+                  className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
+                  <p className="text-sm text-purple-300 font-medium">"Create lunch orders for tables L1 through L30 with curry and rice"</p>
+                </div>
+                <div onClick={() => setAiPrompt("20 breakfast orders for tables starting at B10 with coffee and snacks")} 
+                  className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
+                  <p className="text-sm text-purple-300 font-medium">"20 breakfast orders for tables starting at B10 with coffee and snacks"</p>
+                </div>
+                <div onClick={() => setAiPrompt("15 dinner reservations with our signature biryani dishes")} 
+                  className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
+                  <p className="text-sm text-purple-300 font-medium">"15 dinner reservations with our signature biryani dishes"</p>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
         
-        <DialogFooter className="flex items-center justify-between">
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="flex items-center justify-between mt-6 pt-4 border-t border-gray-800">
+          <Button variant="outline" onClick={onClose} className="border-gray-700 hover:bg-gray-800 hover:text-white">
             <X className="h-4 w-4 mr-2" />
             Cancel
           </Button>
@@ -515,6 +544,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
             <Button 
               onClick={handleCreateBulkOrders}
               disabled={bulkOrderMutation.isPending || selectedMenuItems.length === 0}
+              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800 shadow-md"
             >
               {bulkOrderMutation.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -527,6 +557,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
             <Button 
               onClick={handleCreateAiOrders}
               disabled={aiOrderMutation.isPending || !aiPrompt.trim()}
+              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800 shadow-md"
             >
               {aiOrderMutation.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
