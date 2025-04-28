@@ -368,8 +368,8 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-black/80 border border-purple-600/30 shadow-xl">
-        <DialogHeader className="relative">
+        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-black/80 border border-purple-600/30 shadow-xl p-0">
+        <DialogHeader className="relative p-6 bg-gradient-to-r from-purple-900/60 to-purple-800/60 rounded-t-lg border-b border-purple-600/30">
           <div className="absolute right-0 top-0">
             <Button 
               variant="ghost" 
@@ -392,7 +392,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
           defaultValue="standard" 
           value={activeTab} 
           onValueChange={setActiveTab}
-          className="mt-4"
+          className="px-6 pt-6"
         >
           <TabsList className="grid grid-cols-2">
             <TabsTrigger value="standard">Standard Creation</TabsTrigger>
@@ -401,7 +401,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
           
           {/* Standard bulk creation tab */}
           <TabsContent value="standard" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="orderCount">Number of Orders</Label>
                 <Input
@@ -413,27 +413,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                   onChange={(e) => setOrderCount(parseInt(e.target.value) || 1)}
                 />
               </div>
-              <div className="space-y-2 col-span-2">
-                <Label htmlFor="template">Apply Template (Optional)</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {TEMPLATES.map((template) => (
-                    <TemplateCard 
-                      key={template.name}
-                      template={template}
-                      isSelected={selectedTemplate === template.name}
-                      onClick={() => {
-                        if (selectedTemplate === template.name) {
-                          setSelectedTemplate('none');
-                          applyTemplate('none');
-                        } else {
-                          setSelectedTemplate(template.name);
-                          applyTemplate(template.name);
-                        }
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="tablePrefix">Table Prefix</Label>
                 <Input
@@ -548,7 +528,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
           </TabsContent>
         </Tabs>
         
-        <DialogFooter className="flex items-center justify-between mt-6 pt-4 border-t border-gray-800 sticky bottom-0 bg-black/80 backdrop-blur-md">
+        <DialogFooter className="flex items-center justify-between px-6 py-4 border-t border-purple-600/30 sticky bottom-0 bg-gradient-to-r from-purple-900/60 to-purple-800/60 rounded-b-lg">
           <Button variant="outline" onClick={onClose} className="border-gray-700 hover:bg-gray-800 hover:text-white">
             Cancel
           </Button>
