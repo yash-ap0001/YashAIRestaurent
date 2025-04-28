@@ -367,10 +367,22 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] bg-black border border-gray-800 shadow-lg">
-        <DialogHeader>
-          <DialogTitle>Bulk Order Creation</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto backdrop-blur-xl bg-black/70 border border-gray-600/50 shadow-lg">
+        <DialogHeader className="relative">
+          <div className="absolute right-0 top-0">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onClose} 
+              className="h-8 w-8 rounded-full text-gray-400 hover:text-white hover:bg-gray-800/50"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+            Bulk Order Creation
+          </DialogTitle>
+          <DialogDescription className="text-gray-300">
             Create multiple orders at once to save time. Perfect for events or busy periods.
           </DialogDescription>
         </DialogHeader>
