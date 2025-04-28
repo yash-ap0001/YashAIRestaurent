@@ -101,7 +101,7 @@ function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
    */
   return (
     <div 
-      className={`rounded-lg p-4 hover:shadow-xl transition-all cursor-pointer 
+      className={`rounded-lg p-3 hover:shadow-xl transition-all cursor-pointer 
         ${template.name.includes('Breakfast') ? 'bg-gradient-to-r from-amber-500/90 to-orange-700/90' : 
           template.name.includes('Lunch') ? 'bg-gradient-to-r from-indigo-500/90 to-blue-700/90' : 
           template.name.includes('Dinner') ? 'bg-gradient-to-r from-purple-500/90 to-violet-700/90' : 
@@ -109,21 +109,21 @@ function TemplateCard({ template, isSelected, onClick }: TemplateCardProps) {
         text-white ${isSelected ? 'ring-2 ring-white shadow-lg scale-[1.02]' : ''}`}
       onClick={onClick}
     >
-      <div className="flex items-center justify-between mb-1">
-        <h3 className="font-bold text-xl text-white drop-shadow-md">{template.name}</h3>
+      <div className="flex items-center justify-between mb-0.5">
+        <h3 className="font-bold text-lg text-white drop-shadow-md">{template.name}</h3>
         {isSelected && (
-          <div className="rounded-full bg-white/30 p-1 shadow-md">
-            <Check className="h-4 w-4 text-white" />
+          <div className="rounded-full bg-white/30 p-0.5 shadow-md">
+            <Check className="h-3.5 w-3.5 text-white" />
           </div>
         )}
       </div>
-      <p className="text-sm text-white/90 font-medium">{template.description}</p>
-      <div className="mt-3 flex justify-between items-center">
-        <span className="text-xs bg-black/30 px-3 py-1 rounded-full text-white font-medium shadow-sm">
+      <p className="text-xs text-white/90 font-medium">{template.description}</p>
+      <div className="mt-2 flex justify-between items-center gap-1">
+        <span className="text-xs bg-black/30 px-2 py-0.5 rounded-full text-white font-medium shadow-sm">
           {template.itemsCount} items
         </span>
-        <span className="text-xs bg-black/30 px-3 py-1 rounded-full text-white font-medium shadow-sm">
-          Tables: {template.tablePrefix}1-{template.tablePrefix}{template.name.match(/\d+/)?.[0] || '10'}
+        <span className="text-xs bg-black/30 px-2 py-0.5 rounded-full text-white font-medium shadow-sm">
+          {template.tablePrefix}1-{template.tablePrefix}{template.name.match(/\d+/)?.[0] || '10'}
         </span>
       </div>
     </div>
@@ -368,8 +368,8 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="sm:max-w-[600px] max-h-[650px] overflow-y-auto backdrop-blur-xl bg-black/30 border border-purple-600/20 shadow-xl"
-        style={{backdropFilter: 'blur(8px)'}}>
+        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto backdrop-blur-xl bg-black/40 border border-purple-600/30 shadow-xl"
+        style={{backdropFilter: 'blur(12px)'}}>
         <DialogHeader className="relative">
           <div className="absolute right-0 top-0">
             <Button 
@@ -416,7 +416,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
               </div>
               <div className="space-y-2 col-span-2">
                 <Label htmlFor="template">Apply Template (Optional)</Label>
-                <div className="grid grid-cols-2 gap-3 mt-2">
+                <div className="grid grid-cols-2 gap-2 mt-2">
                   {TEMPLATES.map((template) => (
                     <TemplateCard 
                       key={template.name}
@@ -463,7 +463,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                   Selected {selectedMenuItems.length} items
                 </div>
               </div>
-              <div className="border border-gray-700 rounded-md p-3 max-h-[180px] overflow-y-auto bg-black/50 shadow-inner">
+              <div className="border border-gray-700 rounded-md p-2 max-h-[150px] overflow-y-auto bg-black/50 shadow-inner">
                 {isLoadingMenuItems ? (
                   <div className="flex justify-center items-center h-20">
                     <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
@@ -479,7 +479,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                           {menuItemsByCategory[category].map((item) => (
                             <div 
                               key={item.id} 
-                              className={`flex items-center space-x-2 border rounded-md p-2.5 cursor-pointer transition-all ${
+                              className={`flex items-center space-x-2 border rounded-md p-1.5 cursor-pointer transition-all ${
                                 selectedMenuItems.includes(item.id) 
                                   ? 'bg-purple-900/30 border-purple-500 shadow-md' 
                                   : 'border-gray-800 hover:border-gray-700 hover:bg-gray-900/50'
@@ -549,7 +549,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
           </TabsContent>
         </Tabs>
         
-        <DialogFooter className="flex items-center justify-between mt-6 pt-4 border-t border-gray-800">
+        <DialogFooter className="flex items-center justify-between mt-6 pt-4 border-t border-gray-800 sticky bottom-0 bg-black/80 backdrop-blur-md">
           <Button variant="outline" onClick={onClose} className="border-gray-700 hover:bg-gray-800 hover:text-white">
             <X className="h-4 w-4 mr-2" />
             Cancel
