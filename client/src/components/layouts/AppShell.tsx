@@ -167,8 +167,8 @@ export function AppShell({ children }: AppShellProps) {
                     className={cn(
                       "flex justify-center items-center p-2 rounded-md",
                       location === item.href 
-                        ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                        : "text-neutral-400 hover:bg-neutral-800"
+                        ? "text-[#111827] font-medium underline" 
+                        : "text-[#6B7280] hover:text-[#111827]"
                     )}
                     title={item.label}
                   >

@@ -618,6 +618,15 @@ div[data-state="unchecked"] {
     @apply text-[#111827] font-medium underline;
   }
   
+  /* All navigation links (used in AppShell component) */
+  .nav-link {
+    @apply text-[#6B7280] hover:text-[#111827] bg-transparent;
+  }
+  
+  .nav-link.active {
+    @apply text-[#111827] font-medium underline;
+  }
+  
   /* Navbar (top) styling with absolutely no background color */
   .navbar, 
   header, 
