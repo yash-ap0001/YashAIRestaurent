@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --header-bg: #F5F7FF;
+  --sidebar-bg: #EEF2FF;
+  --border-color: #E5E7EB;
+  --primary-color: #4F46E5;
+  --heading-text: #111827;
+  --body-text: #6B7280;
+}
+
 /* Theme colors for light and dark mode */
 :root {
   /* Fresh & elegant color scheme */
