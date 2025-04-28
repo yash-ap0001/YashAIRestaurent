@@ -191,8 +191,8 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
       onOpenChange={onClose}
     >
       <DialogContent 
-        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-zinc-900/90 border border-purple-600/30 shadow-xl p-0">
-        <DialogHeader className="relative p-4 bg-gradient-to-r from-purple-900/60 to-purple-800/60 rounded-t-lg border-b border-purple-600/30">
+        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-zinc-900/80 border border-purple-600/30 shadow-xl p-0">
+        <DialogHeader className="relative p-4 bg-gradient-to-r from-purple-900/80 to-purple-800/80 rounded-t-lg border-b border-purple-600/30">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
               Bulk Order Creation
@@ -351,7 +351,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
           </TabsContent>
         </Tabs>
         
-        <DialogFooter className="flex items-center justify-between px-6 py-4 border-t border-purple-600/30 sticky bottom-0 bg-gradient-to-r from-purple-900/60 to-purple-800/60 rounded-b-lg">
+        <DialogFooter className="flex items-center justify-between px-6 py-4 border-t border-purple-600/30 sticky bottom-0 bg-gradient-to-r from-purple-900/80 to-purple-800/80 rounded-b-lg">
           <Button variant="outline" onClick={onClose} className="border-gray-700 hover:bg-gray-800 hover:text-white">
             Cancel
           </Button>
