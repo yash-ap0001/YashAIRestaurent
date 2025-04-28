@@ -1,173 +1,258 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { apiRequest } from "@/lib/queryClient";
-import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function NotificationTest() {
-  const [loading, setLoading] = useState(false);
-
-  const createTestOrder = async () => {
-    setLoading(true);
+  const { toast } = useToast();
+  const [notificationType, setNotificationType] = useState<'info' | 'success' | 'warning' | 'error'>('info');
+  const [title, setTitle] = useState('Test Notification');
+  const [message, setMessage] = useState('This is a test notification message');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const handleSendTestNotification = async () => {
+    setIsLoading(true);
     try {
-      // Create a test order via the simulator API
-      const response = await apiRequest("POST", "/api/simulator/create-order", {
-        tableNumber: "T1",
-        orderItems: [
-          {
-            menuItemId: 1,
-            quantity: 1,
-            price: 370,
-            specialInstructions: "Test notification order"
-          }
-        ]
+      const response = await apiRequest('POST', '/api/notifications/test', {
+        type: notificationType,
+        title,
+        message
       });
       
       const data = await response.json();
       
-      console.log("Test order created:", data);
       toast({
-        title: "Test Order Initiated",
-        description: `Order ${data.orderNumber} was created. You should see a real-time toast notification shortly.`,
-        variant: "default"
+        title: 'Notification Sent',
+        description: `Successfully sent a ${notificationType} notification`,
+        variant: 'default'
       });
+      
+      console.log('Notification sent:', data);
     } catch (error) {
-      console.error("Error creating test order:", error);
+      console.error('Error sending notification:', error);
+      
       toast({
-        title: "Error",
-        description: "Failed to create test order. Check console for details.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to send notification',
+        variant: 'destructive'
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
-
-  const updateOrderStatus = async (status: string) => {
-    setLoading(true);
-    try {
-      // Update the most recent order status
-      const ordersResponse = await apiRequest("GET", "/api/orders");
-      const orders = await ordersResponse.json();
-      
-      // Get the latest order
-      const latestOrder = [...orders].sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )[0];
-      
-      if (!latestOrder) {
-        toast({
-          title: "No orders found",
-          description: "Please create a test order first",
-          variant: "destructive"
-        });
-        setLoading(false);
+  
+  const handleSendPredefinedNotification = async (type: string) => {
+    setIsLoading(true);
+    let payload;
+    
+    // Create different payloads based on the notification type
+    switch (type) {
+      case 'newOrder':
+        payload = { 
+          notificationType: 'newOrder',
+          data: { orderNumber: 'ORD-9999', tableNumber: 'T7' } 
+        };
+        break;
+      case 'orderStatusChange':
+        payload = { 
+          notificationType: 'orderStatusChange',
+          data: { orderNumber: 'ORD-9999', status: 'preparing' } 
+        };
+        break;
+      case 'kitchenAlert':
+        payload = { 
+          notificationType: 'kitchenAlert',
+          data: { tokenNumber: 'KT-99', message: 'Running low on ingredients' } 
+        };
+        break;
+      case 'paymentReceived':
+        payload = { 
+          notificationType: 'paymentReceived',
+          data: { billNumber: 'BILL-9999', amount: 1299 } 
+        };
+        break;
+      case 'systemAlert':
+        payload = { 
+          notificationType: 'systemAlert',
+          data: { message: 'System maintenance scheduled in 30 minutes' } 
+        };
+        break;
+      case 'error':
+        payload = { 
+          notificationType: 'error',
+          data: { message: 'Database connection error in kitchen module' } 
+        };
+        break;
+      default:
         return;
-      }
+    }
+    
+    try {
+      const response = await apiRequest('POST', '/api/notifications/send', payload);
+      const data = await response.json();
       
-      const updateResponse = await apiRequest("PATCH", `/api/orders/${latestOrder.id}`, {
-        status
+      toast({
+        title: 'Notification Sent',
+        description: `Successfully sent a ${type} notification`,
+        variant: 'success'
       });
       
-      if (updateResponse.ok) {
-        toast({
-          title: "Order Status Updated",
-          description: `Order ${latestOrder.orderNumber} status updated to ${status}`,
-          variant: "default"
-        });
-      } else {
-        toast({
-          title: "Update Failed",
-          description: "Failed to update order status",
-          variant: "destructive"
-        });
-      }
+      console.log('Predefined notification sent:', data);
     } catch (error) {
-      console.error("Error updating order status:", error);
+      console.error('Error sending predefined notification:', error);
+      
       toast({
-        title: "Error",
-        description: "Failed to update order status. Check console for details.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to send notification',
+        variant: 'destructive'
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
-
+  
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Notification System Test</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Notification Testing Dashboard</h1>
       
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Create Test Order</CardTitle>
-          <CardDescription>
-            This will create a new order and trigger real-time toast notifications
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-4">
-            Click the button below to create a test order. A toast notification should appear
-            to confirm the creation of the order through the WebSocket connection.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={createTestOrder} disabled={loading}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Create Test Order
-          </Button>
-        </CardFooter>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Update Order Status</CardTitle>
-          <CardDescription>
-            Update the status of the most recent order to test different notification sounds
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-4">
-            Click on one of the buttons below to update the status of the most recent order
-            and trigger a status change notification.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={() => updateOrderStatus("preparing")}
-              disabled={loading}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Custom Notification Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Custom Notification</CardTitle>
+            <CardDescription>
+              Create and send a custom notification
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="notificationType">Notification Type</Label>
+                <Select 
+                  value={notificationType} 
+                  onValueChange={(value: any) => setNotificationType(value)}
+                >
+                  <SelectTrigger id="notificationType">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Notification title"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="message">Message</Label>
+                <Input
+                  id="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Notification message"
+                />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              onClick={handleSendTestNotification} 
+              disabled={isLoading}
+              className="w-full"
             >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Set to Preparing
+              {isLoading ? 'Sending...' : 'Send Custom Notification'}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => updateOrderStatus("ready")}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Set to Ready
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => updateOrderStatus("completed")}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Set to Completed
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => updateOrderStatus("billed")}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Set to Billed
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardFooter>
+        </Card>
+        
+        {/* Predefined Notifications Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Predefined Notifications</CardTitle>
+            <CardDescription>
+              Send system-defined notification types
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Button 
+                onClick={() => handleSendPredefinedNotification('newOrder')}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                New Order Notification
+              </Button>
+              
+              <Button 
+                onClick={() => handleSendPredefinedNotification('orderStatusChange')}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                Order Status Change Notification
+              </Button>
+              
+              <Button 
+                onClick={() => handleSendPredefinedNotification('kitchenAlert')}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                Kitchen Alert Notification
+              </Button>
+              
+              <Button 
+                onClick={() => handleSendPredefinedNotification('paymentReceived')}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                Payment Received Notification
+              </Button>
+              
+              <Button 
+                onClick={() => handleSendPredefinedNotification('systemAlert')}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                System Alert Notification
+              </Button>
+              
+              <Button 
+                onClick={() => handleSendPredefinedNotification('error')}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full justify-start text-red-500 hover:text-red-700"
+              >
+                Error Notification
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

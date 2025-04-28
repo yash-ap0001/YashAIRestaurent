@@ -15,7 +15,7 @@ export interface Notification {
 /**
  * Sends a notification through WebSocket to all connected clients
  */
-export function sendNotification(
+function sendNotification(
   title: string,
   message: string,
   type: NotificationType = 'info',

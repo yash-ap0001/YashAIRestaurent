@@ -2304,11 +2304,10 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       }
       
       // Send the notification
-      const notification = notificationService.sendNotification(
-        title, 
-        message, 
-        type as any
-      );
+      // Using our custom test notification method
+      const notification = title && message 
+        ? notificationService.sendNotification(title, message, type as any)
+        : notificationService.testNotification(type as any);
       
       res.status(200).json({ 
         success: true, 
