@@ -22,6 +22,7 @@ interface ChatInterfaceProps {
   userName?: string;
   minimized?: boolean;
   onMinimize?: () => void;
+  onClose?: () => void; // Added to support AppShell.tsx
   customerId?: number;
   orderId?: number;
 }
@@ -31,6 +32,7 @@ export function ChatInterface({
   userName = "Guest",
   minimized = false,
   onMinimize,
+  onClose,
   customerId,
   orderId,
 }: ChatInterfaceProps) {
@@ -241,7 +243,7 @@ export function ChatInterface({
             variant="ghost" 
             size="icon" 
             className="h-7 w-7 text-neutral-400 hover:text-purple-400 hover:bg-purple-900/20" 
-            onClick={onMinimize}
+            onClick={onClose || onMinimize}
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
