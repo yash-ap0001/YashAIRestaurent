@@ -184,11 +184,17 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={onClose}
+    >
       <DialogContent 
-        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-zinc-900/95 border border-purple-600/30 shadow-xl p-0">
-        <DialogHeader className="relative p-6 bg-gradient-to-r from-purple-900/60 to-purple-800/60 rounded-t-lg border-b border-purple-600/30">
-          <div className="absolute right-0 top-0">
+        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-zinc-900/90 border border-purple-600/30 shadow-xl p-0 backdrop-blur-sm">
+        <DialogHeader className="relative p-4 bg-gradient-to-r from-purple-900/60 to-purple-800/60 rounded-t-lg border-b border-purple-600/30">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+              Bulk Order Creation
+            </DialogTitle>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -198,12 +204,6 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
-            Bulk Order Creation
-          </DialogTitle>
-          <DialogDescription className="text-gray-300">
-            Create multiple orders at once to save time. Perfect for events or busy periods.
-          </DialogDescription>
         </DialogHeader>
         
         <Tabs 
