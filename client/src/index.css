@@ -5,9 +5,9 @@
 :root {
   /* Enhanced color palette with more vibrant gradients */
   --header-bg: #0f172a; /* Navy blue header from screenshot */
-  --sidebar-bg: transparent; /* Transparent sidebar */
+  --sidebar-bg: rgba(255, 255, 255, 0.1); /* Glass-like transparent sidebar */
   --header-bg-dark: #0f172a; /* Navy blue header for dark mode too */
-  --sidebar-bg-dark: transparent; /* Transparent sidebar for dark mode */
+  --sidebar-bg-dark: rgba(255, 255, 255, 0.05); /* Glass-like transparent sidebar for dark mode */
   --border-color: rgba(79, 70, 229, 0.15);
   --primary-color: #4F46E5;
   --primary-color-hover: #4338CA;
@@ -89,6 +89,15 @@ a:hover svg {
 }
 .app-logo svg {
   filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.2));
+}
+
+/* Glass effect for sidebar and mobile menu */
+aside[style*="sidebar"],
+[data-radix-sheet-content] {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* Theme colors for light and dark mode */
@@ -344,13 +353,19 @@ div[data-state="unchecked"] {
   
   /* Card and elements styles with theme variable support */
   .card {
-    @apply bg-card border-border;
+    @apply border-border;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     box-shadow: var(--card-shadow);
     transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
   }
   .card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
+    background-color: rgba(255, 255, 255, 0.08);
   }
   
   h1, h2, h3, h4, h5, h6 {

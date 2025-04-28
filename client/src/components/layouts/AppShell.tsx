@@ -369,7 +369,7 @@ export function AppShell({ children }: AppShellProps) {
         </header>
         
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-transparent">
+        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-[#0f172a]/90">
           {children}
         </div>
       </main>
