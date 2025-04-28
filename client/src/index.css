@@ -2,6 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Purple and Black Theme Overrides */
+.sidebar-active-link {
+  color: white !important;
+  background-color: rgba(107, 33, 168, 0.8) !important; /* purple-800 with slight transparency */
+  font-weight: 500;
+}
+
+.sidebar-link {
+  color: white !important;
+}
+
+.sidebar-link:hover {
+  background-color: rgba(126, 34, 206, 0.5) !important; /* purple-700 with transparency */
+}
+
+/* Sidebar menu items */
+.sidebar-menu-item {
+  color: white !important;
+}
+
+.sidebar-menu-item:hover {
+  background-color: rgba(126, 34, 206, 0.5) !important;
+}
+
+.sidebar-menu-item-active {
+  background-color: rgba(107, 33, 168, 0.8) !important;
+  color: white !important;
+  font-weight: 500;
+}
+
+/* Accordion triggers */
+[data-accordion-trigger] {
+  color: white !important;
+}
+
+/* Override all sidebar nav item styles */
+aside a, aside button {
+  color: white !important;
+}
+
 /* Ensure html and body take up full height */
 html, body, #root {
   height: 100%;
