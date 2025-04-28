@@ -3,22 +3,40 @@
 @tailwind utilities;
 
 :root {
-  --header-bg: #F5F7FF;
-  --sidebar-bg: #EEF2FF;
+  /* Enhanced color palette with gradients */
+  --header-bg: linear-gradient(to right, #F5F7FF, #EEF2FF);
+  --sidebar-bg: linear-gradient(to bottom, #EEF2FF, #E4E9FF);
   --border-color: #E5E7EB;
   --primary-color: #4F46E5;
   --primary-color-hover: #4338CA;
   --heading-text: #111827;
   --body-text: #6B7280;
+  
+  /* Shadow variables for depth */
+  --header-shadow: 0 1px 3px rgba(79, 70, 229, 0.1);
+  --sidebar-shadow: 1px 0 5px rgba(79, 70, 229, 0.08);
+  --card-shadow: 0 2px 8px rgba(79, 70, 229, 0.12);
 }
 
 /* Custom primary button with CSS variables */
 .btn-primary-custom {
   background-color: var(--primary-color);
   color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3);
 }
 .btn-primary-custom:hover {
   background-color: var(--primary-color-hover);
+  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Active navigation item styling */
+.nav-link-active {
+  position: relative;
+  background: linear-gradient(to right, rgba(79, 70, 229, 0.1), rgba(79, 70, 229, 0.05));
+  font-weight: 600 !important;
+  border-left: 3px solid var(--primary-color);
 }
 
 /* Theme colors for light and dark mode */

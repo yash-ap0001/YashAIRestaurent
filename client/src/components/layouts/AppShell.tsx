@@ -138,7 +138,11 @@ export function AppShell({ children }: AppShellProps) {
       <aside className={cn(
         "hidden md:flex flex-col border-r h-full transition-all duration-300",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
-      )} style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--border-color)' }}>
+      )} style={{ 
+        background: 'var(--sidebar-bg)', 
+        borderColor: 'var(--border-color)',
+        boxShadow: 'var(--sidebar-shadow)'
+      }}>
         <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB]">
           <div className={cn("flex items-center", sidebarCollapsed ? "justify-center w-full" : "")}>
             <div className="h-8 w-8 rounded-md flex items-center justify-center text-white" style={{ backgroundColor: 'var(--primary-color)' }}>
@@ -318,7 +322,11 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 border-b flex items-center justify-between px-4 sm:px-6" style={{ backgroundColor: 'var(--header-bg)', borderColor: 'var(--border-color)' }}>
+        <header className="h-16 border-b flex items-center justify-between px-4 sm:px-6" style={{ 
+          background: 'var(--header-bg)', 
+          borderColor: 'var(--border-color)',
+          boxShadow: 'var(--header-shadow)'
+        }}>
           <div className="flex items-center md:hidden">
             <Button 
               variant="ghost" 
@@ -371,7 +379,11 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Mobile menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0 border-r" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--border-color)' }}>
+        <SheetContent side="left" className="w-64 p-0 border-r" style={{ 
+          background: 'var(--sidebar-bg)', 
+          borderColor: 'var(--border-color)',
+          boxShadow: 'var(--sidebar-shadow)'
+        }}>
           <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB]">
             <div className="h-8 w-8 rounded-md flex items-center justify-center text-white" style={{ backgroundColor: 'var(--primary-color)' }}>
               <HandPlatter size={20} />
