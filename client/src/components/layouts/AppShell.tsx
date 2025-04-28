@@ -321,55 +321,54 @@ export function AppShell({ children }: AppShellProps) {
       
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar */}
-        <header className="h-16 border-b flex items-center justify-between px-4 sm:px-6 dark:border-gray-700" 
-          style={getThemeStyles("header")}>
-          <div className="flex items-center md:hidden">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <Menu className="h-5 w-5 text-white" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-            <h1 className="ml-3 text-lg font-semibold text-white">{currentPage.label}</h1>
-          </div>
-          
-          <div className="hidden md:block">
-            <h1 className="text-lg font-semibold text-white">{currentPage.label}</h1>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            
-            <div className="relative">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5 text-white" />
-                <span className="absolute top-0 right-0 h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--primary-color)' }}></span>
-                <span className="sr-only">Notifications</span>
+        {/* Top Bar - Simplified to match screenshot */}
+        <header className="h-16 flex items-center justify-between px-4 sm:px-6" 
+          style={{ background: '#0f172a', borderBottom: 'none' }}>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center md:hidden mr-2">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setMobileMenuOpen(true)}
+                className="bg-transparent hover:bg-blue-900/20"
+              >
+                <Menu className="h-5 w-5 text-white" />
+                <span className="sr-only">Open menu</span>
               </Button>
             </div>
             
-            {/* Theme toggle for light/dark mode - now more prominent */}
-            <div className="relative mr-1">
+            <div className="h-8 w-8 rounded-md flex items-center justify-center text-white app-logo">
+              <HandPlatter size={20} className="nav-item-icon" />
+            </div>
+            
+            <h1 className="text-lg font-semibold text-white">{currentPage.label}</h1>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            {/* Notifications icon */}
+            <Button variant="ghost" size="icon" className="relative bg-transparent hover:bg-blue-900/20">
+              <Bell className="h-5 w-5 text-white" />
+              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-blue-500"></span>
+              <span className="sr-only">Notifications</span>
+            </Button>
+            
+            {/* Theme toggle */}
+            <div className="relative">
               <ThemeToggle />
             </div>
             
-            {/* WebSocket connection status indicator */}
+            {/* WebSocket connection status */}
             <div className="relative">
               <ConnectionStatus />
             </div>
             
-            {/* Theme selector dropdown for column colors */}
-            <ColumnColorSettings />
-            
-            {/* User menu - always visible in top right corner */}
+            {/* User menu */}
             <UserMenu />
           </div>
         </header>
         
-        {/* Page Content */}
-        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-[#0f172a]/90">
+        {/* Page Content - Dark navy blue background from screenshot */}
+        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6" style={{ backgroundColor: '#111827' }}>
           {children}
         </div>
       </main>
