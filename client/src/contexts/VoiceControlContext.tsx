@@ -1,54 +1,37 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useVoiceControl } from '@/hooks/use-voice-control';
 import { Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 
-interface VoiceControlContextType {
-  isListening: boolean;
-  isProcessing: boolean;
-  transcript: string;
-  startListening: () => void;
-  stopListening: () => void;
-  toggleListening: () => void;
-  processCommand: (command: string) => Promise<void>;
+// Create a simple voice control context for now
+type VoiceControlContextType = {
   voiceEnabled: boolean;
   setVoiceEnabled: (enabled: boolean) => void;
-  language: string;
-  setLanguage: (lang: string) => void;
-  accentMode: boolean;
-  setAccentMode: (enabled: boolean) => void;
-}
+  isListening: boolean;
+  toggleListening: () => void;
+};
 
+// Create the context
 const VoiceControlContext = createContext<VoiceControlContextType | null>(null);
 
+// Basic voice control provider 
 export const VoiceControlProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load settings from local storage
-  const [voiceEnabled, setVoiceEnabled] = useLocalStorage('voiceEnabled', true);
-  const [language, setLanguage] = useLocalStorage('voiceLanguage', 'en-IN');
-  const [accentMode, setAccentMode] = useLocalStorage('accentMode', true);
-  const [volume, setVolume] = useLocalStorage('voiceVolume', 80);
+  // Simple state management 
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   
-  // Initialize voice control hook with stored settings
-  const voiceControl = useVoiceControl({
-    enabled: true,
-    language,
-    accentMode,
-    voiceEnabled,
-    volume
-  });
+  // Basic toggle functionality
+  const toggleListening = () => {
+    setIsListening(!isListening);
+  };
   
-  // Provide context value
-  const contextValue: VoiceControlContextType = {
-    ...voiceControl,
+  // Context value
+  const contextValue = {
     voiceEnabled,
     setVoiceEnabled,
-    language,
-    setLanguage,
-    accentMode,
-    setAccentMode
+    isListening,
+    toggleListening
   };
-
+  
   return (
     <VoiceControlContext.Provider value={contextValue}>
       {children}
@@ -57,11 +40,11 @@ export const VoiceControlProvider: React.FC<{ children: React.ReactNode }> = ({ 
       <div className="fixed bottom-16 right-4 z-40">
         <Button
           size="icon"
-          variant={voiceControl.isListening ? "default" : "outline"}
-          className={voiceControl.isListening ? "bg-blue-600 hover:bg-blue-700" : ""}
-          onClick={voiceControl.toggleListening}
+          variant={isListening ? "default" : "outline"}
+          className={isListening ? "bg-blue-600 hover:bg-blue-700" : ""}
+          onClick={toggleListening}
         >
-          {voiceControl.isListening ? (
+          {isListening ? (
             <MicOff className="h-5 w-5" />
           ) : (
             <Mic className="h-5 w-5" />
@@ -72,6 +55,7 @@ export const VoiceControlProvider: React.FC<{ children: React.ReactNode }> = ({ 
   );
 };
 
+// Hook to use the voice control context
 export const useVoiceControlContext = () => {
   const context = useContext(VoiceControlContext);
   
