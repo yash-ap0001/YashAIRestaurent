@@ -40,6 +40,7 @@ import * as telephonyService from "./services/telephony";
 import { processChatbotRequest } from "./services/chatbot";
 import { WebSocketServer } from 'ws';
 import { initializeRealTimeService, broadcastStatsUpdate, broadcastToAllClients } from './services/realtime';
+import { notificationService } from './services/notificationService';
 import { broadcastNewOrder } from './orderEnhancement';
 import { generateOrderNumber, generateTokenNumber, generateBillNumber, initializeCounters, handleError } from './utils';
 import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
@@ -2285,6 +2286,77 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     try {
       const docs = n8nService.getWebhooksDocumentation();
       res.json(docs);
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Test notification endpoint
+  app.post("/api/notifications/test", async (req: Request, res: Response) => {
+    try {
+      const { type = 'info', message = 'Test notification', title = 'Test' } = req.body;
+      
+      // Validate notification type
+      if (!['info', 'success', 'warning', 'error'].includes(type)) {
+        return res.status(400).json({ 
+          error: "Invalid notification type. Must be one of: info, success, warning, error" 
+        });
+      }
+      
+      // Send the notification
+      const notification = notificationService.sendNotification(
+        title, 
+        message, 
+        type as any
+      );
+      
+      res.status(200).json({ 
+        success: true, 
+        message: "Notification sent successfully",
+        notification
+      });
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
+  // Send predefined notification types
+  app.post("/api/notifications/send", async (req: Request, res: Response) => {
+    try {
+      const { notificationType, data } = req.body;
+      
+      let notification;
+      
+      switch (notificationType) {
+        case 'newOrder':
+          notification = notificationService.newOrder(data.orderNumber, data.tableNumber);
+          break;
+        case 'orderStatusChange':
+          notification = notificationService.orderStatusChange(data.orderNumber, data.status);
+          break;
+        case 'kitchenAlert':
+          notification = notificationService.kitchenAlert(data.tokenNumber, data.message);
+          break;
+        case 'paymentReceived':
+          notification = notificationService.paymentReceived(data.billNumber, data.amount);
+          break;
+        case 'systemAlert':
+          notification = notificationService.systemAlert(data.message);
+          break;
+        case 'error':
+          notification = notificationService.error(data.message);
+          break;
+        default:
+          return res.status(400).json({ 
+            error: "Invalid notification type" 
+          });
+      }
+      
+      res.status(200).json({ 
+        success: true, 
+        message: "Notification sent successfully",
+        notification
+      });
     } catch (err) {
       errorHandler(err, res);
     }

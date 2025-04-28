@@ -86,18 +86,6 @@ export function NotificationSystem() {
 
     setWebsocket(socket);
 
-    // Mock notifications for testing (remove in production)
-    const mockNotification: Notification = {
-      id: 'test-1',
-      title: 'New Order',
-      message: 'Table 5 placed a new order',
-      type: 'info',
-      createdAt: new Date(),
-      read: false,
-    };
-    setNotifications([mockNotification]);
-    setUnreadCount(1);
-
     // Cleanup
     return () => {
       if (socket && socket.readyState === WebSocket.OPEN) {
