@@ -509,17 +509,17 @@ div[data-state="unchecked"] {
       @apply bg-[#C091F4] hover:bg-[#A064EF];
     }
     
-    /* Background colors for various components */
+    /* Background colors for various components - all removed */
     header, .header, [role="banner"] {
-      @apply bg-[#3A40E7] text-white;
+      @apply bg-transparent text-[#111827];
     }
     
     aside, .sidebar, nav[role="navigation"] {
-      @apply bg-[#C091F4] text-white;
+      @apply bg-transparent text-[#111827];
     }
     
     main, .content, [role="main"] {
-      @apply bg-[#F1F5F3];
+      @apply bg-transparent;
     }
   }
   

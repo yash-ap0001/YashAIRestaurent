@@ -136,15 +136,15 @@ export function AppShell({ children }: AppShellProps) {
     <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-background text-foreground">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-card border-r border-border h-full transition-all duration-300",
+        "hidden md:flex flex-col bg-transparent border-r border-border h-full transition-all duration-300",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
       )}>
-        <div className="p-4 flex items-center justify-between border-b border-neutral-800">
+        <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB]">
           <div className={cn("flex items-center", sidebarCollapsed ? "justify-center w-full" : "")}>
             <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
               <HandPlatter size={20} />
             </div>
-            {!sidebarCollapsed && <h1 className="text-lg font-semibold text-white ml-3">YashHotelBot</h1>}
+            {!sidebarCollapsed && <h1 className="text-lg font-semibold text-[#111827] ml-3">YashHotelBot</h1>}
           </div>
           <Button 
             variant="ghost" 
@@ -306,8 +306,8 @@ export function AppShell({ children }: AppShellProps) {
         )}
         
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-neutral-800">
-            <div className="text-xs text-neutral-400 text-center">
+          <div className="p-4 border-t border-[#E5E7EB]">
+            <div className="text-xs text-[#6B7280] text-center">
               <p>YashHotelBot v1.2.0</p>
               <p className="mt-1">© 2025 Yash Solutions</p>
             </div>
@@ -318,28 +318,28 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 sm:px-6">
+        <header className="h-16 border-b border-[#E5E7EB] bg-transparent flex items-center justify-between px-4 sm:px-6">
           <div className="flex items-center md:hidden">
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setMobileMenuOpen(true)}
             >
-              <Menu className="h-5 w-5 text-neutral-300" />
+              <Menu className="h-5 w-5 text-[#111827]" />
               <span className="sr-only">Open menu</span>
             </Button>
-            <h1 className="ml-3 text-lg font-semibold text-white">{currentPage.label}</h1>
+            <h1 className="ml-3 text-lg font-semibold text-[#111827]">{currentPage.label}</h1>
           </div>
           
           <div className="hidden md:block">
-            <h1 className="text-lg font-semibold text-white">{currentPage.label}</h1>
+            <h1 className="text-lg font-semibold text-[#111827]">{currentPage.label}</h1>
           </div>
           
           <div className="flex items-center space-x-4">
             
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5 text-neutral-300" />
+                <Bell className="h-5 w-5 text-[#6B7280]" />
                 <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-purple-500"></span>
                 <span className="sr-only">Notifications</span>
               </Button>
@@ -364,7 +364,7 @@ export function AppShell({ children }: AppShellProps) {
         </header>
         
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-background">
+        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 bg-transparent">
           {children}
         </div>
       </main>
