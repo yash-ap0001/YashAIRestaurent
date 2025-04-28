@@ -13,27 +13,43 @@
   --body-text: #6B7280;
   
   /* Enhanced shadow variables for more depth */
-  --header-shadow: 0 2px 6px rgba(79, 70, 229, 0.15);
-  --sidebar-shadow: 2px 0 8px rgba(79, 70, 229, 0.12);
-  --card-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+  --header-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+  --sidebar-shadow: 2px 0 12px rgba(79, 70, 229, 0.15);
+  --card-shadow: 0 6px 16px rgba(79, 70, 229, 0.15);
+  --button-shadow: 0 3px 8px rgba(79, 70, 229, 0.25);
   
   /* Additional styling variables */
   --menu-item-hover: rgba(79, 70, 229, 0.08);
   --menu-item-active-bg: linear-gradient(to right, rgba(79, 70, 229, 0.15), rgba(79, 70, 229, 0.05));
   --logo-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  --button-gradient: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+  --title-gradient: linear-gradient(to right, #3366FF, #4F46E5, #6366F1);
 }
 
 /* Custom primary button with CSS variables */
 .btn-primary-custom {
-  background-color: var(--primary-color);
+  background: var(--button-gradient);
   color: white;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3);
+  box-shadow: var(--button-shadow);
 }
 .btn-primary-custom:hover {
-  background-color: var(--primary-color-hover);
-  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.5);
+  background-position: right center;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
   transform: translateY(-1px);
+}
+.btn-primary-custom:active {
+  transform: translateY(0);
+}
+
+/* Enhanced styling for all buttons */
+button[class*="bg-primary"] {
+  background: var(--button-gradient);
+  box-shadow: var(--button-shadow);
+}
+button[class*="bg-primary"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
 }
 
 /* Active navigation item styling */
@@ -47,10 +63,16 @@
 }
 
 /* Enhance the navigation links on hover */
-a:hover .nav-item-icon {
+a:hover svg {
   transform: scale(1.1);
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
   color: var(--primary-color);
+}
+
+/* Add a subtle pulsing effect to icons in active navigation items */
+.nav-link-active svg {
+  color: var(--primary-color);
+  filter: drop-shadow(0 0 2px rgba(79, 70, 229, 0.3));
 }
 
 /* Logo styling */
@@ -320,7 +342,13 @@ div[data-state="unchecked"] {
   
   /* Card and elements styles with theme variable support */
   .card {
-    @apply bg-card border-border shadow-md;
+    @apply bg-card border-border;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
   }
   
   h1, h2, h3, h4, h5, h6 {
