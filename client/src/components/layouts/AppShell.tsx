@@ -132,10 +132,10 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="app-container flex min-h-[600px] h-full w-full overflow-hidden bg-[#0f172a] text-white">
+    <div className="app-container flex min-h-screen h-screen w-full overflow-hidden bg-[#0f172a] text-white">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
-        "hidden md:flex flex-col border-r h-full transition-all duration-300 dark:border-gray-700",
+        "hidden md:flex flex-col border-r h-screen transition-all duration-300 dark:border-gray-700",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
       )} style={getThemeStyles("sidebar")}>
         <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB] dark:border-gray-700">
@@ -318,7 +318,7 @@ export function AppShell({ children }: AppShellProps) {
       </aside>
       
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden h-screen">
         {/* Top Bar - Simplified to match screenshot */}
         <header className="h-16 flex items-center justify-between px-4 sm:px-6 dark:bg-[#0f172a] bg-white border-b border-gray-200 dark:border-none">
           <div className="flex items-center gap-3">
@@ -365,7 +365,7 @@ export function AppShell({ children }: AppShellProps) {
         </header>
         
         {/* Page Content - Dark navy blue background from screenshot (dark mode) and white for light mode */}
-        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 dark:bg-[#111827] bg-gray-50">
+        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 dark:bg-[#111827] bg-gray-50 min-h-0">
           {children}
         </div>
       </main>

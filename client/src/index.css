@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure html and body take up full height */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 :root {
   /* Enhanced color palette with more vibrant gradients */
   --header-bg: #0f172a; /* Navy blue header from screenshot */
@@ -197,9 +205,9 @@ aside[style*="sidebar"],
   --billed-bg: 0 84% 60%; /* Red */
 }
 
-/* Custom height for h-screen to fix vertical scrolling issues */
+/* Full height for h-screen */
 .h-screen {
-  height: 82vh;
+  height: 100vh;
 }
 
 /* Hide Replit metadata borders */
