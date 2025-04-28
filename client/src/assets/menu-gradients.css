@@ -1,0 +1,62 @@
+/* Enhanced Purple Gradient Effects for Menu Items */
+
+/* Dashboard item gradient (sidebar) */
+.sidebar-menu-item-active,
+a[href="/"] {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.9), rgba(132, 0, 255, 0.6)) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 12px rgba(132, 0, 255, 0.4) !important;
+  border: 1px solid rgba(132, 0, 255, 0.7) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Add a subtle animated glow effect */
+.sidebar-menu-item-active::before,
+a[href="/"]::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -50% !important;
+  left: -50% !important;
+  width: 200% !important;
+  height: 200% !important;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%) !important;
+  opacity: 0.7 !important;
+  transform: rotate(30deg) !important;
+  animation: glowPulse 4s infinite !important;
+  pointer-events: none !important;
+}
+
+@keyframes glowPulse {
+  0% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.1; }
+}
+
+/* Hover effect */
+.sidebar-menu-item-active:hover,
+a[href="/"]:hover {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 1), rgba(132, 0, 255, 0.7)) !important;
+  box-shadow: 0 4px 16px rgba(132, 0, 255, 0.6) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Mobile menu specific styling */
+.sheet-content a[href="/"] {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.9), rgba(132, 0, 255, 0.6)) !important;
+  color: white !important;
+}
+
+/* Make all menu items have a slight purple tint when not active */
+.sidebar-menu-item {
+  transition: all 0.3s ease !important;
+  border: 1px solid transparent !important;
+}
+
+.sidebar-menu-item:hover {
+  background: rgba(132, 0, 255, 0.1) !important; 
+  border: 1px solid rgba(132, 0, 255, 0.3) !important;
+}

@@ -1,0 +1,96 @@
+/* Specialized CSS for Menu Items with Strong Purple Transparent Gradients */
+
+/* Target menu item cards in the menu page */
+.menu-page .card,
+.menu-grid .menu-item,
+div[class*="menu-grid"] > div {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(132, 0, 255, 0.3) !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 8px rgba(132, 0, 255, 0.1) !important;
+}
+
+/* Create the transparent purple gradient overlay */
+.menu-page .card::before,
+.menu-grid .menu-item::before,
+div[class*="menu-grid"] > div::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.25), transparent) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+/* Enhanced hover effect */
+.menu-page .card:hover,
+.menu-grid .menu-item:hover,
+div[class*="menu-grid"] > div:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 24px rgba(132, 0, 255, 0.2) !important;
+  border: 1px solid rgba(132, 0, 255, 0.5) !important;
+}
+
+/* Stronger gradient on hover */
+.menu-page .card:hover::before,
+.menu-grid .menu-item:hover::before, 
+div[class*="menu-grid"] > div:hover::before {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.35), rgba(132, 0, 255, 0.05)) !important;
+}
+
+/* Style card titles with purple gradient text */
+.menu-page .card h3,
+.menu-grid .menu-item h3,
+div[class*="menu-grid"] > div h3 {
+  background: linear-gradient(to right, #9333ea, #c084fc);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  font-weight: 600 !important;
+}
+
+/* Price tags with purple border */
+.menu-page .card .price,
+.menu-grid .menu-item .price,
+div[class*="menu-grid"] > div .price {
+  border: 1px solid rgba(132, 0, 255, 0.4) !important;
+  background-color: rgba(132, 0, 255, 0.05) !important;
+  color: rgb(132, 0, 255) !important;
+  font-weight: 600 !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Apply special styling to all menu-related elements */
+[class*="menu-"] {
+  position: relative !important;
+}
+
+/* Target actual menu items with a more direct approach */
+div[role="menuitem"],
+button[role="menuitem"] {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+div[role="menuitem"]::before,
+button[role="menuitem"]::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.2), transparent) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+div[role="menuitem"]:hover::before,
+button[role="menuitem"]:hover::before {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.3), rgba(132, 0, 255, 0.05)) !important;
+}

@@ -234,18 +234,12 @@ export function AppShell({ children }: AppShellProps) {
                           href={item.href}
                           className={cn(
                             "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                            location === item.href 
-                              ? "sidebar-menu-item-active" 
-                              : "sidebar-menu-item"
+                            item.label === "Dashboard" 
+                              ? "dashboard-gradient" 
+                              : location === item.href 
+                                ? "sidebar-menu-item-active" 
+                                : "sidebar-menu-item"
                           )}
-                          style={
-                            item.label === "Dashboard" ? 
-                            { 
-                              background: "linear-gradient(to right, rgba(147, 51, 234, 1), rgba(147, 51, 234, 0.7))",
-                              color: "white",
-                              fontWeight: 500
-                            } : {}
-                          }
                         >
                           <span className="mr-3 text-current">{item.icon}</span>
                           {item.label}

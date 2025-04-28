@@ -1,0 +1,14 @@
+/* Direct Purple Gradient for Menu Items */
+a[href="/"] {
+  background: linear-gradient(to right, rgba(132, 0, 255, 0.9), rgba(132, 0, 255, 0.5)) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 12px rgba(132, 0, 255, 0.4) !important;
+  border: 1px solid rgba(132, 0, 255, 0.7) !important;
+}
+
+a[href="/"]:hover {
+  background: linear-gradient(to right, rgba(132, 0, 255, 1), rgba(132, 0, 255, 0.6)) !important;
+  box-shadow: 0 4px 16px rgba(132, 0, 255, 0.6) !important;
+}

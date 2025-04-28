@@ -1,0 +1,103 @@
+/* Transparent Purple Gradient Effects for UI Elements */
+
+/* Enhanced Card Styling with Purple Gradient Overlays */
+.card {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(132, 0, 255, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Transparent gradient overlay on cards */
+.card::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.15), transparent) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+/* Hover effect for cards */
+.card:hover {
+  box-shadow: 0 8px 24px rgba(132, 0, 255, 0.15) !important;
+  border: 1px solid rgba(132, 0, 255, 0.4) !important;
+}
+
+.card:hover::before {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.2), transparent) !important;
+}
+
+/* Menu Items with Transparent Purple Gradient */
+.menu-item {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(132, 0, 255, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.menu-item::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.2), transparent) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.menu-item:hover {
+  box-shadow: 0 8px 24px rgba(132, 0, 255, 0.15) !important;
+  border: 1px solid rgba(132, 0, 255, 0.4) !important;
+}
+
+.menu-item:hover::before {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.25), rgba(132, 0, 255, 0.05)) !important;
+}
+
+/* Table rows with subtle gradient on hover */
+tbody tr {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+}
+
+tbody tr:hover {
+  background: linear-gradient(to right, rgba(132, 0, 255, 0.05), transparent) !important;
+}
+
+/* Button hover effects */
+button:not(.btn-primary-custom):hover {
+  box-shadow: 0 0 12px rgba(132, 0, 255, 0.3) !important;
+}
+
+/* Primary buttons with stronger purple gradient */
+.btn-primary-custom {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 0.9), rgba(132, 0, 255, 0.7)) !important;
+  border: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.btn-primary-custom::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -50% !important;
+  left: -50% !important;
+  width: 200% !important;
+  height: 200% !important;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%) !important;
+  opacity: 0.5 !important;
+  transform: rotate(30deg) !important;
+  pointer-events: none !important;
+}
+
+.btn-primary-custom:hover {
+  background: linear-gradient(135deg, rgba(132, 0, 255, 1), rgba(132, 0, 255, 0.8)) !important;
+  transform: translateY(-1px) !important;
+}
