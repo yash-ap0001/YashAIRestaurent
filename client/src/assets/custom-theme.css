@@ -1,0 +1,49 @@
+/* Custom styles to apply purple and black theme */
+
+/* Sidebar styles */
+.sidebar-active-link {
+  color: white !important;
+  background-color: rgba(107, 33, 168, 0.8) !important; /* purple-800 with slight transparency */
+  font-weight: 500;
+}
+
+.sidebar-link {
+  color: white !important;
+}
+
+.sidebar-link:hover {
+  background-color: rgba(126, 34, 206, 0.5) !important; /* purple-700 with transparency */
+}
+
+/* Accordion headers */
+.sidebar-accordion-trigger {
+  color: white !important;
+}
+
+/* Navigation link for active item */
+.nav-item-active {
+  background-color: rgba(107, 33, 168, 0.8) !important;
+  color: white !important;
+}
+
+/* Navigation link for inactive items */
+.nav-item-inactive {
+  color: white !important;
+}
+
+.nav-item-inactive:hover {
+  background-color: rgba(126, 34, 206, 0.5) !important;
+}
+
+/* Main content area background */
+.main-content {
+  background-color: black;
+  color: white;
+}
+
+/* Cards and other UI components */
+.card-override {
+  background-color: #111827; /* dark gray */
+  border-color: #374151; /* border gray */
+  color: white;
+}
