@@ -27,7 +27,7 @@ export const useVoiceControl = (options: VoiceControlOptions = {}) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const recognitionRef = useRef<any>(null);
   const synth = useRef<SpeechSynthesis | null>(typeof window !== 'undefined' ? window.speechSynthesis : null);
-  const [location, navigate] = useLocation();
+  const [location, setLocation] = useLocation();
   
   // Initialize speech recognition
   useEffect(() => {
@@ -130,7 +130,7 @@ export const useVoiceControl = (options: VoiceControlOptions = {}) => {
       if (result.success) {
         // Handle navigation commands
         if (result.action === 'navigate' && result.path) {
-          navigate(result.path);
+          setLocation(result.path);
         }
         
         // Handle data refresh commands
@@ -183,7 +183,7 @@ export const useVoiceControl = (options: VoiceControlOptions = {}) => {
       setIsProcessing(false);
       setTranscript('');
     }
-  }, [location, navigate, voiceEnabled, toast]);
+  }, [location, setLocation, voiceEnabled, toast]);
 
   // Process transcript when it changes and user stops speaking
   useEffect(() => {

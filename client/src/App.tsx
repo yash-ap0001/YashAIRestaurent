@@ -114,10 +114,12 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <ColumnColorProvider>
-            <ErrorBoundary>
-              <AppContent />
-            </ErrorBoundary>
-            <Toaster />
+            <VoiceControlProvider>
+              <ErrorBoundary>
+                <AppContent />
+              </ErrorBoundary>
+              <Toaster />
+            </VoiceControlProvider>
           </ColumnColorProvider>
         </AuthProvider>
       </ThemeProvider>
