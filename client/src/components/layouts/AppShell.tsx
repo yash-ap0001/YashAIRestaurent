@@ -133,10 +133,10 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-background text-foreground">
+    <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-white text-[#111827]">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-transparent border-r border-border h-full transition-all duration-300",
+        "hidden md:flex flex-col bg-[#F3F4F6] border-r border-[#E5E7EB] h-full transition-all duration-300",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
       )}>
         <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB]">
@@ -318,7 +318,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 border-b border-[#E5E7EB] bg-transparent flex items-center justify-between px-4 sm:px-6">
+        <header className="h-16 border-b border-[#E5E7EB] bg-[#F9FAFB] flex items-center justify-between px-4 sm:px-6">
           <div className="flex items-center md:hidden">
             <Button 
               variant="ghost" 
@@ -371,7 +371,7 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Mobile menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0 bg-transparent border-r border-[#E5E7EB]">
+        <SheetContent side="left" className="w-64 p-0 bg-[#F3F4F6] border-r border-[#E5E7EB]">
           <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB]">
             <div className="h-8 w-8 rounded-md bg-purple-600 flex items-center justify-center text-white">
               <HandPlatter size={20} />

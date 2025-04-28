@@ -605,9 +605,9 @@ div[data-state="unchecked"] {
     @apply font-bold text-white;
   }
   
-  /* Sidebar styling with absolutely no background color */
+  /* Sidebar styling with subtle gray background */
   .main-nav {
-    @apply border-r border-[#E5E7EB] text-[#374151] bg-transparent;
+    @apply border-r border-[#E5E7EB] text-[#374151] bg-[#F3F4F6];
   }
 
   .main-nav a {
@@ -627,12 +627,12 @@ div[data-state="unchecked"] {
     @apply text-[#111827] font-medium underline;
   }
   
-  /* Navbar (top) styling with absolutely no background color */
+  /* Navbar (top) styling with very light gray background */
   .navbar, 
   header, 
   .header-container,
   [role="banner"] {
-    @apply bg-transparent text-[#111827] border-b border-[#E5E7EB] z-10 relative;
+    @apply bg-[#F9FAFB] text-[#111827] border-b border-[#E5E7EB] z-10 relative;
   }
   
   /* Main content area with no background */
