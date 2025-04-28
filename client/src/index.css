@@ -10,20 +10,27 @@
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 271.4 81.3% 55.9%;
+  --primary: 265 89% 62%; /* Purple primary color to match sidebar selected item */
   --primary-foreground: 210 40% 98%;
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --accent: 265 89% 92%; /* Light purple accent color */
+  --accent-foreground: 265 89% 40%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 271.4 81.3% 55.9%;
+  --ring: 265 89% 62%;
   --radius: 0.5rem;
+  
+  /* Column color definitions for light mode */
+  --pending-bg: 30 100% 54%; /* Orange */
+  --preparing-bg: 217 91% 60%; /* Blue */
+  --ready-bg: 152 60% 40%; /* Green */
+  --completed-bg: 270 95% 65%; /* Purple */
+  --billed-bg: 0 84% 60%; /* Red */
 }
 
 .dark {
@@ -46,6 +53,13 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 271.4 81.3% 55.9%;
+  
+  /* Column color definitions for dark mode remain the same */
+  --pending-bg: 30 100% 54%; /* Orange */
+  --preparing-bg: 217 91% 60%; /* Blue */
+  --ready-bg: 152 60% 40%; /* Green */
+  --completed-bg: 270 95% 65%; /* Purple */
+  --billed-bg: 0 84% 60%; /* Red */
 }
 
 /* Custom height for h-screen to fix vertical scrolling issues */
@@ -427,6 +441,32 @@ div[data-state="unchecked"] {
     [role="status"] {
       @apply bg-white border border-gray-200 shadow-md text-gray-800;
     }
+    
+    /* Header and navbar styling to match the screenshot */
+    .main-header {
+      @apply bg-white border-b border-gray-200 py-2;
+    }
+    
+    /* Apply card styles matching the screenshot */
+    .pending-column .order-card {
+      @apply bg-orange-500;
+    }
+    
+    .preparing-column .order-card {
+      @apply bg-blue-500;
+    }
+    
+    .ready-column .order-card {
+      @apply bg-green-600;
+    }
+    
+    .completed-column .order-card {
+      @apply bg-purple-600;
+    }
+    
+    .billed-column .order-card {
+      @apply bg-red-500;
+    }
   }
   
   /* Dark mode specific improvements */
@@ -509,6 +549,40 @@ div[data-state="unchecked"] {
   
   .order-card-text .amount {
     @apply font-bold text-white;
+  }
+  
+  /* Sidebar styling to match the design */
+  .main-nav {
+    @apply bg-white border-r border-gray-200;
+  }
+
+  .main-nav a {
+    @apply text-gray-600 hover:bg-gray-100 rounded-md px-3 py-2 flex items-center gap-2;
+  }
+
+  .main-nav a.active {
+    @apply bg-gradient-to-r from-purple-600 to-purple-500 text-white font-medium;
+  }
+
+  /* Order card styling based on screenshot */
+  .pending-card {
+    @apply bg-gradient-to-r from-orange-500 to-orange-600 shadow-md;
+  }
+
+  .preparing-card {
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 shadow-md;
+  }
+
+  .ready-card {
+    @apply bg-gradient-to-r from-green-600 to-green-500 shadow-md;
+  }
+
+  .completed-card {
+    @apply bg-gradient-to-r from-purple-600 to-purple-500 shadow-md;
+  }
+
+  .billed-card {
+    @apply bg-gradient-to-r from-red-500 to-red-600 shadow-md;
   }
   
   /* Apply these styles to all text elements in cards, regardless of class names */
