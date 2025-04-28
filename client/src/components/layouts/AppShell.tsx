@@ -322,17 +322,16 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar - Simplified to match screenshot */}
-        <header className="h-16 flex items-center justify-between px-4 sm:px-6" 
-          style={{ background: '#0f172a', borderBottom: 'none' }}>
+        <header className="h-16 flex items-center justify-between px-4 sm:px-6 dark:bg-[#0f172a] bg-white border-b border-gray-200 dark:border-none">
           <div className="flex items-center gap-3">
             <div className="flex items-center md:hidden mr-2">
               <Button 
                 variant="ghost" 
                 size="icon"
                 onClick={() => setMobileMenuOpen(true)}
-                className="bg-transparent hover:bg-blue-900/20"
+                className="bg-transparent dark:hover:bg-blue-900/20 hover:bg-gray-100"
               >
-                <Menu className="h-5 w-5 text-white" />
+                <Menu className="h-5 w-5 dark:text-white text-gray-800" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </div>
@@ -341,13 +340,13 @@ export function AppShell({ children }: AppShellProps) {
               <HandPlatter size={20} className="nav-item-icon" />
             </div>
             
-            <h1 className="text-lg font-semibold text-white">{currentPage.label}</h1>
+            <h1 className="text-lg font-semibold dark:text-white text-gray-800">{currentPage.label}</h1>
           </div>
           
           <div className="flex items-center space-x-3">
             {/* Notifications icon */}
-            <Button variant="ghost" size="icon" className="relative bg-transparent hover:bg-blue-900/20">
-              <Bell className="h-5 w-5 text-white" />
+            <Button variant="ghost" size="icon" className="relative bg-transparent dark:hover:bg-blue-900/20 hover:bg-gray-100">
+              <Bell className="h-5 w-5 dark:text-white text-gray-800" />
               <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-blue-500"></span>
               <span className="sr-only">Notifications</span>
             </Button>
@@ -367,8 +366,8 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </header>
         
-        {/* Page Content - Dark navy blue background from screenshot */}
-        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6" style={{ backgroundColor: '#111827' }}>
+        {/* Page Content - Dark navy blue background from screenshot (dark mode) and white for light mode */}
+        <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-6 dark:bg-[#111827] bg-gray-50">
           {children}
         </div>
       </main>
