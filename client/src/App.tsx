@@ -42,6 +42,7 @@ import { useEffect } from "react";
 import { OrderTrackingToasts } from "@/components/orders/OrderTrackingToasts";
 import { ColumnColorProvider } from "@/contexts/ColumnColorContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { VoiceControlProvider } from "@/contexts/VoiceControlContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function Router() {
