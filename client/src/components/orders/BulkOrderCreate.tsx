@@ -186,7 +186,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-black/80 border border-purple-600/30 shadow-xl p-0">
+        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-zinc-900/95 border border-purple-600/30 shadow-xl p-0">
         <DialogHeader className="relative p-6 bg-gradient-to-r from-purple-900/60 to-purple-800/60 rounded-t-lg border-b border-purple-600/30">
           <div className="absolute right-0 top-0">
             <Button 
@@ -212,16 +212,16 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
           onValueChange={setActiveTab}
           className="px-6 pt-6"
         >
-          <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="standard">Standard Creation</TabsTrigger>
-            <TabsTrigger value="ai">AI-Powered Creation</TabsTrigger>
+          <TabsList className="grid grid-cols-2 bg-zinc-800">
+            <TabsTrigger value="standard" className="data-[state=active]:bg-purple-900 data-[state=active]:text-white">Standard Creation</TabsTrigger>
+            <TabsTrigger value="ai" className="data-[state=active]:bg-purple-900 data-[state=active]:text-white">AI-Powered Creation</TabsTrigger>
           </TabsList>
           
           {/* Standard bulk creation tab */}
           <TabsContent value="standard" className="space-y-4 mt-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="orderCount">Number of Orders</Label>
+                <Label htmlFor="orderCount" className="text-white">Number of Orders</Label>
                 <Input
                   id="orderCount"
                   type="number"
@@ -233,7 +233,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tablePrefix">Table Prefix</Label>
+                <Label htmlFor="tablePrefix" className="text-white">Table Prefix</Label>
                 <Input
                   id="tablePrefix"
                   value={tablePrefix}
@@ -242,7 +242,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tableStart">Starting Table Number</Label>
+                <Label htmlFor="tableStart" className="text-white">Starting Table Number</Label>
                 <Input
                   id="tableStart"
                   type="number"
@@ -255,12 +255,12 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-base font-medium">Select Menu Items</Label>
+                <Label className="text-base font-medium text-white">Select Menu Items</Label>
                 <div className="bg-purple-600/20 text-purple-400 text-xs px-3 py-1 rounded-full border border-purple-600/30">
                   Selected {selectedMenuItems.length} items
                 </div>
               </div>
-              <div className="border border-gray-700 rounded-md p-2 max-h-[150px] overflow-y-auto bg-black/50 shadow-inner">
+              <div className="border border-gray-700 rounded-md p-2 max-h-[150px] overflow-y-auto bg-black/90 shadow-inner">
                 {isLoadingMenuItems ? (
                   <div className="flex justify-center items-center h-20">
                     <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
@@ -318,15 +318,15 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
                 placeholder="Example: Create breakfast orders for 20 tables (T1-T20) with coffee, dosa and idli"
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                className="h-32 border-gray-700 bg-black/50 focus:border-purple-500 focus:ring-purple-500/30 shadow-inner"
+                className="h-32 border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 shadow-inner text-white"
               />
-              <p className="text-sm text-gray-400 bg-purple-900/10 p-3 rounded-md border border-purple-900/30">
+              <p className="text-sm text-gray-300 bg-purple-900/30 p-3 rounded-md border border-purple-600/40">
                 Provide details like number of orders, table numbers, menu items, and any special requirements.
                 Our AI will analyze your request and create the appropriate orders automatically.
               </p>
             </div>
             
-            <div className="bg-black/30 rounded-lg border border-gray-800 p-4 mt-2">
+            <div className="bg-black/90 rounded-lg border border-gray-800 p-4 mt-2">
               <h3 className="text-sm font-semibold text-white mb-3">Try these examples:</h3>
               <div className="grid grid-cols-1 gap-2">
                 <div onClick={() => setAiPrompt("Create lunch orders for tables L1 through L30 with curry and rice")} 
