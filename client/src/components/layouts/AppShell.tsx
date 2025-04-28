@@ -136,10 +136,10 @@ export function AppShell({ children }: AppShellProps) {
     <div className="app-container flex min-h-[600px] h-full w-full overflow-hidden bg-white text-[#111827]">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
-        "hidden md:flex flex-col border-r h-full transition-all duration-300",
+        "hidden md:flex flex-col border-r h-full transition-all duration-300 dark:border-gray-700",
         sidebarCollapsed ? "md:w-16" : "md:w-64"
       )} style={{ 
-        background: 'var(--sidebar-bg)', 
+        background: document.documentElement.classList.contains('dark') ? 'var(--sidebar-bg-dark)' : 'var(--sidebar-bg)', 
         borderColor: 'var(--border-color)',
         boxShadow: 'var(--sidebar-shadow)'
       }}>
@@ -322,8 +322,8 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 border-b flex items-center justify-between px-4 sm:px-6" style={{ 
-          background: 'var(--header-bg)', 
+        <header className="h-16 border-b flex items-center justify-between px-4 sm:px-6 dark:border-gray-700" style={{ 
+          background: document.documentElement.classList.contains('dark') ? 'var(--header-bg-dark)' : 'var(--header-bg)', 
           borderColor: 'var(--border-color)',
           boxShadow: 'var(--header-shadow)'
         }}>
