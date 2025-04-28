@@ -145,10 +145,10 @@ export function AppShell({ children }: AppShellProps) {
       }}>
         <div className="p-4 flex items-center justify-between border-b border-[#E5E7EB]">
           <div className={cn("flex items-center", sidebarCollapsed ? "justify-center w-full" : "")}>
-            <div className="h-8 w-8 rounded-md flex items-center justify-center text-white" style={{ backgroundColor: 'var(--primary-color)' }}>
-              <HandPlatter size={20} />
+            <div className="h-8 w-8 rounded-md flex items-center justify-center text-white app-logo">
+              <HandPlatter size={20} className="nav-item-icon" />
             </div>
-            {!sidebarCollapsed && <h1 className="text-lg font-semibold text-[#111827] ml-3">YashHotelBot</h1>}
+            {!sidebarCollapsed && <h1 className="text-lg font-semibold text-[#111827] ml-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">YashHotelBot</h1>}
           </div>
           <Button 
             variant="ghost" 
@@ -385,10 +385,10 @@ export function AppShell({ children }: AppShellProps) {
           boxShadow: 'var(--sidebar-shadow)'
         }}>
           <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB]">
-            <div className="h-8 w-8 rounded-md flex items-center justify-center text-white" style={{ backgroundColor: 'var(--primary-color)' }}>
-              <HandPlatter size={20} />
+            <div className="h-8 w-8 rounded-md flex items-center justify-center text-white app-logo">
+              <HandPlatter size={20} className="nav-item-icon" />
             </div>
-            <h1 className="text-lg font-semibold text-[#111827]">YashHotelBot</h1>
+            <h1 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">YashHotelBot</h1>
           </div>
           
           <nav className="flex-1 pt-4 pb-4 overflow-hidden">
