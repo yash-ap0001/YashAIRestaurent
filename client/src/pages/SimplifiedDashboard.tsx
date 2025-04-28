@@ -631,7 +631,7 @@ export default function SimplifiedDashboard() {
               
               <Button
                 onClick={() => setIsBulkCreateOpen(true)}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800"
                 size="sm"
               >
                 <Plus className="h-4 w-4 mr-1" />

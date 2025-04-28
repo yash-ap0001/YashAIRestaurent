@@ -368,8 +368,7 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto backdrop-blur-xl bg-black/40 border border-purple-600/30 shadow-xl"
-        style={{backdropFilter: 'blur(12px)'}}>
+        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-black/80 border border-purple-600/30 shadow-xl">
         <DialogHeader className="relative">
           <div className="absolute right-0 top-0">
             <Button 
@@ -551,7 +550,6 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
         
         <DialogFooter className="flex items-center justify-between mt-6 pt-4 border-t border-gray-800 sticky bottom-0 bg-black/80 backdrop-blur-md">
           <Button variant="outline" onClick={onClose} className="border-gray-700 hover:bg-gray-800 hover:text-white">
-            <X className="h-4 w-4 mr-2" />
             Cancel
           </Button>
           {activeTab === "standard" ? (
