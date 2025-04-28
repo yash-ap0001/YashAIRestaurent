@@ -65,13 +65,12 @@ const managementNavItems: NavItem[] = [
   { label: "Reports", href: "/reports", icon: <BarChart3 className="w-5 h-5" /> },
 ];
 
+// Testing navigation items with Theme Test and AI Order Simulator removed
 const testingNavItems: NavItem[] = [
-  { label: "AI Order Simulator", href: "/test-ai-order", icon: <Cpu className="w-5 h-5" /> },
   { label: "External Integration", href: "/external-integration", icon: <ExternalLink className="w-5 h-5" /> },
   { label: "Voice Assistant", href: "/voice-assistant", icon: <Mic className="w-5 h-5" /> },
   { label: "n8n Integration", href: "/n8n-integration", icon: <Workflow className="w-5 h-5" /> },
   { label: "Notification Test", href: "/notification-test", icon: <Bell className="w-5 h-5" /> },
-  { label: "Theme Test", href: "/test-theme", icon: <UserCog className="w-5 h-5" /> },
 ];
 
 interface AppShellProps {
@@ -201,22 +200,24 @@ export function AppShell({ children }: AppShellProps) {
               }
               
               {(currentRole === "admin" || currentRole === "manager") && 
-                getFilteredNavItems(testingNavItems, currentRole).map((item) => (
-                  <li key={item.href} className="px-4">
-                    <Link 
-                      href={item.href}
-                      className={cn(
-                        "flex justify-center items-center p-2 rounded-md",
-                        location === item.href 
-                          ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                          : "text-neutral-400 hover:bg-neutral-800"
-                      )}
-                      title={item.label}
-                    >
-                      {item.icon}
-                    </Link>
-                  </li>
-                ))
+                getFilteredNavItems(testingNavItems, currentRole).length > 0 && (
+                  getFilteredNavItems(testingNavItems, currentRole).map((item) => (
+                    <li key={item.href} className="px-4">
+                      <Link 
+                        href={item.href}
+                        className={cn(
+                          "flex justify-center items-center p-2 rounded-md",
+                          location === item.href 
+                            ? "text-purple-400 bg-purple-900 bg-opacity-40" 
+                            : "text-neutral-400 hover:bg-neutral-800"
+                        )}
+                        title={item.label}
+                      >
+                        {item.icon}
+                      </Link>
+                    </li>
+                  ))
+                )
               }
             </ul>
           </nav>
@@ -278,33 +279,7 @@ export function AppShell({ children }: AppShellProps) {
                 </AccordionItem>
               )}
               
-              {(currentRole === "admin" || currentRole === "manager") && (
-                <AccordionItem value="testing" className="border-none">
-                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
-                    Testing
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-0 pb-1">
-                    <ul>
-                      {getFilteredNavItems(testingNavItems, currentRole).map((item) => (
-                        <li key={item.href}>
-                          <Link 
-                            href={item.href}
-                            className={cn(
-                              "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                              location === item.href 
-                                ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 font-medium" 
-                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
-                            )}
-                          >
-                            <span className="mr-3 text-current">{item.icon}</span>
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
+              {/* Testing section removed */}
             </Accordion>
           </nav>
         )}
@@ -420,35 +395,6 @@ export function AppShell({ children }: AppShellProps) {
                   <AccordionContent className="pt-0 pb-1">
                     <ul>
                       {getFilteredNavItems(managementNavItems, currentRole).map((item) => (
-                        <li key={item.href}>
-                          <Link 
-                            href={item.href}
-                            className={cn(
-                              "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
-                              location === item.href 
-                                ? "text-[#111827] font-medium underline" 
-                                : "text-[#6B7280] hover:text-[#111827]"
-                            )}
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <span className="mr-3 text-current">{item.icon}</span>
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
-              
-              {(currentRole === "admin" || currentRole === "manager") && (
-                <AccordionItem value="testing" className="border-none">
-                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-[#6B7280] uppercase tracking-wider hover:no-underline">
-                    Testing
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-0 pb-1">
-                    <ul>
-                      {getFilteredNavItems(testingNavItems, currentRole).map((item) => (
                         <li key={item.href}>
                           <Link 
                             href={item.href}
