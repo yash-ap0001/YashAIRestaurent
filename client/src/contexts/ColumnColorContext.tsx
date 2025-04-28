@@ -15,26 +15,27 @@ interface ColumnColorContextType {
 }
 
 // Define fixed professional color schemes for each column status
+// Improved colors for better visibility in both light and dark modes
 const defaultStyles: Record<ColumnType, ColumnStyle> = {
   pending: {
-    backgroundColor: "#FF9800", // Orange
+    backgroundColor: "#F97316", // Bright Orange
     textColor: "#FFFFFF",      // White
-    borderColor: "#E65100"     // Dark Orange
+    borderColor: "#C2410C"     // Dark Orange
   },
   preparing: {
-    backgroundColor: "#2196F3", // Blue
+    backgroundColor: "#3B82F6", // Bright Blue
     textColor: "#FFFFFF",      // White
-    borderColor: "#0D47A1"     // Dark Blue
+    borderColor: "#1D4ED8"     // Dark Blue
   },
   ready: {
-    backgroundColor: "#4CAF50", // Green
+    backgroundColor: "#10B981", // Bright Green
     textColor: "#FFFFFF",      // White
-    borderColor: "#1B5E20"     // Dark Green
+    borderColor: "#059669"     // Dark Green
   },
   completed: {
-    backgroundColor: "#9C27B0", // Purple
+    backgroundColor: "#8B5CF6", // Bright Purple
     textColor: "#FFFFFF",      // White
-    borderColor: "#4A148C"     // Dark Purple
+    borderColor: "#6D28D9"     // Dark Purple
   }
 };
 
