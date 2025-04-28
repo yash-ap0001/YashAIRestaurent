@@ -834,4 +834,20 @@ div[data-state="unchecked"] {
   .bg-gradient-to-r [class*="text-white"] {
     @apply shadow-sm;
   }
+  
+  /* Override all purple backgrounds in navigation links */
+  a[class*="bg-purple-900"] {
+    @apply bg-transparent !important;
+    @apply text-[#111827] font-medium underline !important;
+  }
+  
+  /* Override all neutral text colors */
+  a[class*="text-neutral-400"] {
+    @apply text-[#6B7280] !important;
+  }
+  
+  /* Override all neutral background hovers */
+  a:hover[class*="hover:bg-neutral-800"] {
+    @apply hover:bg-transparent hover:text-[#111827] !important;
+  }
 }
