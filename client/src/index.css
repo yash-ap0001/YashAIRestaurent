@@ -835,19 +835,28 @@ div[data-state="unchecked"] {
     @apply shadow-sm;
   }
   
-  /* Override all purple backgrounds in navigation links */
-  a[class*="bg-purple-900"] {
-    @apply bg-transparent !important;
-    @apply text-[#111827] font-medium underline !important;
+  /* Global navigation link overrides with higher specificity */
+  .app-container a[class*="bg-purple-900"],
+  body a[class*="bg-purple-900"],
+  #root a[class*="bg-purple-900"] {
+    background-color: transparent !important;
+    color: #111827 !important;
+    font-weight: 500 !important;
+    text-decoration: underline !important;
   }
   
-  /* Override all neutral text colors */
-  a[class*="text-neutral-400"] {
-    @apply text-[#6B7280] !important;
+  /* Override all neutral text colors with higher specificity */
+  .app-container a[class*="text-neutral-400"],
+  body a[class*="text-neutral-400"],
+  #root a[class*="text-neutral-400"] {
+    color: #6B7280 !important;
   }
   
-  /* Override all neutral background hovers */
-  a:hover[class*="hover:bg-neutral-800"] {
-    @apply hover:bg-transparent hover:text-[#111827] !important;
+  /* Override all neutral background hovers with higher specificity */
+  .app-container a:hover[class*="hover:bg-neutral-800"],
+  body a:hover[class*="hover:bg-neutral-800"],
+  #root a:hover[class*="hover:bg-neutral-800"] {
+    background-color: transparent !important;
+    color: #111827 !important;
   }
 }

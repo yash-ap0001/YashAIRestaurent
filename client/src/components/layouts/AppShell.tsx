@@ -133,7 +133,7 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="flex min-h-[600px] h-full w-full overflow-hidden bg-white text-[#111827]">
+    <div className="app-container flex min-h-[600px] h-full w-full overflow-hidden bg-white text-[#111827]">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
         "hidden md:flex flex-col bg-[#EEF2FF] border-r border-[#E5E7EB] h-full transition-all duration-300",
@@ -233,8 +233,8 @@ export function AppShell({ children }: AppShellProps) {
                           className={cn(
                             "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
                             location === item.href 
-                              ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                              : "text-neutral-400 hover:bg-neutral-800"
+                              ? "text-[#111827] font-medium underline" 
+                              : "text-[#6B7280] hover:text-[#111827]"
                           )}
                         >
                           <span className="mr-3 text-current">{item.icon}</span>
