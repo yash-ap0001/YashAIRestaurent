@@ -204,8 +204,8 @@ export function AppShell({ children }: AppShellProps) {
                         className={cn(
                           "flex justify-center items-center p-2 rounded-md",
                           location === item.href 
-                            ? "text-purple-400 bg-purple-900 bg-opacity-40" 
-                            : "text-neutral-400 hover:bg-neutral-800"
+                            ? "text-white font-medium bg-purple-800" 
+                            : "text-white hover:bg-purple-800"
                         )}
                         title={item.label}
                       >
@@ -222,7 +222,7 @@ export function AppShell({ children }: AppShellProps) {
           <nav className="flex-1 pt-4 pb-4 overflow-hidden">
             <Accordion type="single" defaultValue="main" collapsible={false} className="border-none">
               <AccordionItem value="main" className="border-none">
-                <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                <AccordionTrigger className="py-2 px-3 text-xs font-medium text-white uppercase tracking-wider hover:no-underline">
                   Main
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
@@ -249,7 +249,7 @@ export function AppShell({ children }: AppShellProps) {
               
               {getFilteredNavItems(managementNavItems, currentRole).length > 0 && (
                 <AccordionItem value="management" className="border-none">
-                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-white uppercase tracking-wider hover:no-underline">
                     Management
                   </AccordionTrigger>
                   <AccordionContent className="pt-0 pb-1">
@@ -278,7 +278,7 @@ export function AppShell({ children }: AppShellProps) {
               {(currentRole === "admin" || currentRole === "manager") && 
                 getFilteredNavItems(testingNavItems, currentRole).length > 0 && (
                 <AccordionItem value="testing" className="border-none">
-                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-white uppercase tracking-wider hover:no-underline">
                     Testing
                   </AccordionTrigger>
                   <AccordionContent className="pt-0 pb-1">
@@ -308,8 +308,8 @@ export function AppShell({ children }: AppShellProps) {
         )}
         
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-[#E5E7EB] dark:border-gray-700">
-            <div className="text-xs text-[#6B7280] dark:text-gray-400 text-center">
+          <div className="p-4 border-t border-purple-800">
+            <div className="text-xs text-white text-center">
               <p>YashHotelBot v1.2.0</p>
               <p className="mt-1">© 2025 Yash Solutions</p>
             </div>
