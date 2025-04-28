@@ -220,7 +220,7 @@ export function AppShell({ children }: AppShellProps) {
         ) : (
           // Expanded sidebar with accordion
           <nav className="flex-1 pt-4 pb-4 overflow-hidden">
-            <Accordion type="multiple" defaultValue={["main"]} className="border-none">
+            <Accordion type="single" defaultValue="main" collapsible={false} className="border-none">
               <AccordionItem value="main" className="border-none">
                 <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
                   Main
@@ -382,7 +382,7 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <nav className="flex-1 pt-4 pb-4 overflow-hidden">
-            <Accordion type="multiple" defaultValue={["main"]} className="border-none">
+            <Accordion type="single" defaultValue="main" collapsible={false} className="border-none">
               <AccordionItem value="main" className="border-none">
                 <AccordionTrigger className="py-2 px-3 text-xs font-medium text-[#6B7280] uppercase tracking-wider hover:no-underline">
                   Main
