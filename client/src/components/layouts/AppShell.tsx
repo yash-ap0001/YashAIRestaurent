@@ -279,7 +279,34 @@ export function AppShell({ children }: AppShellProps) {
                 </AccordionItem>
               )}
               
-              {/* Testing section removed */}
+              {(currentRole === "admin" || currentRole === "manager") && 
+                getFilteredNavItems(testingNavItems, currentRole).length > 0 && (
+                <AccordionItem value="testing" className="border-none">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-neutral-400 uppercase tracking-wider hover:no-underline">
+                    Testing
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-0 pb-1">
+                    <ul>
+                      {getFilteredNavItems(testingNavItems, currentRole).map((item) => (
+                        <li key={item.href}>
+                          <Link 
+                            href={item.href}
+                            className={cn(
+                              "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                              location === item.href 
+                                ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 font-medium" 
+                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
+                            )}
+                          >
+                            <span className="mr-3 text-current">{item.icon}</span>
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
             </Accordion>
           </nav>
         )}
@@ -395,6 +422,36 @@ export function AppShell({ children }: AppShellProps) {
                   <AccordionContent className="pt-0 pb-1">
                     <ul>
                       {getFilteredNavItems(managementNavItems, currentRole).map((item) => (
+                        <li key={item.href}>
+                          <Link 
+                            href={item.href}
+                            className={cn(
+                              "flex items-center px-3 py-2 text-sm font-medium rounded-md mx-2 mt-1",
+                              location === item.href 
+                                ? "text-[#111827] font-medium underline" 
+                                : "text-[#6B7280] hover:text-[#111827]"
+                            )}
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <span className="mr-3 text-current">{item.icon}</span>
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+              
+              {(currentRole === "admin" || currentRole === "manager") && 
+               getFilteredNavItems(testingNavItems, currentRole).length > 0 && (
+                <AccordionItem value="testing-mobile" className="border-none">
+                  <AccordionTrigger className="py-2 px-3 text-xs font-medium text-[#6B7280] uppercase tracking-wider hover:no-underline">
+                    Testing
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-0 pb-1">
+                    <ul>
+                      {getFilteredNavItems(testingNavItems, currentRole).map((item) => (
                         <li key={item.href}>
                           <Link 
                             href={item.href}
