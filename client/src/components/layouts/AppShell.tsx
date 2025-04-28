@@ -59,8 +59,6 @@ const managementNavItems: NavItem[] = [
   { label: "Inventory", href: "/inventory", icon: <Package2 className="w-5 h-5" /> },
   { label: "Customers", href: "/customers", icon: <Users className="w-5 h-5" /> },
   { label: "Menu Items", href: "/menu-items", icon: <MenuSquare className="w-5 h-5" /> },
-  { label: "AR Menu Preview", href: "/ar-menu-preview", icon: <Eye className="w-5 h-5" /> },
-  { label: "AR Menu Experience", href: "/ar-menu", icon: <Camera className="w-5 h-5" /> },
   { label: "Diet Plan", href: "/diet-plan", icon: <Apple className="w-5 h-5" /> },
   { label: "Reports", href: "/reports", icon: <BarChart3 className="w-5 h-5" /> },
 ];
@@ -124,8 +122,6 @@ export function AppShell({ children }: AppShellProps) {
     "/inventory": ["admin", "manager", "kitchen"],
     "/customers": ["admin", "manager"],
     "/menu-items": ["admin", "manager", "kitchen"],
-    "/ar-menu-preview": ["admin", "manager", "waiter", "customer"],
-    "/ar-menu": ["admin", "manager", "waiter", "customer"],
     "/reports": ["admin", "manager"],
     "/external-integration": ["admin", "manager"],
     "/voice-assistant": ["admin", "manager"],
