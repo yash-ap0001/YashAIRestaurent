@@ -345,14 +345,14 @@ export function AppShell({ children }: AppShellProps) {
               </Button>
             </div>
             
+            {/* Theme toggle for light/dark mode - now more prominent */}
+            <div className="relative mr-1">
+              <ThemeToggle />
+            </div>
+            
             {/* WebSocket connection status indicator */}
             <div className="relative">
               <ConnectionStatus />
-            </div>
-            
-            {/* Theme toggle for light/dark mode */}
-            <div className="relative">
-              <ThemeToggle />
             </div>
             
             {/* Theme selector dropdown for column colors */}

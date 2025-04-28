@@ -18,12 +18,18 @@ export function ThemeToggle() {
         <Button 
           variant="outline" 
           size="icon" 
-          className="bg-primary/10 hover:bg-primary/20 border-primary/30 rounded-full h-9 w-9 animate-pulse-subtle"
+          className={`
+            rounded-full h-10 w-10
+            ${theme === "light" 
+              ? "bg-gray-100 hover:bg-gray-200 border-gray-300 shadow-sm" 
+              : "bg-gray-800 hover:bg-gray-700 border-gray-700"
+            }
+          `}
         >
           {theme === "light" ? (
-            <Sun className="h-5 w-5 rotate-0 scale-100 text-amber-500 transition-all hover:rotate-12" />
+            <Sun className="h-5 w-5 text-amber-600 transition-all hover:text-amber-500" />
           ) : theme === "dark" ? (
-            <Moon className="h-5 w-5 rotate-0 scale-100 text-blue-500 transition-all hover:-rotate-12" />
+            <Moon className="h-5 w-5 text-blue-400 transition-all hover:text-blue-300" />
           ) : (
             <Monitor className="h-5 w-5 text-gray-500" />
           )}
@@ -32,7 +38,7 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[150px]">
         <DropdownMenuItem onClick={() => setTheme("light")} className="flex items-center gap-2 cursor-pointer">
-          <Sun className="h-4 w-4 text-amber-500" />
+          <Sun className="h-4 w-4 text-amber-600" />
           <span>Light Mode</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("dark")} className="flex items-center gap-2 cursor-pointer">
