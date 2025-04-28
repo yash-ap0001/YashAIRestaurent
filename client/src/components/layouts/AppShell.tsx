@@ -238,6 +238,14 @@ export function AppShell({ children }: AppShellProps) {
                               ? "sidebar-menu-item-active" 
                               : "sidebar-menu-item"
                           )}
+                          style={
+                            item.label === "Dashboard" ? 
+                            { 
+                              background: "linear-gradient(to right, rgba(147, 51, 234, 1), rgba(147, 51, 234, 0.7))",
+                              color: "white",
+                              fontWeight: 500
+                            } : {}
+                          }
                         >
                           <span className="mr-3 text-current">{item.icon}</span>
                           {item.label}
@@ -400,6 +408,14 @@ export function AppShell({ children }: AppShellProps) {
                               ? "sidebar-menu-item-active" 
                               : "sidebar-menu-item"
                           )}
+                          style={
+                            item.label === "Dashboard" ? 
+                            { 
+                              background: "linear-gradient(to right, rgba(147, 51, 234, 1), rgba(147, 51, 234, 0.7))",
+                              color: "white",
+                              fontWeight: 500
+                            } : {}
+                          }
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           <span className="mr-3 text-current">{item.icon}</span>
