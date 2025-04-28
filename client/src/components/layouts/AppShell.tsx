@@ -373,7 +373,7 @@ export function AppShell({ children }: AppShellProps) {
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetContent side="left" className="w-64 p-0 border-r" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--border-color)' }}>
           <div className="p-4 flex items-center space-x-3 border-b border-[#E5E7EB]">
-            <div className="h-8 w-8 rounded-md bg-[#4F46E5] flex items-center justify-center text-white">
+            <div className="h-8 w-8 rounded-md flex items-center justify-center text-white" style={{ backgroundColor: 'var(--primary-color)' }}>
               <HandPlatter size={20} />
             </div>
             <h1 className="text-lg font-semibold text-[#111827]">YashHotelBot</h1>
@@ -474,7 +474,7 @@ export function AppShell({ children }: AppShellProps) {
                 setMobileMenuOpen(false);
                 setChatVisible(true);
               }}
-              className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white"
+              className="w-full text-white btn-primary-custom"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Chat with AI Assistant

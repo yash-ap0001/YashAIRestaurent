@@ -7,8 +7,18 @@
   --sidebar-bg: #EEF2FF;
   --border-color: #E5E7EB;
   --primary-color: #4F46E5;
+  --primary-color-hover: #4338CA;
   --heading-text: #111827;
   --body-text: #6B7280;
+}
+
+/* Custom primary button with CSS variables */
+.btn-primary-custom {
+  background-color: var(--primary-color);
+  color: white;
+}
+.btn-primary-custom:hover {
+  background-color: var(--primary-color-hover);
 }
 
 /* Theme colors for light and dark mode */
