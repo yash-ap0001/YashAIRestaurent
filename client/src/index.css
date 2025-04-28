@@ -17,17 +17,18 @@
   background-color: rgba(126, 34, 206, 0.5) !important; /* purple-700 with transparency */
 }
 
-/* Sidebar menu items */
+/* Sidebar menu items with purple gradient */
 .sidebar-menu-item {
   color: white !important;
+  transition: all 0.2s ease;
 }
 
 .sidebar-menu-item:hover {
-  background-color: rgba(126, 34, 206, 0.5) !important;
+  background: linear-gradient(to right, rgba(124, 58, 237, 0.7), rgba(124, 58, 237, 0.5)) !important;
 }
 
 .sidebar-menu-item-active {
-  background-color: rgba(107, 33, 168, 0.8) !important;
+  background: linear-gradient(to right, rgba(124, 58, 237, 0.9), rgba(124, 58, 237, 0.7)) !important;
   color: white !important;
   font-weight: 500;
 }
