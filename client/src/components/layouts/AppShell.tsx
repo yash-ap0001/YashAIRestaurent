@@ -137,7 +137,7 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="app-container flex min-h-[600px] h-full w-full overflow-hidden bg-white dark:bg-gray-900 text-[#111827] dark:text-white">
+    <div className="app-container flex min-h-[600px] h-full w-full overflow-hidden bg-[#0f172a] text-white">
       {/* Collapsible Sidebar - hidden on mobile */}
       <aside className={cn(
         "hidden md:flex flex-col border-r h-full transition-all duration-300 dark:border-gray-700",
@@ -330,21 +330,21 @@ export function AppShell({ children }: AppShellProps) {
               size="icon"
               onClick={() => setMobileMenuOpen(true)}
             >
-              <Menu className="h-5 w-5 text-[#111827] dark:text-white" />
+              <Menu className="h-5 w-5 text-white" />
               <span className="sr-only">Open menu</span>
             </Button>
-            <h1 className="ml-3 text-lg font-semibold text-[#111827] dark:text-white">{currentPage.label}</h1>
+            <h1 className="ml-3 text-lg font-semibold text-white">{currentPage.label}</h1>
           </div>
           
           <div className="hidden md:block">
-            <h1 className="text-lg font-semibold text-[#111827] dark:text-white">{currentPage.label}</h1>
+            <h1 className="text-lg font-semibold text-white">{currentPage.label}</h1>
           </div>
           
           <div className="flex items-center space-x-4">
             
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5 text-[#6B7280] dark:text-gray-400" />
+                <Bell className="h-5 w-5 text-white" />
                 <span className="absolute top-0 right-0 h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--primary-color)' }}></span>
                 <span className="sr-only">Notifications</span>
               </Button>
