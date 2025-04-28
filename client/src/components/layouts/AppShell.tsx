@@ -8,7 +8,7 @@ import {
   Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils,
   ChevronRight, PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
-import { NotificationSystem } from "@/components/notifications/NotificationSystem";
+import NotificationSystem from "@/components/notifications/NotificationSystem";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";

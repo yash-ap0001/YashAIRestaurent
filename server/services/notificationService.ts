@@ -1,4 +1,5 @@
 import { broadcastToAllClients } from './realtime';
+import { WS_EVENTS } from './constants';
 
 // Define notification types
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
@@ -32,7 +33,8 @@ function sendNotification(
 
   // Broadcast the notification to all connected clients
   broadcastToAllClients({
-    type: 'notification',
+    type: WS_EVENTS.NOTIFICATION,
+    notification: notification,
     title: notification.title,
     message: notification.message,
     notificationType: notification.type,
@@ -46,6 +48,9 @@ function sendNotification(
 
 // Pre-defined notification senders for common scenarios
 export const notificationService = {
+  // Export sendNotification function as part of the service
+  sendNotification,
+  
   newOrder: (orderNumber: string, tableNumber?: string) => {
     const message = tableNumber 
       ? `New order #${orderNumber} placed from table ${tableNumber}`

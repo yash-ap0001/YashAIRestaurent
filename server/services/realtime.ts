@@ -1,26 +1,11 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { storage } from '../storage';
+import { WS_EVENTS } from './constants';
 
 // Custom interface for WebSocket with isAlive property
 interface ExtendedWebSocket extends WebSocket {
   isAlive: boolean;
 }
-
-// Event types for WebSocket messages
-const WS_EVENTS = {
-  CONNECT: 'connect',
-  ORDER_UPDATED: 'order_updated',
-  KITCHEN_TOKEN_UPDATED: 'kitchen_token_updated',
-  BILL_UPDATED: 'bill_updated',
-  NEW_ORDER: 'new_order',
-  NEW_KITCHEN_TOKEN: 'new_kitchen_token',
-  NEW_BILL: 'new_bill',
-  STATS_UPDATED: 'stats_updated', // Added event for dashboard stats
-  NOTIFICATION: 'notification', // Added event for notification system
-  ERROR: 'error',
-  PING: 'ping',
-  PONG: 'pong'
-};
 
 // Store active clients
 let activeClients: Map<string, ExtendedWebSocket> = new Map();
@@ -216,6 +201,11 @@ export function broadcastToAllClients(data: any) {
     if (!data.data?.id || !data.data?.orderNumber) {
       console.error('WARNING: Incomplete order data being broadcast!', data);
     }
+  }
+  
+  // Special handling for notification events - log details
+  if (data.type === WS_EVENTS.NOTIFICATION) {
+    console.log(`Broadcasting notification: ${data.notification?.title || 'Untitled'} - ${data.notification?.message || 'No message'} (${data.notification?.type || 'unknown type'})`);
   }
   
   // Add timestamp to help with debugging and caching issues

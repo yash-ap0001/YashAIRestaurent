@@ -104,7 +104,7 @@ export default function NotificationTest() {
       toast({
         title: 'Notification Sent',
         description: `Successfully sent a ${type} notification`,
-        variant: 'success'
+        variant: 'default'
       });
       
       console.log('Predefined notification sent:', data);
