@@ -68,7 +68,7 @@ export function OrderForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      tableNumber: "",
+      tableNumber: "T1", // Set T1 as the default value
       items: [],
       notes: "",
       isUrgent: false,
