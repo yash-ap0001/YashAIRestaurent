@@ -728,6 +728,12 @@ ${data.map((opp: any, idx: number) => `${idx + 1}. ${opp.area} - Estimated impac
                 >
                   Strategic
                 </button>
+                <button 
+                  onClick={() => setAnalysisMode('order')}
+                  className={`px-2 py-1 text-xs rounded ${analysisMode === 'order' ? 'bg-primary/20 text-primary' : 'text-gray-400'}`}
+                >
+                  Orders
+                </button>
               </div>
             </div>
           </div>
