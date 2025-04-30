@@ -81,8 +81,24 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
       
       // Save the updated conversation to localStorage for persistence
       saveConversationHistory(finalConversation);
+      
+      // Speak the response without auto-starting listening again if it contains a question about the user's name
+      const isNameQuestion = transcript.toLowerCase().includes('name') || 
+                            transcript.toLowerCase().includes('who are you') ||
+                            transcript.toLowerCase().includes('what is your name');
+      
+      setTimeout(() => {
+        speakResponse(response);
+        
+        // Only auto-restart listening if it's not a name-related question
+        if (!isNameQuestion) {
+          setTimeout(() => {
+            startListening();
+          }, 3000);
+        }
+      }, 300);
     }
-  }, [transcript, isListening, conversation, processVoiceCommand]);
+  }, [transcript, isListening, conversation, processVoiceCommand, speakResponse, startListening]);
 
   // Clean up speech and recognition when dialog closes
   useEffect(() => {
