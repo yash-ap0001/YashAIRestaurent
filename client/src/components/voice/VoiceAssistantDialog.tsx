@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Info, 
@@ -17,6 +17,14 @@ import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
 
 // Example voice commands by category
 const commandCategories = [
@@ -54,57 +62,15 @@ const commandCategories = [
   }
 ];
 
-// Create a custom popup instead of using the Dialog component
+// Use enhanced Dialog component with iOS-style frosted glass effect
 export function VoiceAssistantDialog() {
   const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const { isListening, toggleListening } = useVoiceControl({
     enabled: true,
     language: 'en-IN',
     accentMode: true,
     voiceEnabled: true
   });
-
-  // Add blur overlay to the entire page when menu is open
-  useEffect(() => {
-    const appContainer = document.getElementById('app-container');
-    if (appContainer) {
-      if (open) {
-        appContainer.style.filter = 'blur(8px)';
-      } else {
-        appContainer.style.filter = '';
-      }
-    }
-    
-    return () => {
-      if (appContainer) {
-        appContainer.style.filter = '';
-      }
-    };
-  }, [open]);
-
-  // Close the menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && 
-          !menuRef.current.contains(event.target as Node) && 
-          buttonRef.current && 
-          !buttonRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-
-    if (open) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [open]);
 
   const menuItems = [
     { 

@@ -335,7 +335,7 @@ export function AppShell({ children }: AppShellProps) {
       </aside>
       
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden h-screen">
+      <main id="app-container" className="flex-1 flex flex-col overflow-hidden h-screen">
         {/* Top Bar - Black header */}
         <header className="h-16 flex items-center justify-between px-4 sm:px-6 bg-black text-white border-b border-gray-800">
           <div className="flex items-center gap-3">
