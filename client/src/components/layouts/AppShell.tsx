@@ -380,61 +380,19 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <div className="flex items-center space-x-3">
-            {/* Voice Control Button Group */}
+            {/* Restaurant AI Assistant */}
             <div className="relative flex items-center gap-1">
-              {/* Hotel Agent Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setHotelAgentDialogOpen(true)}
-                title="Hotel AI Agent"
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-700/80 to-purple-600/60 border-purple-800 hover:from-purple-600 hover:to-purple-500 text-white rounded-md"
-              >
-                <Bot className="h-4 w-4 text-white" />
-                <span>Hotel Agent</span>
-              </Button>
-              
-              {/* Voice Control Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleListening}
-                title={isListening ? "Stop listening" : "Start voice control"}
-                className={cn(
-                  "rounded-full",
-                  isListening 
-                    ? "bg-purple-600 hover:bg-purple-700 text-white" 
-                    : "hover:bg-gray-800 text-white"
-                )}
-              >
-                {isListening ? (
-                  <MicOff className="h-5 w-5" />
-                ) : (
-                  <Mic className="h-5 w-5" />
-                )}
-                <span className="sr-only">
-                  {isListening ? "Stop listening" : "Start voice control"}
-                </span>
-              </Button>
-              
-              {/* Voice Assistant Info Dialog */}
-              <VoiceAssistantDialog />
-              
-              {/* Welcome greeting dialog with voice that appears on login */}
-              {user && (
-                <WelcomeGreeting 
-                  userName={user.fullName?.split(' ')[0] || 'Owner'}
-                  isOpen={welcomeDialogOpen}
-                  onClose={() => setWelcomeDialogOpen(false)}
-                />
-              )}
-              
-              {/* Hotel Agent Dialog */}
-              <HotelAgentDialog
-                isOpen={hotelAgentDialogOpen}
-                onClose={() => setHotelAgentDialogOpen(false)}
-              />
+              <RestaurantAI />
             </div>
+              
+            {/* Welcome greeting dialog with voice that appears on login */}
+            {user && (
+              <WelcomeGreeting 
+                userName={user.fullName?.split(' ')[0] || 'Owner'}
+                isOpen={welcomeDialogOpen}
+                onClose={() => setWelcomeDialogOpen(false)}
+              />
+            )}
             
             {/* Notifications system */}
             <NotificationSystem />
@@ -570,17 +528,9 @@ export function AppShell({ children }: AppShellProps) {
           </nav>
           
           <div className="p-4 border-t border-[#E5E7EB] dark:border-gray-700 flex flex-col gap-3">
-            <Button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setHotelAgentDialogOpen(true);
-              }}
-              className="w-full text-white bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500"
-            >
-              <Bot className="w-4 h-4 mr-2" />
-              Hotel Agent
-            </Button>
-            
+            <div className="mb-2">
+              <RestaurantAI />
+            </div>
             <Button
               onClick={() => {
                 setMobileMenuOpen(false);
