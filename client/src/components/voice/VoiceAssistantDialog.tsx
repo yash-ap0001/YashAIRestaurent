@@ -8,12 +8,51 @@ import {
   Bell, 
   FileEdit,
   Upload,
-  X
+  X,
+  BrainCircuit,
+  ChevronRight
 } from "lucide-react";
 import { useVoiceControl } from "@/hooks/use-voice-control";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Badge } from "@/components/ui/badge";
+
+// Example voice commands by category
+const commandCategories = [
+  {
+    name: "Order Management",
+    commands: [
+      "Create a new order for table 5",
+      "Add 2 veg biryani to order 1004",
+      "Show all pending orders"
+    ]
+  },
+  {
+    name: "Kitchen Management",
+    commands: [
+      "Mark token T03 as ready",
+      "How many orders are in the kitchen?",
+      "Show kitchen workload"
+    ]
+  },
+  {
+    name: "Business Intelligence",
+    commands: [
+      "Show me sales trends for this month",
+      "What are our top selling items?",
+      "Compare revenue with last month"
+    ]
+  },
+  {
+    name: "System Navigation",
+    commands: [
+      "Go to dashboard",
+      "Open kitchen tokens page",
+      "Show me the billing screen"
+    ]
+  }
+];
 
 // Create a custom popup instead of using the Dialog component
 export function VoiceAssistantDialog() {
@@ -26,6 +65,24 @@ export function VoiceAssistantDialog() {
     accentMode: true,
     voiceEnabled: true
   });
+
+  // Add blur overlay to the entire page when menu is open
+  useEffect(() => {
+    const appContainer = document.getElementById('app-container');
+    if (appContainer) {
+      if (open) {
+        appContainer.style.filter = 'blur(8px)';
+      } else {
+        appContainer.style.filter = '';
+      }
+    }
+    
+    return () => {
+      if (appContainer) {
+        appContainer.style.filter = '';
+      }
+    };
+  }, [open]);
 
   // Close the menu when clicking outside
   useEffect(() => {
@@ -98,49 +155,103 @@ export function VoiceAssistantDialog() {
       </Button>
 
       {open && (
-        <div 
-          ref={menuRef}
-          className="absolute z-50 right-0 top-12 max-w-[260px] rounded-xl border-0 shadow-xl overflow-hidden"
-          style={{
-            background: 'rgba(255, 255, 255, 0.2)',
-            backdropFilter: 'blur(30px)',
-            WebkitBackdropFilter: 'blur(30px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-          }}
-          aria-labelledby="voice-assistant-title"
-        >
-          <VisuallyHidden id="voice-assistant-title">Voice Assistant Options</VisuallyHidden>
-          
-          <div className="flex flex-col">
-            {menuItems.map((item, index) => (
-              <button
-                key={item.id}
-                onClick={item.onClick}
-                className={cn(
-                  "flex items-center justify-between px-5 py-3 text-left border-b border-white/20 transition-colors",
-                  item.isActive ? "bg-opacity-60" : "hover:bg-white/20",
-                  index === menuItems.length - 1 ? "border-b-0" : ""
-                )}
-                style={{
-                  background: `linear-gradient(to right, ${item.isActive ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)'}, ${item.isActive ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'})`
-                }}
-              >
-                <span className="font-medium text-gray-800">{item.label}</span>
-                <span className="text-gray-700">
-                  {item.icon}
-                </span>
-              </button>
-            ))}
-          </div>
-          
-          <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg opacity-90">
-            <Link href="/voice-commands">
-              <div className="w-12 h-12 flex items-center justify-center">
-                <Mic className="h-7 w-7 text-gray-700" />
+        <>
+          {/* This is the dark overlay behind the menu to give the blur effect */}
+          <div 
+            className="fixed inset-0 z-40"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              backdropFilter: 'blur(5px)', 
+            }}
+            onClick={() => setOpen(false)}
+          />
+
+          {/* The voice assistant menu */}
+          <div 
+            ref={menuRef}
+            className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[600px] max-h-[80vh] rounded-xl border-0 shadow-xl overflow-hidden overflow-y-auto"
+            style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+            }}
+            aria-labelledby="voice-assistant-title"
+          >
+            <div className="p-5 border-b border-white/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="h-8 w-8 bg-purple-600/20 rounded-full flex items-center justify-center">
+                    <BrainCircuit className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <h2 id="voice-assistant-title" className="text-xl font-bold text-white">Voice Assistant Commands</h2>
+                </div>
+                <button 
+                  onClick={() => setOpen(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-            </Link>
+              <p className="mt-2 text-gray-300 text-sm">
+                Here are some commands you can say to the voice assistant. Click the mic button or use the global mic in the header to start.
+              </p>
+            </div>
+
+            {/* Quick Action Buttons */}
+            <div className="grid grid-cols-4 gap-2 p-3 border-b border-white/20">
+              {menuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={item.onClick}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-3 rounded-lg transition-colors",
+                    item.isActive ? "bg-purple-600/40" : "bg-white/10 hover:bg-white/20"
+                  )}
+                >
+                  <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center mb-2">
+                    {item.icon}
+                  </div>
+                  <span className="text-xs font-medium text-white">{item.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Command Categories */}
+            <div className="p-4">
+              <h3 className="text-lg font-medium text-white mb-3">Available Commands</h3>
+              
+              <div className="space-y-4">
+                {commandCategories.map((category, catIndex) => (
+                  <div key={catIndex} className="bg-white/10 rounded-lg p-3">
+                    <h4 className="text-sm font-medium text-white mb-2">{category.name}</h4>
+                    <div className="space-y-2">
+                      {category.commands.map((command, cmdIndex) => (
+                        <div key={cmdIndex} className="flex items-start">
+                          <ChevronRight className="h-4 w-4 text-purple-400 mt-0.5 mr-2 flex-shrink-0" />
+                          <p className="text-sm text-gray-300">{command}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-4 bg-black/20 border-t border-white/10">
+              <div className="flex items-center justify-between">
+                <Badge className="bg-purple-600 hover:bg-purple-700">
+                  {isListening ? "Listening..." : "Voice Ready"}
+                </Badge>
+                <Link href="/voice-commands">
+                  <Button size="sm" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
+                    See all commands
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
