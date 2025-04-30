@@ -1,72 +1,104 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import React, { useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Mic, Info, Brain } from "lucide-react";
+import { 
+  Info, 
+  Mic, 
+  MicOff, 
+  BarChart2, 
+  Bell, 
+  FileEdit,
+  Upload
+} from "lucide-react";
+import { useVoiceControl } from "@/hooks/use-voice-control";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
-interface VoiceAssistantDialogProps {
-  isListening: boolean;
-  className?: string;
-}
+export function VoiceAssistantDialog() {
+  const [open, setOpen] = useState(false);
+  const { isListening, toggleListening } = useVoiceControl({
+    enabled: true,
+    language: 'en-IN',
+    accentMode: true,
+    voiceEnabled: true
+  });
 
-export const VoiceAssistantDialog = ({ isListening, className }: VoiceAssistantDialogProps) => {
+  const menuItems = [
+    { 
+      id: 'voice',
+      label: "Voice Commands", 
+      icon: <Mic className="h-5 w-5" />,
+      onClick: () => {
+        toggleListening();
+        setOpen(false);
+      },
+      gradient: "from-blue-400 to-blue-300",
+      isActive: isListening
+    },
+    { 
+      id: 'stats',
+      label: "Business Stats", 
+      icon: <BarChart2 className="h-5 w-5" />,
+      onClick: () => window.location.href = '/dashboard-stats',
+      gradient: "from-green-400 to-green-300"
+    },
+    { 
+      id: 'activity',
+      label: "Restaurant Activity", 
+      icon: <Bell className="h-5 w-5" />,
+      onClick: () => window.location.href = '/live-tracking',
+      gradient: "from-amber-400 to-amber-300"
+    },
+    { 
+      id: 'new-order',
+      label: "New Order", 
+      icon: <FileEdit className="h-5 w-5" />,
+      onClick: () => window.location.href = '/new-order',
+      gradient: "from-rose-400 to-rose-300"
+    }
+  ];
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
-          variant="ghost" 
-          size="icon"
-          className={cn("text-gray-300 hover:text-white hover:bg-gray-800 rounded-full", className)}
+          variant="outline" 
+          size="icon" 
+          className="rounded-full bg-transparent border-gray-800 hover:bg-gray-900 hover:text-white"
         >
           <Info className="h-4 w-4" />
-          <span className="sr-only">Voice assistant info</span>
+          <span className="sr-only">Voice Commands Info</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-black/80 backdrop-blur-md border-gray-800">
-        <DialogHeader>
-          <DialogTitle className="flex items-center text-xl">
-            <Brain className="h-5 w-5 mr-2 text-purple-400" />
-            Voice Assistant
-          </DialogTitle>
-          <DialogDescription>
-            Use natural voice commands to control the application
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-[260px] p-0 rounded-xl bg-white/30 backdrop-blur-xl border-0 shadow-xl overflow-hidden">
+        <div className="flex flex-col">
+          {menuItems.map((item, index) => (
+            <button
+              key={item.id}
+              onClick={item.onClick}
+              className={cn(
+                "flex items-center justify-between px-5 py-3 text-left border-b border-white/20 transition-colors",
+                item.isActive ? "bg-opacity-40" : "hover:bg-white/10",
+                index === menuItems.length - 1 ? "border-b-0" : "",
+                `bg-gradient-to-r ${item.gradient} bg-opacity-20`
+              )}
+            >
+              <span className="font-medium text-gray-800">{item.label}</span>
+              <span className="text-gray-700">
+                {item.icon}
+              </span>
+            </button>
+          ))}
+        </div>
         
-        <div className="space-y-4 mt-2">
-          <p className="text-sm">
-            Your AI voice assistant is always ready to help. Click the{" "}
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-purple-900/30 text-purple-300 text-xs">
-              <Mic className="h-3 w-3 mr-1" /> microphone
-            </span>{" "}
-            button in the top right corner to activate voice control.
-          </p>
-          
-          <div className="rounded-md border border-gray-800 bg-black/40 p-3">
-            <h4 className="font-medium text-sm mb-2">Common voice commands:</h4>
-            <ul className="space-y-1 text-sm text-gray-300">
-              <li>• "Create a new order for table 5"</li>
-              <li>• "Show me today's sales report"</li>
-              <li>• "Go to kitchen tokens page"</li>
-              <li>• "What are our top selling items?"</li>
-              <li>• "Show me business insights"</li>
-            </ul>
-          </div>
-          
-          <div className="rounded-md border border-gray-800 bg-gradient-to-r from-purple-900/30 to-black/40 p-3">
-            <h4 className="font-medium text-sm mb-2">Business Intelligence:</h4>
-            <p className="text-sm text-gray-300">
-              Ask business questions like "How is our revenue trending?" or "What menu items have the highest profit margins?" for AI-powered business insights.
-            </p>
-          </div>
-          
-          <Link href="/voice-commands" className="block w-full">
-            <Button variant="outline" className="w-full border-purple-800 hover:bg-purple-900/30 hover:text-purple-200">
-              View all voice commands
-            </Button>
+        <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg opacity-90">
+          <Link href="/voice-commands">
+            <div className="w-12 h-12 flex items-center justify-center">
+              <Mic className="h-7 w-7 text-gray-700" />
+            </div>
           </Link>
         </div>
       </DialogContent>
     </Dialog>
   );
-};
+}

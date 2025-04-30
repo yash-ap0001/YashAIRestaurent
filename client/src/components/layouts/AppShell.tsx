@@ -9,7 +9,7 @@ import {
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
   Radio, Signal, Globe, ExternalLink, Mic, MicOff, Workflow, Salad, Apple, UserCog, Eye, Utensils,
-  ChevronRight, PanelLeftClose, PanelLeftOpen
+  ChevronRight, PanelLeftClose, PanelLeftOpen, BrainCircuit as Brain
 } from "lucide-react";
 import NotificationSystem from "@/components/notifications/NotificationSystem";
 import { cn } from "@/lib/utils";
@@ -72,6 +72,7 @@ const managementNavItems: NavItem[] = [
 const testingNavItems: NavItem[] = [
   { label: "External Integration", href: "/external-integration", icon: <ExternalLink className="w-5 h-5" /> },
   { label: "Voice Assistant", href: "/voice-assistant", icon: <Mic className="w-5 h-5" /> },
+  { label: "Voice Commands", href: "/voice-commands", icon: <Brain className="w-5 h-5" /> },
   { label: "n8n Integration", href: "/n8n-integration", icon: <Workflow className="w-5 h-5" /> },
   { label: "Notification Test", href: "/notification-test", icon: <Bell className="w-5 h-5" /> },
 ];
@@ -138,6 +139,7 @@ export function AppShell({ children }: AppShellProps) {
     "/reports": ["admin", "manager"],
     "/external-integration": ["admin", "manager"],
     "/voice-assistant": ["admin", "manager"],
+    "/voice-commands": ["admin", "manager", "waiter", "kitchen", "delivery", "customer"],
     "/n8n-integration": ["admin", "manager"],
     "/diet-plan": ["admin", "manager", "customer"],
     "/notification-test": ["admin", "manager"],
@@ -357,8 +359,8 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <div className="flex items-center space-x-3">
-            {/* Voice Control Button */}
-            <div className="relative">
+            {/* Voice Control Button Group */}
+            <div className="relative flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
@@ -380,6 +382,9 @@ export function AppShell({ children }: AppShellProps) {
                   {isListening ? "Stop listening" : "Start voice control"}
                 </span>
               </Button>
+              
+              {/* Voice Assistant Info Dialog */}
+              <VoiceAssistantDialog />
             </div>
             
             {/* Notifications system */}
