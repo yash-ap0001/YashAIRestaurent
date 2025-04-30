@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import OrderManagementAI from '@/components/ai/OrderManagementAI';
-import RestaurantAdminAI from '@/components/admin/RestaurantAdminAI';
+import RestaurantAdminAI from '@/components/admin/RestaurantAdminAI.fixed';
 import { 
   MessageSquare, 
   Utensils, 
