@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { 
   Info, 
@@ -13,6 +13,7 @@ import {
 import { useVoiceControl } from "@/hooks/use-voice-control";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export function VoiceAssistantDialog() {
   const [open, setOpen] = useState(false);
@@ -70,7 +71,19 @@ export function VoiceAssistantDialog() {
           <span className="sr-only">Voice Commands Info</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[260px] p-0 rounded-xl bg-white/30 backdrop-blur-xl border-0 shadow-xl overflow-hidden">
+      <DialogContent 
+        className="max-w-[260px] p-0 rounded-xl border-0 shadow-xl overflow-hidden" 
+        style={{
+          background: 'rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(30px)',
+          WebkitBackdropFilter: 'blur(30px)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        <VisuallyHidden>
+          <DialogTitle>Voice Assistant Options</DialogTitle>
+        </VisuallyHidden>
+        
         <div className="flex flex-col">
           {menuItems.map((item, index) => (
             <button
@@ -78,10 +91,13 @@ export function VoiceAssistantDialog() {
               onClick={item.onClick}
               className={cn(
                 "flex items-center justify-between px-5 py-3 text-left border-b border-white/20 transition-colors",
-                item.isActive ? "bg-opacity-40" : "hover:bg-white/10",
+                item.isActive ? "bg-opacity-60" : "hover:bg-white/20",
                 index === menuItems.length - 1 ? "border-b-0" : "",
-                `bg-gradient-to-r ${item.gradient} bg-opacity-20`
+                `bg-gradient-to-r ${item.gradient} bg-opacity-30`
               )}
+              style={{
+                background: `linear-gradient(to right, ${item.isActive ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)'}, ${item.isActive ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'})`
+              }}
             >
               <span className="font-medium text-gray-800">{item.label}</span>
               <span className="text-gray-700">
