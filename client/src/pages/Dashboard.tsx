@@ -6,16 +6,34 @@ import { TopSellingItems } from "@/components/dashboard/TopSellingItems";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { PersonalizedRecommendations } from "@/components/dashboard/PersonalizedRecommendations";
 import { LiveOrderTracker } from "@/components/orders/LiveOrderTracker";
+import RestaurantAdminAI from "@/components/admin/RestaurantAdminAI";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 import { Activity, ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  
+  // Check if the user is an admin or manager
+  const isAdminOrManager = user && (user.role === "admin" || user.role === "manager");
+  
   return (
     <div className="space-y-6">
       {/* Dashboard Stats */}
-      <DashboardStats />
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <DashboardStats />
+        </div>
+        
+        {/* Show the RestaurantAdminAI button only for admin/manager users */}
+        {isAdminOrManager && (
+          <div className="ml-4 self-start mt-2">
+            <RestaurantAdminAI />
+          </div>
+        )}
+      </div>
       
       {/* Live Order Tracking */}
       <div>
