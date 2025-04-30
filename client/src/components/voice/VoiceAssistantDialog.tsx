@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Info, 
@@ -110,115 +110,83 @@ export function VoiceAssistantDialog() {
   return (
     <div className="relative">
       <Button 
-        ref={buttonRef}
         variant="outline" 
         size="icon" 
         className="rounded-full bg-transparent border-gray-800 hover:bg-gray-900 hover:text-white"
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen(true)}
       >
         <Info className="h-4 w-4" />
         <span className="sr-only">Voice Commands Info</span>
       </Button>
 
-      {open && (
-        <>
-          {/* This is the dark overlay behind the menu to give the blur effect */}
-          <div 
-            className="fixed inset-0 z-40"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.3)',
-              backdropFilter: 'blur(5px)', 
-            }}
-            onClick={() => setOpen(false)}
-          />
-
-          {/* The voice assistant menu */}
-          <div 
-            ref={menuRef}
-            className="fixed z-50 left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[600px] max-h-[80vh] rounded-xl border-0 shadow-xl overflow-hidden overflow-y-auto"
-            style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-            }}
-            aria-labelledby="voice-assistant-title"
-          >
-            <div className="p-5 border-b border-white/20">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="h-8 w-8 bg-purple-600/20 rounded-full flex items-center justify-center">
-                    <BrainCircuit className="h-5 w-5 text-purple-500" />
-                  </div>
-                  <h2 id="voice-assistant-title" className="text-xl font-bold text-white">Voice Assistant Commands</h2>
-                </div>
-                <button 
-                  onClick={() => setOpen(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <div className="flex items-center space-x-3">
+              <div className="h-8 w-8 bg-purple-600/20 rounded-full flex items-center justify-center">
+                <BrainCircuit className="h-5 w-5 text-purple-500" />
               </div>
-              <p className="mt-2 text-gray-300 text-sm">
-                Here are some commands you can say to the voice assistant. Click the mic button or use the global mic in the header to start.
-              </p>
+              <DialogTitle className="text-xl">Voice Assistant Commands</DialogTitle>
             </div>
+            <DialogDescription>
+              Here are some commands you can say to the voice assistant. Click the mic button or use the global mic in the header to start.
+            </DialogDescription>
+          </DialogHeader>
 
-            {/* Quick Action Buttons */}
-            <div className="grid grid-cols-4 gap-2 p-3 border-b border-white/20">
-              {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={item.onClick}
-                  className={cn(
-                    "flex flex-col items-center justify-center p-3 rounded-lg transition-colors",
-                    item.isActive ? "bg-purple-600/40" : "bg-white/10 hover:bg-white/20"
-                  )}
-                >
-                  <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center mb-2">
-                    {item.icon}
+          {/* Quick Action Buttons */}
+          <div className="grid grid-cols-4 gap-2 p-1 border-b border-white/10 pb-3">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={item.onClick}
+                className={cn(
+                  "flex flex-col items-center justify-center p-3 rounded-lg transition-colors",
+                  item.isActive ? "bg-purple-600/40" : "bg-black/20 hover:bg-black/30"
+                )}
+              >
+                <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center mb-2">
+                  {item.icon}
+                </div>
+                <span className="text-xs font-medium">{item.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Command Categories */}
+          <div className="p-1">
+            <h3 className="text-lg font-medium mb-3">Available Commands</h3>
+            
+            <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
+              {commandCategories.map((category, catIndex) => (
+                <div key={catIndex} className="bg-black/20 rounded-lg p-3">
+                  <h4 className="text-sm font-medium mb-2">{category.name}</h4>
+                  <div className="space-y-2">
+                    {category.commands.map((command, cmdIndex) => (
+                      <div key={cmdIndex} className="flex items-start">
+                        <ChevronRight className="h-4 w-4 text-purple-400 mt-0.5 mr-2 flex-shrink-0" />
+                        <p className="text-sm text-gray-300">{command}</p>
+                      </div>
+                    ))}
                   </div>
-                  <span className="text-xs font-medium text-white">{item.label}</span>
-                </button>
+                </div>
               ))}
             </div>
-
-            {/* Command Categories */}
-            <div className="p-4">
-              <h3 className="text-lg font-medium text-white mb-3">Available Commands</h3>
-              
-              <div className="space-y-4">
-                {commandCategories.map((category, catIndex) => (
-                  <div key={catIndex} className="bg-white/10 rounded-lg p-3">
-                    <h4 className="text-sm font-medium text-white mb-2">{category.name}</h4>
-                    <div className="space-y-2">
-                      {category.commands.map((command, cmdIndex) => (
-                        <div key={cmdIndex} className="flex items-start">
-                          <ChevronRight className="h-4 w-4 text-purple-400 mt-0.5 mr-2 flex-shrink-0" />
-                          <p className="text-sm text-gray-300">{command}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-4 bg-black/20 border-t border-white/10">
-              <div className="flex items-center justify-between">
-                <Badge className="bg-purple-600 hover:bg-purple-700">
-                  {isListening ? "Listening..." : "Voice Ready"}
-                </Badge>
-                <Link href="/voice-commands">
-                  <Button size="sm" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
-                    See all commands
-                  </Button>
-                </Link>
-              </div>
-            </div>
           </div>
-        </>
-      )}
+
+          <DialogFooter className="border-t border-white/10 pt-3">
+            <div className="flex items-center justify-between w-full">
+              <Badge className="bg-purple-600 hover:bg-purple-700">
+                {isListening ? "Listening..." : "Voice Ready"}
+              </Badge>
+              <Link href="/voice-commands">
+                <Button size="sm" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
+                  See all commands
+                </Button>
+              </Link>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
