@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { orders, menuItems, kitchenTokens, bills, customers } from '../../shared/schema';
+import { orders, menuItems, kitchenTokens, bills, customers, inventory } from '../../shared/schema';
 import { eq, like, desc, sql } from 'drizzle-orm';
 import { aiService } from './ai';
 import { broadcastToAllClients } from './realtime';
@@ -320,8 +320,8 @@ async function getKitchenStatus() {
 async function getInventoryStatus() {
   try {
     // Get inventory items with low stock
-    const lowStockItems = await db.select().from(inventoryItems)
-      .where(sql`quantity < reorder_level`)
+    const lowStockItems = await db.select().from(inventory)
+      .where(sql`quantity < min_quantity`)
       .orderBy(sql`quantity`)
       .limit(5);
     
