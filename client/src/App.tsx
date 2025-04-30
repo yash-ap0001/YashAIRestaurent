@@ -22,6 +22,7 @@ import MenuItems from "@/pages/MenuItems";
 import Reports from "@/pages/Reports";
 import ExternalIntegration from "@/pages/ExternalIntegration";
 import VoiceAssistant from "@/pages/VoiceAssistant";
+import VoiceCommandsPage from "@/pages/VoiceCommandsPage";
 import N8nIntegration from "@/pages/N8nIntegration";
 import DietPlan from "@/pages/DietPlan";
 import LoginPage from "@/pages/LoginPage";
@@ -89,6 +90,7 @@ function Router() {
       <ProtectedRoute path="/reports" component={Reports} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/external-integration" component={ExternalIntegration} allowedRoles={["admin"]} />
       <ProtectedRoute path="/voice-assistant" component={VoiceAssistant} allowedRoles={["admin", "manager", "waiter"]} />
+      <ProtectedRoute path="/voice-commands" component={VoiceCommandsPage} allowedRoles={["admin", "manager", "waiter", "kitchen", "delivery", "customer"]} />
       <ProtectedRoute path="/n8n-integration" component={N8nIntegration} allowedRoles={["admin"]} />
       <ProtectedRoute path="/diet-plan" component={DietPlan} allowedRoles={["admin", "manager", "waiter", "customer"]} />
       <ProtectedRoute path="/loading-demo" component={LoadingDemo} allowedRoles={["admin", "manager"]} />

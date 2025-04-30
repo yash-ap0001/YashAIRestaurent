@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useVoiceControlContext } from "@/contexts/VoiceControlContext";
 import { useVoiceControl } from "@/hooks/use-voice-control";
+import { VoiceAssistantDialog } from "@/components/voice/VoiceAssistantDialog";
 import "@/assets/custom-theme.css";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
