@@ -11,7 +11,7 @@ import {
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
   Radio, Signal, Globe, ExternalLink, Mic, MicOff, Workflow, Salad, Apple, UserCog, Eye, Utensils,
-  ChevronRight, PanelLeftClose, PanelLeftOpen, BrainCircuit as Brain
+  ChevronRight, PanelLeftClose, PanelLeftOpen, BrainCircuit as Brain, Bot
 } from "lucide-react";
 import NotificationSystem from "@/components/notifications/NotificationSystem";
 import { cn } from "@/lib/utils";
@@ -379,6 +379,19 @@ export function AppShell({ children }: AppShellProps) {
           <div className="flex items-center space-x-3">
             {/* Voice Control Button Group */}
             <div className="relative flex items-center gap-1">
+              {/* Hotel Agent Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setHotelAgentDialogOpen(true)}
+                title="Hotel AI Agent"
+                className="rounded-full hover:bg-gray-800 text-white"
+              >
+                <Bot className="h-5 w-5" />
+                <span className="sr-only">Hotel AI Agent</span>
+              </Button>
+              
+              {/* Voice Control Button */}
               <Button
                 variant="ghost"
                 size="icon"
