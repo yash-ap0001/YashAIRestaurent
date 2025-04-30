@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useVoiceControlContext } from "@/contexts/VoiceControlContext";
+import { useVoiceControl } from "@/hooks/use-voice-control";
 import "@/assets/custom-theme.css";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
-  Radio, Signal, Globe, ExternalLink, Mic, Workflow, Salad, Apple, UserCog, Eye, Utensils,
+  Radio, Signal, Globe, ExternalLink, Mic, MicOff, Workflow, Salad, Apple, UserCog, Eye, Utensils,
   ChevronRight, PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
 import NotificationSystem from "@/components/notifications/NotificationSystem";
@@ -90,6 +92,14 @@ export function AppShell({ children }: AppShellProps) {
                     managementNavItems.find(item => item.href === location) ||
                     testingNavItems.find(item => item.href === location) ||
                     { label: "Dashboard" };
+  
+  // Set up voice control for global use
+  const { isListening, toggleListening } = useVoiceControl({
+    enabled: true,
+    language: 'en-IN',
+    accentMode: true,
+    voiceEnabled: true
+  });
   
   // Determine the user type based on the current role for chatbot
   const getUserType = () => {
@@ -346,6 +356,31 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <div className="flex items-center space-x-3">
+            {/* Voice Control Button */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleListening}
+                title={isListening ? "Stop listening" : "Start voice control"}
+                className={cn(
+                  "rounded-full",
+                  isListening 
+                    ? "bg-purple-600 hover:bg-purple-700 text-white" 
+                    : "hover:bg-gray-800 text-white"
+                )}
+              >
+                {isListening ? (
+                  <MicOff className="h-5 w-5" />
+                ) : (
+                  <Mic className="h-5 w-5" />
+                )}
+                <span className="sr-only">
+                  {isListening ? "Stop listening" : "Start voice control"}
+                </span>
+              </Button>
+            </div>
+            
             {/* Notifications system */}
             <NotificationSystem />
             

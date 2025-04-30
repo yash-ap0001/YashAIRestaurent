@@ -35,22 +35,6 @@ export const VoiceControlProvider: React.FC<{ children: React.ReactNode }> = ({ 
   return (
     <VoiceControlContext.Provider value={contextValue}>
       {children}
-      
-      {/* Global Voice Control Button */}
-      <div className="fixed bottom-16 right-4 z-40">
-        <Button
-          size="icon"
-          variant={isListening ? "default" : "outline"}
-          className={isListening ? "bg-blue-600 hover:bg-blue-700" : ""}
-          onClick={toggleListening}
-        >
-          {isListening ? (
-            <MicOff className="h-5 w-5" />
-          ) : (
-            <Mic className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
     </VoiceControlContext.Provider>
   );
 };
