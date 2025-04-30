@@ -180,13 +180,61 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
     }
   };
   
-  // Automatically start speaking when dialog opens
+  // Automatically start speaking when dialog opens - no user action required
   useEffect(() => {
     if (isOpen) {
       // Small delay to allow dialog transition
       const timer = setTimeout(() => {
         setCurrentSection('greeting');
-        playCurrentSection();
+        // Automatically start speaking without waiting for user input
+        if ('speechSynthesis' in window) {
+          const text = script.greeting;
+          const utterance = new SpeechSynthesisUtterance(text);
+          
+          // Get available voices and choose a pleasant one
+          const voices = window.speechSynthesis.getVoices();
+          // Pick a female voice if available
+          const femaleVoice = voices.find(voice => 
+            voice.name.includes('Female') || 
+            voice.name.includes('Samantha') || 
+            voice.name.includes('Veena') ||
+            voice.name.includes('Rishi')
+          );
+          
+          if (femaleVoice) {
+            utterance.voice = femaleVoice;
+          }
+          
+          // Adjust speech parameters
+          utterance.rate = 1.0;  // Normal speed
+          utterance.pitch = 1.1; // Slightly higher pitch
+          utterance.volume = 1.0; // Full volume
+          
+          // Automatically continue to next section when done speaking greeting
+          utterance.onend = () => {
+            setIsSpeaking(false);
+            setCurrentSection('yesterday');
+            // Automatically start speaking the next section
+            playSpeech(script.yesterday, () => {
+              setCurrentSection('today');
+              playSpeech(script.today, () => {
+                setCurrentSection('tomorrow');
+                playSpeech(script.tomorrow, () => {
+                  setCurrentSection('tips');
+                  playSpeech(script.tips, () => {
+                    setCurrentSection('closing');
+                    playSpeech(script.closing);
+                  });
+                });
+              });
+            });
+          };
+          
+          // Start speaking immediately
+          window.speechSynthesis.speak(utterance);
+          setIsSpeaking(true);
+          setUtterance(utterance);
+        }
       }, 500);
       
       return () => clearTimeout(timer);
@@ -229,8 +277,8 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
       icon={<BarChart3 className="h-6 w-6 text-primary" />}
       width="max-w-lg"
       footer={
-        <div className="flex justify-between w-full items-center">
-          <div className="flex gap-2">
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex gap-2 flex-wrap">
             <Badge variant={currentSection === 'greeting' ? "default" : "outline"}>
               Greeting
             </Badge>
@@ -247,9 +295,27 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
               Tips
             </Badge>
           </div>
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
+          
+          <div className="flex justify-between items-center">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="text-slate-400 hover:text-white text-xs"
+              onClick={() => {
+                // Keep speaking but minimize the dialog
+                onClose();
+              }}
+            >
+              <ArrowRight className="h-3 w-3 mr-1" />
+              Continue while I speak in background
+            </Button>
+            <Button variant="outline" onClick={() => {
+              stopSpeech();
+              onClose();
+            }}>
+              Close
+            </Button>
+          </div>
         </div>
       }
     >
