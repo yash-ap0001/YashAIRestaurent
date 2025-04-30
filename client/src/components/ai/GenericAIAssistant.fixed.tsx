@@ -49,6 +49,7 @@ export interface AIAssistantConfig {
   // Optional data processing
   processQueryResponse?: (data: any) => any;
   processChatResponse?: (data: any) => any;
+  customPayloadProcessor?: (payload: any) => any;
   
   // UI customization
   maxWidth?: string;
@@ -98,7 +99,8 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
     buttonVariant = "outline",
     extraDataQueries = [],
     storageKey,
-    maxStoredMessages = 20
+    maxStoredMessages = 20,
+    customPayloadProcessor
   } = props;
   
   // Get user info if available
@@ -159,7 +161,14 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
         user
       };
       
-      const payload = { message, context };
+      // Create base payload
+      let payload = { message, context };
+      
+      // Apply custom payload processor if provided
+      if (customPayloadProcessor) {
+        payload = customPayloadProcessor(payload);
+      }
+      
       const res = await apiRequest('POST', chatEndpoint, payload);
       const data = await res.json();
       return processChatResponse(data);

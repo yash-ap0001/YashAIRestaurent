@@ -124,6 +124,14 @@ export function RestaurantAdminAI() {
     return data.response || "I'm analyzing the restaurant business performance. How can I help you with specific insights?";
   };
   
+  // Add custom API payload processor to include userType
+  const customPayloadProcessor = (payload: any) => {
+    return {
+      ...payload,
+      userType: 'admin' // Add the required userType parameter
+    };
+  };
+  
   return (
     <GenericAIAssistant
       title="Restaurant Admin AI"
@@ -150,6 +158,9 @@ export function RestaurantAdminAI() {
       // Additional data and command patterns
       extraDataQueries={adminDataQueries}
       commandPatterns={adminCommandPatterns}
+      
+      // Add custom payload processor
+      customPayloadProcessor={customPayloadProcessor}
       customCommands={adminCommands}
       
       // Data processors
