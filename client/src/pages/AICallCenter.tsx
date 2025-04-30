@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { toast } from '@/hooks/use-toast';
-import { Phone, Mic, Loader2, Play, StopCircle, PhoneCall, PhoneOff, Settings, FilePhone } from 'lucide-react';
+import { Phone, Mic, Loader2, Play, StopCircle, PhoneCall, PhoneOff, Settings, FileText } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -497,106 +497,15 @@ export default function AICallCenter() {
       
       {/* Call Details Dialog */}
       {selectedCall && (
-        <Dialog open={!!selectedCall} onOpenChange={(open) => !open && setSelectedCall(null)}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Call Details</DialogTitle>
-              <DialogDescription>
-                Call from {selectedCall.phoneNumber} at {formatTime(selectedCall.startTime)}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <Tabs defaultValue="transcript">
-              <TabsList>
-                <TabsTrigger value="transcript">Transcript</TabsTrigger>
-                <TabsTrigger value="order" disabled={!selectedCall.orderId}>Order Details</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="transcript" className="space-y-4">
-                <div className="border rounded-md p-4 bg-gray-50 max-h-96 overflow-auto">
-                  {selectedCall.transcript ? (
-                    <div className="space-y-2">
-                      {selectedCall.transcript.split('\n').map((line, index) => {
-                        // Determine if it's the AI or customer speaking
-                        const isAI = line.startsWith('AI:');
-                        const isCustomer = line.startsWith('Customer:');
-                        
-                        // Apply appropriate styling based on speaker
-                        return (
-                          <div 
-                            key={index} 
-                            className={`p-2 rounded-lg ${
-                              isAI 
-                                ? 'bg-primary/10 text-primary border-l-4 border-primary' 
-                                : isCustomer 
-                                  ? 'bg-gray-200 text-gray-800 ml-8 border-r-4 border-gray-400' 
-                                  : ''
-                            }`}
-                          >
-                            {/* Format order summaries with better presentation */}
-                            {isAI && line.includes('summary') && line.includes('₹') ? (
-                              <div>
-                                <div className="font-medium mb-1">
-                                  {line.split('\n')[0]} {/* Display the header */}
-                                </div>
-                                <div className="pl-3 border-l-2 border-primary/30 space-y-1 whitespace-pre-wrap">
-                                  {line.split('\n').slice(1).map((summaryLine, i) => (
-                                    summaryLine.includes('₹') ? (
-                                      <div key={i} className="font-mono text-sm flex justify-between">
-                                        <span>{summaryLine.split('=')[0]}</span>
-                                        <span className="font-medium">{summaryLine.split('=')[1]?.trim()}</span>
-                                      </div>
-                                    ) : (
-                                      <div key={i}>{summaryLine}</div>
-                                    )
-                                  ))}
-                                </div>
-                              </div>
-                            ) : (
-                              // For standard messages
-                              <div className={
-                                isAI && line.includes('Excellent!') ? 'text-green-600 font-medium' : 
-                                isAI && line.includes('Hi there! Welcome to') ? 'text-blue-600 font-medium' : 
-                                isAI && line.includes('Thank you for your order') ? 'text-green-600 font-medium' : 
-                                ''
-                              }>
-                                {line}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    'No transcript available'
-                  )}
-                </div>
-                
-                <div className="flex justify-between">
-                  <Badge className={getStatusColor(selectedCall.status)}>
-                    {selectedCall.status === 'active' ? 'Call in progress' : 'Call completed'}
-                  </Badge>
-                  
-                  {selectedCall.orderId && (
-                    <Badge variant="outline">
-                      Order #{selectedCall.orderId}
-                    </Badge>
-                  )}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="order">
-                {selectedCall.orderId ? (
-                  <OrderDetails orderId={selectedCall.orderId} phoneNumber={selectedCall.phoneNumber} />
-                ) : (
-                  <div className="py-8 text-center text-gray-500">
-                    No order was placed during this call
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-            
-            <DialogFooter>
+        <MaterialDialog 
+          isOpen={!!selectedCall} 
+          onClose={() => setSelectedCall(null)}
+          title="Call Details"
+          description={`Call from ${selectedCall.phoneNumber} at ${formatTime(selectedCall.startTime)}`}
+          icon={<FileText className="h-5 w-5 text-blue-500" />}
+          width="max-w-3xl"
+          footer={
+            <div className="flex justify-end w-full space-x-2">
               <Button variant="secondary" onClick={() => setSelectedCall(null)}>
                 Close
               </Button>
@@ -606,100 +515,189 @@ export default function AICallCenter() {
                   End Call
                 </Button>
               )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </div>
+          }
+        >
+          <Tabs defaultValue="transcript">
+            <TabsList>
+              <TabsTrigger value="transcript">Transcript</TabsTrigger>
+              <TabsTrigger value="order" disabled={!selectedCall.orderId}>Order Details</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="transcript" className="space-y-4">
+              <div className="border border-gray-800 rounded-md p-4 bg-black/30 max-h-96 overflow-auto">
+                {selectedCall.transcript ? (
+                  <div className="space-y-2">
+                    {selectedCall.transcript.split('\n').map((line, index) => {
+                      // Determine if it's the AI or customer speaking
+                      const isAI = line.startsWith('AI:');
+                      const isCustomer = line.startsWith('Customer:');
+                      
+                      // Apply appropriate styling based on speaker - dark mode version
+                      return (
+                        <div 
+                          key={index} 
+                          className={`p-2 rounded-lg ${
+                            isAI 
+                              ? 'bg-blue-950/40 text-blue-300 border-l-4 border-blue-800/60' 
+                              : isCustomer 
+                                ? 'bg-gray-900/60 text-gray-200 ml-8 border-r-4 border-gray-700/60' 
+                                : ''
+                          }`}
+                        >
+                          {/* Format order summaries with better presentation - dark mode version */}
+                          {isAI && line.includes('summary') && line.includes('₹') ? (
+                            <div>
+                              <div className="font-medium mb-1 text-green-400">
+                                {line.split('\n')[0]} {/* Display the header */}
+                              </div>
+                              <div className="pl-3 border-l-2 border-green-800/50 space-y-1 whitespace-pre-wrap">
+                                {line.split('\n').slice(1).map((summaryLine, i) => (
+                                  summaryLine.includes('₹') ? (
+                                    <div key={i} className="font-mono text-sm flex justify-between text-green-300">
+                                      <span>{summaryLine.split('=')[0]}</span>
+                                      <span className="font-medium">{summaryLine.split('=')[1]?.trim()}</span>
+                                    </div>
+                                  ) : (
+                                    <div key={i} className="text-green-200">{summaryLine}</div>
+                                  )
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            // For standard messages - dark mode version
+                            <div className={
+                              isAI && line.includes('Excellent!') ? 'text-green-400 font-medium' : 
+                              isAI && line.includes('Hi there! Welcome to') ? 'text-blue-400 font-medium' : 
+                              isAI && line.includes('Thank you for your order') ? 'text-green-400 font-medium' : 
+                              ''
+                            }>
+                              {line}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-gray-400 text-center py-10">No transcript available</div>
+                )}
+              </div>
+              
+              <div className="flex justify-between">
+                <Badge className={getStatusColor(selectedCall.status)}>
+                  {selectedCall.status === 'active' ? 'Call in progress' : 'Call completed'}
+                </Badge>
+                
+                {selectedCall.orderId && (
+                  <Badge variant="outline">
+                    Order #{selectedCall.orderId}
+                  </Badge>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="order">
+              {selectedCall.orderId ? (
+                <OrderDetails orderId={selectedCall.orderId} phoneNumber={selectedCall.phoneNumber} />
+              ) : (
+                <div className="py-8 text-center text-gray-500">
+                  No order was placed during this call
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </MaterialDialog>
       )}
       
       {/* Settings Dialog */}
-      <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>AI Call Center Settings</DialogTitle>
-            <DialogDescription>
-              Configure how the AI handles customer calls
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-2">
-            <div>
-              <Label htmlFor="greeting">Greeting Message</Label>
-              <Textarea 
-                id="greeting" 
-                value={settings.greeting} 
-                onChange={(e) => setSettings({...settings, greeting: e.target.value})}
-                rows={2}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                This is the first message customers will hear when they call
-              </p>
-            </div>
-            
-            <div>
-              <Label htmlFor="confirmation">Confirmation Prompt</Label>
-              <Textarea 
-                id="confirmation" 
-                value={settings.confirmationPrompt} 
-                onChange={(e) => setSettings({...settings, confirmationPrompt: e.target.value})}
-                rows={2}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Message to confirm the order details with the customer
-              </p>
-            </div>
-            
-            <div>
-              <Label htmlFor="farewell">Farewell Message</Label>
-              <Textarea 
-                id="farewell" 
-                value={settings.farewell} 
-                onChange={(e) => setSettings({...settings, farewell: e.target.value})}
-                rows={2}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Final message after the order is placed
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="max-retries">Maximum Retries</Label>
-                <Input 
-                  id="max-retries" 
-                  type="number"
-                  min={1}
-                  max={5}
-                  value={settings.maxRetries} 
-                  onChange={(e) => setSettings({...settings, maxRetries: parseInt(e.target.value)})}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  How many times to retry when AI can't understand
-                </p>
-              </div>
-              
-              <div className="flex items-end pb-7">
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="auto-answer" 
-                    checked={settings.autoAnswerCalls}
-                    onCheckedChange={(checked) => setSettings({...settings, autoAnswerCalls: checked})}
-                  />
-                  <Label htmlFor="auto-answer">Auto-answer calls</Label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
+      <MaterialDialog 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)}
+        title="AI Call Center Settings"
+        description="Configure how the AI handles customer calls"
+        icon={<Settings className="h-5 w-5 text-purple-500" />}
+        width="max-w-2xl"
+        footer={
+          <div className="flex justify-end w-full space-x-2">
             <Button variant="outline" onClick={() => setShowSettings(false)}>
               Cancel
             </Button>
             <Button onClick={saveSettings}>
               Save Changes
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        }
+      >
+        <div className="space-y-4 py-2">
+          <div>
+            <Label htmlFor="greeting">Greeting Message</Label>
+            <Textarea 
+              id="greeting" 
+              value={settings.greeting} 
+              onChange={(e) => setSettings({...settings, greeting: e.target.value})}
+              rows={2}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              This is the first message customers will hear when they call
+            </p>
+          </div>
+          
+          <div>
+            <Label htmlFor="confirmation">Confirmation Prompt</Label>
+            <Textarea 
+              id="confirmation" 
+              value={settings.confirmationPrompt} 
+              onChange={(e) => setSettings({...settings, confirmationPrompt: e.target.value})}
+              rows={2}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Message to confirm the order details with the customer
+            </p>
+          </div>
+          
+          <div>
+            <Label htmlFor="farewell">Farewell Message</Label>
+            <Textarea 
+              id="farewell" 
+              value={settings.farewell} 
+              onChange={(e) => setSettings({...settings, farewell: e.target.value})}
+              rows={2}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Final message after the order is placed
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="max-retries">Maximum Retries</Label>
+              <Input 
+                id="max-retries" 
+                type="number"
+                min={1}
+                max={5}
+                value={settings.maxRetries} 
+                onChange={(e) => setSettings({...settings, maxRetries: parseInt(e.target.value)})}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                How many times to retry when AI can't understand
+              </p>
+            </div>
+            
+            <div className="flex items-end pb-7">
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="auto-answer" 
+                  checked={settings.autoAnswerCalls}
+                  onCheckedChange={(checked) => setSettings({...settings, autoAnswerCalls: checked})}
+                />
+                <Label htmlFor="auto-answer">Auto-answer calls</Label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </MaterialDialog>
     </div>
   );
 }
