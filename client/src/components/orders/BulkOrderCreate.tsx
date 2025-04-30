@@ -1,15 +1,5 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogOverlay,
-  DialogPortal,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +15,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, Plus, Minus, Check, X } from "lucide-react";
+import { Loader2, Plus, Minus, Check, X, Sparkles } from "lucide-react";
+import { MaterialDialog } from "@/components/ui/material-dialog";
 
 interface MenuItem {
   id: number;
@@ -185,205 +176,195 @@ export function BulkOrderCreate({ isOpen, onClose }: BulkOrderCreateProps) {
     aiOrderMutation.mutate(aiPrompt);
   };
   
-  return (
-    <Dialog 
-      open={isOpen} 
-      onOpenChange={onClose}
-    >
-      <DialogContent 
-        className="sm:max-w-[600px] max-h-[550px] overflow-y-auto bg-zinc-900/80 border border-purple-600/30 shadow-xl p-0">
-        <DialogHeader className="relative p-4 bg-gradient-to-r from-purple-900/80 to-purple-800/80 rounded-t-lg border-b border-purple-600/30">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
-              Bulk Order Creation
-            </DialogTitle>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onClose} 
-              className="h-8 w-8 rounded-full text-gray-400 hover:text-white hover:bg-gray-800/50"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
-        
-        <Tabs 
-          defaultValue="standard" 
-          value={activeTab} 
-          onValueChange={setActiveTab}
-          className="px-6 pt-6"
+  // Create footer buttons
+  const dialogFooter = (
+    <div className="flex items-center justify-between w-full">
+      <Button variant="outline" onClick={onClose} className="border-gray-700 hover:bg-gray-800 hover:text-white">
+        Cancel
+      </Button>
+      {activeTab === "standard" ? (
+        <Button 
+          onClick={handleCreateBulkOrders}
+          disabled={bulkOrderMutation.isPending || selectedMenuItems.length === 0}
+          className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800 shadow-md"
         >
-          <TabsList className="grid grid-cols-2 bg-zinc-800">
-            <TabsTrigger value="standard" className="data-[state=active]:bg-purple-900 data-[state=active]:text-white">Standard Creation</TabsTrigger>
-            <TabsTrigger value="ai" className="data-[state=active]:bg-purple-900 data-[state=active]:text-white">AI-Powered Creation</TabsTrigger>
-          </TabsList>
-          
-          {/* Standard bulk creation tab */}
-          <TabsContent value="standard" className="space-y-4 mt-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="orderCount" className="text-white">Number of Orders</Label>
-                <Input
-                  id="orderCount"
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={orderCount}
-                  onChange={(e) => setOrderCount(parseInt(e.target.value) || 1)}
-                  className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tablePrefix" className="text-white">Table Prefix</Label>
-                <Input
-                  id="tablePrefix"
-                  value={tablePrefix}
-                  onChange={(e) => setTablePrefix(e.target.value)}
-                  maxLength={3}
-                  className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tableStart" className="text-white">Starting Table Number</Label>
-                <Input
-                  id="tableStart"
-                  type="number"
-                  min={1}
-                  value={tableStart}
-                  onChange={(e) => setTableStart(parseInt(e.target.value) || 1)}
-                  className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-base font-medium text-white">Select Menu Items</Label>
-                <div className="bg-purple-600/20 text-purple-400 text-xs px-3 py-1 rounded-full border border-purple-600/30">
-                  Selected {selectedMenuItems.length} items
-                </div>
-              </div>
-              <div className="border border-gray-700 rounded-md p-2 max-h-[150px] overflow-y-auto bg-black/90 shadow-inner">
-                {isLoadingMenuItems ? (
-                  <div className="flex justify-center items-center h-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
-                  </div>
-                ) : (
-                  <div className="space-y-5">
-                    {categories.map((category) => (
-                      <div key={category} className="space-y-2">
-                        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide px-1">
-                          {category}
-                        </h3>
-                        <div className="grid grid-cols-2 gap-2">
-                          {menuItemsByCategory[category].map((item) => (
-                            <div 
-                              key={item.id} 
-                              className={`flex items-center space-x-2 border rounded-md p-1.5 cursor-pointer transition-all ${
-                                selectedMenuItems.includes(item.id) 
-                                  ? 'bg-purple-900/30 border-purple-500 shadow-md' 
-                                  : 'border-gray-800 hover:border-gray-700 hover:bg-gray-900/50'
-                              }`}
-                              onClick={() => toggleMenuItem(item.id)}
-                            >
-                              <Checkbox 
-                                checked={selectedMenuItems.includes(item.id)} 
-                                onCheckedChange={() => toggleMenuItem(item.id)}
-                                className={selectedMenuItems.includes(item.id) ? "border-purple-500" : ""}
-                              />
-                              <div className="flex-1 truncate">
-                                <span className={`text-sm font-medium ${selectedMenuItems.includes(item.id) ? "text-white" : "text-gray-200"}`}>
-                                  {item.name}
-                                </span>
-                                <span className={`text-sm ml-2 ${selectedMenuItems.includes(item.id) ? "text-purple-300" : "text-gray-400"}`}>
-                                  ₹{item.price}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-          
-          {/* AI-powered creation tab */}
-          <TabsContent value="ai" className="space-y-4 mt-4">
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Label htmlFor="aiPrompt" className="text-base font-medium text-white">Describe Your Order Requirements</Label>
-              </div>
-              <Textarea
-                id="aiPrompt"
-                placeholder="Example: Create breakfast orders for 20 tables (T1-T20) with coffee, dosa and idli"
-                value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
-                className="h-32 border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 shadow-inner text-white"
-              />
-              <p className="text-sm text-gray-300 bg-purple-900/30 p-3 rounded-md border border-purple-600/40">
-                Provide details like number of orders, table numbers, menu items, and any special requirements.
-                Our AI will analyze your request and create the appropriate orders automatically.
-              </p>
-            </div>
-            
-            <div className="bg-black/90 rounded-lg border border-gray-800 p-4 mt-2">
-              <h3 className="text-sm font-semibold text-white mb-3">Try these examples:</h3>
-              <div className="grid grid-cols-1 gap-2">
-                <div onClick={() => setAiPrompt("Create lunch orders for tables L1 through L30 with curry and rice")} 
-                  className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
-                  <p className="text-sm text-purple-300 font-medium">"Create lunch orders for tables L1 through L30 with curry and rice"</p>
-                </div>
-                <div onClick={() => setAiPrompt("20 breakfast orders for tables starting at B10 with coffee and snacks")} 
-                  className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
-                  <p className="text-sm text-purple-300 font-medium">"20 breakfast orders for tables starting at B10 with coffee and snacks"</p>
-                </div>
-                <div onClick={() => setAiPrompt("15 dinner reservations with our signature biryani dishes")} 
-                  className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
-                  <p className="text-sm text-purple-300 font-medium">"15 dinner reservations with our signature biryani dishes"</p>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-        
-        <DialogFooter className="flex items-center justify-between px-6 py-4 border-t border-purple-600/30 sticky bottom-0 bg-gradient-to-r from-purple-900/80 to-purple-800/80 rounded-b-lg">
-          <Button variant="outline" onClick={onClose} className="border-gray-700 hover:bg-gray-800 hover:text-white">
-            Cancel
-          </Button>
-          {activeTab === "standard" ? (
-            <Button 
-              onClick={handleCreateBulkOrders}
-              disabled={bulkOrderMutation.isPending || selectedMenuItems.length === 0}
-              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800 shadow-md"
-            >
-              {bulkOrderMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4 mr-2" />
-              )}
-              Create {orderCount} Orders
-            </Button>
+          {bulkOrderMutation.isPending ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : (
-            <Button 
-              onClick={handleCreateAiOrders}
-              disabled={aiOrderMutation.isPending || !aiPrompt.trim()}
-              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800 shadow-md"
-            >
-              {aiOrderMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Check className="h-4 w-4 mr-2" />
-              )}
-              Create Orders with AI
-            </Button>
+            <Plus className="h-4 w-4 mr-2" />
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          Create {orderCount} Orders
+        </Button>
+      ) : (
+        <Button 
+          onClick={handleCreateAiOrders}
+          disabled={aiOrderMutation.isPending || !aiPrompt.trim()}
+          className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800 shadow-md"
+        >
+          {aiOrderMutation.isPending ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Check className="h-4 w-4 mr-2" />
+          )}
+          Create Orders with AI
+        </Button>
+      )}
+    </div>
+  );
+
+  return (
+    <MaterialDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Bulk Order Creation" 
+      description="Create multiple orders at once"
+      icon={<Sparkles className="h-5 w-5 text-purple-500" />}
+      footer={dialogFooter}
+      width="max-w-[600px]"
+      className="max-h-[550px] overflow-y-auto"
+    >
+      <Tabs 
+        defaultValue="standard" 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="px-2"
+      >
+        <TabsList className="grid grid-cols-2 bg-zinc-800">
+          <TabsTrigger value="standard" className="data-[state=active]:bg-purple-900 data-[state=active]:text-white">Standard Creation</TabsTrigger>
+          <TabsTrigger value="ai" className="data-[state=active]:bg-purple-900 data-[state=active]:text-white">AI-Powered Creation</TabsTrigger>
+        </TabsList>
+        
+        {/* Standard bulk creation tab */}
+        <TabsContent value="standard" className="space-y-4 mt-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="orderCount" className="text-white">Number of Orders</Label>
+              <Input
+                id="orderCount"
+                type="number"
+                min={1}
+                max={100}
+                value={orderCount}
+                onChange={(e) => setOrderCount(parseInt(e.target.value) || 1)}
+                className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tablePrefix" className="text-white">Table Prefix</Label>
+              <Input
+                id="tablePrefix"
+                value={tablePrefix}
+                onChange={(e) => setTablePrefix(e.target.value)}
+                maxLength={3}
+                className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tableStart" className="text-white">Starting Table Number</Label>
+              <Input
+                id="tableStart"
+                type="number"
+                min={1}
+                value={tableStart}
+                onChange={(e) => setTableStart(parseInt(e.target.value) || 1)}
+                className="border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 text-white"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-medium text-white">Select Menu Items</Label>
+              <div className="bg-purple-600/20 text-purple-400 text-xs px-3 py-1 rounded-full border border-purple-600/30">
+                Selected {selectedMenuItems.length} items
+              </div>
+            </div>
+            <div className="border border-gray-700 rounded-md p-2 max-h-[150px] overflow-y-auto bg-black/90 shadow-inner">
+              {isLoadingMenuItems ? (
+                <div className="flex justify-center items-center h-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  {categories.map((category) => (
+                    <div key={category} className="space-y-2">
+                      <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide px-1">
+                        {category}
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {menuItemsByCategory[category].map((item) => (
+                          <div 
+                            key={item.id} 
+                            className={`flex items-center space-x-2 border rounded-md p-1.5 cursor-pointer transition-all ${
+                              selectedMenuItems.includes(item.id) 
+                                ? 'bg-purple-900/30 border-purple-500 shadow-md' 
+                                : 'border-gray-800 hover:border-gray-700 hover:bg-gray-900/50'
+                            }`}
+                            onClick={() => toggleMenuItem(item.id)}
+                          >
+                            <Checkbox 
+                              checked={selectedMenuItems.includes(item.id)} 
+                              onCheckedChange={() => toggleMenuItem(item.id)}
+                              className={selectedMenuItems.includes(item.id) ? "border-purple-500" : ""}
+                            />
+                            <div className="flex-1 truncate">
+                              <span className={`text-sm font-medium ${selectedMenuItems.includes(item.id) ? "text-white" : "text-gray-200"}`}>
+                                {item.name}
+                              </span>
+                              <span className={`text-sm ml-2 ${selectedMenuItems.includes(item.id) ? "text-purple-300" : "text-gray-400"}`}>
+                                ₹{item.price}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+        
+        {/* AI-powered creation tab */}
+        <TabsContent value="ai" className="space-y-4 mt-4">
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <Label htmlFor="aiPrompt" className="text-base font-medium text-white">Describe Your Order Requirements</Label>
+            </div>
+            <Textarea
+              id="aiPrompt"
+              placeholder="Example: Create breakfast orders for 20 tables (T1-T20) with coffee, dosa and idli"
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              className="h-32 border-gray-700 bg-black/90 focus:border-purple-500 focus:ring-purple-500/30 shadow-inner text-white"
+            />
+            <p className="text-sm text-gray-300 bg-purple-900/30 p-3 rounded-md border border-purple-600/40">
+              Provide details like number of orders, table numbers, menu items, and any special requirements.
+              Our AI will analyze your request and create the appropriate orders automatically.
+            </p>
+          </div>
+          
+          <div className="bg-black/90 rounded-lg border border-gray-800 p-4 mt-2">
+            <h3 className="text-sm font-semibold text-white mb-3">Try these examples:</h3>
+            <div className="grid grid-cols-1 gap-2">
+              <div onClick={() => setAiPrompt("Create lunch orders for tables L1 through L30 with curry and rice")} 
+                className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
+                <p className="text-sm text-purple-300 font-medium">"Create lunch orders for tables L1 through L30 with curry and rice"</p>
+              </div>
+              <div onClick={() => setAiPrompt("20 breakfast orders for tables starting at B10 with coffee and snacks")} 
+                className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
+                <p className="text-sm text-purple-300 font-medium">"20 breakfast orders for tables starting at B10 with coffee and snacks"</p>
+              </div>
+              <div onClick={() => setAiPrompt("15 dinner reservations with our signature biryani dishes")} 
+                className="rounded-md border border-gray-800 p-3 cursor-pointer hover:bg-gray-900/50 hover:border-gray-700 transition-all">
+                <p className="text-sm text-purple-300 font-medium">"15 dinner reservations with our signature biryani dishes"</p>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </MaterialDialog>
   );
 }
