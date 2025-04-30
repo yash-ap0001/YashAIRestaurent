@@ -425,6 +425,12 @@ export function AppShell({ children }: AppShellProps) {
                   onClose={() => setWelcomeDialogOpen(false)}
                 />
               )}
+              
+              {/* Hotel Agent Dialog */}
+              <HotelAgentDialog
+                isOpen={hotelAgentDialogOpen}
+                onClose={() => setHotelAgentDialogOpen(false)}
+              />
             </div>
             
             {/* Notifications system */}
