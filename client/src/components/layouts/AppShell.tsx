@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useVoiceControlContext } from "@/contexts/VoiceControlContext";
 import { useVoiceControl } from "@/hooks/use-voice-control";
 import { VoiceAssistantDialog } from "@/components/voice/VoiceAssistantDialog";
+import { WelcomeGreeting } from "@/components/voice/WelcomeGreeting";
 import "@/assets/custom-theme.css";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
@@ -87,8 +88,23 @@ export function AppShell({ children }: AppShellProps) {
   const [chatVisible, setChatVisible] = useState(false);
   const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [welcomeDialogOpen, setWelcomeDialogOpen] = useState(false);
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
   const { user, currentRole, setCurrentRole } = useAuth();
   const { currentMode, getThemeStyles } = useTheme();
+  
+  // Show welcome greeting after user logs in
+  useEffect(() => {
+    if (user && !hasShownWelcome) {
+      // Brief delay to let the UI settle after login
+      const timer = setTimeout(() => {
+        setWelcomeDialogOpen(true);
+        setHasShownWelcome(true);
+      }, 800);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user, hasShownWelcome]);
 
   const currentPage = mainNavItems.find(item => item.href === location) || 
                     managementNavItems.find(item => item.href === location) ||
@@ -385,6 +401,15 @@ export function AppShell({ children }: AppShellProps) {
               
               {/* Voice Assistant Info Dialog */}
               <VoiceAssistantDialog />
+              
+              {/* Welcome greeting dialog with voice that appears on login */}
+              {user && (
+                <WelcomeGreeting 
+                  userName={user.fullName?.split(' ')[0] || 'Owner'}
+                  isOpen={welcomeDialogOpen}
+                  onClose={() => setWelcomeDialogOpen(false)}
+                />
+              )}
             </div>
             
             {/* Notifications system */}
