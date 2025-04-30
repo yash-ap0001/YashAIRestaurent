@@ -12,13 +12,13 @@ interface HotelAgentDialogProps {
   onClose: () => void;
 }
 
+// Define conversation message type
+export type ConversationMessage = {
+  type: 'user' | 'agent';
+  text: string;
+};
+
 export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
-  // Define conversation message type
-  type ConversationMessage = {
-    type: 'user' | 'agent';
-    text: string;
-  };
-  
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [showOverview, setShowOverview] = useState(false);
   const { user } = useAuth();
@@ -69,20 +69,20 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
   useEffect(() => {
     if (transcript && !isListening) {
       // Add user message to conversation
-      const updatedConversation = [...conversation, { type: 'user', text: transcript }];
+      const updatedConversation: ConversationMessage[] = [...conversation, { type: 'user', text: transcript }];
       setConversation(updatedConversation);
       
       // Process the command and get a response
       const response = processVoiceCommand(transcript);
       
       // Add agent response to conversation
-      const finalConversation = [...updatedConversation, { type: 'agent', text: response }];
+      const finalConversation: ConversationMessage[] = [...updatedConversation, { type: 'agent', text: response }];
       setConversation(finalConversation);
       
       // Save the updated conversation to localStorage for persistence
       saveConversationHistory(finalConversation);
     }
-  }, [transcript, isListening]);
+  }, [transcript, isListening, conversation, processVoiceCommand]);
 
   // Clean up speech and recognition when dialog closes
   useEffect(() => {
@@ -91,7 +91,7 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
       stopSpeaking();
       setShowOverview(false);
     }
-  }, [isOpen]);
+  }, [isOpen, stopListening, stopSpeaking]);
 
   // Get current date for greeting
   const getCurrentTime = () => {
@@ -118,13 +118,13 @@ I have comprehensive data about your hotel operations. Would you like me to give
     
 YESTERDAY: We had a strong performance with approximately ${Math.round((dashboardStats?.todaysSales || 1920) * 1.2).toLocaleString()} rupees in sales and ${Math.round((dashboardStats?.ordersCount || 3) * 1.3)} food orders processed.
     
-TODAY: So far, we've had ${dashboardStats?.ordersCount || 3} orders with ${dashboardStats?.todaysSales?.toLocaleString() || "1,920"} rupees in revenue. We have ${dashboardStats?.activeTables || 1} active tables out of ${dashboardStats?.totalTables || 20}, giving us a ${Math.round(((dashboardStats?.activeTables || 1) / (dashboardStats?.totalTables || 20)) * 100)}% utilization rate. ${dashboardStats?.kitchenQueueCount > 3 ? "The kitchen queue is quite busy with " + dashboardStats?.kitchenQueueCount + " orders in progress." : "The kitchen queue is manageable with " + dashboardStats?.kitchenQueueCount + " orders in progress."}
+TODAY: So far, we've had ${dashboardStats?.ordersCount || 3} orders with ${dashboardStats?.todaysSales?.toLocaleString() || "1,920"} rupees in revenue. We have ${dashboardStats?.activeTables || 1} active tables out of ${dashboardStats?.totalTables || 20}, giving us a ${Math.round(((dashboardStats?.activeTables || 1) / (dashboardStats?.totalTables || 20)) * 100)}% utilization rate. ${dashboardStats?.kitchenQueueCount > 3 ? "The kitchen queue is quite busy with " + dashboardStats?.kitchenQueueCount + " orders in progress." : "The kitchen queue is manageable with " + (dashboardStats?.kitchenQueueCount || 2) + " orders in progress."}
     
 TOMORROW: Based on historical data and current trends, we're expecting approximately ${Math.round((dashboardStats?.ordersCount || 3) * 1.18)} orders with projected revenue of ${Math.round((dashboardStats?.todaysSales || 1920) * 1.15).toLocaleString()} rupees.
     
 BUSINESS IMPROVEMENT SUGGESTIONS:
 1. ${dashboardStats?.kitchenQueueCount > 3 ? "Add temporary kitchen staff during peak hours to maintain service quality." : "Consider running a limited-time promotion to boost orders during slower periods."}
-2. ${dashboardStats?.activeTables / (dashboardStats?.totalTables || 20) > 0.7 ? "Ensure adequate staffing for high table occupancy." : "Contact customers with future reservations to fill empty tables today."}
+2. ${(dashboardStats?.activeTables || 1) / (dashboardStats?.totalTables || 20) > 0.7 ? "Ensure adequate staffing for high table occupancy." : "Contact customers with future reservations to fill empty tables today."}
 3. Engage with your loyalty program members to drive repeat business.
 4. Consider dynamic pricing to maximize revenue during peak demand.
 5. Review inventory levels to ensure optimal stock for projected demand.
@@ -183,10 +183,7 @@ What would you like to discuss in more detail?`;
             // Auto-generate a full overview if this is the first conversation
             if (!localStorage.getItem('hotelAgentHistory')) {
               const overview = provideFullOverview();
-              setConversation(prev => [
-                ...prev,
-                { type: 'agent', text: overview }
-              ]);
+              setConversation(prev => [...prev, { type: 'agent', text: overview }]);
               
               // Save this initial conversation
               saveConversationHistory([
@@ -208,7 +205,7 @@ What would you like to discuss in more detail?`;
         }, 300);
       }
     }
-  }, [isOpen, user]);
+  }, [isOpen, user, userName, conversation.length, speakResponse, startListening]);
 
   return (
     <MaterialDialog
