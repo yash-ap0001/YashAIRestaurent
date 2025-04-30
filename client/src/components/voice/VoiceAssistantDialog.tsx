@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Info, 
@@ -8,21 +7,47 @@ import {
   BarChart2, 
   Bell, 
   FileEdit,
-  Upload
+  Upload,
+  X
 } from "lucide-react";
 import { useVoiceControl } from "@/hooks/use-voice-control";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
+// Create a custom popup instead of using the Dialog component
 export function VoiceAssistantDialog() {
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const { isListening, toggleListening } = useVoiceControl({
     enabled: true,
     language: 'en-IN',
     accentMode: true,
     voiceEnabled: true
   });
+
+  // Close the menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && 
+          !menuRef.current.contains(event.target as Node) && 
+          buttonRef.current && 
+          !buttonRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open]);
 
   const menuItems = [
     { 
@@ -60,64 +85,63 @@ export function VoiceAssistantDialog() {
   ];
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="rounded-full bg-transparent border-gray-800 hover:bg-gray-900 hover:text-white"
-        >
-          <Info className="h-4 w-4" />
-          <span className="sr-only">Voice Commands Info</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent 
-        className="max-w-[260px] p-0 rounded-xl border-0 shadow-xl overflow-hidden" 
-        style={{
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(30px)',
-          WebkitBackdropFilter: 'blur(30px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-        }}
-        // Remove the close button and make background transparent
-        hideCloseButton={true}
-        hideBackground={true}
+    <div className="relative">
+      <Button 
+        ref={buttonRef}
+        variant="outline" 
+        size="icon" 
+        className="rounded-full bg-transparent border-gray-800 hover:bg-gray-900 hover:text-white"
+        onClick={() => setOpen(!open)}
       >
-        <VisuallyHidden>
-          <DialogTitle>Voice Assistant Options</DialogTitle>
-        </VisuallyHidden>
-        
-        <div className="flex flex-col">
-          {menuItems.map((item, index) => (
-            <button
-              key={item.id}
-              onClick={item.onClick}
-              className={cn(
-                "flex items-center justify-between px-5 py-3 text-left border-b border-white/20 transition-colors",
-                item.isActive ? "bg-opacity-60" : "hover:bg-white/20",
-                index === menuItems.length - 1 ? "border-b-0" : "",
-                `bg-gradient-to-r ${item.gradient} bg-opacity-30`
-              )}
-              style={{
-                background: `linear-gradient(to right, ${item.isActive ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)'}, ${item.isActive ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'})`
-              }}
-            >
-              <span className="font-medium text-gray-800">{item.label}</span>
-              <span className="text-gray-700">
-                {item.icon}
-              </span>
-            </button>
-          ))}
+        <Info className="h-4 w-4" />
+        <span className="sr-only">Voice Commands Info</span>
+      </Button>
+
+      {open && (
+        <div 
+          ref={menuRef}
+          className="absolute z-50 right-0 top-12 max-w-[260px] rounded-xl border-0 shadow-xl overflow-hidden"
+          style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(30px)',
+            WebkitBackdropFilter: 'blur(30px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          }}
+          aria-labelledby="voice-assistant-title"
+        >
+          <VisuallyHidden id="voice-assistant-title">Voice Assistant Options</VisuallyHidden>
+          
+          <div className="flex flex-col">
+            {menuItems.map((item, index) => (
+              <button
+                key={item.id}
+                onClick={item.onClick}
+                className={cn(
+                  "flex items-center justify-between px-5 py-3 text-left border-b border-white/20 transition-colors",
+                  item.isActive ? "bg-opacity-60" : "hover:bg-white/20",
+                  index === menuItems.length - 1 ? "border-b-0" : ""
+                )}
+                style={{
+                  background: `linear-gradient(to right, ${item.isActive ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)'}, ${item.isActive ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'})`
+                }}
+              >
+                <span className="font-medium text-gray-800">{item.label}</span>
+                <span className="text-gray-700">
+                  {item.icon}
+                </span>
+              </button>
+            ))}
+          </div>
+          
+          <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg opacity-90">
+            <Link href="/voice-commands">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <Mic className="h-7 w-7 text-gray-700" />
+              </div>
+            </Link>
+          </div>
         </div>
-        
-        <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg opacity-90">
-          <Link href="/voice-commands">
-            <div className="w-12 h-12 flex items-center justify-center">
-              <Mic className="h-7 w-7 text-gray-700" />
-            </div>
-          </Link>
-        </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </div>
   );
 }
