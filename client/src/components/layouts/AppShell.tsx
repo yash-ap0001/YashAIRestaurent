@@ -6,6 +6,7 @@ import { useVoiceControl } from "@/hooks/use-voice-control";
 import { VoiceAssistantDialog } from "@/components/voice/VoiceAssistantDialog";
 import { WelcomeGreeting } from "@/components/voice/WelcomeGreeting";
 import { HotelAgentDialog } from "@/components/voice/HotelAgentDialog";
+import { RestaurantAI } from "@/components/ai/RestaurantAI";
 import "@/assets/custom-theme.css";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
