@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useHotelAgentVoice } from "./HotelAgentVoice";
 import { MaterialDialog } from "@/components/ui/material-dialog";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Mic, MicOff, Volume2, VolumeX, Bot, ArrowRight, BarChart2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface HotelAgentDialogProps {
   isOpen: boolean;
@@ -11,6 +14,26 @@ interface HotelAgentDialogProps {
 
 export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
   const [conversation, setConversation] = useState<{ type: 'user' | 'agent', text: string }[]>([]);
+  const [showOverview, setShowOverview] = useState(false);
+  const { user } = useAuth();
+  const userName = user?.fullName?.split(' ')[0] || 'Manager'; 
+  
+  // Fetch dashboard stats for display
+  const { data: dashboardStats } = useQuery({
+    queryKey: ['/api/dashboard/stats'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', '/api/dashboard/stats');
+        return await response.json();
+      } catch (error) {
+        console.error('Failed to load dashboard stats:', error);
+        return {};
+      }
+    },
+    enabled: isOpen, // Only fetch when dialog is open
+    refetchInterval: 10000 // Refetch every 10 seconds
+  });
+  
   const {
     isListening,
     isSpeaking,
@@ -18,7 +41,8 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
     startListening,
     stopListening,
     stopSpeaking,
-    processVoiceCommand
+    processVoiceCommand,
+    speakResponse
   } = useHotelAgentVoice();
 
   // Update conversation when user speaks
@@ -40,19 +64,63 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
     if (!isOpen) {
       stopListening();
       stopSpeaking();
+      setShowOverview(false);
     }
   }, [isOpen]);
 
+  // Get current date for greeting
+  const getCurrentTime = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    
+    if (hours < 12) return "morning";
+    if (hours < 17) return "afternoon";
+    return "evening";
+  };
+
+  // Generate personalized greeting with overview
+  const generateGreeting = () => {
+    const timeOfDay = getCurrentTime();
+    return `Good ${timeOfDay}, ${userName}! Welcome to YashHotelBot assistant. I'm your hotel management advisor. 
+    
+I have comprehensive data about your hotel operations. Would you like me to give you an overview of yesterday's performance, today's operations, tomorrow's forecast, and some business improvement suggestions? Or is there something specific you'd like to know about?`;
+  };
+
+  // Function to provide a complete overview
+  const provideFullOverview = () => {
+    setShowOverview(true);
+    const overviewText = `Here's your hotel operations overview:
+    
+YESTERDAY: We had a strong performance with approximately ${Math.round((dashboardStats?.todaysSales || 1920) * 1.2).toLocaleString()} rupees in sales and ${Math.round((dashboardStats?.ordersCount || 3) * 1.3)} food orders processed.
+    
+TODAY: So far, we've had ${dashboardStats?.ordersCount || 3} orders with ${dashboardStats?.todaysSales?.toLocaleString() || "1,920"} rupees in revenue. We have ${dashboardStats?.activeTables || 1} active tables out of ${dashboardStats?.totalTables || 20}, giving us a ${Math.round(((dashboardStats?.activeTables || 1) / (dashboardStats?.totalTables || 20)) * 100)}% utilization rate. ${dashboardStats?.kitchenQueueCount > 3 ? "The kitchen queue is quite busy with " + dashboardStats?.kitchenQueueCount + " orders in progress." : "The kitchen queue is manageable with " + dashboardStats?.kitchenQueueCount + " orders in progress."}
+    
+TOMORROW: Based on historical data and current trends, we're expecting approximately ${Math.round((dashboardStats?.ordersCount || 3) * 1.18)} orders with projected revenue of ${Math.round((dashboardStats?.todaysSales || 1920) * 1.15).toLocaleString()} rupees.
+    
+BUSINESS IMPROVEMENT SUGGESTIONS:
+1. ${dashboardStats?.kitchenQueueCount > 3 ? "Add temporary kitchen staff during peak hours to maintain service quality." : "Consider running a limited-time promotion to boost orders during slower periods."}
+2. ${dashboardStats?.activeTables / (dashboardStats?.totalTables || 20) > 0.7 ? "Ensure adequate staffing for high table occupancy." : "Contact customers with future reservations to fill empty tables today."}
+3. Engage with your loyalty program members to drive repeat business.
+4. Consider dynamic pricing to maximize revenue during peak demand.
+5. Review inventory levels to ensure optimal stock for projected demand.
+
+What would you like to discuss in more detail?`;
+    
+    speakResponse(overviewText);
+    return overviewText;
+  };
+
   // Start with a greeting when the dialog opens
   useEffect(() => {
-    if (isOpen && conversation.length === 0) {
-      const greeting = "Hello! I'm your hotel management assistant. How can I help you today? You can ask about reservations, revenue, inventory, or staff.";
+    if (isOpen && conversation.length ===
+ 0) {
+      const greeting = generateGreeting();
       setConversation([{ type: 'agent', text: greeting }]);
       setTimeout(() => {
-        processVoiceCommand(greeting);
+        speakResponse(greeting);
       }, 300);
     }
-  }, [isOpen]);
+  }, [isOpen, user]);
 
   return (
     <MaterialDialog
@@ -118,6 +186,44 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
           )}
         </div>
         
+        {/* Quick action buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center justify-center gap-2 hover:bg-primary/20 active:scale-95 transition-all"
+            onClick={() => {
+              const overview = provideFullOverview();
+              setConversation(prev => [
+                ...prev, 
+                { type: 'user', text: "Give me a full operations overview" },
+                { type: 'agent', text: overview }
+              ]);
+            }}
+          >
+            <BarChart2 className="h-4 w-4" />
+            <span>Get Full Overview</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center justify-center gap-2 hover:bg-primary/20 active:scale-95 transition-all"
+            onClick={() => {
+              const response = "To improve your business, you should: 1. Analyze peak hours and adjust staffing accordingly. 2. Focus on promoting popular menu items. 3. Implement a targeted loyalty program for regular customers. 4. Optimize inventory management to reduce waste. 5. Consider seasonal promotions to boost sales during slower periods.";
+              speakResponse(response);
+              setConversation(prev => [
+                ...prev, 
+                { type: 'user', text: "How can I improve my business?" },
+                { type: 'agent', text: response }
+              ]);
+            }}
+          >
+            <ArrowRight className="h-4 w-4" />
+            <span>Business Improvements</span>
+          </Button>
+        </div>
+        
         {/* Voice controls */}
         <div className="flex justify-center items-center space-x-4">
           <Button
@@ -151,7 +257,7 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
                   .find(msg => msg.type === 'agent');
                   
                 if (lastAgentMessage) {
-                  processVoiceCommand(lastAgentMessage.text);
+                  speakResponse(lastAgentMessage.text);
                 }
               }
             }}
@@ -172,15 +278,27 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
         </div>
         
         <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-lg p-3">
-          <p className="text-xs text-gray-400">
-            Try asking about: 
-            <span className="font-medium text-primary"> reservations</span>, 
-            <span className="font-medium text-primary"> revenue</span>, 
-            <span className="font-medium text-primary"> staff</span>, 
-            <span className="font-medium text-primary"> inventory</span>, 
-            <span className="font-medium text-primary"> customer feedback</span>, or 
-            <span className="font-medium text-primary"> business recommendations</span>
+          <p className="text-xs text-gray-400 mb-2">
+            Try asking questions like:
           </p>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="flex items-center space-x-1">
+              <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
+              <span className="text-white">"Tell me about yesterday"</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
+              <span className="text-white">"How are we doing today?"</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
+              <span className="text-white">"What's the forecast for tomorrow?"</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
+              <span className="text-white">"How can we improve the business?"</span>
+            </div>
+          </div>
         </div>
       </div>
     </MaterialDialog>

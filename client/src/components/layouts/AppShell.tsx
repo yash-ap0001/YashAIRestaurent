@@ -381,14 +381,14 @@ export function AppShell({ children }: AppShellProps) {
             <div className="relative flex items-center gap-1">
               {/* Hotel Agent Button */}
               <Button
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                size="sm"
                 onClick={() => setHotelAgentDialogOpen(true)}
                 title="Hotel AI Agent"
-                className="rounded-full hover:bg-gray-800 text-white"
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-700/80 to-purple-600/60 border-purple-800 hover:from-purple-600 hover:to-purple-500 text-white rounded-md"
               >
-                <Bot className="h-5 w-5" />
-                <span className="sr-only">Hotel AI Agent</span>
+                <Bot className="h-4 w-4 text-white" />
+                <span>Hotel Agent</span>
               </Button>
               
               {/* Voice Control Button */}
@@ -566,7 +566,18 @@ export function AppShell({ children }: AppShellProps) {
             </Accordion>
           </nav>
           
-          <div className="p-4 border-t border-[#E5E7EB] dark:border-gray-700">
+          <div className="p-4 border-t border-[#E5E7EB] dark:border-gray-700 flex flex-col gap-3">
+            <Button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setHotelAgentDialogOpen(true);
+              }}
+              className="w-full text-white bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500"
+            >
+              <Bot className="w-4 h-4 mr-2" />
+              Hotel Agent
+            </Button>
+            
             <Button
               onClick={() => {
                 setMobileMenuOpen(false);
