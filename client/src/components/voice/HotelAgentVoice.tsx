@@ -358,6 +358,13 @@ export function useHotelAgentVoice() {
     let response = "";
     const commandLower = command.toLowerCase();
     
+    // Handle name-related questions specifically to prevent loop issues
+    if (commandLower.includes('my name') || 
+        (commandLower.includes('what') && commandLower.includes('name')) ||
+        (commandLower.includes('who') && commandLower.includes('am') && commandLower.includes('i'))) {
+      return "Your name is shown in your user profile. I can see you're the Hotel Manager. If you'd like to change your display name, you can update it in your account settings.";
+    }
+    
     // Match command to knowledge categories
     if (commandLower.includes('hour') || commandLower.includes('open') || commandLower.includes('close')) {
       response = hotelKnowledgeBase.operations.hours;

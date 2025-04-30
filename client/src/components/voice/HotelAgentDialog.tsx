@@ -68,37 +68,50 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
   // Update conversation when user speaks and save history
   useEffect(() => {
     if (transcript && !isListening) {
-      // Add user message to conversation
-      const updatedConversation: ConversationMessage[] = [...conversation, { type: 'user', text: transcript }];
-      setConversation(updatedConversation);
-      
-      // Process the command and get a response
-      const response = processVoiceCommand(transcript);
-      
-      // Add agent response to conversation
-      const finalConversation: ConversationMessage[] = [...updatedConversation, { type: 'agent', text: response }];
-      setConversation(finalConversation);
-      
-      // Save the updated conversation to localStorage for persistence
-      saveConversationHistory(finalConversation);
-      
-      // Speak the response without auto-starting listening again if it contains a question about the user's name
-      const isNameQuestion = transcript.toLowerCase().includes('name') || 
-                            transcript.toLowerCase().includes('who are you') ||
-                            transcript.toLowerCase().includes('what is your name');
-      
-      setTimeout(() => {
-        speakResponse(response);
+      try {
+        // Add user message to conversation
+        const updatedConversation: ConversationMessage[] = [...conversation, { type: 'user', text: transcript }];
+        setConversation(updatedConversation);
         
-        // Only auto-restart listening if it's not a name-related question
+        // Process the command and get a response (already speaks in the processVoiceCommand function)
+        const response = processVoiceCommand(transcript);
+        
+        // Add agent response to conversation
+        const finalConversation: ConversationMessage[] = [...updatedConversation, { type: 'agent', text: response }];
+        setConversation(finalConversation);
+        
+        // Save the updated conversation to localStorage for persistence
+        saveConversationHistory(finalConversation);
+        
+        // Detect if this is a name-related question to avoid infinite loops
+        const isNameQuestion = transcript.toLowerCase().includes('name') || 
+                              transcript.toLowerCase().includes('who am i') ||
+                              transcript.toLowerCase().includes('my name');
+        
+        // Only auto-restart listening after a delay if it's not a name-related question
         if (!isNameQuestion) {
           setTimeout(() => {
-            startListening();
+            if (!isSpeaking) {
+              startListening();
+            } else {
+              // If still speaking, wait a bit more before trying to listen
+              const checkInterval = setInterval(() => {
+                if (!isSpeaking) {
+                  startListening();
+                  clearInterval(checkInterval);
+                }
+              }, 1000);
+              
+              // Safety cleanup after 10 seconds
+              setTimeout(() => clearInterval(checkInterval), 10000);
+            }
           }, 3000);
         }
-      }, 300);
+      } catch (error) {
+        console.error('Error processing voice command:', error);
+      }
     }
-  }, [transcript, isListening, conversation, processVoiceCommand, speakResponse, startListening]);
+  }, [transcript, isListening, isSpeaking, conversation, processVoiceCommand, startListening]);
 
   // Clean up speech and recognition when dialog closes
   useEffect(() => {
@@ -241,10 +254,19 @@ What would you like to discuss in more detail?`;
             variant="outline" 
             size="sm"
             onClick={() => {
-              setConversation([]);
               const greeting = "Hello! I'm your hotel management assistant. How can I help you today?";
+              
+              // Clear conversation history
+              localStorage.removeItem('hotelAgentHistory');
               setConversation([{ type: 'agent', text: greeting }]);
-              processVoiceCommand(greeting);
+              
+              // Speak greeting without auto-processing it (which would create an infinite loop)
+              speakResponse(greeting);
+              
+              // Schedule listening restart after greeting
+              setTimeout(() => {
+                startListening();
+              }, 3000);
             }}
           >
             Restart Conversation
