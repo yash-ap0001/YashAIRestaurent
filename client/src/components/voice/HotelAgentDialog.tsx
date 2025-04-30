@@ -13,7 +13,13 @@ interface HotelAgentDialogProps {
 }
 
 export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
-  const [conversation, setConversation] = useState<{ type: 'user' | 'agent', text: string }[]>([]);
+  // Define conversation message type
+  type ConversationMessage = {
+    type: 'user' | 'agent';
+    text: string;
+  };
+  
+  const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [showOverview, setShowOverview] = useState(false);
   const { user } = useAuth();
   const userName = user?.fullName?.split(' ')[0] || 'Manager'; 
@@ -44,18 +50,37 @@ export function HotelAgentDialog({ isOpen, onClose }: HotelAgentDialogProps) {
     processVoiceCommand,
     speakResponse
   } = useHotelAgentVoice();
-
-  // Update conversation when user speaks
+  
+  // Save conversation history to localStorage
+  const saveConversationHistory = (updatedConversation: ConversationMessage[]) => {
+    try {
+      // Keep only the last 20 messages to avoid storage limits
+      const limitedHistory = updatedConversation.slice(-20);
+      localStorage.setItem('hotelAgentHistory', JSON.stringify({
+        conversation: limitedHistory,
+        timestamp: new Date().toISOString()
+      }));
+    } catch (error) {
+      console.error('Failed to save conversation history:', error);
+    }
+  };
+  
+  // Update conversation when user speaks and save history
   useEffect(() => {
     if (transcript && !isListening) {
       // Add user message to conversation
-      setConversation(prev => [...prev, { type: 'user', text: transcript }]);
+      const updatedConversation = [...conversation, { type: 'user', text: transcript }];
+      setConversation(updatedConversation);
       
       // Process the command and get a response
       const response = processVoiceCommand(transcript);
       
       // Add agent response to conversation
-      setConversation(prev => [...prev, { type: 'agent', text: response }]);
+      const finalConversation = [...updatedConversation, { type: 'agent', text: response }];
+      setConversation(finalConversation);
+      
+      // Save the updated conversation to localStorage for persistence
+      saveConversationHistory(finalConversation);
     }
   }, [transcript, isListening]);
 
@@ -110,15 +135,78 @@ What would you like to discuss in more detail?`;
     return overviewText;
   };
 
-  // Start with a greeting when the dialog opens
+  // Load conversation history from localStorage when component mounts
   useEffect(() => {
-    if (isOpen && conversation.length ===
- 0) {
-      const greeting = generateGreeting();
-      setConversation([{ type: 'agent', text: greeting }]);
-      setTimeout(() => {
-        speakResponse(greeting);
-      }, 300);
+    if (isOpen && conversation.length === 0) {
+      try {
+        // Check if there's saved history
+        const savedHistory = localStorage.getItem('hotelAgentHistory');
+        
+        if (savedHistory) {
+          const { conversation: savedConversation, timestamp } = JSON.parse(savedHistory);
+          const historyDate = new Date(timestamp);
+          const now = new Date();
+          
+          // Only use conversation history if it's less than 12 hours old
+          if (now.getTime() - historyDate.getTime() < 12 * 60 * 60 * 1000) {
+            // Start with the saved conversation
+            setConversation(savedConversation);
+            
+            // Greet the user with a welcome back message
+            const welcomeBack = `Welcome back, ${userName}! I remember we were discussing your hotel operations. Is there anything specific you'd like to continue discussing?`;
+            setConversation(prev => [...prev, { type: 'agent', text: welcomeBack }]);
+            
+            setTimeout(() => {
+              speakResponse(welcomeBack);
+              
+              // Auto-activate microphone after greeting
+              setTimeout(() => {
+                startListening();
+              }, 5000);
+            }, 300);
+            
+            return; // Skip the regular greeting
+          }
+        }
+        
+        // If no valid history, proceed with regular greeting
+        const greeting = generateGreeting();
+        setConversation([{ type: 'agent', text: greeting }]);
+        
+        // Speak the greeting
+        setTimeout(() => {
+          speakResponse(greeting);
+          
+          // Auto-activate microphone after greeting with a delay to allow greeting to finish
+          setTimeout(() => {
+            startListening();
+            // Auto-generate a full overview if this is the first conversation
+            if (!localStorage.getItem('hotelAgentHistory')) {
+              const overview = provideFullOverview();
+              setConversation(prev => [
+                ...prev,
+                { type: 'agent', text: overview }
+              ]);
+              
+              // Save this initial conversation
+              saveConversationHistory([
+                { type: 'agent', text: greeting },
+                { type: 'agent', text: overview }
+              ]);
+            }
+          }, 6000); // 6 second delay after greeting starts
+        }, 300);
+      } catch (error) {
+        console.error('Error loading conversation history:', error);
+        
+        // Fall back to simple greeting in case of error
+        const greeting = generateGreeting();
+        setConversation([{ type: 'agent', text: greeting }]);
+        setTimeout(() => {
+          speakResponse(greeting);
+          setTimeout(() => startListening(), 5000);
+        }, 300);
+      }
     }
   }, [isOpen, user]);
 
