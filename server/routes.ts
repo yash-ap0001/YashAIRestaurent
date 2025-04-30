@@ -2151,11 +2151,11 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       
       console.log(`Processing voice command: ${command} (${userType})`);
       
-      // Import the voice assistant service dynamically to avoid circular dependencies
-      const { processVoiceCommand } = require('./services/voiceAssistant');
+      // Import the voice assistant service
+      const voiceAssistant = await import('./services/voiceAssistant');
       
       // Process the voice command
-      const result = await processVoiceCommand(command, userType);
+      const result = await voiceAssistant.processVoiceCommand(command, userType);
       
       // Log successful commands
       if (result.success) {
