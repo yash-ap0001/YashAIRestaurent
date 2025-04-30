@@ -602,7 +602,7 @@ ${data.map((opp: any, idx: number) => `${idx + 1}. ${opp.area} - Estimated impac
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       const speechResult = event.results[0][0].transcript;
       setQuery(speechResult);
       

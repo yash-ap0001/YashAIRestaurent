@@ -132,7 +132,7 @@ const OrderManagementAI: React.FC = () => {
     // Create order pattern
     {
       pattern: /create (a |an |)(order|table) (for |at |)(table |)(\d+)/i,
-      action: (matches, speak) => {
+      action: (matches: RegExpMatchArray, speak: (text: string) => void) => {
         const tableNumber = matches[5];
         speak(`Creating new order for table ${tableNumber}`);
         createOrderMutation.mutate(tableNumber);
@@ -142,7 +142,7 @@ const OrderManagementAI: React.FC = () => {
     // Update order status pattern - with order number
     {
       pattern: /(set|mark|update|change) (order|) ?(\d+|[a-z0-9-]+) (to |as |status to |status as |)(pending|preparing|ready|complete|completed|done|billed|paid)/i,
-      action: (matches, speak) => {
+      action: (matches: RegExpMatchArray, speak: (text: string) => void) => {
         const orderIdentifier = matches[3];
         let status = matches[5].toLowerCase();
         
@@ -169,7 +169,7 @@ const OrderManagementAI: React.FC = () => {
     // Update order status pattern - with table number
     {
       pattern: /(set|mark|update|change) (table|) ?(\d+) (order |)(to |as |status to |status as |)(pending|preparing|ready|complete|completed|done|billed|paid)/i,
-      action: (matches, speak) => {
+      action: (matches: RegExpMatchArray, speak: (text: string) => void) => {
         const tableNumber = matches[3];
         let status = matches[6].toLowerCase();
         
@@ -195,7 +195,7 @@ const OrderManagementAI: React.FC = () => {
     // Delete order pattern
     {
       pattern: /(delete|remove|cancel) (order|) ?(\d+|[a-z0-9-]+)/i,
-      action: (matches, speak) => {
+      action: (matches: RegExpMatchArray, speak: (text: string) => void) => {
         const orderIdentifier = matches[3];
         
         // Find matching order
@@ -224,7 +224,7 @@ const OrderManagementAI: React.FC = () => {
     // List orders pattern
     {
       pattern: /(list|show|get) (all |)(orders|active orders)/i,
-      action: (matches, speak) => {
+      action: (matches: RegExpMatchArray, speak: (text: string) => void) => {
         if (!orders || orders.length === 0) {
           speak('There are no active orders at the moment.');
           return true;
@@ -247,7 +247,7 @@ const OrderManagementAI: React.FC = () => {
       endpoint: "/api/ai/create-order",
       buttonText: "New Order",
       icon: <Utensils className="h-4 w-4" />,
-      processFn: (data) => {
+      processFn: (data: any) => {
         const tableNum = window.prompt('Enter table number:');
         if (tableNum) {
           createOrderMutation.mutate(tableNum);
