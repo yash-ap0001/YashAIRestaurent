@@ -11,7 +11,8 @@ import {
   Users,
   Car,
   CalendarCheck,
-  Network
+  Network,
+  Mic
 } from 'lucide-react';
 
 const AIDemo: React.FC = () => {

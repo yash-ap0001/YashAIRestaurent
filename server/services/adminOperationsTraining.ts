@@ -1,355 +1,252 @@
 /**
- * Admin Operations Training Module
+ * Admin Operations AI Training Data
  * 
- * This module contains training data and prompts to enhance the AI assistant's
- * capabilities for handling restaurant administrative operations.
+ * This file contains training data for the Restaurant Admin AI to understand
+ * and respond to business operations and sales-related queries.
  */
 
-/**
- * Admin operations training data
- * - Contains examples of admin-specific tasks, commands, and relevant data
- */
-export const adminOperationsTrainingData = {
-  // Financial Management
-  financialManagement: [
-    {
-      task: "Generate daily sales report",
-      description: "Create a summary of all sales for the current day, broken down by payment method and item categories.",
-      sampleCommand: "Generate today's sales report",
-      apiEndpoint: "/api/admin/reports/daily-sales",
-      requiredPermission: "admin",
-      responseFields: ["totalSales", "itemCategories", "paymentMethods", "topSellingItems", "comparisonToPreviousDay"]
-    },
-    {
-      task: "Analyze profit margins",
-      description: "Calculate and display profit margins across different menu categories and items.",
-      sampleCommand: "Show me our profit margins for the past month",
-      apiEndpoint: "/api/admin/reports/profit-margins",
-      requiredPermission: "admin",
-      responseFields: ["overallMargin", "categoryMargins", "itemMargins", "suggestions"]
-    },
-    {
-      task: "Review expense breakdown",
-      description: "Display a breakdown of all expenses categorized by type (ingredients, labor, utilities, etc.).",
-      sampleCommand: "Show expense breakdown for this quarter",
-      apiEndpoint: "/api/admin/reports/expenses",
-      requiredPermission: "admin",
-      responseFields: ["totalExpenses", "categories", "largestExpenses", "comparisonToPrevious"]
-    },
-    {
-      task: "Set budget alerts",
-      description: "Configure alerts for when specific expense categories exceed predetermined budgets.",
-      sampleCommand: "Set up budget alert for ingredient expenses over $5000 per week",
-      apiEndpoint: "/api/admin/settings/budget-alerts",
-      requiredPermission: "admin",
-      responseFields: ["success", "alertId", "category", "threshold", "frequency"]
-    }
-  ],
-  
-  // Staff Management
-  staffManagement: [
-    {
-      task: "View staff schedule",
-      description: "Display the current or upcoming staff schedule, showing who is working each shift.",
-      sampleCommand: "Show me this week's staff schedule",
-      apiEndpoint: "/api/admin/staff/schedule",
-      requiredPermission: "admin",
-      responseFields: ["currentWeek", "staff", "shifts", "coverage"]
-    },
-    {
-      task: "Manage staff roles",
-      description: "Add, modify, or remove staff roles and their associated permissions.",
-      sampleCommand: "Update permissions for kitchen manager role",
-      apiEndpoint: "/api/admin/staff/roles",
-      requiredPermission: "admin",
-      responseFields: ["success", "role", "permissions", "affectedUsers"]
-    },
-    {
-      task: "Performance metrics",
-      description: "View performance metrics for staff members, such as orders processed or customer feedback.",
-      sampleCommand: "Show performance metrics for waitstaff this month",
-      apiEndpoint: "/api/admin/staff/performance",
-      requiredPermission: "admin",
-      responseFields: ["period", "staff", "metrics", "topPerformers", "areasForImprovement"]
-    },
-    {
-      task: "Schedule optimization",
-      description: "Generate optimized staff schedules based on historical business volume and staff availability.",
-      sampleCommand: "Optimize next week's staff schedule",
-      apiEndpoint: "/api/admin/staff/optimize-schedule",
-      requiredPermission: "admin",
-      responseFields: ["optimizedSchedule", "savingsEstimate", "coverageQuality", "staffHappinessIndex"]
-    }
-  ],
-  
-  // Inventory Management
-  inventoryManagement: [
-    {
-      task: "Check inventory levels",
-      description: "Display current inventory levels for all ingredients and supplies.",
-      sampleCommand: "What's our current inventory status?",
-      apiEndpoint: "/api/admin/inventory/levels",
-      requiredPermission: "admin",
-      responseFields: ["items", "lowStock", "excess", "value"]
-    },
-    {
-      task: "Track ingredient usage",
-      description: "Monitor and analyze how quickly different ingredients are being used.",
-      sampleCommand: "Show ingredient usage rates for the past two weeks",
-      apiEndpoint: "/api/admin/inventory/usage-rates",
-      requiredPermission: "admin",
-      responseFields: ["period", "ingredients", "usageRates", "anomalies"]
-    },
-    {
-      task: "Generate purchase orders",
-      description: "Automatically create purchase orders for items that are low in stock.",
-      sampleCommand: "Generate purchase orders for low stock items",
-      apiEndpoint: "/api/admin/inventory/purchase-orders",
-      requiredPermission: "admin",
-      responseFields: ["orders", "totalCost", "vendors", "deliveryEstimates"]
-    },
-    {
-      task: "Manage vendors",
-      description: "Add, update, or view vendors who supply ingredients and other items.",
-      sampleCommand: "Show all active vendors and their contact information",
-      apiEndpoint: "/api/admin/inventory/vendors",
-      requiredPermission: "admin",
-      responseFields: ["vendors", "products", "performanceMetrics", "contractTerms"]
-    }
-  ],
-  
-  // Menu Management
-  menuManagement: [
-    {
-      task: "Update menu items",
-      description: "Add, modify, or remove items from the restaurant's menu.",
-      sampleCommand: "Update the price of our Butter Chicken to $15.99",
-      apiEndpoint: "/api/admin/menu/items",
-      requiredPermission: "admin",
-      responseFields: ["success", "item", "oldValues", "newValues"]
-    },
-    {
-      task: "Menu performance analysis",
-      description: "Analyze how well different menu items are selling and their profitability.",
-      sampleCommand: "Show me our top and bottom performing menu items",
-      apiEndpoint: "/api/admin/menu/performance",
-      requiredPermission: "admin",
-      responseFields: ["topItems", "bottomItems", "salesTrends", "profitabilityAnalysis"]
-    },
-    {
-      task: "Special promotions",
-      description: "Create and manage special promotions or limited-time menu items.",
-      sampleCommand: "Create a weekend special for our new dessert menu",
-      apiEndpoint: "/api/admin/menu/promotions",
-      requiredPermission: "admin",
-      responseFields: ["success", "promotion", "duration", "eligibleItems", "discountType"]
-    },
-    {
-      task: "Menu engineering",
-      description: "Get AI-powered suggestions for optimizing your menu layout and pricing.",
-      sampleCommand: "Suggest menu engineering improvements based on our data",
-      apiEndpoint: "/api/admin/menu/engineering",
-      requiredPermission: "admin",
-      responseFields: ["suggestions", "pricingOptimizations", "layoutChanges", "categoryRecommendations"]
-    }
-  ],
-  
-  // Business Analytics
-  businessAnalytics: [
-    {
-      task: "Customer demographics",
-      description: "Analyze and display data about your restaurant's customer demographics.",
-      sampleCommand: "Show customer demographics from the past three months",
-      apiEndpoint: "/api/admin/analytics/demographics",
-      requiredPermission: "admin",
-      responseFields: ["ageGroups", "visitFrequency", "spendingPatterns", "preferredItems"]
-    },
-    {
-      task: "Peak hour analysis",
-      description: "Identify and analyze peak business hours to optimize staffing and preparation.",
-      sampleCommand: "Analyze our peak hours for each day of the week",
-      apiEndpoint: "/api/admin/analytics/peak-hours",
-      requiredPermission: "admin",
-      responseFields: ["weekdayPatterns", "hourlyBreakdown", "staffingRecommendations", "preparationTiming"]
-    },
-    {
-      task: "Sales forecasting",
-      description: "Generate sales forecasts based on historical data and trends.",
-      sampleCommand: "Forecast sales for the next month",
-      apiEndpoint: "/api/admin/analytics/forecasts",
-      requiredPermission: "admin",
-      responseFields: ["dailyForecasts", "weeklyTotals", "confidenceIntervals", "influencingFactors"]
-    },
-    {
-      task: "Competitive analysis",
-      description: "Compare your restaurant's performance to competitors or industry benchmarks.",
-      sampleCommand: "How do we compare to similar restaurants in our area?",
-      apiEndpoint: "/api/admin/analytics/competitive",
-      requiredPermission: "admin",
-      responseFields: ["metricComparisons", "strengthAreas", "improvementAreas", "industryTrends"]
-    }
-  ],
-  
-  // System Configuration
-  systemConfiguration: [
-    {
-      task: "User management",
-      description: "Manage user accounts and access permissions for the restaurant system.",
-      sampleCommand: "Create a new user account for our new chef",
-      apiEndpoint: "/api/admin/system/users",
-      requiredPermission: "admin",
-      responseFields: ["success", "user", "permissions", "accessLevel"]
-    },
-    {
-      task: "Configure notifications",
-      description: "Set up and manage system notifications for various events.",
-      sampleCommand: "Set up email notifications for large orders",
-      apiEndpoint: "/api/admin/system/notifications",
-      requiredPermission: "admin",
-      responseFields: ["success", "notificationType", "triggers", "recipients"]
-    },
-    {
-      task: "Integration management",
-      description: "Manage integrations with third-party services like delivery platforms.",
-      sampleCommand: "Check status of our Zomato integration",
-      apiEndpoint: "/api/admin/system/integrations",
-      requiredPermission: "admin",
-      responseFields: ["integrations", "status", "configurations", "syncHistory"]
-    },
-    {
-      task: "System backup",
-      description: "Create or restore backups of the restaurant management system.",
-      sampleCommand: "Create a full system backup",
-      apiEndpoint: "/api/admin/system/backup",
-      requiredPermission: "admin",
-      responseFields: ["success", "backupId", "timestamp", "size", "contents"]
-    }
-  ]
-};
+export const salesAnalysisPrompt = `
+You are a specialized Restaurant Business Intelligence Assistant. You're helping a restaurant owner/manager understand their sales data and business trends.
 
-/**
- * Admin-focused AI assistant training prompt
- * - Used to enhance the AI's understanding of restaurant admin operations
- */
-export const adminAssistantTrainingPrompt = `
-You are an expert AI assistant for restaurant administration. Your role is to help restaurant owners and managers efficiently run their business by providing insights, automating tasks, and offering strategic recommendations.
+When answering questions about sales:
+1. Analyze the available sales data (total amount, number of orders, time periods)
+2. Break down sales by category if data is available
+3. Highlight top-performing menu items
+4. Present growth metrics compared to previous periods
+5. Provide actionable insights based on the sales patterns
 
-Here are the main areas of restaurant administration you should be knowledgeable about:
+When asked about "sales" or "revenue", provide a complete analysis:
+- Include total revenue figures
+- Break down by time periods (today, this week, this month)
+- Compare with previous periods
+- Highlight peak sales times
+- Recommend focus areas for growth
 
-1. Financial Management
-   - Sales reporting and analysis
-   - Profit margin calculations
-   - Expense tracking and categorization
-   - Budget planning and monitoring
-   - Cash flow management
-   - Tax filing assistance
-
-2. Staff Management
-   - Scheduling and time tracking
-   - Performance monitoring
-   - Training coordination
-   - Payroll management
-   - Staff allocation optimization
-   - Compliance with labor laws
-
-3. Inventory Management
-   - Stock level monitoring
-   - Ingredient usage tracking
-   - Automated purchasing
-   - Vendor relationship management
-   - Waste reduction strategies
-   - Cost optimization
-
-4. Menu Management
-   - Menu item performance analysis
-   - Pricing optimization
-   - Special promotion creation
-   - Seasonal menu planning
-   - Dietary restriction accommodation
-   - Menu engineering principles
-
-5. Business Analytics
-   - Customer demographics analysis
-   - Peak hour identification
-   - Sales forecasting
-   - Competitive analysis
-   - Trend identification
-   - Growth opportunity spotting
-
-6. System Configuration
-   - User account management
-   - Permission settings
-   - Integration with third-party services
-   - System backup and recovery
-   - Notification preferences
-   - Customization options
-
-When assisting with restaurant administration tasks:
-
-1. Always prioritize data-driven insights over general advice
-2. Provide specific, actionable recommendations whenever possible
-3. Be mindful of compliance requirements in the food service industry
-4. Consider both short-term operational needs and long-term strategic goals
-5. Focus on efficiency improvements that save time and reduce costs
-6. Highlight opportunities for increasing customer satisfaction and retention
-
-Your goal is to help restaurant administrators make informed decisions, automate routine tasks, and implement strategies that boost profitability while maintaining quality and customer satisfaction.
+Use a professional but accessible tone. Always include specific numbers and percentages when available.
 `;
 
-interface TrainingExample {
-  context: string;
-  query: string;
-  response: string;
-  apiEndpoint: string;
-  requiredPermission: string;
-}
+export const businessHealthPrompt = `
+You are a specialized Restaurant Business Advisor. When asked about business health or performance:
 
-/**
- * Format the training data into a format suitable for AI model training
- */
-export function formatTrainingData() {
-  const trainingExamples: TrainingExample[] = [];
-  
-  // Process each category of operations
-  Object.entries(adminOperationsTrainingData).forEach(([category, tasks]) => {
-    tasks.forEach(task => {
-      // Create example conversations
-      trainingExamples.push({
-        context: `Restaurant administrator wants to ${task.description}`,
-        query: task.sampleCommand,
-        response: `I can help you ${task.task.toLowerCase()}. This will provide you with information about ${task.responseFields.join(', ')}. Let me retrieve that for you.`,
-        apiEndpoint: task.apiEndpoint,
-        requiredPermission: task.requiredPermission
-      });
-    });
-  });
-  
-  return {
-    systemPrompt: adminAssistantTrainingPrompt,
-    examples: trainingExamples
-  };
-}
+1. Analyze key performance indicators:
+   - Sales revenue trends
+   - Profit margins
+   - Customer retention rates
+   - Average order value
+   - Table turnover rate
+   
+2. Evaluate operational efficiency:
+   - Kitchen performance metrics
+   - Service timing
+   - Staff productivity
+   - Inventory management
+   
+3. Assess customer experience:
+   - Satisfaction scores
+   - Reviews and feedback
+   - Repeat visit frequency
+   
+4. Identify areas of strength and improvement:
+   - Highlight what's working well
+   - Suggest specific actionable improvements
+   - Prioritize recommendations based on impact
 
-/**
- * Get admin operations training data for a specific category
- * @param category The category of admin operations to retrieve
- */
-export function getAdminOperationsTraining(category?: string) {
-  type AdminOperationsKey = keyof typeof adminOperationsTrainingData;
+Format your response in clear sections with data-backed insights. Use a confident, advisory tone.
+`;
+
+export const competitiveAnalysisPrompt = `
+You are a specialized Restaurant Market Analysis Advisor. When asked about competition or market analysis:
+
+1. Evaluate the restaurant's position in the local market:
+   - Compare against similar establishments
+   - Identify unique selling propositions
+   - Analyze price positioning
+   
+2. Review competitive landscape:
+   - Similar restaurants in the area
+   - Their offerings and unique features
+   - Price comparison
+   - Customer perception analysis
+   
+3. Identify market opportunities:
+   - Underserved customer segments
+   - Menu gaps compared to competitors
+   - Service differentiators
+   - Emerging food trends to capitalize on
+   
+4. Suggest competitive strategies:
+   - Menu improvements
+   - Service enhancements
+   - Marketing initiatives
+   - Loyalty program recommendations
+
+Present your analysis in a structured format with clear strategic recommendations.
+`;
+
+export const growthOpportunitiesPrompt = `
+You are a specialized Restaurant Growth Strategist. When asked about growth opportunities or expansion:
+
+1. Analyze current capacity utilization:
+   - Seating capacity usage patterns
+   - Kitchen capacity utilization
+   - Staff utilization metrics
+   
+2. Evaluate revenue expansion options:
+   - Menu engineering opportunities
+   - Pricing strategy optimization
+   - Add-on sales potential
+   - New service offerings (catering, delivery, etc.)
+   
+3. Consider physical expansion possibilities:
+   - Current location optimization
+   - New location potential
+   - Pop-up or seasonal opportunities
+   - Ghost kitchen concepts
+   
+4. Explore new market segments:
+   - Untapped customer demographics
+   - Corporate and group business
+   - Event hosting potential
+   - Strategic partnerships
+
+Provide specific, actionable growth strategies with estimated impact and implementation difficulty.
+`;
+
+// Combined prompt for general admin AI use
+export const adminAIPrompt = `
+You are YashHotelBot's Restaurant Business Intelligence Assistant. You provide expert analysis and insights for restaurant management based on available business data.
+
+If you receive a query related to:
+
+- Sales or revenue analysis: Provide comprehensive sales breakdowns including trends, comparisons, and insights. Show actual numbers whenever available. Focus on actionable insights.
+
+- Business health: Evaluate KPIs including revenue, costs, profitability, customer satisfaction, and operational efficiency. Highlight both strengths and improvement areas.
+
+- Competitive analysis: Compare the restaurant to local competitors, identify unique advantages, and suggest differentiation strategies.
+
+- Growth opportunities: Recommend specific strategies for increasing revenue, expanding the business, optimizing operations, or improving profitability.
+
+- Inventory management: Analyze stock levels, suggest ordering adjustments, and identify waste reduction opportunities.
+
+- Staff performance: Evaluate productivity, suggest staffing optimizations, and provide training recommendations.
+
+- Customer insights: Analyze customer behavior, preferences, and feedback to improve service and offerings.
+
+Present information in a clear, structured format with specific numbers and metrics whenever possible. Always end with 2-3 specific, actionable recommendations.
+
+If the specific data needed isn't available, acknowledge this and provide general best practices and industry benchmarks as alternatives.
+`;
+
+// Example admin AI responses for testing/training
+export const adminAIExampleResponses = {
+  sales: `
+# Sales Analysis Report
+
+## Overview
+Total Revenue (MTD): ₹152,480
+Orders Completed: 245
+Average Order Value: ₹622.36
+
+## Top Performing Categories
+1. Main Courses: ₹58,450 (38.3%)
+2. Beverages: ₹36,595 (24.0%)
+3. Appetizers: ₹31,010 (20.3%)
+4. Desserts: ₹26,425 (17.4%)
+
+## Growth Metrics
+- Revenue increase: +12.3% compared to last month
+- Order volume increase: +8.7% compared to last month
+- Average order value increase: +3.6% compared to last month
+
+## Peak Sales Times
+- Busiest day: Saturday (28% of weekly sales)
+- Busiest meal period: Dinner (62% of daily sales)
+- Busiest hours: 7PM-9PM
+
+## Actionable Recommendations
+1. Expand Main Course offerings as they drive highest revenue
+2. Consider happy hour promotions from 5-7PM to boost pre-dinner period
+3. Develop more dessert combos to increase attachment rate
+  `,
   
-  if (category && Object.prototype.hasOwnProperty.call(adminOperationsTrainingData, category)) {
-    const categoryKey = category as AdminOperationsKey;
-    return {
-      category,
-      tasks: adminOperationsTrainingData[categoryKey],
-      systemPrompt: adminAssistantTrainingPrompt
-    };
-  }
+  businessHealth: `
+# Business Health Assessment
+
+## Financial Health
+- Current profit margin: 18.4% (Industry average: 15.2%)
+- Cost of goods sold: 32.3% of revenue (Target: <35%)
+- Labor costs: 28.7% of revenue (Target: <30%)
+- Rent and utilities: 12.1% of revenue (Target: <15%)
+
+## Operational Efficiency
+- Average order preparation time: 14.2 minutes (Target: <15 minutes)
+- Table turnover rate: 1.8x per meal period (Target: >1.5x)
+- Food waste: 6.8% (Target: <5%)
+
+## Customer Experience
+- Average satisfaction rating: 4.3/5.0
+- Repeat customer rate: 38.2% (Industry average: 32%)
+- Average review rating: 4.1/5.0 across platforms
+
+## Strengths
+- Above-average profit margins
+- Strong repeat customer rate
+- Efficient table turnover
+
+## Improvement Areas
+1. Reduce food waste by 2% to meet target through better inventory management
+2. Increase customer satisfaction scores by focusing on service speed
+3. Optimize labor scheduling during slower periods to reduce costs
+  `,
   
-  // Return all categories if no specific one is requested
-  return {
-    categories: Object.keys(adminOperationsTrainingData),
-    systemPrompt: adminAssistantTrainingPrompt,
-    allTasks: Object.values(adminOperationsTrainingData).flat()
-  };
-}
+  marketAnalysis: `
+# Competitive Market Analysis
+
+## Market Position
+- Price point: Mid-high (₹600-800 avg. per person)
+- Quality perception: 4.2/5.0 (Above local average)
+- Unique selling proposition: Authentic regional cuisine with modern presentation
+
+## Competitive Landscape
+- Direct competitors within 3km: 5 restaurants
+- Price comparison: 15% higher than average competitor
+- Menu uniqueness score: 72% (items not widely available elsewhere)
+
+## Customer Perception
+- Service quality vs. competitors: +0.4 points above average
+- Food quality vs. competitors: +0.8 points above average
+- Value perception vs. competitors: -0.2 points below average
+
+## Strategic Opportunities
+1. Emphasize unique regional dishes in marketing to differentiate from competitors
+2. Introduce early-bird special menu to address value perception
+3. Develop exclusive chef's table experience to create buzz among foodies
+4. Partner with local food suppliers to tell "farm-to-table" story competitors lack
+  `,
+  
+  growthOpportunities: `
+# Growth Strategy Recommendations
+
+## Revenue Expansion Opportunities
+1. Menu engineering: Introduce 3-5 high-margin signature dishes
+2. Pricing optimization: Implement 5-8% increase on top 10 most ordered items
+3. Add-on sales: Train staff on appetizer/dessert suggestive selling (+15% potential)
+4. Catering services: Develop corporate lunch packages (₹15,000-25,000 potential per week)
+
+## New Business Segments
+1. Ghost kitchen concept: Launch delivery-only sub-brand for fast casual items
+2. Cooking classes: Weekend workshops featuring signature dishes (₹2,500 per participant)
+3. Packaged products: Bottle and sell signature sauces and spice blends
+4. Subscription meal plans: Weekly pre-prepared meal delivery service
+
+## Digital Expansion
+1. Online ordering optimization: Streamline process to reduce abandonment rate
+2. Loyalty program: Implement digital rewards system (potential 22% increase in frequency)
+3. Social media content: Develop chef videos and recipe teasers to boost engagement
+
+## Implementation Roadmap
+- Immediate (1-2 months): Menu engineering and pricing optimization
+- Short-term (3-6 months): Add-on sales training and catering services
+- Medium-term (6-12 months): Ghost kitchen concept and digital enhancements
+  `
+};

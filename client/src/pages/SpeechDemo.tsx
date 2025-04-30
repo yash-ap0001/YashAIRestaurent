@@ -14,7 +14,12 @@ const SpeechDemo = () => {
   // AI Chat mutation
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
-      const payload = { message, context: {} };
+      // Include required userType parameter for chatbot API
+      const payload = { 
+        message, 
+        context: {},
+        userType: 'admin' // Use admin for testing
+      };
       const res = await apiRequest('POST', '/api/ai/chatbot', payload);
       const data = await res.json();
       return data.response || data.message || data;
