@@ -1,9 +1,7 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
-import PageHeader from '@/components/ui/page-header';
 import { Card } from '@/components/ui/card';
 import OrderManagementAI from '@/components/ai/OrderManagementAI';
-import { RestaurantAdminAI } from '@/components/admin';
+import RestaurantAdminAI from '@/components/admin/RestaurantAdminAI';
 import { 
   MessageSquare, 
   Utensils, 
@@ -19,15 +17,15 @@ import {
 const AIDemo: React.FC = () => {
   return (
     <>
-      <Helmet>
-        <title>AI Assistants Demo | YashHotelBot</title>
-      </Helmet>
-      
-      <PageHeader
-        title="AI Assistants Demo"
-        subtitle="Explore reusable AI assistant components for different business applications"
-        icon={<MessageSquare className="h-6 w-6" />}
-      />
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold flex items-center">
+          <MessageSquare className="h-6 w-6 mr-2 text-primary" />
+          AI Assistants Demo
+        </h1>
+        <p className="text-gray-400 mt-2">
+          Explore reusable AI assistant components for different business applications
+        </p>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         {/* Current Components */}

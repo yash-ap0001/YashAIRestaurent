@@ -11,7 +11,7 @@ import {
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
   Menu, Bell, HandPlatter, ChevronDown, HeartPulse, MessageCircle, Phone, PhoneCall, Cpu, Activity,
   Radio, Signal, Globe, ExternalLink, Mic, MicOff, Workflow, Salad, Apple, UserCog, Eye, Utensils,
-  ChevronRight, PanelLeftClose, PanelLeftOpen, BrainCircuit as Brain, Bot
+  ChevronRight, PanelLeftClose, PanelLeftOpen, BrainCircuit as Brain, Bot, MessageSquare
 } from "lucide-react";
 import NotificationSystem from "@/components/notifications/NotificationSystem";
 import { cn } from "@/lib/utils";
@@ -75,6 +75,7 @@ const testingNavItems: NavItem[] = [
   { label: "External Integration", href: "/external-integration", icon: <ExternalLink className="w-5 h-5" /> },
   { label: "Voice Assistant", href: "/voice-assistant", icon: <Mic className="w-5 h-5" /> },
   { label: "Voice Commands", href: "/voice-commands", icon: <Brain className="w-5 h-5" /> },
+  { label: "AI Assistants", href: "/ai-demo", icon: <MessageSquare className="w-5 h-5" /> },
   { label: "n8n Integration", href: "/n8n-integration", icon: <Workflow className="w-5 h-5" /> },
   { label: "Notification Test", href: "/notification-test", icon: <Bell className="w-5 h-5" /> },
 ];
@@ -158,6 +159,7 @@ export function AppShell({ children }: AppShellProps) {
     "/external-integration": ["admin", "manager"],
     "/voice-assistant": ["admin", "manager"],
     "/voice-commands": ["admin", "manager", "waiter", "kitchen", "delivery", "customer"],
+    "/ai-demo": ["admin", "manager"],
     "/n8n-integration": ["admin", "manager"],
     "/diet-plan": ["admin", "manager", "customer"],
     "/notification-test": ["admin", "manager"],
