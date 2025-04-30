@@ -79,8 +79,9 @@ export function VoiceAssistantDialog() {
           WebkitBackdropFilter: 'blur(30px)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
         }}
-        // Remove the close button
+        // Remove the close button and make background transparent
         hideCloseButton={true}
+        hideBackground={true}
       >
         <VisuallyHidden>
           <DialogTitle>Voice Assistant Options</DialogTitle>
