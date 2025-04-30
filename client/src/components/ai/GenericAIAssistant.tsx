@@ -418,10 +418,16 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
     }
   }, [isOpen, refetch]);
   
+  // Use a ref to track if we've initialized the conversation
+  const conversationInitializedRef = useRef(false);
+  
   // Handle conversation initialization
   useEffect(() => {
-    // Only run this effect once when the dialog is opened and conversation is empty
-    if (!isOpen || conversation.length > 0) return;
+    // Only run this effect once when the dialog is opened
+    if (!isOpen || conversationInitializedRef.current) return;
+    
+    // Mark as initialized to prevent running again
+    conversationInitializedRef.current = true;
     
     // Try to load saved conversation history from localStorage
     if (storageKey) {
@@ -436,12 +442,14 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
           // Only use conversation history if it's less than 12 hours old
           if (now.getTime() - historyDate.getTime() < 12 * 60 * 60 * 1000) {
             const userName = user?.fullName?.split(' ')[0] || 'User';
-            setConversation(savedConversation);
             
-            // Add welcome back message
+            // Add welcome back message and saved conversation
             const welcomeBack = `Welcome back, ${userName}! We were discussing something earlier. How can I help you now?`;
             const welcomeBackMessage: Message = { type: 'agent', text: welcomeBack };
-            setConversation(prev => [...prev, welcomeBackMessage]);
+            
+            // Set both at once to avoid multiple renders
+            const initialConversation = [...savedConversation, welcomeBackMessage];
+            setConversation(initialConversation);
             
             if (voiceEnabled) {
               setTimeout(() => {
@@ -481,7 +489,7 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
       }
     }
   }, [isOpen, welcomeMessage, voiceEnabled, speakResponse, storageKey, 
-      autoListen, toggleVoiceRecognition, user, conversation]);
+      autoListen, toggleVoiceRecognition, user]);
       
   // Reset conversation when dialog closes
   useEffect(() => {

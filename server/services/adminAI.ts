@@ -1,12 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { storage } from '../storage';
+import { adminAssistantTrainingPrompt, getAdminOperationsTraining } from './adminOperationsTraining';
 
 // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-// Admin AI system prompt
+// Admin AI system prompt - combines executive and operational capabilities
 const ADMIN_SYSTEM_PROMPT = `
 You are an executive-level Business Advisor AI for restaurant owners and administrators.
 Your purpose is to provide high-level strategic insights, financial analysis, and business
@@ -43,6 +44,9 @@ CONSTRAINTS:
 
 When responding to queries, analyze multiple perspectives and provide strategic options
 with their associated benefits, costs, risks, and implementation considerations.
+
+ADMINISTRATIVE OPERATIONS CAPABILITIES:
+${adminAssistantTrainingPrompt}
 `;
 
 /**
@@ -348,6 +352,14 @@ export async function generateAdminInsights(query: string, adminData: any) {
     // Format the context with real restaurant data
     const dataContext = JSON.stringify(adminData, null, 2);
     
+    // Check if this query is related to admin operations
+    const isAdminOperationsQuery = detectAdminOperationsQuery(query);
+    
+    // Get relevant admin operations training data if applicable
+    const adminOperationsContext = isAdminOperationsQuery 
+      ? JSON.stringify(getAdminOperationsTraining(), null, 2) 
+      : '';
+    
     // Generate response from AI
     const response = await anthropic.messages.create({
       model: 'claude-3-7-sonnet-20250219',
@@ -359,9 +371,13 @@ export async function generateAdminInsights(query: string, adminData: any) {
           content: `Here is current data about my restaurant business:
 ${dataContext}
 
+${isAdminOperationsQuery ? `Additional context for administrative operations:
+${adminOperationsContext}` : ''}
+
 My question is: ${query}
 
 Based on the provided data, give me an executive-level analysis that focuses on actionable insights. 
+${isAdminOperationsQuery ? 'Include specific step-by-step guidance for this administrative operation.' : ''}
 Include relevant metrics, identify trends, and suggest specific strategies appropriate for my business.
 Format your response with clear sections and prioritize the most impactful actions I should take.`
         }
@@ -375,12 +391,35 @@ Format your response with clear sections and prioritize the most impactful actio
       
     return {
       response: responseText,
-      chartData: generateChartData(query, adminData)
+      chartData: generateChartData(query, adminData),
+      isAdminOperation: isAdminOperationsQuery
     };
   } catch (error) {
     console.error('Error generating admin insights:', error);
     throw new Error('Failed to generate business insights. Please try again later.');
   }
+}
+
+/**
+ * Detect if a query is related to admin operations
+ */
+function detectAdminOperationsQuery(query: string): boolean {
+  const adminOperationsData = getAdminOperationsTraining();
+  const lowerQuery = query.toLowerCase();
+  
+  // Check if the query matches any known admin operation keywords
+  const operationKeywords = [
+    'financial management', 'staff management', 'inventory management',
+    'menu management', 'business analytics', 'system configuration',
+    'daily sales report', 'profit margins', 'expense breakdown', 'budget alert',
+    'staff schedule', 'staff roles', 'performance metrics', 'schedule optimization',
+    'inventory levels', 'ingredient usage', 'purchase orders', 'vendors',
+    'update menu', 'menu performance', 'promotions', 'menu engineering',
+    'customer demographics', 'peak hour', 'sales forecast', 'competitive analysis',
+    'user management', 'notifications', 'integration', 'system backup'
+  ];
+  
+  return operationKeywords.some(keyword => lowerQuery.includes(keyword));
 }
 
 /**
