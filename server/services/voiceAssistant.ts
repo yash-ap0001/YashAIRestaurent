@@ -1,7 +1,7 @@
 import { db } from '../db';
 import { orders, menuItems, kitchenTokens, bills, customers, inventory } from '../../shared/schema';
 import { eq, like, desc, sql } from 'drizzle-orm';
-import { aiService } from './ai';
+import { processChatbotRequest } from './chatbot/chatbotService';
 import { broadcastToAllClients } from './realtime';
 
 // Define command patterns
@@ -86,14 +86,14 @@ export async function processVoiceCommand(command: string, userType: string) {
     }
     // If no patterns match, use AI to interpret the command
     else {
-      const aiResponse = await aiService.processMessage({
+      const aiResponse = await processChatbotRequest({
         message: command,
-        userType,
+        userType: userType as any,
         messageHistory: [],
       });
       
-      response = aiResponse.message || "I'm not sure how to help with that.";
-      success = !!aiResponse.message;
+      response = aiResponse || "I'm not sure how to help with that.";
+      success = !!aiResponse;
     }
     
     return {
