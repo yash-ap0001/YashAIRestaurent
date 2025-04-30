@@ -5,6 +5,7 @@ import { useVoiceControlContext } from "@/contexts/VoiceControlContext";
 import { useVoiceControl } from "@/hooks/use-voice-control";
 import { VoiceAssistantDialog } from "@/components/voice/VoiceAssistantDialog";
 import { WelcomeGreeting } from "@/components/voice/WelcomeGreeting";
+import { HotelAgentDialog } from "@/components/voice/HotelAgentDialog";
 import "@/assets/custom-theme.css";
 import { 
   LayoutDashboard, PlusSquare, Receipt, CreditCard, Package2, Users, MenuSquare, BarChart3, LogOut,
@@ -89,6 +90,7 @@ export function AppShell({ children }: AppShellProps) {
   const [singleOrderOpen, setSingleOrderOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [welcomeDialogOpen, setWelcomeDialogOpen] = useState(false);
+  const [hotelAgentDialogOpen, setHotelAgentDialogOpen] = useState(false);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
   const { user, currentRole, setCurrentRole } = useAuth();
   const { currentMode, getThemeStyles } = useTheme();

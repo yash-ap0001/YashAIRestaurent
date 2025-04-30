@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { MaterialDialog } from "@/components/ui/material-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PauseCircle, Play, BarChart3, ArrowRight, ChevronRight } from "lucide-react";
+import { PauseCircle, Play, BarChart3, ArrowRight, ChevronRight, Mic } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface WelcomeGreetingProps {

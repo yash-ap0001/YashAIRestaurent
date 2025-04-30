@@ -3,6 +3,38 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 
+// Define types for browser speech recognition
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  }
+}
+
 /**
  * HotelAgentVoice - Global voice assistant service for hotel operations
  * 
@@ -86,35 +118,37 @@ export function useHotelAgentVoice() {
   // Initialize voice recognition on component mount
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-IN'; // Indian English accent
-      
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        setTranscript(transcript);
-        processVoiceCommand(transcript);
-      };
-      
-      recognition.onerror = (event: SpeechRecognitionError) => {
-        setIsListening(false);
-        console.error('Speech recognition error', event.error);
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognitionAPI) {
+        const recognition = new SpeechRecognitionAPI();
         
-        toast({
-          title: "Voice Recognition Error",
-          description: "I couldn't hear you clearly. Please try again.",
-          variant: "destructive",
-        });
-      };
-      
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-      
-      setVoiceRecognition(recognition);
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-IN'; // Indian English accent
+        
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
+          const transcript = event.results[0][0].transcript;
+          setTranscript(transcript);
+          processVoiceCommand(transcript);
+        };
+        
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+          setIsListening(false);
+          console.error('Speech recognition error', event.error);
+          
+          toast({
+            title: "Voice Recognition Error",
+            description: "I couldn't hear you clearly. Please try again.",
+            variant: "destructive",
+          });
+        };
+        
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+        
+        setVoiceRecognition(recognition);
+      }
     } else {
       toast({
         title: "Voice Recognition Not Supported",
