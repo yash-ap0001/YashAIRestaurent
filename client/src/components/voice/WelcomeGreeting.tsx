@@ -326,6 +326,62 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
           </p>
         </div>
         
+        {/* Interactive question and response section */}
+        {currentSection === 'closing' && (
+          <div className="space-y-3">
+            <div className="relative">
+              <input 
+                type="text"
+                placeholder="Ask me anything about your business..."
+                className="w-full bg-black/40 backdrop-blur-sm border border-gray-800 rounded-lg py-3 px-4 text-white"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.currentTarget.value) {
+                    const question = e.currentTarget.value;
+                    e.currentTarget.value = '';
+                    
+                    // Generate a response based on the question
+                    let response = '';
+                    if (question.toLowerCase().includes('revenue')) {
+                      response = `Based on current trends, your revenue is projected to increase by 12% this month compared to last month. Your strongest revenue generating items are Butter Chicken, Veg Biryani, and Paneer Tikka.`;
+                    } else if (question.toLowerCase().includes('staff') || question.toLowerCase().includes('employee')) {
+                      response = `I recommend scheduling 3 kitchen staff and 2 waiters for tomorrow's evening shift based on reservation data. You should also consider hiring a part-time chef to handle the increased weekend demand.`;
+                    } else if (question.toLowerCase().includes('inventory') || question.toLowerCase().includes('stock')) {
+                      response = `Your rice inventory is running low at 15% of optimal levels. I recommend restocking within the next 2 days. Your chicken inventory is at 65% and should last until your next scheduled delivery.`;
+                    } else if (question.toLowerCase().includes('menu') || question.toLowerCase().includes('dish')) {
+                      response = `Based on order patterns, I recommend featuring Butter Chicken as your special this week. Consider adding a seasonal dessert as customers often order sweet items with spicy main courses.`;
+                    } else if (question.toLowerCase().includes('marketing') || question.toLowerCase().includes('promotion')) {
+                      response = `Wednesday lunches have been consistently slow. Consider running a 15% discount promotion for office workers between 12-2pm on Wednesdays to increase traffic.`;
+                    } else {
+                      response = `Based on your business metrics, I'd recommend focusing on optimizing your kitchen capacity during peak hours and promoting your most popular items like ${stats?.topSellingItem || "Butter Chicken"} more prominently.`;
+                    }
+                    
+                    // Speak the response
+                    playSpeech(response);
+                    
+                    // Display response
+                    const responseElement = document.createElement('div');
+                    responseElement.className = 'bg-primary/20 backdrop-blur-sm p-3 rounded-lg border border-primary/30 text-white text-sm mt-2';
+                    responseElement.textContent = response;
+                    e.currentTarget.parentElement?.parentElement?.appendChild(responseElement);
+                  }
+                }}
+              />
+              <button 
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary"
+                onClick={() => {
+                  // You could trigger speech recognition here or other interactions
+                  playSpeech("What would you like to know about your restaurant's performance?");
+                }}
+              >
+                <Mic className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 text-center">
+              Try asking about revenue projections, staff recommendations, inventory status, menu optimizations, or marketing ideas
+            </p>
+          </div>
+        )}
+        
         {/* Yesterday's Business Metrics */}
         {currentSection === 'yesterday' && (
           <div className="grid grid-cols-3 gap-4 pt-2">
