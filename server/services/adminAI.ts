@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { db } from '../db';
+import { storage } from '../storage';
 
 // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
 const anthropic = new Anthropic({
@@ -84,11 +84,11 @@ export async function fetchAdminDashboardData() {
 async function getFinancialMetrics() {
   // For now simulate financials with placeholder calculations
   // In a real implementation, this would pull from DB
-  const orders = await db.query('SELECT * FROM orders');
-  const menuItems = await db.query('SELECT * FROM menu_items');
+  const orders = await storage.getOrders();
+  const menuItems = await storage.getMenuItems();
   
   // Calculate revenue
-  const revenue = orders.reduce((total, order) => total + order.total, 0);
+  const revenue = orders.reduce((total: number, order: any) => total + (order.total || 0), 0);
   
   // Estimate costs (in a real app would come from actual cost data)
   const foodCost = {
@@ -368,8 +368,13 @@ Format your response with clear sections and prioritize the most impactful actio
       ]
     });
 
+    // Access the response content safely
+    const responseText = typeof response.content[0] === 'object' && 'text' in response.content[0] 
+      ? response.content[0].text 
+      : JSON.stringify(response.content[0]);
+      
     return {
-      response: response.content[0].text,
+      response: responseText,
       chartData: generateChartData(query, adminData)
     };
   } catch (error) {

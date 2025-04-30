@@ -2426,6 +2426,120 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       });
     }
   });
+  
+  // Admin AI analytics endpoints
+  app.post("/api/admin/ai/insights", async (req: Request, res: Response) => {
+    try {
+      // Check role permission
+      if (!req.isAuthenticated() || !["admin", "manager"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
+      }
+      
+      const { query } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ error: 'Query is required' });
+      }
+      
+      // Import adminAI functions
+      const { fetchAdminDashboardData, generateAdminInsights } = await import('./services/adminAI');
+      
+      // Fetch admin dashboard data
+      const adminData = await fetchAdminDashboardData();
+      
+      // Generate AI insights
+      const insights = await generateAdminInsights(query, adminData);
+      
+      res.status(200).json(insights);
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  });
+  
+  app.get("/api/admin/dashboard-data", async (req: Request, res: Response) => {
+    try {
+      // Check role permission
+      if (!req.isAuthenticated() || !["admin", "manager"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
+      }
+      
+      // Import adminAI functions
+      const { fetchAdminDashboardData } = await import('./services/adminAI');
+      
+      // Get admin dashboard data
+      const adminData = await fetchAdminDashboardData();
+      
+      res.status(200).json(adminData);
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  });
+  
+  app.post("/api/admin/ai/business-health", async (req: Request, res: Response) => {
+    try {
+      // Check role permission
+      if (!req.isAuthenticated() || !["admin", "manager"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
+      }
+      
+      // Import adminAI functions
+      const { fetchAdminDashboardData, assessBusinessHealth } = await import('./services/adminAI');
+      
+      // Fetch admin dashboard data
+      const adminData = await fetchAdminDashboardData();
+      
+      // Generate business health assessment
+      const healthAssessment = assessBusinessHealth(adminData);
+      
+      res.status(200).json(healthAssessment);
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  });
+  
+  app.post("/api/admin/ai/growth-opportunities", async (req: Request, res: Response) => {
+    try {
+      // Check role permission
+      if (!req.isAuthenticated() || !["admin", "manager"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
+      }
+      
+      // Import adminAI functions
+      const { fetchAdminDashboardData, analyzeGrowthOpportunities } = await import('./services/adminAI');
+      
+      // Fetch admin dashboard data
+      const adminData = await fetchAdminDashboardData();
+      
+      // Generate growth opportunities analysis
+      const opportunities = analyzeGrowthOpportunities(adminData);
+      
+      res.status(200).json(opportunities);
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  });
+  
+  app.post("/api/admin/ai/competitive-analysis", async (req: Request, res: Response) => {
+    try {
+      // Check role permission
+      if (!req.isAuthenticated() || !["admin", "manager"].includes(req.user.role)) {
+        return res.status(403).json({ error: "Unauthorized: Insufficient permissions" });
+      }
+      
+      // Import adminAI functions
+      const { fetchAdminDashboardData, analyzeCompetitivePosition } = await import('./services/adminAI');
+      
+      // Fetch admin dashboard data
+      const adminData = await fetchAdminDashboardData();
+      
+      // Generate competitive analysis
+      const competitiveAnalysis = analyzeCompetitivePosition(adminData);
+      
+      res.status(200).json(competitiveAnalysis);
+    } catch (error) {
+      errorHandler(error, res);
+    }
+  });
 
   return httpServer;
 }
