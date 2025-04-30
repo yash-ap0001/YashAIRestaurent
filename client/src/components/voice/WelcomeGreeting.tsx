@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { MaterialDialog } from "@/components/ui/material-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PauseCircle, Play, Volume2 } from "lucide-react";
+import { PauseCircle, Play, BarChart3, ArrowRight, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface WelcomeGreetingProps {
@@ -40,17 +40,30 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
     }
   });
 
-  // Predefined business tips - would come from AI in production
-  const businessTips = [
-    "Consider running lunch specials to increase traffic during slower hours.",
-    "Featuring a dish of the day can help reduce inventory and create excitement.",
-    "Customers who receive personalized service are 40% more likely to become regulars.",
-    "Analyzing your most popular dishes can help optimize your inventory purchases.",
-    "Implementing a small loyalty program can increase return business by up to 30%."
-  ];
+  // Smart business intelligence tips based on actual metrics
+  const generateBusinessTip = () => {
+    // Default values if stats aren't loaded yet
+    const ordersYesterday = stats?.ordersYesterday || 42;
+    const ordersToday = stats?.ordersToday || 18;
+    const popularDish = stats?.topSellingItem || "Butter Chicken";
+    const kitchenCapacity = Math.round((ordersToday/60) * 100);
+    
+    // Generate context-aware business tips
+    if (kitchenCapacity < 30) {
+      return `With kitchen operating at only ${kitchenCapacity}% capacity, consider running a limited-time promotion on your delivery platforms to boost afternoon orders.`;
+    } else if (kitchenCapacity > 80) {
+      return `Your kitchen is operating at ${kitchenCapacity}% capacity. Consider adding temporary staff during peak hours to maintain service quality and reduce wait times.`;
+    } else if (ordersYesterday < 35) {
+      return `Yesterday's orders were below average. Analyze your competitor's promotions and consider implementing a targeted social media campaign to increase visibility.`;
+    } else if (ordersYesterday > 50) {
+      return `You had an excellent day yesterday with ${ordersYesterday} orders! Analyze which menu items performed best and consider featuring them more prominently.`;
+    } else {
+      return `${popularDish} is your most ordered dish. Consider creating a special variation or complementary item to increase check sizes through upselling.`;
+    }
+  };
 
-  // Select a random tip
-  const randomTip = businessTips[Math.floor(Math.random() * businessTips.length)];
+  // Get a contextually relevant business tip
+  const smartBusinessTip = generateBusinessTip();
   
   const generateWelcomeScript = () => {
     // Default values if stats aren't loaded yet
@@ -65,7 +78,7 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
       yesterday: `Yesterday was quite a day! We served ${ordersYesterday} orders, which is ${ordersYesterday > 35 ? "above" : "below"} our daily average. ${popularDish} was our most ordered dish.`,
       today: `Today so far, we've had ${ordersToday} orders with a total revenue of ${revenue}. The kitchen is operating at ${Math.round((ordersToday/60) * 100)}% capacity.`,
       tomorrow: `Looking ahead, we have ${reservations} reservations for tomorrow, with 3 being large parties of 6 or more.`,
-      tips: `Here's a business tip for your consideration: ${randomTip}`,
+      tips: `Here's a business insight based on your current metrics: ${smartBusinessTip}`,
       closing: `Is there anything specific you'd like to know about the business today?`
     };
   };
@@ -211,9 +224,9 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
         stopSpeech();
         onClose();
       }}
-      title="Welcome, Hotel Owner!"
-      description="Your AI Assistant is here to help"
-      icon={<Volume2 className="h-6 w-6 text-primary" />}
+      title={`Welcome back, ${userName}!`}
+      description="Your AI Business Assistant has prepared insights for you"
+      icon={<BarChart3 className="h-6 w-6 text-primary" />}
       width="max-w-lg"
       footer={
         <div className="flex justify-between w-full items-center">
@@ -247,7 +260,102 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
           </p>
         </div>
         
-        <div className="flex justify-center">
+        {/* Yesterday's Business Metrics */}
+        {currentSection === 'yesterday' && (
+          <div className="grid grid-cols-3 gap-4 pt-2">
+            <div className="bg-amber-900/30 backdrop-blur-sm p-3 rounded-lg border border-amber-800 text-center">
+              <p className="text-xs text-amber-300">Total Orders</p>
+              <p className="text-xl font-bold text-white">{stats?.ordersYesterday || 42}</p>
+            </div>
+            <div className="bg-orange-900/30 backdrop-blur-sm p-3 rounded-lg border border-orange-800 text-center">
+              <p className="text-xs text-orange-300">Performance</p>
+              <p className="text-xl font-bold text-white">{(stats?.ordersYesterday || 42) > 35 ? "+15%" : "-9%"}</p>
+            </div>
+            <div className="bg-rose-900/30 backdrop-blur-sm p-3 rounded-lg border border-rose-800 text-center">
+              <p className="text-xs text-rose-300">Top Item</p>
+              <p className="text-sm font-bold text-white truncate">{stats?.topSellingItem || "Butter Chicken"}</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Today's Business Metrics */}
+        {currentSection === 'today' && (
+          <div className="grid grid-cols-3 gap-4 pt-2">
+            <div className="bg-purple-900/30 backdrop-blur-sm p-3 rounded-lg border border-purple-800 text-center">
+              <p className="text-xs text-purple-300">Total Orders</p>
+              <p className="text-xl font-bold text-white">{stats?.ordersToday || 18}</p>
+            </div>
+            <div className="bg-indigo-900/30 backdrop-blur-sm p-3 rounded-lg border border-indigo-800 text-center">
+              <p className="text-xs text-indigo-300">Revenue</p>
+              <p className="text-xl font-bold text-white">₹{stats?.revenueToday?.toLocaleString() || "12,500"}</p>
+            </div>
+            <div className="bg-blue-900/30 backdrop-blur-sm p-3 rounded-lg border border-blue-800 text-center">
+              <p className="text-xs text-blue-300">Kitchen Capacity</p>
+              <p className="text-xl font-bold text-white">{Math.round(((stats?.ordersToday || 18)/60) * 100)}%</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Tomorrow's Business Metrics */}
+        {currentSection === 'tomorrow' && (
+          <div className="grid grid-cols-3 gap-4 pt-2">
+            <div className="bg-emerald-900/30 backdrop-blur-sm p-3 rounded-lg border border-emerald-800 text-center">
+              <p className="text-xs text-emerald-300">Reservations</p>
+              <p className="text-xl font-bold text-white">{stats?.upcomingReservations || 8}</p>
+            </div>
+            <div className="bg-teal-900/30 backdrop-blur-sm p-3 rounded-lg border border-teal-800 text-center">
+              <p className="text-xs text-teal-300">Large Parties</p>
+              <p className="text-xl font-bold text-white">3</p>
+            </div>
+            <div className="bg-cyan-900/30 backdrop-blur-sm p-3 rounded-lg border border-cyan-800 text-center">
+              <p className="text-xs text-cyan-300">Forecast</p>
+              <p className="text-xl font-bold text-white">{(stats?.upcomingReservations || 8) > 5 ? "Busy" : "Normal"}</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Action Suggestions */}
+        {currentSection === 'tips' && (
+          <div className="bg-emerald-900/20 backdrop-blur-sm p-3 rounded-lg border border-emerald-800">
+            <h4 className="text-sm font-semibold text-emerald-300 mb-2">Recommended Actions:</h4>
+            <ul className="text-sm space-y-1 text-white">
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-400 mt-0.5">•</span>
+                <span>Review yesterday's order patterns in the Reports section</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-400 mt-0.5">•</span>
+                <span>Update inventory levels based on today's projected demand</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-400 mt-0.5">•</span>
+                <span>Prepare kitchen staff for tomorrow's large party reservations</span>
+              </li>
+            </ul>
+          </div>
+        )}
+        
+        <div className="flex justify-between items-center gap-4 pt-1">
+          <Button 
+            size="sm"
+            variant="ghost"
+            className="text-gray-400 hover:text-white"
+            onClick={() => {
+              stopSpeech();
+              // Move to previous section if not at greeting
+              switch(currentSection) {
+                case 'yesterday': setCurrentSection('greeting'); break;
+                case 'today': setCurrentSection('yesterday'); break;
+                case 'tomorrow': setCurrentSection('today'); break;
+                case 'tips': setCurrentSection('tomorrow'); break;
+                case 'closing': setCurrentSection('tips'); break;
+              }
+            }}
+            disabled={currentSection === 'greeting'}
+          >
+            Previous
+          </Button>
+          
           <Button 
             size="lg" 
             className="rounded-full w-14 h-14 p-0 flex items-center justify-center" 
@@ -257,6 +365,26 @@ export function WelcomeGreeting({ userName, isOpen, onClose }: WelcomeGreetingPr
               <PauseCircle className="h-8 w-8" /> : 
               <Play className="h-8 w-8 ml-1" />
             }
+          </Button>
+          
+          <Button 
+            size="sm"
+            variant="ghost"
+            className="text-gray-400 hover:text-white flex items-center gap-1"
+            onClick={() => {
+              stopSpeech();
+              // Move to next section if not at closing
+              switch(currentSection) {
+                case 'greeting': setCurrentSection('yesterday'); break;
+                case 'yesterday': setCurrentSection('today'); break;
+                case 'today': setCurrentSection('tomorrow'); break;
+                case 'tomorrow': setCurrentSection('tips'); break;
+                case 'tips': setCurrentSection('closing'); break;
+              }
+            }}
+            disabled={currentSection === 'closing'}
+          >
+            Next <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
         
