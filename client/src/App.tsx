@@ -35,6 +35,7 @@ import DashboardStatsPage from "@/pages/DashboardStats";
 import RestaurantOrderChatbotPage from "@/pages/RestaurantOrderChatbotPage";
 import AIDemo from "@/pages/AIDemo";
 import SpeechDemo from "@/pages/SpeechDemo";
+import HandsFreeAssistantPage from "@/pages/HandsFreeAssistantPage";
 import { AppShell } from "@/components/layouts/AppShell";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -103,6 +104,7 @@ function Router() {
       <ProtectedRoute path="/chatbot" component={RestaurantOrderChatbotPage} allowedRoles={["admin", "manager", "waiter", "customer"]} />
       <ProtectedRoute path="/ai-demo" component={AIDemo} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/speech-demo" component={SpeechDemo} allowedRoles={["admin", "manager", "waiter", "kitchen"]} />
+      <ProtectedRoute path="/hands-free-assistant" component={HandsFreeAssistantPage} allowedRoles={["admin", "manager", "waiter", "kitchen"]} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />

@@ -44,7 +44,9 @@ import { notificationService } from './services/notificationService';
 import { broadcastNewOrder } from './orderEnhancement';
 import { generateOrderNumber, generateTokenNumber, generateBillNumber, initializeCounters, handleError } from './utils';
 import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
-import { handleVoiceCommand } from './services/voiceAssistant';
+// We'll use dynamic import for voiceAssistant.ts to avoid circular dependencies
+import { db } from './db';
+import { activities } from '@shared/schema';
 import { setupAuth } from './auth';
 
 // Role-based access control middleware
