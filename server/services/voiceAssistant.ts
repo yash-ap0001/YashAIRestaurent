@@ -1,8 +1,8 @@
 import { db } from '../db';
-import { orders, menuItems, kitchenTokens, bills, inventoryItems, customers } from '../../shared/schema';
+import { orders, menuItems, kitchenTokens, bills, customers } from '../../shared/schema';
 import { eq, like, desc, sql } from 'drizzle-orm';
 import { aiService } from './ai';
-import { broadcastEvent } from '../realtime';
+import { broadcastToAllClients } from './realtime';
 
 // Define command patterns
 const ORDER_CREATE_PATTERN = /create\s+order\s+(?:for\s+)?table\s+(\d+)/i;
@@ -133,8 +133,9 @@ async function createOrder(tableNumber: string) {
     }).returning();
     
     // Broadcast event to all connected clients
-    broadcastEvent('new-order', { 
-      order: newOrder,
+    broadcastToAllClients({ 
+      type: 'new_order',
+      data: newOrder,
       message: `New order ${newOrderNumber} created for table ${tableNumber}`
     });
     
@@ -185,8 +186,9 @@ async function updateOrderStatus(orderNumber: string, status: string) {
       .returning();
     
     // Broadcast event to all connected clients
-    broadcastEvent('order-updated', { 
-      order: updatedOrder,
+    broadcastToAllClients({ 
+      type: 'order-updated',
+      data: updatedOrder,
       message: `Order ${updatedOrder.orderNumber} updated to status: ${normalizedStatus}`
     });
     
@@ -241,8 +243,9 @@ async function addItemToOrder(itemName: string, orderNumber: string) {
       .returning();
     
     // Broadcast event to all connected clients
-    broadcastEvent('order-updated', { 
-      order: updatedOrder,
+    broadcastToAllClients({ 
+      type: 'order-updated',
+      data: updatedOrder,
       message: `Added ${menuItem.name} to Order ${updatedOrder.orderNumber}`
     });
     
