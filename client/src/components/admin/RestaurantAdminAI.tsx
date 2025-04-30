@@ -629,7 +629,7 @@ ${data.map((opp: any, idx: number) => `${idx + 1}. ${opp.area} - Estimated impac
       setIsListening(false);
     };
     
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: any) => {
       console.error('Speech recognition error', event);
       setIsListening(false);
       toast({
