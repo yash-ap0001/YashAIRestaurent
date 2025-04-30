@@ -1,6 +1,6 @@
 import React from 'react';
 import { Bot, Cpu, BarChart2 } from 'lucide-react';
-import GenericAIAssistant from './GenericAIAssistant';
+import GenericAIAssistant from './GenericAIAssistant.fixed';
 
 /**
  * RestaurantAI - Restaurant management AI assistant

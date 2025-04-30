@@ -3,8 +3,7 @@ import { MaterialDialog } from '../ui/material-dialog';
 import { Button } from '../ui/button';
 import { 
   MessageSquare, Mic, MicOff, Search, 
-  RefreshCw, Download, ArrowUpRight,
-  BarChart2, Volume2, VolumeX 
+  RefreshCw, Download, Volume2, VolumeX 
 } from 'lucide-react';
 import { Input } from '../ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -69,6 +68,13 @@ export interface AIAssistantConfig {
   maxStoredMessages?: number; // Maximum number of messages to store
 }
 
+// Define message type
+type Message = {
+  type: 'user' | 'agent';
+  text: string;
+  data?: any;
+};
+
 /**
  * Generic AI Assistant Component that can be configured for different use cases
  */
@@ -90,8 +96,6 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
     processChatResponse = (data) => data.response || data.message || data,
     maxWidth = "2xl",
     buttonVariant = "outline",
-    accentColor = "primary",
-    showListeningIndicator = true,
     extraDataQueries = [],
     storageKey,
     maxStoredMessages = 20
@@ -99,30 +103,24 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
   
   // Get user info if available
   const { user } = useAuth();
+  const { toast } = useToast();
 
+  // Component state
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  // Define message type
-  type Message = {
-    type: 'user' | 'agent';
-    text: string;
-    data?: any;
-  };
-  
   const [conversation, setConversation] = useState<Message[]>([]);
   
-  // Audio elements for speech
+  // Refs for speech recognition and synthesis
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
-  
-  const { toast } = useToast();
+  const recognitionRef = useRef<any>(null);
+  const dialogOpenedRef = useRef(false);
   
   // Fetch main data
   const { 
     data: mainData, 
-    isLoading: isLoadingData, 
-    error: dataError, 
+    isLoading: isLoadingData,
     refetch 
   } = useQuery({
     queryKey: [dataQueryEndpoint],
@@ -141,34 +139,54 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
       queryKey: [query.endpoint],
       queryFn: async () => {
         const res = await apiRequest('GET', query.endpoint);
-        return await res.json();
+        return res.json();
       },
       enabled: isOpen && (query.enabled !== false),
+      staleTime: 60000,
     });
   });
   
-  // Chat request mutation
+  // Chat mutation
   const chatMutation = useMutation({
-    mutationFn: async (userQuery: string) => {
-      const res = await apiRequest('POST', chatEndpoint, { query: userQuery });
+    mutationFn: async (message: string) => {
+      const context = {
+        mainData,
+        extraData: extraDataResults.map((result, index) => ({
+          name: extraDataQueries[index].name,
+          data: result.data
+        })),
+        conversation: conversation.slice(-5), // Send last 5 messages for context
+        user
+      };
+      
+      const payload = { message, context };
+      const res = await apiRequest('POST', chatEndpoint, payload);
       const data = await res.json();
       return processChatResponse(data);
     },
     onSuccess: (response) => {
-      // Add AI response to conversation
-      const agentMessage: Message = { type: 'agent', text: response };
-      const updatedConversation = [...conversation, agentMessage];
-      setConversation(updatedConversation);
+      // Add response to conversation
+      const agentMessage: Message = { 
+        type: 'agent', 
+        text: typeof response === 'string' ? response : response.text || JSON.stringify(response),
+        data: typeof response === 'string' ? undefined : response
+      };
+      
+      setConversation(prev => [...prev, agentMessage]);
       
       // Save conversation history if enabled
       if (storageKey) {
+        const updatedConversation = [...conversation, agentMessage];
         saveConversationHistory(updatedConversation);
       }
       
-      // Speak response if voice is enabled
+      // Speak response if voice enabled
       if (voiceEnabled) {
-        speakResponse(response);
+        speakResponse(agentMessage.text);
       }
+      
+      // Refresh data
+      refetch();
     },
     onError: (error: Error) => {
       toast({
@@ -183,19 +201,36 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
   const customMutations = customCommands.map(command => {
     return useMutation({
       mutationFn: async () => {
-        const res = await apiRequest('POST', command.endpoint);
+        const context = {
+          mainData,
+          extraData: extraDataResults.map((result, index) => ({
+            name: extraDataQueries[index].name,
+            data: result.data
+          })),
+          user
+        };
+        
+        const res = await apiRequest('POST', command.endpoint, { context });
         const data = await res.json();
         return command.processFn ? command.processFn(data) : data;
       },
       onSuccess: (response) => {
         // Add response to conversation
-        const agentMessage: Message = { type: 'agent', text: response };
-        setConversation(prev => [
-          ...prev,
-          agentMessage
-        ]);
+        const agentMessage: Message = { 
+          type: 'agent', 
+          text: typeof response === 'string' ? response : response.text || JSON.stringify(response),
+          data: typeof response === 'string' ? undefined : response
+        };
         
-        // Speak response if voice is enabled
+        setConversation(prev => [...prev, agentMessage]);
+        
+        // Save conversation history if enabled
+        if (storageKey) {
+          const updatedConversation = [...conversation, agentMessage];
+          saveConversationHistory(updatedConversation);
+        }
+        
+        // Speak response if voice enabled
         if (voiceEnabled) {
           speakResponse(response);
         }
@@ -264,7 +299,7 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
       window.speechSynthesis.speak(utterance);
     }
   }, [voiceEnabled]);
-
+  
   // Process command based on patterns
   const processVoiceCommand = useCallback((command: string): boolean => {
     for (const pattern of commandPatterns) {
@@ -278,7 +313,7 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
   }, [commandPatterns, speakResponse]);
   
   // Save conversation to localStorage
-  const saveConversationHistory = useCallback((updatedConversation: typeof conversation) => {
+  const saveConversationHistory = useCallback((updatedConversation: Message[]) => {
     if (!storageKey) return; // Only save if storage key is provided
     
     try {
@@ -292,9 +327,6 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
       console.error('Failed to save conversation history:', error);
     }
   }, [storageKey, maxStoredMessages]);
-  
-  // Voice recognition reference
-  const recognitionRef = useRef<any>(null);
   
   // Modified voice recognition with better error handling
   const toggleVoiceRecognition = useCallback(() => {
@@ -396,7 +428,7 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
         if (event.error !== 'aborted') {
           toast({
             title: 'Speech Recognition Issue',
-            description: `Please try again. (${event.error})`,
+            description: `Please try again or type your message instead.`,
             variant: 'default'
           });
         }
@@ -416,9 +448,147 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
       });
     }
   }, [voiceEnabled, isListening, conversation, processVoiceCommand, 
-      chatMutation, toast, setQuery, setIsListening, storageKey, saveConversationHistory]);
+      chatMutation, toast, storageKey, saveConversationHistory]);
   
-  // Auto-restart listening after speaking is done
+  // Initialize dialog with welcome message or load conversation history
+  const initializeDialog = useCallback(() => {
+    if (storageKey) {
+      try {
+        const savedHistory = localStorage.getItem(storageKey);
+        
+        if (savedHistory) {
+          const { conversation: savedConversation, timestamp } = JSON.parse(savedHistory);
+          const historyDate = new Date(timestamp);
+          const now = new Date();
+          
+          // Only use conversation history if it's less than 12 hours old
+          if (now.getTime() - historyDate.getTime() < 12 * 60 * 60 * 1000) {
+            const userName = user?.fullName?.split(' ')[0] || 'User';
+            
+            // Add welcome back message
+            const welcomeBackText = `Welcome back, ${userName}! We were discussing something earlier. How can I help you now?`;
+            const initialConversation = [
+              ...savedConversation, 
+              { type: 'agent' as const, text: welcomeBackText }
+            ];
+            
+            setConversation(initialConversation);
+            
+            if (voiceEnabled) {
+              setTimeout(() => {
+                speakResponse(welcomeBackText);
+                
+                // Auto-activate microphone after greeting if auto-listen is enabled
+                if (autoListen) {
+                  setTimeout(() => {
+                    toggleVoiceRecognition();
+                  }, 2000);
+                }
+              }, 300);
+            }
+            
+            return true; // Successfully loaded history
+          }
+        }
+      } catch (error) {
+        console.error('Error loading conversation history:', error);
+      }
+    }
+    
+    // No history loaded, use welcome message
+    if (welcomeMessage) {
+      setConversation([{ type: 'agent', text: welcomeMessage }]);
+      
+      if (voiceEnabled) {
+        setTimeout(() => {
+          speakResponse(welcomeMessage);
+          
+          // Auto-activate microphone after greeting if auto-listen is enabled
+          if (autoListen) {
+            setTimeout(() => {
+              toggleVoiceRecognition();
+            }, 2000);
+          }
+        }, 300);
+      }
+    }
+    
+    return false;
+  }, [
+    storageKey, user, voiceEnabled, welcomeMessage,
+    autoListen, speakResponse, toggleVoiceRecognition
+  ]);
+  
+  // Dialog open/close handlers
+  const handleOpenDialog = useCallback(() => {
+    if (!isOpen) {
+      setIsOpen(true);
+      
+      // Initialize dialog content on next render
+      if (!dialogOpenedRef.current) {
+        dialogOpenedRef.current = true;
+        
+        // Use setTimeout to ensure state updates have propagated
+        setTimeout(() => {
+          initializeDialog();
+        }, 0);
+      }
+    }
+  }, [isOpen, initializeDialog]);
+  
+  const handleCloseDialog = useCallback(() => {
+    if (isOpen) {
+      setIsOpen(false);
+      dialogOpenedRef.current = false;
+      
+      // Clean up resources
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (err) {
+          console.error("Error stopping recognition:", err);
+        }
+        recognitionRef.current = null;
+      }
+      
+      if (speechSynthesisRef.current && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      
+      setIsListening(false);
+      setIsSpeaking(false);
+    }
+  }, [isOpen]);
+  
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      // Stop any speech or voice recognition
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (err) {
+          console.error("Error stopping recognition:", err);
+        }
+      }
+      
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      
+      dialogOpenedRef.current = false;
+    };
+  }, []);
+  
+  // Initialize speech synthesis
+  useEffect(() => {
+    if (isOpen && voiceEnabled && window.speechSynthesis) {
+      // Pre-load voices
+      window.speechSynthesis.getVoices();
+    }
+  }, [isOpen, voiceEnabled]);
+  
+  // Auto-restart listening after speaking is done (if enabled)
   useEffect(() => {
     if (autoListen && !isSpeaking && !isListening && isOpen && conversation.length > 0) {
       // Restart listening after speaking is done if auto-listen is enabled
@@ -429,128 +599,6 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
       return () => clearTimeout(timer);
     }
   }, [isSpeaking, isListening, autoListen, isOpen, conversation.length, toggleVoiceRecognition]);
-  
-  // Initialize speech synthesis when dialog opens
-  useEffect(() => {
-    if (isOpen && voiceEnabled && window.speechSynthesis) {
-      const getVoices = () => {
-        // This will trigger loading voices
-        window.speechSynthesis.getVoices();
-      };
-      
-      // Get voices immediately
-      getVoices();
-      
-      // And also when voices change (some browsers load them asynchronously)
-      if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = getVoices;
-      }
-    }
-    
-    return () => {
-      // Cancel any speech when dialog closes
-      if (voiceEnabled && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, [isOpen, voiceEnabled]);
-  
-  // Fetch data when dialog opens
-  useEffect(() => {
-    if (isOpen) {
-      refetch();
-    }
-  }, [isOpen, refetch]);
-  
-  // This flag and function manages dialog opening/closing with proper conversation initialization
-  const dialogOpenedRef = useRef(false);
-  
-  // Handle dialog open/close with proper conversation initialization
-  const handleDialogOpenState = useCallback((open: boolean) => {
-    // If opening and wasn't already open
-    if (open && !dialogOpenedRef.current) {
-      dialogOpenedRef.current = true;
-      
-      // Try to load saved conversation history from localStorage
-      if (storageKey) {
-        try {
-          const savedHistory = localStorage.getItem(storageKey);
-          
-          if (savedHistory) {
-            const { conversation: savedConversation, timestamp } = JSON.parse(savedHistory);
-            const historyDate = new Date(timestamp);
-            const now = new Date();
-            
-            // Only use conversation history if it's less than 12 hours old
-            if (now.getTime() - historyDate.getTime() < 12 * 60 * 60 * 1000) {
-              const userName = user?.fullName?.split(' ')[0] || 'User';
-              
-              // Add welcome back message and saved conversation
-              const welcomeBack = `Welcome back, ${userName}! We were discussing something earlier. How can I help you now?`;
-              const welcomeBackMessage: Message = { type: 'agent', text: welcomeBack };
-              
-              // Set both at once to avoid multiple renders
-              const initialConversation = [...savedConversation, welcomeBackMessage];
-              setConversation(initialConversation);
-              
-              if (voiceEnabled) {
-                setTimeout(() => {
-                  speakResponse(welcomeBack);
-                  
-                  // Auto-activate microphone after greeting if auto-listen is enabled
-                  if (autoListen) {
-                    setTimeout(() => {
-                      toggleVoiceRecognition();
-                    }, 2000);
-                  }
-                }, 300);
-              }
-              
-              setIsOpen(true);
-              return; // Skip the regular greeting if we've loaded history
-            }
-          }
-        } catch (error) {
-          console.error('Error loading conversation history:', error);
-        }
-      }
-      
-      // Add welcome message when dialog opens (if no history was loaded)
-      if (welcomeMessage) {
-        const welcomeMsg: Message = { type: 'agent', text: welcomeMessage };
-        setConversation([welcomeMsg]);
-        
-        if (voiceEnabled) {
-          speakResponse(welcomeMessage);
-          
-          // Auto-activate microphone after greeting if auto-listen is enabled
-          if (autoListen) {
-            setTimeout(() => {
-              toggleVoiceRecognition();
-            }, 2000);
-          }
-        }
-      }
-      
-      setIsOpen(true);
-    } 
-    // If closing the dialog
-    else if (!open) {
-      dialogOpenedRef.current = false;
-      setConversation([]);
-      setIsOpen(false);
-    }
-  }, [
-    storageKey, user, voiceEnabled, welcomeMessage,
-    autoListen, speakResponse, toggleVoiceRecognition
-  ]);
-      
-  // Effect to reset conversation references when component unmounts
-  useEffect(() => {
-    return () => {
-      dialogOpenedRef.current = false;
-    };
-  }, []);
   
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -579,8 +627,6 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
     setQuery('');
   };
   
-  // Export data to JSON function is defined below
-  
   // Export data to JSON
   const exportData = () => {
     if (!mainData) return;
@@ -607,7 +653,7 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
       <Button
         variant={buttonVariant}
         className="flex items-center gap-2 bg-black/20 backdrop-blur-sm border-primary/20 hover:bg-black/40 hover:border-primary/30"
-        onClick={() => handleDialogOpenState(true)}
+        onClick={handleOpenDialog}
       >
         {icon}
         <span className="text-sm">{buttonText}</span>
@@ -616,7 +662,7 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
       {/* Dialog */}
       <MaterialDialog
         isOpen={isOpen}
-        onClose={() => handleDialogOpenState(false)}
+        onClose={handleCloseDialog}
         title={title}
         description={description}
         icon={icon}
