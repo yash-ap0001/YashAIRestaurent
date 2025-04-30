@@ -1,1135 +1,407 @@
-import { storage } from "../storage";
-import { Order, MenuItem, Inventory, KitchenToken, Bill, Customer } from "@shared/schema";
-import { generateOrderNumber, generateTokenNumber, generateBillNumber } from "../utils";
-import { insertOrderSchema, insertOrderItemSchema, insertKitchenTokenSchema, insertBillSchema } from "@shared/schema";
+import { db } from '../db';
+import { orders, menuItems, kitchenTokens, bills, inventoryItems, customers } from '../../shared/schema';
+import { eq, like, desc, sql } from 'drizzle-orm';
+import { aiService } from './ai';
+import { broadcastEvent } from '../realtime';
 
-// Command types that the voice assistant can handle
-enum CommandType {
-  ORDER_STATUS = "order_status",
-  TABLE_STATUS = "table_status",
-  KITCHEN_STATUS = "kitchen_status",
-  CREATE_ORDER = "create_order",
-  UPDATE_ORDER = "update_order",
-  GET_ORDERS = "get_orders",
-  GET_MENU = "get_menu",
-  CHECK_INVENTORY = "check_inventory",
-  GET_CUSTOMER = "get_customer",
-  GET_STATS = "get_stats",
-  UNKNOWN = "unknown"
-}
-
-// Regular expressions to match command patterns
-const COMMAND_PATTERNS = {
-  ORDER_STATUS: /(?:status|info|details).*(?:order|id).*(\w+-\d+|\d+)/i,
-  TABLE_STATUS: /(?:status|info|details).*(?:table|number).*(\d+)/i,
-  KITCHEN_STATUS: /(?:status|info|details).*(?:kitchen)/i,
-  CREATE_ORDER: /(?:create|make|new|add|place|want|get|give|bring|send).*(?:order|takeaway|food)/i,
-  UPDATE_ORDER: /(?:update|change|mark|set).*(?:order|id).*(\w+-\d+|\d+).*(?:as|to).*(\w+)/i,
-  GET_ORDERS: /(?:show|list|get|display).*(?:orders)/i,
-  GET_MENU: /(?:show|list|get|display).*(?:menu|items)/i,
-  CHECK_INVENTORY: /(?:check|show|get).*(?:inventory|stock).*(?:of|for)?.*(\w+)/i,
-  GET_CUSTOMER: /(?:customer|info|details).*(\w+)/i,
-  GET_STATS: /(?:stats|statistics|numbers|dashboard)/i
-};
-
-// Interface for processed commands
-interface ProcessedCommand {
-  type: CommandType;
-  params: Record<string, any>;
-}
+// Define command patterns
+const ORDER_CREATE_PATTERN = /create\s+order\s+(?:for\s+)?table\s+(\d+)/i;
+const ORDER_STATUS_PATTERN = /(?:mark|change|update)\s+order\s+(\d+)\s+(?:to|as)\s+(\w+)/i;
+const ADD_ITEM_PATTERN = /add\s+(.+)\s+to\s+order\s+(\d+)/i;
+const KITCHEN_STATUS_PATTERN = /kitchen\s+status|check\s+kitchen/i;
+const INVENTORY_CHECK_PATTERN = /inventory\s+status|check\s+inventory|stock\s+levels/i;
+const CUSTOMER_INFO_PATTERN = /customer\s+info\s+(.+)|lookup\s+customer\s+(.+)/i;
+const HELP_PATTERN = /help|what\s+can\s+you\s+do|available\s+commands/i;
 
 /**
- * Process a voice command and extract the command type and parameters
+ * Process a voice command from a user
+ * @param command The voice command text
+ * @param userType The type of user (admin, waiter, kitchen, etc.)
+ * @returns Response information
  */
-function processCommand(command: string): ProcessedCommand {
-  const processed: ProcessedCommand = {
-    type: CommandType.UNKNOWN,
-    params: {}
-  };
-  
-  // Check for order status command
-  const orderStatusMatch = command.match(COMMAND_PATTERNS.ORDER_STATUS);
-  if (orderStatusMatch) {
-    processed.type = CommandType.ORDER_STATUS;
-    const orderIdentifier = orderStatusMatch[1];
-    processed.params.orderIdentifier = orderIdentifier;
-    return processed;
-  }
-  
-  // Check for table status command
-  const tableStatusMatch = command.match(COMMAND_PATTERNS.TABLE_STATUS);
-  if (tableStatusMatch) {
-    processed.type = CommandType.TABLE_STATUS;
-    const tableNumber = tableStatusMatch[1];
-    processed.params.tableNumber = tableNumber;
-    return processed;
-  }
-  
-  // Check for kitchen status command
-  if (COMMAND_PATTERNS.KITCHEN_STATUS.test(command)) {
-    processed.type = CommandType.KITCHEN_STATUS;
-    return processed;
-  }
-  
-  // Check for create order command
-  if (COMMAND_PATTERNS.CREATE_ORDER.test(command)) {
-    processed.type = CommandType.CREATE_ORDER;
-    // Extract order items if possible
-    const items = extractOrderItems(command);
-    if (items.length > 0) {
-      processed.params.items = items;
-    }
-    return processed;
-  }
-  
-  // Check for update order command
-  const updateOrderMatch = command.match(COMMAND_PATTERNS.UPDATE_ORDER);
-  if (updateOrderMatch) {
-    processed.type = CommandType.UPDATE_ORDER;
-    const orderIdentifier = updateOrderMatch[1];
-    const status = updateOrderMatch[2].toLowerCase();
-    processed.params.orderIdentifier = orderIdentifier;
-    processed.params.status = mapStatusTerm(status);
-    return processed;
-  }
-  
-  // Check for get orders command
-  if (COMMAND_PATTERNS.GET_ORDERS.test(command)) {
-    processed.type = CommandType.GET_ORDERS;
-    // Check for status filter
-    if (command.match(/pending|preparing|ready|completed|billed/i)) {
-      const status = command.match(/pending|preparing|ready|completed|billed/i)?.[0];
-      if (status) {
-        processed.params.status = status.toLowerCase();
-      }
-    }
-    return processed;
-  }
-  
-  // Check for menu items command
-  if (COMMAND_PATTERNS.GET_MENU.test(command)) {
-    processed.type = CommandType.GET_MENU;
-    // Check for category filter
-    if (command.match(/main|starters|desserts|beverages|drinks/i)) {
-      const category = command.match(/main|starters|desserts|beverages|drinks/i)?.[0];
-      if (category) {
-        processed.params.category = category.toLowerCase();
-      }
-    }
-    return processed;
-  }
-  
-  // Check for inventory check command
-  const checkInventoryMatch = command.match(COMMAND_PATTERNS.CHECK_INVENTORY);
-  if (checkInventoryMatch) {
-    processed.type = CommandType.CHECK_INVENTORY;
-    const item = checkInventoryMatch[1]?.toLowerCase();
-    if (item) {
-      processed.params.item = item;
-    }
-    return processed;
-  }
-  
-  // Check for customer info command
-  const customerMatch = command.match(COMMAND_PATTERNS.GET_CUSTOMER);
-  if (customerMatch) {
-    processed.type = CommandType.GET_CUSTOMER;
-    const customerIdentifier = customerMatch[1];
-    processed.params.customerIdentifier = customerIdentifier;
-    return processed;
-  }
-  
-  // Check for stats command
-  if (COMMAND_PATTERNS.GET_STATS.test(command)) {
-    processed.type = CommandType.GET_STATS;
-    return processed;
-  }
-  
-  return processed;
-}
-
-/**
- * Extract order items from a command string
- */
-function extractOrderItems(command: string): { name: string, quantity: number }[] {
-  const items: { name: string, quantity: number }[] = [];
-  
-  // Define common menu items and their accent/pronunciation variants
-  const menuItemMap: Record<string, string[]> = {
-    "butter chicken": ["bata chicken", "butter chickan", "butter chicken", "butar chicken", "batter chicken"],
-    "naan": ["naan", "nan", "narn", "nah", "naa"],
-    "tandoori chicken": ["tandoori chicken", "tandori chicken", "tanduri chicken", "thundoori chicken"],
-    "biryani": ["biryani", "briyani", "beriani", "bee ryani", "beeriyani"],
-    "paneer tikka": ["paneer tikka", "panir tikka", "puneer tikka", "paneer tika", "panner tikka"],
-    "dal makhani": ["dal makhani", "dal makni", "dal makani", "daal makhani", "dal makhni"],
-    "chicken curry": ["chicken curry", "chickan curry", "chicken kari", "chicken karry"],
-    "roti": ["roti", "rotee", "rotti", "rooti", "rootie"],
-    "paratha": ["paratha", "paratha", "parota", "puratha", "parotta"],
-    "samosa": ["samosa", "samosaa", "samossa", "sumosa"],
-    "pakora": ["pakora", "pakoda", "pakodi", "pakora", "pukora"],
-    "chicken biryani": ["chicken biryani", "chicken briyani", "chickan biryani", "chicken beriani"],
-    "veg biryani": ["veg biryani", "vej biryani", "vegetable biryani", "vege biryani", "veg briyani"],
-    "masala dosa": ["masala dosa", "masala dosai", "masala dhosa", "masala thosai", "masala dosa"],
-    "idli": ["idli", "idly", "iddly", "idaly", "idlee"],
-    "vada": ["vada", "wada", "vadai", "voda", "vaddai"],
-    "chicken tikka": ["chicken tikka", "chickan tikka", "chicken tika", "chicken tikaa"],
-    "malai kofta": ["malai kofta", "malai kopta", "mallai kofta", "malai koftha"],
-    "palak paneer": ["palak paneer", "palack paneer", "palak panir", "palak panner", "palak puneer"],
-    "chana masala": ["chana masala", "channa masala", "chole masala", "choley", "chana masala"],
-    "gulab jamun": ["gulab jamun", "gulaab jamun", "gulab jaman", "gulub jamun", "gulab jamoon"],
-    "rasmalai": ["rasmalai", "ras malai", "rasmalai", "ras malay", "rasmallai"],
-    "kheer": ["kheer", "keer", "khir", "kheir", "kir"],
-    "jalebi": ["jalebi", "jilebi", "julebi", "jalaybee", "jalabi"],
-    "lassi": ["lassi", "lassee", "lasee", "lussie"],
-    "chai": ["chai", "cha", "chay", "chaai", "chah"],
-    "mango lassi": ["mango lassi", "mango lassee", "aaam lassi", "mango lasee", "mango shake"],
-    "soda": ["soda", "soft drink", "cool drink", "cold drink", "soda water"],
-    "water": ["water", "watar", "wartar", "waater", "aqua"],
-    "beer": ["beer", "bier", "beeyar", "beear"],
-    "wine": ["wine", "vino", "vine", "waain"],
-    "whiskey": ["whiskey", "whisky", "wisky", "viskee"]
-  };
-  
-  // Clean and normalize the command
-  const normalizedCommand = command.toLowerCase()
-    .replace(/[.,;:!?]/g, ' ') // Replace punctuation with spaces
-    .replace(/\\s+/g, ' ')     // Replace multiple spaces with a single space
-    .trim();
-  
-  // Look for quantity words and convert them to numbers
-  const quantityWords: Record<string, number> = {
-    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
-    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
-    "couple": 2, "few": 3, "several": 4, "many": 5, "dozen": 12,
-    "once": 1, "twice": 2, "double": 2, "triple": 3, "single": 1
-  };
-  
-  // Search for each menu item and its variations in the command
-  for (const [menuItem, variations] of Object.entries(menuItemMap)) {
-    // Create a regex pattern that matches any of the variations
-    const variationPattern = variations.map(v => v.replace(/\s+/g, '\\s+')).join('|');
-    
-    // Look for patterns with a number before or after the menu item, or quantity words
-    const regexWithNumber = new RegExp(`(\\d+)\\s+(${variationPattern})|(${variationPattern})\\s+(\\d+)`, "i");
-    const regexWithWord = new RegExp(`(${Object.keys(quantityWords).join('|')})\\s+(${variationPattern})|(${variationPattern})\\s+(${Object.keys(quantityWords).join('|')})`, "i");
-    const regexJustItem = new RegExp(`(${variationPattern})`, "i");
-    
-    // Check for items with numeric quantities
-    const matchNumber = normalizedCommand.match(regexWithNumber);
-    if (matchNumber) {
-      const quantity = parseInt(matchNumber[1] || matchNumber[4]) || 1;
-      // Check if this item is already in our list
-      const existingItem = items.find(item => item.name === menuItem);
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        items.push({
-          name: menuItem,
-          quantity
-        });
-      }
-      continue; // Skip to next item
-    }
-    
-    // Check for items with word quantities
-    const matchWord = normalizedCommand.match(regexWithWord);
-    if (matchWord) {
-      const quantityWord = (matchWord[1] || matchWord[4]).toLowerCase();
-      const quantity = quantityWords[quantityWord] || 1;
-      // Check if this item is already in our list
-      const existingItem = items.find(item => item.name === menuItem);
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        items.push({
-          name: menuItem,
-          quantity
-        });
-      }
-      continue; // Skip to next item
-    }
-    
-    // Check for just the item name
-    if (regexJustItem.test(normalizedCommand)) {
-      // Check if this item is already in our list
-      const existingItem = items.find(item => item.name === menuItem);
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        items.push({
-          name: menuItem,
-          quantity: 1
-        });
-      }
-    }
-  }
-  
-  return items;
-}
-
-/**
- * Map common status terms to system status values
- */
-function mapStatusTerm(status: string): string {
-  const statusMap: Record<string, string> = {
-    "ready": "ready",
-    "done": "ready",
-    "complete": "completed",
-    "completed": "completed",
-    "finished": "completed",
-    "delivered": "completed",
-    "served": "completed",
-    "prepare": "preparing",
-    "preparing": "preparing",
-    "cooking": "preparing",
-    "in progress": "preparing",
-    "pending": "pending",
-    "waiting": "pending",
-    "new": "pending",
-    "bill": "billed",
-    "billed": "billed",
-    "paid": "billed",
-    "cancelled": "cancelled",
-    "cancel": "cancelled"
-  };
-  
-  return statusMap[status.toLowerCase()] || "pending";
-}
-
-/**
- * Main function to handle voice commands
- */
-export async function handleVoiceCommand(command: string): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  try {
-    console.log(`Processing voice command: "${command}"`);
-    
-    const processedCommand = processCommand(command);
-    
-    console.log("Processed command:", processedCommand);
-    
-    // Handle different command types
-    switch (processedCommand.type) {
-      case CommandType.ORDER_STATUS:
-        return await handleOrderStatusCommand(processedCommand.params);
-      
-      case CommandType.TABLE_STATUS:
-        return await handleTableStatusCommand(processedCommand.params);
-      
-      case CommandType.KITCHEN_STATUS:
-        return await handleKitchenStatusCommand();
-      
-      case CommandType.CREATE_ORDER:
-        return await handleCreateOrderCommand(processedCommand.params);
-      
-      case CommandType.UPDATE_ORDER:
-        return await handleUpdateOrderCommand(processedCommand.params);
-      
-      case CommandType.GET_ORDERS:
-        return await handleGetOrdersCommand(processedCommand.params);
-      
-      case CommandType.GET_MENU:
-        return await handleGetMenuCommand(processedCommand.params);
-      
-      case CommandType.CHECK_INVENTORY:
-        return await handleCheckInventoryCommand(processedCommand.params);
-      
-      case CommandType.GET_CUSTOMER:
-        return await handleGetCustomerCommand(processedCommand.params);
-      
-      case CommandType.GET_STATS:
-        return await handleGetStatsCommand();
-      
-      default:
-        return {
-          success: false,
-          response: "I'm sorry, I couldn't understand that command. Please try again with a different phrasing.",
-          error: "Unrecognized command"
-        };
-    }
-  } catch (error: any) {
-    console.error("Error handling voice command:", error);
-    return {
-      success: false,
-      response: "Sorry, there was an error processing your command. Please try again.",
-      error: error.message
-    };
-  }
-}
-
-/**
- * Handle order status command
- */
-async function handleOrderStatusCommand(params: Record<string, any>): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  const { orderIdentifier } = params;
-  
-  // Check if the order identifier is an order number or ID
-  let order: Order | undefined;
-  
-  if (/^\d+$/.test(orderIdentifier)) {
-    // If it's a numeric ID
-    order = await storage.getOrder(parseInt(orderIdentifier));
-  } else {
-    // If it's an order number (e.g., ORD-1234)
-    order = await storage.getOrderByNumber(orderIdentifier);
-  }
-  
-  if (!order) {
-    return {
-      success: false,
-      response: `Sorry, I couldn't find an order with the identifier ${orderIdentifier}.`,
-      error: "Order not found"
-    };
-  }
-  
-  // Get the order items to provide more info
-  const orderItems = await storage.getOrderItems(order.id);
-  const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0);
-  
-  // Format response
-  let response = `Order ${order.orderNumber} is currently ${order.status}. `;
-  response += `It contains ${totalItems} items totaling ${order.totalAmount} rupees.`;
-  
-  if (order.status === "pending") {
-    response += " The kitchen has not started preparing this order yet.";
-  } else if (order.status === "preparing") {
-    response += " The order is being prepared in the kitchen now.";
-  } else if (order.status === "ready") {
-    response += " The order is ready to be served or delivered.";
-  } else if (order.status === "completed") {
-    response += " The order has been delivered to the customer.";
-  } else if (order.status === "billed") {
-    response += " The order has been billed and payment is complete.";
-  }
-  
-  return {
-    success: true,
-    response,
-    invalidateQueries: ['/api/orders']
-  };
-}
-
-/**
- * Handle table status command
- */
-async function handleTableStatusCommand(params: Record<string, any>): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  const { tableNumber } = params;
-  
-  // Get all orders
-  const allOrders = await storage.getOrders();
-  
-  // Filter orders for the specified table
-  const tableOrders = allOrders.filter(order => 
-    order.tableNumber === tableNumber && 
-    ['pending', 'preparing', 'ready'].includes(order.status)
-  );
-  
-  if (tableOrders.length === 0) {
-    return {
-      success: true,
-      response: `Table ${tableNumber} does not have any active orders.`,
-      invalidateQueries: ['/api/orders']
-    };
-  }
-  
-  // Format response
-  let response = `Table ${tableNumber} has ${tableOrders.length} active ${tableOrders.length === 1 ? 'order' : 'orders'}. `;
-  
-  // Add details for each order
-  for (const order of tableOrders) {
-    const orderItems = await storage.getOrderItems(order.id);
-    const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0);
-    
-    response += `Order ${order.orderNumber} is ${order.status} with ${totalItems} items. `;
-  }
-  
-  return {
-    success: true,
-    response,
-    invalidateQueries: ['/api/orders']
-  };
-}
-
-/**
- * Handle kitchen status command
- */
-async function handleKitchenStatusCommand(): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  // Get all kitchen tokens
-  const allTokens = await storage.getKitchenTokens();
-  
-  // Count tokens by status
-  const pendingTokens = allTokens.filter(token => token.status === "pending").length;
-  const inProgressTokens = allTokens.filter(token => token.status === "in_progress").length;
-  const urgentTokens = allTokens.filter(token => token.isUrgent).length;
-  
-  // Get all orders that are in progress
-  const allOrders = await storage.getOrders();
-  const preparingOrders = allOrders.filter(order => order.status === "preparing").length;
-  const readyOrders = allOrders.filter(order => order.status === "ready").length;
-  
-  // Format response
-  let response = `The kitchen currently has `;
-  
-  if (pendingTokens === 0 && inProgressTokens === 0) {
-    response += `no orders to prepare. All caught up!`;
-  } else {
-    response += `${pendingTokens} pending and ${inProgressTokens} in-progress orders. `;
-    
-    if (urgentTokens > 0) {
-      response += `${urgentTokens} of these orders are marked as urgent. `;
-    }
-    
-    response += `There are ${readyOrders} orders ready to be served.`;
-  }
-  
-  return {
-    success: true,
-    response,
-    invalidateQueries: ['/api/kitchen-tokens', '/api/orders']
-  };
-}
-
-/**
- * Handle create order command
- */
-async function handleCreateOrderCommand(params: Record<string, any>): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  const { items = [] } = params;
-  
-  if (items.length === 0) {
-    return {
-      success: false,
-      response: "I need to know what items to add to the order. Please specify the food items.",
-      error: "No items specified"
-    };
-  }
+export async function processVoiceCommand(command: string, userType: string) {
+  // Default response
+  let response = "I'm sorry, I didn't understand that command. Try asking for help to see available commands.";
+  let success = false;
   
   try {
-    // Get menu items to match against
-    const menuItems = await storage.getMenuItems();
-    
-    // Match provided items with menu items
-    const matchedItems = [];
-    let totalAmount = 0;
-    
-    for (const item of items) {
-      const menuItem = menuItems.find(mi => 
-        mi.name.toLowerCase().includes(item.name.toLowerCase()) ||
-        item.name.toLowerCase().includes(mi.name.toLowerCase())
-      );
-      
-      if (menuItem) {
-        matchedItems.push({
-          menuItemId: menuItem.id,
-          name: menuItem.name,
-          price: menuItem.price,
-          quantity: item.quantity,
-          notes: ""
-        });
-        
-        totalAmount += menuItem.price * item.quantity;
+    // Create order command
+    if (ORDER_CREATE_PATTERN.test(command)) {
+      const match = command.match(ORDER_CREATE_PATTERN);
+      if (match && match[1]) {
+        const tableNumber = match[1];
+        const result = await createOrder(tableNumber);
+        response = result.response;
+        success = result.success;
       }
     }
-    
-    if (matchedItems.length === 0) {
-      return {
-        success: false,
-        response: "I couldn't match any of the items you mentioned with our menu. Please try again with items from our menu.",
-        error: "No matching menu items"
-      };
+    // Update order status command
+    else if (ORDER_STATUS_PATTERN.test(command)) {
+      const match = command.match(ORDER_STATUS_PATTERN);
+      if (match && match[1] && match[2]) {
+        const orderNumber = match[1];
+        const status = match[2].toLowerCase();
+        const result = await updateOrderStatus(orderNumber, status);
+        response = result.response;
+        success = result.success;
+      }
     }
-    
-    // Create order
-    const orderData = {
-      orderNumber: generateOrderNumber(),
-      tableNumber: null, // Setting null for takeaway/voice orders
-      status: "pending",
-      totalAmount,
-      notes: "Created via voice assistant",
-      orderSource: "voice",
-      useAIAutomation: true
-    };
-    
-    const parsedOrder = insertOrderSchema.parse(orderData);
-    const order = await storage.createOrder(parsedOrder);
-    
-    // Create order items
-    for (const item of matchedItems) {
-      const orderItem = {
-        orderId: order.id,
-        menuItemId: item.menuItemId,
-        price: item.price,
-        quantity: item.quantity,
-        notes: item.notes
-      };
+    // Add item to order command
+    else if (ADD_ITEM_PATTERN.test(command)) {
+      const match = command.match(ADD_ITEM_PATTERN);
+      if (match && match[1] && match[2]) {
+        const itemName = match[1].trim();
+        const orderNumber = match[2];
+        const result = await addItemToOrder(itemName, orderNumber);
+        response = result.response;
+        success = result.success;
+      }
+    }
+    // Kitchen status command
+    else if (KITCHEN_STATUS_PATTERN.test(command)) {
+      const result = await getKitchenStatus();
+      response = result.response;
+      success = result.success;
+    }
+    // Inventory check command
+    else if (INVENTORY_CHECK_PATTERN.test(command)) {
+      const result = await getInventoryStatus();
+      response = result.response;
+      success = result.success;
+    }
+    // Customer info command
+    else if (CUSTOMER_INFO_PATTERN.test(command)) {
+      const match = command.match(CUSTOMER_INFO_PATTERN);
+      if (match && (match[1] || match[2])) {
+        const customerQuery = match[1] || match[2];
+        const result = await getCustomerInfo(customerQuery);
+        response = result.response;
+        success = result.success;
+      }
+    }
+    // Help command
+    else if (HELP_PATTERN.test(command)) {
+      response = "You can ask me to create orders, update order status, add items to orders, check kitchen status, review inventory, or look up customer information. For example, try saying 'Create order for table 5' or 'Check kitchen status'.";
+      success = true;
+    }
+    // If no patterns match, use AI to interpret the command
+    else {
+      const aiResponse = await aiService.processMessage({
+        message: command,
+        userType,
+        messageHistory: [],
+      });
       
-      const parsedOrderItem = insertOrderItemSchema.parse(orderItem);
-      await storage.createOrderItem(parsedOrderItem);
+      response = aiResponse.message || "I'm not sure how to help with that.";
+      success = !!aiResponse.message;
     }
-    
-    // Create a kitchen token
-    const tokenData = {
-      tokenNumber: generateTokenNumber(),
-      orderId: order.id,
-      status: "pending",
-      isUrgent: false
-    };
-    
-    const parsedToken = insertKitchenTokenSchema.parse(tokenData);
-    await storage.createKitchenToken(parsedToken);
-    
-    // Format response
-    const itemsText = matchedItems.map(item => `${item.quantity} ${item.name}`).join(", ");
-    
-    const response = `I've created a new order number ${order.orderNumber} with ${matchedItems.length} items: ${itemsText}. The total amount is ${totalAmount} rupees. The order has been sent to the kitchen.`;
     
     return {
-      success: true,
       response,
-      invalidateQueries: ['/api/orders', '/api/kitchen-tokens']
+      success
     };
-  } catch (error: any) {
+  } catch (error) {
+    console.error("Error processing voice command:", error);
+    return {
+      response: "Sorry, there was an error processing your command. Please try again.",
+      success: false
+    };
+  }
+}
+
+/**
+ * Create a new order for a table
+ */
+async function createOrder(tableNumber: string) {
+  try {
+    // Generate order number (simple incrementing number)
+    const [{ max }] = await db.select({
+      max: sql<number>`MAX(CAST(SUBSTRING("orderNumber", 5) AS INTEGER))`,
+    }).from(orders);
+    
+    const nextOrderNumber = max ? max + 1 : 1001;
+    const newOrderNumber = `ORD-${nextOrderNumber}`;
+    
+    // Create the order
+    const [newOrder] = await db.insert(orders).values({
+      orderNumber: newOrderNumber,
+      tableNumber,
+      status: 'pending',
+      totalAmount: 0,
+      createdAt: new Date(),
+      orderSource: 'voice',
+    }).returning();
+    
+    // Broadcast event to all connected clients
+    broadcastEvent('new-order', { 
+      order: newOrder,
+      message: `New order ${newOrderNumber} created for table ${tableNumber}`
+    });
+    
+    return {
+      response: `Order ${newOrderNumber} has been created for table ${tableNumber}.`,
+      success: true
+    };
+  } catch (error) {
     console.error("Error creating order:", error);
     return {
-      success: false,
-      response: "Sorry, there was an error creating the order. Please try again.",
-      error: error.message
+      response: "Sorry, I couldn't create that order. Please try again.",
+      success: false
     };
   }
 }
 
 /**
- * Handle update order command
+ * Update the status of an order
  */
-async function handleUpdateOrderCommand(params: Record<string, any>): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  const { orderIdentifier, status } = params;
-  
-  if (!orderIdentifier || !status) {
-    return {
-      success: false,
-      response: "Please specify both the order identifier and the status to update to.",
-      error: "Missing parameters"
-    };
-  }
-  
-  // Check if the order identifier is an order number or ID
-  let order: Order | undefined;
-  
-  if (/^\d+$/.test(orderIdentifier)) {
-    // If it's a numeric ID
-    order = await storage.getOrder(parseInt(orderIdentifier));
-  } else {
-    // If it's an order number (e.g., ORD-1234)
-    order = await storage.getOrderByNumber(orderIdentifier);
-  }
-  
-  if (!order) {
-    return {
-      success: false,
-      response: `Sorry, I couldn't find an order with the identifier ${orderIdentifier}.`,
-      error: "Order not found"
-    };
-  }
-  
+async function updateOrderStatus(orderNumber: string, status: string) {
   try {
-    // Update the order status
-    const updatedOrder = await storage.updateOrder(order.id, { status });
+    // Validate status
+    const validStatuses = ['pending', 'preparing', 'ready', 'served', 'completed', 'cancelled'];
+    const normalizedStatus = status.toLowerCase();
     
-    if (!updatedOrder) {
+    if (!validStatuses.includes(normalizedStatus)) {
       return {
-        success: false,
-        response: `Failed to update order ${order.orderNumber}.`,
-        error: "Order update failed"
+        response: `Invalid status. Valid statuses are: ${validStatuses.join(', ')}.`,
+        success: false
       };
     }
     
-    // If the status is "ready" or "completed", update the kitchen token as well
-    if (status === "ready" || status === "completed") {
-      const kitchenTokens = await storage.getKitchenTokens();
-      const orderToken = kitchenTokens.find(token => token.orderId === order.id);
-      
-      if (orderToken) {
-        const tokenStatus = status === "ready" ? "completed" : "completed";
-        await storage.updateKitchenToken(orderToken.id, { 
-          status: tokenStatus,
-          // Not using completionTime as it's not in the KitchenToken schema
-        });
-      }
-    }
+    // Find the order by number
+    const [existingOrder] = await db.select().from(orders)
+      .where(like(orders.orderNumber, `%${orderNumber}%`));
     
-    // If the status is "billed", create a bill
-    if (status === "billed") {
-      // Get order items to calculate bill amount
-      const orderItems = await storage.getOrderItems(order.id);
-      const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const taxRate = 0.18; // 18% tax
-      const tax = subtotal * taxRate;
-      const total = subtotal + tax;
-      
-      const billData = {
-        orderId: order.id,
-        billNumber: generateBillNumber(),
-        subtotal,
-        tax,
-        discount: 0,
-        total,
-        paymentStatus: "pending",
-        paymentMethod: null
+    if (!existingOrder) {
+      return {
+        response: `Order ${orderNumber} not found.`,
+        success: false
       };
-      
-      const parsedBill = insertBillSchema.parse(billData);
-      await storage.createBill(parsedBill);
     }
     
-    // Format response
-    let response = `Order ${order.orderNumber} has been updated to status "${status}". `;
+    // Update the order status
+    const [updatedOrder] = await db.update(orders)
+      .set({ status: normalizedStatus })
+      .where(eq(orders.id, existingOrder.id))
+      .returning();
     
-    if (status === "ready") {
-      response += "The kitchen has completed preparing this order and it's ready to be served.";
-    } else if (status === "completed") {
-      response += "The order has been marked as delivered or served.";
-    } else if (status === "billed") {
-      response += "The order has been billed and is ready for payment.";
+    // Broadcast event to all connected clients
+    broadcastEvent('order-updated', { 
+      order: updatedOrder,
+      message: `Order ${updatedOrder.orderNumber} updated to status: ${normalizedStatus}`
+    });
+    
+    return {
+      response: `Order ${existingOrder.orderNumber} status has been updated to ${normalizedStatus}.`,
+      success: true
+    };
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return {
+      response: "Sorry, I couldn't update that order status. Please try again.",
+      success: false
+    };
+  }
+}
+
+/**
+ * Add a menu item to an order
+ */
+async function addItemToOrder(itemName: string, orderNumber: string) {
+  try {
+    // Find the menu item by name
+    const [menuItem] = await db.select().from(menuItems)
+      .where(like(menuItems.name, `%${itemName}%`));
+    
+    if (!menuItem) {
+      return {
+        response: `Menu item "${itemName}" not found.`,
+        success: false
+      };
+    }
+    
+    // Find the order by number
+    const [existingOrder] = await db.select().from(orders)
+      .where(like(orders.orderNumber, `%${orderNumber}%`));
+    
+    if (!existingOrder) {
+      return {
+        response: `Order ${orderNumber} not found.`,
+        success: false
+      };
+    }
+    
+    // For simplicity, assume we have a separate orderItems table
+    // Instead of implementing the complex relation, we'll just update the order total
+    const newTotal = existingOrder.totalAmount + menuItem.price;
+    
+    // Update the order with new total
+    const [updatedOrder] = await db.update(orders)
+      .set({ totalAmount: newTotal })
+      .where(eq(orders.id, existingOrder.id))
+      .returning();
+    
+    // Broadcast event to all connected clients
+    broadcastEvent('order-updated', { 
+      order: updatedOrder,
+      message: `Added ${menuItem.name} to Order ${updatedOrder.orderNumber}`
+    });
+    
+    return {
+      response: `Added ${menuItem.name} to order ${existingOrder.orderNumber}. New total is $${newTotal.toFixed(2)}.`,
+      success: true
+    };
+  } catch (error) {
+    console.error("Error adding item to order:", error);
+    return {
+      response: "Sorry, I couldn't add that item to the order. Please try again.",
+      success: false
+    };
+  }
+}
+
+/**
+ * Get the current status of the kitchen
+ */
+async function getKitchenStatus() {
+  try {
+    // Get orders that are currently in the kitchen
+    const kitchenOrders = await db.select().from(orders)
+      .where(sql`status IN ('preparing', 'ready')`)
+      .orderBy(desc(orders.createdAt))
+      .limit(5);
+    
+    // Get active kitchen tokens
+    const activeTokens = await db.select().from(kitchenTokens)
+      .where(sql`status != 'completed'`)
+      .limit(10);
+    
+    if (kitchenOrders.length === 0 && activeTokens.length === 0) {
+      return {
+        response: "The kitchen is currently empty with no active orders or preparations.",
+        success: true
+      };
+    }
+    
+    let response = "Current kitchen status: ";
+    
+    if (kitchenOrders.length > 0) {
+      response += `${kitchenOrders.length} orders in progress. `;
+      
+      const preparingCount = kitchenOrders.filter(o => o.status === 'preparing').length;
+      const readyCount = kitchenOrders.filter(o => o.status === 'ready').length;
+      
+      response += `${preparingCount} preparing, ${readyCount} ready for service. `;
+      
+      const oldestOrder = kitchenOrders[kitchenOrders.length - 1];
+      const oldestTime = new Date(oldestOrder.createdAt as Date).toLocaleTimeString();
+      
+      response += `Oldest active order is ${oldestOrder.orderNumber} from ${oldestTime}.`;
     }
     
     return {
-      success: true,
       response,
-      invalidateQueries: ['/api/orders', '/api/kitchen-tokens', '/api/bills']
+      success: true
     };
-  } catch (error: any) {
-    console.error("Error updating order:", error);
+  } catch (error) {
+    console.error("Error getting kitchen status:", error);
     return {
-      success: false,
-      response: "Sorry, there was an error updating the order. Please try again.",
-      error: error.message
+      response: "Sorry, I couldn't retrieve the kitchen status at this time.",
+      success: false
     };
   }
 }
 
 /**
- * Handle get orders command
+ * Get the current inventory status
  */
-async function handleGetOrdersCommand(params: Record<string, any>): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  const { status } = params;
-  
-  // Get all orders
-  const allOrders = await storage.getOrders();
-  
-  // Filter orders by status if specified
-  const filteredOrders = status
-    ? allOrders.filter(order => order.status === status)
-    : allOrders.filter(order => ['pending', 'preparing', 'ready'].includes(order.status));
-  
-  if (filteredOrders.length === 0) {
-    const statusText = status ? `with status "${status}"` : "active";
+async function getInventoryStatus() {
+  try {
+    // Get inventory items with low stock
+    const lowStockItems = await db.select().from(inventoryItems)
+      .where(sql`quantity < reorder_level`)
+      .orderBy(sql`quantity`)
+      .limit(5);
+    
+    if (lowStockItems.length === 0) {
+      return {
+        response: "All inventory items are sufficiently stocked. No items below reorder levels.",
+        success: true
+      };
+    }
+    
+    const response = `Inventory alert: ${lowStockItems.length} items below reorder level. Critical items: ${
+      lowStockItems.map(item => `${item.name} (${item.quantity} ${item.unit} remaining)`).join(', ')
+    }.`;
+    
     return {
-      success: true,
-      response: `There are no orders ${statusText} at the moment.`,
-      invalidateQueries: ['/api/orders']
+      response,
+      success: true
+    };
+  } catch (error) {
+    console.error("Error getting inventory status:", error);
+    return {
+      response: "Sorry, I couldn't retrieve the inventory status at this time.",
+      success: false
     };
   }
-  
-  // Sort orders by creation time (newest first)
-  filteredOrders.sort((a, b) => {
-    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    return dateB - dateA;
-  });
-  
-  // Take only the first 5 orders for the response
-  const displayOrders = filteredOrders.slice(0, 5);
-  
-  // Format response
-  const statusText = status ? `with status "${status}"` : "active";
-  let response = `There are ${filteredOrders.length} orders ${statusText}. `;
-  
-  if (filteredOrders.length > 5) {
-    response += `Here are the 5 most recent ones: `;
-  } else {
-    response += `Here they are: `;
-  }
-  
-  for (const order of displayOrders) {
-    response += `Order ${order.orderNumber} (${order.status}), `;
-  }
-  
-  // Remove trailing comma and space
-  response = response.slice(0, -2) + ".";
-  
-  return {
-    success: true,
-    response,
-    invalidateQueries: ['/api/orders']
-  };
 }
 
 /**
- * Handle get menu command
+ * Get information about a customer
  */
-async function handleGetMenuCommand(params: Record<string, any>): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  const { category } = params;
-  
-  // Get all menu items
-  const allMenuItems = await storage.getMenuItems();
-  
-  // Filter by category if specified
-  const filteredItems = category
-    ? allMenuItems.filter(item => item.category.toLowerCase().includes(category.toLowerCase()))
-    : allMenuItems;
-  
-  if (filteredItems.length === 0) {
-    const categoryText = category ? `in category "${category}"` : "";
-    return {
-      success: true,
-      response: `There are no menu items ${categoryText} available.`,
-      invalidateQueries: ['/api/menu-items']
-    };
-  }
-  
-  // Group items by category
-  const itemsByCategory: Record<string, MenuItem[]> = {};
-  
-  for (const item of filteredItems) {
-    if (!itemsByCategory[item.category]) {
-      itemsByCategory[item.category] = [];
-    }
-    itemsByCategory[item.category].push(item);
-  }
-  
-  // Format response
-  let response = "";
-  
-  if (category) {
-    const items = filteredItems.slice(0, 10); // Limit to 10 items
+async function getCustomerInfo(customerQuery: string) {
+  try {
+    // Try to find customer by ID or name
+    let customer;
     
-    response = `Here are ${items.length} items in the ${category} category: `;
-    
-    for (const item of items) {
-      response += `${item.name} (${item.price} rupees), `;
-    }
-    
-    // Remove trailing comma and space
-    response = response.slice(0, -2) + ".";
-    
-    if (filteredItems.length > 10) {
-      response += ` And ${filteredItems.length - 10} more items.`;
-    }
-  } else {
-    response = `Our menu has ${filteredItems.length} items across ${Object.keys(itemsByCategory).length} categories. `;
-    
-    for (const category in itemsByCategory) {
-      response += `${category} (${itemsByCategory[category].length} items), `;
-    }
-    
-    // Remove trailing comma and space
-    response = response.slice(0, -2) + ".";
-    
-    response += " You can ask for specific categories to hear more details.";
-  }
-  
-  return {
-    success: true,
-    response,
-    invalidateQueries: ['/api/menu-items']
-  };
-}
-
-/**
- * Handle check inventory command
- */
-async function handleCheckInventoryCommand(params: Record<string, any>): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  const { item } = params;
-  
-  if (!item) {
-    // If no specific item, give summary of inventory
-    const inventoryItems = await storage.getInventoryItems();
-    
-    // Count items by category
-    const categories: Record<string, number> = {};
-    const lowStockItems: Inventory[] = [];
-    
-    for (const inv of inventoryItems) {
-      if (!categories[inv.category]) {
-        categories[inv.category] = 0;
-      }
-      categories[inv.category]++;
-      
-      // Check for low stock
-      if (inv.quantity <= inv.minQuantity) {
-        lowStockItems.push(inv);
-      }
-    }
-    
-    // Format response
-    let response = `There are ${inventoryItems.length} items in the inventory across ${Object.keys(categories).length} categories. `;
-    
-    if (lowStockItems.length > 0) {
-      response += `There are ${lowStockItems.length} items that are low on stock: `;
-      
-      for (let i = 0; i < Math.min(lowStockItems.length, 5); i++) {
-        const item = lowStockItems[i];
-        response += `${item.name} (${item.quantity} ${item.unit}), `;
-      }
-      
-      // Remove trailing comma and space
-      response = response.slice(0, -2);
-      
-      if (lowStockItems.length > 5) {
-        response += `, and ${lowStockItems.length - 5} more items`;
-      }
-      
-      response += ".";
+    // If query is a number, search by ID
+    if (/^\d+$/.test(customerQuery)) {
+      [customer] = await db.select().from(customers)
+        .where(eq(customers.id, parseInt(customerQuery)));
     } else {
-      response += "All items are adequately stocked.";
+      // Otherwise search by name
+      [customer] = await db.select().from(customers)
+        .where(sql`LOWER(name) LIKE ${`%${customerQuery.toLowerCase()}%`}`);
     }
     
-    return {
-      success: true,
-      response,
-      invalidateQueries: ['/api/inventory']
-    };
-  }
-  
-  // Find the specific inventory item
-  const inventoryItems = await storage.getInventoryItems();
-  const matchingItems = inventoryItems.filter(inv => 
-    inv.name.toLowerCase().includes(item.toLowerCase())
-  );
-  
-  if (matchingItems.length === 0) {
-    return {
-      success: false,
-      response: `Sorry, I couldn't find any inventory item matching "${item}".`,
-      error: "Inventory item not found"
-    };
-  }
-  
-  // Format response
-  let response = "";
-  
-  if (matchingItems.length === 1) {
-    const inv = matchingItems[0];
+    if (!customer) {
+      return {
+        response: `No customer found matching "${customerQuery}".`,
+        success: false
+      };
+    }
     
-    response = `${inv.name} currently has ${inv.quantity} ${inv.unit} in stock. `;
+    // Get customer's recent orders
+    const customerOrders = await db.select().from(orders)
+      .where(sql`customer_id = ${customer.id}`)
+      .orderBy(desc(orders.createdAt))
+      .limit(3);
     
-    if (inv.quantity <= inv.minQuantity) {
-      response += `This is below the minimum required quantity of ${inv.minQuantity} ${inv.unit}. Please restock soon.`;
+    let response = `Customer: ${customer.name}. `;
+    
+    if (customer.phone) {
+      response += `Phone: ${customer.phone}. `;
+    }
+    
+    if (customer.email) {
+      response += `Email: ${customer.email}. `;
+    }
+    
+    if (customerOrders.length > 0) {
+      response += `Recent orders: ${customerOrders.map(o => o.orderNumber).join(', ')}.`;
     } else {
-      const buffer = inv.quantity - inv.minQuantity;
-      response += `This is ${buffer} ${inv.unit} above the minimum required quantity.`;
-    }
-  } else {
-    response = `I found ${matchingItems.length} items matching "${item}": `;
-    
-    for (const inv of matchingItems) {
-      response += `${inv.name} (${inv.quantity} ${inv.unit}), `;
-    }
-    
-    // Remove trailing comma and space
-    response = response.slice(0, -2) + ".";
-  }
-  
-  return {
-    success: true,
-    response,
-    invalidateQueries: ['/api/inventory']
-  };
-}
-
-/**
- * Handle get customer command
- */
-async function handleGetCustomerCommand(params: Record<string, any>): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  const { customerIdentifier } = params;
-  
-  if (!customerIdentifier) {
-    // If no specific customer, give summary of customers
-    const customers = await storage.getCustomers();
-    
-    let response = `There are ${customers.length} customers in the database. `;
-    
-    // Sort by visit count
-    customers.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0));
-    
-    // Take top 3 customers by visit count
-    const topCustomers = customers.slice(0, 3);
-    
-    if (topCustomers.length > 0) {
-      response += `The top ${topCustomers.length} customers by visit count are: `;
-      
-      for (const customer of topCustomers) {
-        response += `${customer.name} (${customer.visitCount || 0} visits), `;
-      }
-      
-      // Remove trailing comma and space
-      response = response.slice(0, -2) + ".";
+      response += `No recent orders found.`;
     }
     
     return {
-      success: true,
       response,
-      invalidateQueries: ['/api/customers']
+      success: true
     };
-  }
-  
-  // Find the specific customer
-  const customers = await storage.getCustomers();
-  const matchingCustomers = customers.filter(cust => 
-    cust.name.toLowerCase().includes(customerIdentifier.toLowerCase()) ||
-    (cust.phone && cust.phone.includes(customerIdentifier))
-  );
-  
-  if (matchingCustomers.length === 0) {
+  } catch (error) {
+    console.error("Error getting customer info:", error);
     return {
-      success: false,
-      response: `Sorry, I couldn't find any customer matching "${customerIdentifier}".`,
-      error: "Customer not found"
+      response: "Sorry, I couldn't retrieve that customer information at this time.",
+      success: false
     };
   }
-  
-  // Format response
-  let response = "";
-  
-  if (matchingCustomers.length === 1) {
-    const cust = matchingCustomers[0];
-    
-    response = `${cust.name} has visited ${cust.visitCount || 0} times. `;
-    
-    if (cust.phone) {
-      response += `Phone: ${cust.phone}. `;
-    }
-    
-    if (cust.email) {
-      response += `Email: ${cust.email}. `;
-    }
-    
-    if (cust.lastVisit) {
-      const lastVisitDate = new Date(cust.lastVisit);
-      response += `Last visit was on ${lastVisitDate.toLocaleDateString()}.`;
-    }
-    
-    // Get recent orders for this customer
-    const orders = await storage.getOrdersByCustomerId(cust.id);
-    
-    if (orders.length > 0) {
-      const createdAt = orders[0].createdAt;
-      if (createdAt) {
-        response += ` Has ${orders.length} total orders, with the most recent on ${new Date(createdAt).toLocaleDateString()}.`;
-      } else {
-        response += ` Has ${orders.length} total orders.`;
-      }
-    }
-  } else {
-    response = `I found ${matchingCustomers.length} customers matching "${customerIdentifier}": `;
-    
-    for (const cust of matchingCustomers) {
-      response += `${cust.name} (${cust.visitCount || 0} visits), `;
-    }
-    
-    // Remove trailing comma and space
-    response = response.slice(0, -2) + ".";
-  }
-  
-  return {
-    success: true,
-    response,
-    invalidateQueries: ['/api/customers']
-  };
-}
-
-/**
- * Handle get stats command
- */
-async function handleGetStatsCommand(): Promise<{
-  success: boolean;
-  response: string;
-  invalidateQueries?: string[];
-  error?: string;
-}> {
-  // Get orders
-  const orders = await storage.getOrders();
-  
-  // Get today's orders
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const todaysOrders = orders.filter(order => {
-    if (!order.createdAt) return false;
-    const orderDate = new Date(order.createdAt);
-    return orderDate >= today;
-  });
-  
-  // Calculate total sales
-  let todaysSales = 0;
-  for (const order of todaysOrders) {
-    todaysSales += order.totalAmount;
-  }
-  
-  // Get active orders
-  const activeOrders = orders.filter(order => 
-    ['pending', 'preparing', 'ready'].includes(order.status)
-  );
-  
-  // Get kitchen tokens
-  const kitchenTokens = await storage.getKitchenTokens();
-  const pendingTokens = kitchenTokens.filter(token => token.status === "pending").length;
-  
-  // Format response
-  let response = `Today's stats: ${todaysOrders.length} orders with ${todaysSales} rupees in sales. `;
-  response += `There are currently ${activeOrders.length} active orders and ${pendingTokens} pending kitchen tokens.`;
-  
-  return {
-    success: true,
-    response,
-    invalidateQueries: ['/api/dashboard/stats', '/api/orders', '/api/kitchen-tokens']
-  };
 }

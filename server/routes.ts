@@ -2131,7 +2131,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Voice Assistant API endpoints
   app.post("/api/voice-assistant/process", async (req: Request, res: Response) => {
     try {
-      const { command } = req.body;
+      const { command, userType } = req.body;
       
       if (!command || typeof command !== 'string') {
         return res.status(400).json({
@@ -2140,9 +2140,31 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         });
       }
       
-      console.log(`Processing voice command: ${command}`);
+      if (!userType || !["customer", "admin", "kitchen", "waiter", "manager", "delivery"].includes(userType)) {
+        return res.status(400).json({ 
+          error: "Valid userType is required (customer, admin, kitchen, waiter, manager, or delivery)",
+          success: false
+        });
+      }
       
-      const result = await handleVoiceCommand(command);
+      console.log(`Processing voice command: ${command} (${userType})`);
+      
+      // Import the voice assistant service dynamically to avoid circular dependencies
+      const { processVoiceCommand } = require('./services/voiceAssistant');
+      
+      // Process the voice command
+      const result = await processVoiceCommand(command, userType);
+      
+      // Log successful commands
+      if (result.success) {
+        // Record activity
+        await db.insert(activities).values({
+          type: 'voice_command',
+          description: `Voice command: ${command}`,
+          createdAt: new Date(),
+          entityType: 'voice_assistant',
+        });
+      }
       
       return res.status(200).json(result);
     } catch (error) {
