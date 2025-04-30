@@ -1,30 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MaterialDialog } from '../ui/material-dialog';
 import { Button } from '../ui/button';
-import { TrendingUp, BarChart3, RefreshCw, Download, Mic, MicOff, Search } from 'lucide-react';
+import { 
+  TrendingUp, BarChart3, RefreshCw, Download, Mic, MicOff, Search, 
+  Utensils, CheckCircle2, Circle, ClipboardList, AlertCircle, ReceiptText, Trash2
+} from 'lucide-react';
 import { Input } from '../ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 
-type AnalysisMode = 'general' | 'financial' | 'operational' | 'strategic' | 'customer' | 'staff' | 'marketing';
+type AnalysisMode = 'general' | 'financial' | 'operational' | 'strategic' | 'customer' | 'staff' | 'marketing' | 'order';
+
+// Define order statuses
+type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'billed';
+
+interface Order {
+  id: number;
+  orderNumber: string;
+  tableNumber: string | null;
+  status: string;
+  totalAmount: number;
+  createdAt?: Date | string | null;
+}
 
 const RestaurantAdminAI: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('general');
   const [conversation, setConversation] = useState<{
     type: 'user' | 'agent';
     text: string;
     chartData?: any;
     chartType?: string;
+    action?: 'update_order' | 'create_order' | 'delete_order';
+    orderData?: any;
   }[]>([]);
+  
+  // Audio elements for speech
+  const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
+  
+  // Store orders data
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   
   const { toast } = useToast();
   
   // Fetch admin dashboard data
-  const { data: adminData, isLoading, error, refetch } = useQuery({
+  const { data: adminData, isLoading: isLoadingAdminData, error: adminDataError, refetch } = useQuery({
     queryKey: ['/api/admin/dashboard-data'],
     queryFn: async () => {
       const res = await apiRequest('GET', '/api/admin/dashboard-data');
@@ -32,6 +56,151 @@ const RestaurantAdminAI: React.FC = () => {
     },
     enabled: isOpen,
     staleTime: 60000, // Consider data fresh for 1 minute
+  });
+  
+  // Fetch orders data
+  const { data: orders, isLoading: isLoadingOrders, error: ordersError, refetch: refetchOrders } = useQuery({
+    queryKey: ['/api/orders'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/orders');
+      return await res.json();
+    },
+    enabled: isOpen,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+  });
+  
+  // Create order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData: any) => {
+      const res = await apiRequest('POST', '/api/orders', orderData);
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      
+      // Add success message to conversation
+      const successMessage = `Order ${data.orderNumber} created successfully for table ${data.tableNumber || 'Takeaway'}.`;
+      
+      setConversation(prev => [
+        ...prev,
+        {
+          type: 'agent',
+          text: successMessage,
+          action: 'create_order',
+          orderData: data
+        }
+      ]);
+      
+      // Speak success message
+      speakResponse(successMessage);
+      
+      setAnalysisMode('order');
+      
+      toast({
+        title: 'Order Created',
+        description: successMessage,
+      });
+    },
+    onError: (error: any) => {
+      const errorMessage = `Failed to create order. ${error.message || ''}`;
+      speakResponse(errorMessage);
+      
+      toast({
+        title: 'Error Creating Order',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    }
+  });
+  
+  // Update order mutation
+  const updateOrderMutation = useMutation({
+    mutationFn: async ({ id, orderData }: { id: number, orderData: any }) => {
+      const res = await apiRequest('PATCH', `/api/orders/${id}`, orderData);
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      
+      // Get readable status
+      const statusText = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+      
+      // Add success message to conversation
+      const successMessage = `Order ${data.orderNumber} for table ${data.tableNumber || 'Takeaway'} updated to status: ${statusText}.`;
+      
+      setConversation(prev => [
+        ...prev,
+        {
+          type: 'agent',
+          text: successMessage,
+          action: 'update_order',
+          orderData: data
+        }
+      ]);
+      
+      // Speak success message
+      speakResponse(successMessage);
+      
+      setAnalysisMode('order');
+      
+      toast({
+        title: 'Order Updated',
+        description: successMessage,
+      });
+    },
+    onError: (error: any) => {
+      const errorMessage = `Failed to update order. ${error.message || ''}`;
+      speakResponse(errorMessage);
+      
+      toast({
+        title: 'Error Updating Order',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    }
+  });
+  
+  // Delete order mutation
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest('DELETE', `/api/orders/${id}`);
+      return await res.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      
+      // Add success message to conversation
+      const successMessage = `Order #${variables} has been deleted successfully.`;
+      
+      setConversation(prev => [
+        ...prev,
+        {
+          type: 'agent',
+          text: successMessage,
+          action: 'delete_order'
+        }
+      ]);
+      
+      // Speak success message
+      speakResponse(successMessage);
+      
+      setAnalysisMode('order');
+      
+      toast({
+        title: 'Order Deleted',
+        description: successMessage,
+      });
+    },
+    onError: (error: any) => {
+      const errorMessage = `Failed to delete order. ${error.message || ''}`;
+      speakResponse(errorMessage);
+      
+      toast({
+        title: 'Error Deleting Order',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    }
   });
   
   // AI Insights mutation
@@ -158,9 +327,212 @@ ${data.map((opp: any, idx: number) => `${idx + 1}. ${opp.area} - Estimated impac
   });
   
   // Determine analysis mode based on query
+  // Speech synthesis - speak response
+  const speakResponse = (text: string) => {
+    // Stop any current speech
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+    
+    // Create a new speech utterance
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Optional: Configure voice settings
+    utterance.rate = 1.0; // Speed
+    utterance.pitch = 1.0; // Pitch
+    utterance.volume = 1.0; // Volume
+    
+    // Get available voices
+    const voices = speechSynthesis.getVoices();
+    
+    // Try to find a female English voice (common in most browsers)
+    const englishVoice = voices.find(voice => 
+      voice.lang.includes('en-') && voice.name.includes('Female')
+    ) || voices.find(voice => voice.lang.includes('en-'));
+    
+    if (englishVoice) {
+      utterance.voice = englishVoice;
+    }
+    
+    // Track speech state
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+    };
+    
+    utterance.onend = () => {
+      setIsSpeaking(false);
+    };
+    
+    utterance.onerror = (event) => {
+      console.error('Speech synthesis error', event);
+      setIsSpeaking(false);
+    };
+    
+    // Store the utterance reference
+    speechSynthesisRef.current = utterance;
+    
+    // Speak the text
+    speechSynthesis.speak(utterance);
+  };
+  
+  // Process voice commands related to orders
+  const processOrderVoiceCommand = (command: string) => {
+    const commandLower = command.toLowerCase();
+    
+    // Extract table number using regex
+    const tableNumberMatch = commandLower.match(/table\s+(\w+)/i);
+    const tableNumber = tableNumberMatch ? tableNumberMatch[1] : null;
+    
+    // Create order command
+    if (commandLower.includes('create order') || commandLower.includes('new order')) {
+      createOrder(tableNumber);
+      return true;
+    }
+    
+    // Get order number from command using regex
+    const orderNumberMatch = commandLower.match(/order\s+(\w+)/i) || 
+                            commandLower.match(/number\s+(\w+)/i);
+    let orderNumber = orderNumberMatch ? orderNumberMatch[1] : null;
+    
+    // Try to find the order
+    let targetOrder: Order | undefined;
+    
+    if (orderNumber && orders) {
+      targetOrder = orders.find((order: Order) => 
+        order.orderNumber.toLowerCase().includes(orderNumber.toLowerCase())
+      );
+    } else if (tableNumber && orders) {
+      // If no order number but we have a table number, try to find by table
+      targetOrder = orders.find((order: Order) => 
+        order.tableNumber === tableNumber
+      );
+    }
+    
+    if (targetOrder) {
+      // Status update commands
+      if (commandLower.includes('pending')) {
+        updateOrderStatus(targetOrder.id, 'pending');
+        return true;
+      } else if (commandLower.includes('preparing') || commandLower.includes('prep')) {
+        updateOrderStatus(targetOrder.id, 'preparing');
+        return true;
+      } else if (commandLower.includes('ready')) {
+        updateOrderStatus(targetOrder.id, 'ready');
+        return true;
+      } else if (commandLower.includes('complete') || commandLower.includes('completed')) {
+        updateOrderStatus(targetOrder.id, 'completed');
+        return true;
+      } else if (commandLower.includes('bill') || commandLower.includes('billed')) {
+        updateOrderStatus(targetOrder.id, 'billed');
+        return true;
+      } else if (commandLower.includes('delete') || commandLower.includes('remove') || 
+                 commandLower.includes('cancel')) {
+        deleteOrder(targetOrder.id);
+        return true;
+      }
+    }
+    
+    // If we get here, it's not an order command
+    return false;
+  };
+  
+  // Create a new order 
+  const createOrder = (tableNumber: string | null) => {
+    createOrderMutation.mutate({
+      tableNumber: tableNumber,
+      status: 'pending',
+      totalAmount: 0,
+      orderSource: 'ai',
+      notes: 'Created via voice command'
+    });
+  };
+  
+  // Update order status
+  const updateOrderStatus = (orderId: number, status: string) => {
+    updateOrderMutation.mutate({
+      id: orderId,
+      orderData: {
+        status
+      }
+    });
+  };
+  
+  // Delete an order
+  const deleteOrder = (orderId: number) => {
+    deleteOrderMutation.mutate(orderId);
+  };
+  
+  // Initialize effects for voice synthesis and dialog behavior
+  useEffect(() => {
+    if (isOpen) {
+      // Fetch initial voice data
+      refetch();
+      refetchOrders();
+      
+      // Initialize speech synthesis voices when dialog opens
+      // Workaround for browsers that load voices asynchronously
+      if (window.speechSynthesis) {
+        const getVoices = () => {
+          // This will trigger loading voices
+          window.speechSynthesis.getVoices();
+        };
+        
+        // Get voices immediately
+        getVoices();
+        
+        // And also when voices change (some browsers load them asynchronously)
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+          speechSynthesis.onvoiceschanged = getVoices;
+        }
+      }
+      
+      // Add voice welcome message when dialog opens
+      const welcomeMessage = "Welcome to Restaurant Business Advisor. How can I assist you today?";
+      setConversation([{ type: 'agent', text: welcomeMessage }]);
+      speakResponse(welcomeMessage);
+    } else {
+      // Cancel any speech when dialog closes
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      
+      // Reset conversation when dialog closes
+      setConversation([]);
+    }
+  }, [isOpen, refetch, refetchOrders]);
+  
+  // Add order status mode effect
+  useEffect(() => {
+    // Automatically switch to order mode if any order-related API calls are made
+    if (createOrderMutation.isPending || 
+        updateOrderMutation.isPending || 
+        deleteOrderMutation.isPending) {
+      setAnalysisMode('order');
+    }
+  }, [
+    createOrderMutation.isPending, 
+    updateOrderMutation.isPending, 
+    deleteOrderMutation.isPending
+  ]);
+  
+  // Determine analysis mode based on query
   const determineAnalysisMode = (query: string) => {
     const queryLower = query.toLowerCase();
     
+    // Check for order-related commands first
+    if (queryLower.includes('order') || queryLower.includes('table') || 
+        queryLower.includes('pending') || queryLower.includes('preparing') || 
+        queryLower.includes('ready') || queryLower.includes('complete') || 
+        queryLower.includes('bill')) {
+      setAnalysisMode('order');
+      
+      // If it's an order command, process it
+      if (processOrderVoiceCommand(query)) {
+        return;
+      }
+    }
+    
+    // Otherwise, continue with other analytics modes
     if (queryLower.includes('revenue') || queryLower.includes('profit') || 
         queryLower.includes('cost') || queryLower.includes('margin') ||
         queryLower.includes('financial')) {
@@ -241,7 +613,14 @@ ${data.map((opp: any, idx: number) => `${idx + 1}. ${opp.area} - Estimated impac
           { type: 'user', text: speechResult }
         ]);
         
-        insightsMutation.mutate(speechResult);
+        // Check if this is an order management command first
+        const isOrderCommand = processOrderVoiceCommand(speechResult);
+        
+        // If not an order command, treat as a regular insight query
+        if (!isOrderCommand) {
+          insightsMutation.mutate(speechResult);
+        }
+        
         setQuery('');
       }
     };
@@ -415,6 +794,140 @@ ${data.map((opp: any, idx: number) => `${idx + 1}. ${opp.area} - Estimated impac
             </div>
           </form>
           
+          {/* Order Management UI - only shown in order mode */}
+          {analysisMode === 'order' && (
+            <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700 rounded-lg p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-sm font-medium text-white">Voice Order Management</h3>
+                <div className="flex items-center space-x-1">
+                  <div className={`h-2 w-2 rounded-full ${isSpeaking ? 'bg-green-500 animate-pulse' : 'bg-gray-600'}`}></div>
+                  <span className="text-xs text-gray-400">{isSpeaking ? 'Speaking' : 'Ready'}</span>
+                </div>
+              </div>
+              
+              <div className="text-xs text-gray-400 mb-3">
+                <p>Use voice commands to manage orders:</p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                  <li>"Create order for table 5"</li>
+                  <li>"Set order 1001 to preparing"</li>
+                  <li>"Mark table 3 order as ready to serve"</li>
+                  <li>"Complete order 1002"</li>
+                </ul>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex items-center justify-center gap-1 py-1 h-auto"
+                  onClick={() => {
+                    const tableNum = window.prompt('Enter table number:');
+                    if (tableNum) {
+                      createOrder(tableNum);
+                    }
+                  }}
+                >
+                  <Utensils className="h-3 w-3" />
+                  <span className="text-xs">New Order</span>
+                </Button>
+                
+                {['pending', 'preparing', 'ready', 'completed', 'billed'].map((status) => {
+                  // Map status to appropriate icon
+                  let StatusIcon;
+                  switch(status) {
+                    case 'pending': StatusIcon = Circle; break;
+                    case 'preparing': StatusIcon = ClipboardList; break;
+                    case 'ready': StatusIcon = AlertCircle; break;
+                    case 'completed': StatusIcon = CheckCircle2; break;
+                    case 'billed': StatusIcon = ReceiptText; break;
+                    default: StatusIcon = Circle;
+                  }
+                  
+                  return (
+                    <Button 
+                      key={status}
+                      variant="outline" 
+                      size="sm"
+                      className="flex items-center justify-center gap-1 py-1 h-auto"
+                      onClick={() => {
+                        if (!orders || orders.length === 0) {
+                          toast({
+                            title: 'No orders found',
+                            description: 'There are no active orders to update',
+                            variant: 'destructive'
+                          });
+                          return;
+                        }
+                        
+                        // Ask for order number
+                        const orderNum = window.prompt('Enter order number:');
+                        if (!orderNum) return;
+                        
+                        // Find matching order
+                        const order = orders.find((o: Order) => 
+                          o.orderNumber.toLowerCase().includes(orderNum.toLowerCase())
+                        );
+                        
+                        if (order) {
+                          updateOrderStatus(order.id, status);
+                        } else {
+                          toast({
+                            title: 'Order not found',
+                            description: `Could not find order number ${orderNum}`,
+                            variant: 'destructive'
+                          });
+                        }
+                      }}
+                    >
+                      <StatusIcon className="h-3 w-3" />
+                      <span className="text-xs capitalize">{status}</span>
+                    </Button>
+                  );
+                })}
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex items-center justify-center gap-1 py-1 h-auto text-red-500 border-red-500/30 hover:bg-red-500/10"
+                  onClick={() => {
+                    if (!orders || orders.length === 0) {
+                      toast({
+                        title: 'No orders found',
+                        description: 'There are no active orders to delete',
+                        variant: 'destructive'
+                      });
+                      return;
+                    }
+                    
+                    // Ask for order number
+                    const orderNum = window.prompt('Enter order number to delete:');
+                    if (!orderNum) return;
+                    
+                    // Find matching order
+                    const order = orders.find((o: Order) => 
+                      o.orderNumber.toLowerCase().includes(orderNum.toLowerCase())
+                    );
+                    
+                    if (order) {
+                      if (window.confirm(`Are you sure you want to delete order ${order.orderNumber}?`)) {
+                        deleteOrder(order.id);
+                      }
+                    } else {
+                      toast({
+                        title: 'Order not found',
+                        description: `Could not find order number ${orderNum}`,
+                        variant: 'destructive'
+                      });
+                    }
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                  <span className="text-xs">Delete</span>
+                </Button>
+              </div>
+            </div>
+          )}
+          
           {/* Quick access buttons */}
           <div className="grid grid-cols-2 gap-3">
             <Button 
@@ -456,9 +969,9 @@ ${data.map((opp: any, idx: number) => `${idx + 1}. ${opp.area} - Estimated impac
               variant="outline" 
               size="sm"
               onClick={() => refetch()}
-              disabled={isLoading}
+              disabled={isLoadingAdminData}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingAdminData ? 'animate-spin' : ''}`} />
               Refresh Data
             </Button>
           </div>
