@@ -25,6 +25,15 @@ const AIDemo: React.FC = () => {
         <p className="text-gray-400 mt-2">
           Explore reusable AI assistant components for different business applications
         </p>
+        <div className="mt-4">
+          <a 
+            href="/speech-demo" 
+            className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+          >
+            <Mic className="h-4 w-4 mr-2" />
+            Test Speech Recognition
+          </a>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
