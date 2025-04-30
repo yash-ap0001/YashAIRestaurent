@@ -386,96 +386,109 @@ const GenericAIAssistant: React.FC<AIAssistantConfig> = (props) => {
     }
   }, [isSpeaking, isListening, autoListen, isOpen, conversation.length, toggleVoiceRecognition]);
   
-  // Initialize effects for voice synthesis and dialog behavior
+  // Initialize speech synthesis when dialog opens
   useEffect(() => {
-    if (isOpen) {
-      // Fetch initial data
-      refetch();
+    if (isOpen && voiceEnabled && window.speechSynthesis) {
+      const getVoices = () => {
+        // This will trigger loading voices
+        window.speechSynthesis.getVoices();
+      };
       
-      // Initialize speech synthesis voices when dialog opens
-      if (voiceEnabled && window.speechSynthesis) {
-        const getVoices = () => {
-          // This will trigger loading voices
-          window.speechSynthesis.getVoices();
-        };
-        
-        // Get voices immediately
-        getVoices();
-        
-        // And also when voices change (some browsers load them asynchronously)
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-          speechSynthesis.onvoiceschanged = getVoices;
-        }
-      }
+      // Get voices immediately
+      getVoices();
       
-      // Try to load saved conversation history from localStorage
-      if (storageKey && conversation.length === 0) {
-        try {
-          const savedHistory = localStorage.getItem(storageKey);
-          
-          if (savedHistory) {
-            const { conversation: savedConversation, timestamp } = JSON.parse(savedHistory);
-            const historyDate = new Date(timestamp);
-            const now = new Date();
-            
-            // Only use conversation history if it's less than 12 hours old
-            if (now.getTime() - historyDate.getTime() < 12 * 60 * 60 * 1000) {
-              const userName = user?.fullName?.split(' ')[0] || 'User';
-              setConversation(savedConversation);
-              
-              // Add welcome back message
-              const welcomeBack = `Welcome back, ${userName}! We were discussing something earlier. How can I help you now?`;
-              const welcomeBackMessage: Message = { type: 'agent', text: welcomeBack };
-              setConversation(prev => [...prev, welcomeBackMessage]);
-              
-              if (voiceEnabled) {
-                setTimeout(() => {
-                  speakResponse(welcomeBack);
-                  
-                  // Auto-activate microphone after greeting if auto-listen is enabled
-                  if (autoListen) {
-                    setTimeout(() => {
-                      toggleVoiceRecognition();
-                    }, 2000);
-                  }
-                }, 300);
-              }
-              
-              return; // Skip the regular greeting
-            }
-          }
-        } catch (error) {
-          console.error('Error loading conversation history:', error);
-        }
+      // And also when voices change (some browsers load them asynchronously)
+      if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = getVoices;
       }
-      
-      // Add welcome message when dialog opens (if no history was loaded)
-      if (welcomeMessage && conversation.length === 0) {
-        const welcomeMsg: Message = { type: 'agent', text: welcomeMessage };
-        setConversation([welcomeMsg]);
-        
-        if (voiceEnabled) {
-          speakResponse(welcomeMessage);
-          
-          // Auto-activate microphone after greeting if auto-listen is enabled
-          if (autoListen) {
-            setTimeout(() => {
-              toggleVoiceRecognition();
-            }, 2000);
-          }
-        }
-      }
-    } else {
+    }
+    
+    return () => {
       // Cancel any speech when dialog closes
       if (voiceEnabled && window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
+    };
+  }, [isOpen, voiceEnabled]);
+  
+  // Fetch data when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      refetch();
+    }
+  }, [isOpen, refetch]);
+  
+  // Handle conversation initialization
+  useEffect(() => {
+    // Only run this effect once when the dialog is opened and conversation is empty
+    if (!isOpen || conversation.length > 0) return;
+    
+    // Try to load saved conversation history from localStorage
+    if (storageKey) {
+      try {
+        const savedHistory = localStorage.getItem(storageKey);
+        
+        if (savedHistory) {
+          const { conversation: savedConversation, timestamp } = JSON.parse(savedHistory);
+          const historyDate = new Date(timestamp);
+          const now = new Date();
+          
+          // Only use conversation history if it's less than 12 hours old
+          if (now.getTime() - historyDate.getTime() < 12 * 60 * 60 * 1000) {
+            const userName = user?.fullName?.split(' ')[0] || 'User';
+            setConversation(savedConversation);
+            
+            // Add welcome back message
+            const welcomeBack = `Welcome back, ${userName}! We were discussing something earlier. How can I help you now?`;
+            const welcomeBackMessage: Message = { type: 'agent', text: welcomeBack };
+            setConversation(prev => [...prev, welcomeBackMessage]);
+            
+            if (voiceEnabled) {
+              setTimeout(() => {
+                speakResponse(welcomeBack);
+                
+                // Auto-activate microphone after greeting if auto-listen is enabled
+                if (autoListen) {
+                  setTimeout(() => {
+                    toggleVoiceRecognition();
+                  }, 2000);
+                }
+              }, 300);
+            }
+            
+            return; // Skip the regular greeting if we've loaded history
+          }
+        }
+      } catch (error) {
+        console.error('Error loading conversation history:', error);
+      }
+    }
+    
+    // Add welcome message when dialog opens (if no history was loaded)
+    if (welcomeMessage) {
+      const welcomeMsg: Message = { type: 'agent', text: welcomeMessage };
+      setConversation([welcomeMsg]);
       
-      // Reset conversation when dialog closes
+      if (voiceEnabled) {
+        speakResponse(welcomeMessage);
+        
+        // Auto-activate microphone after greeting if auto-listen is enabled
+        if (autoListen) {
+          setTimeout(() => {
+            toggleVoiceRecognition();
+          }, 2000);
+        }
+      }
+    }
+  }, [isOpen, welcomeMessage, voiceEnabled, speakResponse, storageKey, 
+      autoListen, toggleVoiceRecognition, user, conversation]);
+      
+  // Reset conversation when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
       setConversation([]);
     }
-  }, [isOpen, refetch, welcomeMessage, voiceEnabled, speakResponse, storageKey, 
-      conversation.length, autoListen, toggleVoiceRecognition, user]);
+  }, [isOpen]);
   
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
