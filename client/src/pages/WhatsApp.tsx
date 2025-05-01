@@ -78,6 +78,29 @@ export default function WhatsApp() {
       });
     }
   });
+  
+  // Mutation to test with real WhatsApp number
+  const testRealNumberMutation = useMutation({
+    mutationFn: async (payload: { phone: string; message: string }) => {
+      const response = await apiRequest('POST', '/api/whatsapp/test-real-number', payload);
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Real WhatsApp test processed',
+        description: 'The message has been processed as if it came from your real WhatsApp number.',
+      });
+      setMessage('');
+      refetchMessages();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Failed to process real number test',
+        description: error.message || 'Something went wrong',
+        variant: 'destructive',
+      });
+    }
+  });
 
   // Mutation to send a direct message
   const sendMessageMutation = useMutation({
@@ -219,8 +242,9 @@ export default function WhatsApp() {
             </CardHeader>
             <CardContent className="py-2">
               <Tabs defaultValue="simulate" value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2 h-7">
+                <TabsList className="grid w-full grid-cols-3 h-7">
                   <TabsTrigger value="simulate" className="text-xs">Simulate</TabsTrigger>
+                  <TabsTrigger value="real" className="text-xs">Real Number</TabsTrigger>
                   <TabsTrigger value="send" className="text-xs">Send Direct</TabsTrigger>
                 </TabsList>
                 <TabsContent value="simulate" className="space-y-2 mt-2">
@@ -262,6 +286,53 @@ export default function WhatsApp() {
                       disabled={simulateMessageMutation.isPending}
                     >
                       {simulateMessageMutation.isPending ? 'Sending...' : 'Simulate Message'}
+                    </Button>
+                  </form>
+                </TabsContent>
+                <TabsContent value="real" className="space-y-2 mt-2">
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!phone || !message) {
+                      toast({
+                        title: 'Missing information',
+                        description: 'Phone number and message are required',
+                        variant: 'destructive',
+                      });
+                      return;
+                    }
+                    testRealNumberMutation.mutate({ phone, message });
+                  }} className="space-y-2">
+                    <div>
+                      <label className="block text-xs font-medium mb-0.5">Your WhatsApp Number</label>
+                      <Input 
+                        value={phone} 
+                        onChange={(e) => setPhone(e.target.value)} 
+                        placeholder="Include country code, e.g., 918765432100"
+                        className="h-7 text-xs"
+                      />
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Enter your real WhatsApp number with country code
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-0.5">Message Content</label>
+                      <Textarea 
+                        value={message} 
+                        onChange={(e) => setMessage(e.target.value)} 
+                        placeholder="Type a message you'd send from WhatsApp..."
+                        rows={2}
+                        className="text-xs min-h-[50px]"
+                      />
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        This will be processed as if you sent it from your real WhatsApp
+                      </p>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full h-7 text-xs"
+                      disabled={testRealNumberMutation.isPending}
+                    >
+                      {testRealNumberMutation.isPending ? 'Processing...' : 'Test with Real Number'}
                     </Button>
                   </form>
                 </TabsContent>
