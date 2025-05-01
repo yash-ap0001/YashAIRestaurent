@@ -1847,6 +1847,145 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     }
   });
   
+  // Special endpoint for testing with a real WhatsApp number
+  app.post("/api/whatsapp/test-real-number", async (req: Request, res: Response) => {
+    try {
+      const { phone, message } = req.body;
+      
+      if (!phone || !message) {
+        return res.status(400).json({
+          error: 'Phone number and message text are required'
+        });
+      }
+      
+      // Create an ID for the "real" message
+      const messageId = `real-${Date.now()}`;
+      const timestamp = new Date().toISOString();
+      const businessPhone = process.env.WHATSAPP_PHONE_NUMBER_ID || "BUSINESS_PHONE";
+      
+      // Store incoming message as if it came from the user's real number
+      await storage.storeWhatsAppMessage({
+        id: messageId,
+        from: phone,
+        to: businessPhone,
+        content: message,
+        timestamp,
+        direction: "incoming",
+        type: "text"
+      });
+      
+      // Log activity
+      await storage.createActivity({
+        type: "whatsapp_message",
+        description: `Real WhatsApp message from ${phone}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
+        entityType: "whatsapp"
+      });
+      
+      // Notify admin/manager
+      notificationService.sendNotification(
+        "WhatsApp Message", 
+        `New message from real WhatsApp number ${phone}: ${message.substring(0, 30)}${message.length > 30 ? '...' : ''}`,
+        "info",
+        ["admin", "manager"]
+      );
+      
+      // Broadcast message to all clients
+      broadcastToAllClients({
+        type: 'whatsapp_message',
+        data: {
+          id: messageId,
+          from: phone,
+          content: message,
+          timestamp,
+          direction: 'incoming',
+          type: 'text'
+        }
+      });
+      
+      // Process the message with the WhatsApp processor
+      try {
+        // Use customer name from phone number by default
+        const result = await processWhatsAppMessage(phone, message, "Real WhatsApp Customer");
+        
+        // If order was created, generate a confirmation message
+        if (result.orderCreated && result.order) {
+          const responseId = `real-resp-${Date.now()}`;
+          const responseTimestamp = new Date().toISOString();
+          const responseMessage = `Thank you for your order! Your order #${result.order.orderNumber} has been received and is being processed. Total amount: ₹${result.totalAmount.toFixed(2)}`;
+          
+          // Store the response message
+          await storage.storeWhatsAppMessage({
+            id: responseId,
+            from: businessPhone,
+            to: phone,
+            content: responseMessage,
+            timestamp: responseTimestamp,
+            direction: "outgoing",
+            type: "text"
+          });
+          
+          // Broadcast the response message
+          broadcastToAllClients({
+            type: 'whatsapp_message',
+            data: {
+              id: responseId,
+              from: businessPhone,
+              to: phone,
+              content: responseMessage,
+              timestamp: responseTimestamp,
+              direction: 'outgoing',
+              type: 'text'
+            }
+          });
+        } else {
+          // Send general acknowledgment response
+          const responseId = `real-resp-${Date.now()}`;
+          const responseTimestamp = new Date().toISOString();
+          const responseMessage = `Thank you for your message. We'll process your request: "${message}"`;
+          
+          // Store the response message
+          await storage.storeWhatsAppMessage({
+            id: responseId,
+            from: businessPhone,
+            to: phone,
+            content: responseMessage,
+            timestamp: responseTimestamp,
+            direction: "outgoing",
+            type: "text"
+          });
+          
+          // Broadcast the response message
+          broadcastToAllClients({
+            type: 'whatsapp_message',
+            data: {
+              id: responseId,
+              from: businessPhone,
+              to: phone,
+              content: responseMessage,
+              timestamp: responseTimestamp,
+              direction: 'outgoing',
+              type: 'text'
+            }
+          });
+        }
+      } catch (e) {
+        console.error("Error processing real WhatsApp test message:", e);
+      }
+      
+      res.json({
+        success: true,
+        messageProcessed: true,
+        result: {
+          processed: true,
+          responseGenerated: true,
+          messageType: "text"
+        }
+      });
+    } catch (err) {
+      errorHandler(err, res);
+    }
+  });
+  
   // Meta WhatsApp API Webhook - for receiving messages
   app.post("/api/webhook/whatsapp", async (req: Request, res: Response) => {
     try {
