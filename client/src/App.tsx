@@ -11,6 +11,7 @@ import KitchenTokens from "@/pages/KitchenTokens";
 import Billing from "@/pages/Billing";
 import HealthAdvisor from "@/pages/HealthAdvisor";
 import WhatsApp from "@/pages/WhatsApp";
+import WhatsAppSimulator from "@/pages/WhatsAppSimulator";
 import PhoneOrders from "@/pages/PhoneOrders";
 import AICallCenter from "@/pages/AICallCenter";
 import TestAIOrder from "@/pages/TestAIOrder";
@@ -80,6 +81,7 @@ function Router() {
       <ProtectedRoute path="/billing" component={Billing} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/health-advisor" component={HealthAdvisor} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/whatsapp" component={WhatsApp} allowedRoles={["admin", "manager"]} />
+      <Route path="/whatsapp-simulator" component={WhatsAppSimulator} />
       <ProtectedRoute path="/phone-orders" component={PhoneOrders} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/ai-call-center" component={AICallCenter} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/test-ai-order" component={TestAIOrder} allowedRoles={["admin", "manager"]} />
@@ -136,7 +138,8 @@ function AppContent() {
   const { user, isLoading } = useAuth();
   const isTestDashboard = window.location.pathname.includes('test-dashboard');
   const isPublicOrderTest = window.location.pathname.includes('public-order-test');
-  const isPublicRoute = isTestDashboard || isPublicOrderTest;
+  const isWhatsAppSimulator = window.location.pathname.includes('whatsapp-simulator');
+  const isPublicRoute = isTestDashboard || isPublicOrderTest || isWhatsAppSimulator;
   
   // Single combined WebSocket initialization for both authenticated and public routes
   useEffect(() => {
@@ -163,11 +166,13 @@ function AppContent() {
   if (!user && isPublicRoute) {
     let bannerMessage = isPublicOrderTest ? 
       "Public Order Testing Page - View all orders without authentication" : 
+      isWhatsAppSimulator ?
+      "WhatsApp Simulator - Test WhatsApp ordering without a real device" :
       "Test Dashboard Mode - Viewing dashboard without authentication";
     
     return (
       <>
-        {!isPublicOrderTest && (
+        {(!isPublicOrderTest) && (
           <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 mb-4">
             <p className="font-bold">Test Mode</p>
             <p>{bannerMessage}</p>
