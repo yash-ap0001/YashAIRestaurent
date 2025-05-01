@@ -85,7 +85,7 @@ export async function processWhatsAppOrder(message: string, phone: string): Prom
         menuItemId: item.id,
         quantity: item.quantity,
         price: item.price,
-        specialInstructions: null
+        notes: null // Use notes instead of specialInstructions per schema
       });
     }
     
@@ -96,11 +96,12 @@ export async function processWhatsAppOrder(message: string, phone: string): Prom
       items,
       totalAmount
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error processing WhatsApp order:', error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error processing order";
     return { 
       success: false, 
-      error: error.message || "Unknown error processing order"
+      error: errorMessage
     };
   }
 }
@@ -139,7 +140,7 @@ export async function processWhatsAppMessage(phone: string, message: string, nam
     });
     
     return { text: response };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error processing WhatsApp message:', error);
     return { 
       text: "I'm sorry, I encountered an error processing your message. Please try again or contact our customer support."

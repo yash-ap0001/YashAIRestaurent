@@ -188,8 +188,11 @@ export async function processWhatsAppMessage(phone: string, message: string, cus
       createdAt: new Date()
     });
     
+    // Import the WhatsApp processor dynamically to avoid circular dependencies
+    const { processWhatsAppMessage: processWithProcessor } = await import('./chatbot/whatsappProcessor');
+    
     // Process the message with our dedicated WhatsApp processor
-    const result = await processWithWhatsAppHandler(phone, message, customerName);
+    const result = await processWithProcessor(phone, message, customerName);
     
     // The response should be an object with text property
     if (result && typeof result.text === 'string') {
