@@ -274,3 +274,29 @@ export const insertScheduledOrderSchema = createInsertSchema(scheduledOrders).pi
 
 export type InsertScheduledOrder = z.infer<typeof insertScheduledOrderSchema>;
 export type ScheduledOrder = typeof scheduledOrders.$inferSelect;
+
+// WhatsApp messages model 
+export const whatsappMessages = pgTable("whatsapp_messages", {
+  id: serial("id").primaryKey(),
+  from: text("from").notNull(), // Phone number of sender
+  to: text("to").notNull(), // Phone number of recipient
+  message: text("message").notNull(), // Message content
+  direction: text("direction").notNull(), // 'incoming' or 'outgoing'
+  messageType: text("message_type").notNull().default("text"), // 'text', 'template', 'order', etc.
+  status: text("status"), // 'sent', 'delivered', 'read', 'failed', etc.
+  metadata: json("metadata").$type<any>(), // Additional message metadata
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertWhatsappMessageSchema = createInsertSchema(whatsappMessages).pick({
+  from: true,
+  to: true,
+  message: true,
+  direction: true,
+  messageType: true,
+  status: true,
+  metadata: true,
+});
+
+export type InsertWhatsappMessage = z.infer<typeof insertWhatsappMessageSchema>;
+export type WhatsappMessage = typeof whatsappMessages.$inferSelect;

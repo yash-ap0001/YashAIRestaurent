@@ -46,7 +46,7 @@ import { generateOrderNumber, generateTokenNumber, generateBillNumber, initializ
 import { simulateZomatoOrder, simulateSwiggyOrder } from './services/externalPlatforms';
 // We'll use dynamic import for voiceAssistant.ts to avoid circular dependencies
 import { db } from './db';
-import { activities } from '@shared/schema';
+import { activities, whatsappMessages } from '@shared/schema';
 import { setupAuth } from './auth';
 
 // Role-based access control middleware
@@ -1729,28 +1729,48 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     try {
       const { phone, message, name } = req.body;
       
-      if (!phone || !message || !name) {
+      if (!phone || !message) {
         return res.status(400).json({
-          error: 'Phone number, message text, and contact name are required'
+          error: 'Phone number and message text are required'
         });
       }
       
-      const client = getWhatsAppClient();
-      // Use type assertion to access the simulateIncomingMessage method
-      const simulatedClient = client as any;
+      // Save incoming message to database
+      await db.insert(whatsappMessages).values({
+        from: phone,
+        to: "BUSINESS_PHONE", // This would be your actual WhatsApp business number
+        message: message,
+        direction: "incoming",
+        messageType: "text",
+        status: "received",
+        metadata: { 
+          customerName: name || "Customer",
+          timestamp: new Date().toISOString()
+        }
+      });
       
-      if (!simulatedClient.simulateIncomingMessage) {
-        return res.status(400).json({
-          error: 'Simulation is only available with the simulated WhatsApp client'
-        });
-      }
+      // Log to activity log
+      await db.insert(activities).values({
+        type: "whatsapp_message",
+        description: `New WhatsApp message from ${phone}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
+        entityType: "whatsapp"
+      });
       
-      const formattedPhone = phone.includes('@c.us') ? phone : `${phone}@c.us`;
-      await simulatedClient.simulateIncomingMessage(formattedPhone, message, { name });
+      // Notify admin/manager about new message
+      notificationService.sendNotification(
+        "WhatsApp Message", 
+        `New message from ${name || "Customer"}: ${message.substring(0, 30)}${message.length > 30 ? '...' : ''}`,
+        "info",
+        ["admin", "manager"]
+      );
+      
+      // Process the message with the WhatsApp service
+      const result = await processWhatsAppMessage(phone, message);
       
       res.json({
         success: true,
-        message: 'WhatsApp message simulated successfully'
+        messageProcessed: true,
+        result: result
       });
     } catch (err) {
       errorHandler(err, res);
@@ -1760,19 +1780,24 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Get WhatsApp message history (for testing only)
   app.get("/api/whatsapp/message-history", async (req: Request, res: Response) => {
     try {
-      const client = getWhatsAppClient();
-      // Use type assertion to access the getMessageHistory method
-      const simulatedClient = client as any;
+      // Get messages from database instead of the client
+      const messages = await db.select().from(whatsappMessages)
+        .orderBy(whatsappMessages.createdAt);
       
-      if (!simulatedClient.getMessageHistory) {
-        return res.status(400).json({
-          error: 'Message history is only available with the simulated WhatsApp client'
-        });
-      }
+      // Format for the frontend
+      const formattedMessages = messages.map(msg => ({
+        id: msg.id.toString(),
+        from: msg.from,
+        to: msg.to,
+        content: msg.message,
+        timestamp: msg.createdAt.toISOString(),
+        direction: msg.direction,
+        type: msg.messageType,
+        status: msg.status,
+        metadata: msg.metadata
+      }));
       
-      const messages = simulatedClient.getMessageHistory();
-      
-      res.json(messages);
+      res.json(formattedMessages);
     } catch (err) {
       errorHandler(err, res);
     }
