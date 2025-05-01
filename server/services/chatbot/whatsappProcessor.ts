@@ -11,6 +11,7 @@ import { generateOrderNumber } from "../../utils";
 import { menuItems } from "@shared/schema"; 
 import { db } from "../../db";
 import { orders } from "@shared/schema";
+import { broadcastNewOrder } from "../../orderEnhancement";
 
 // Simple menu item extraction from text using pattern matching
 async function extractMenuItems(text: string): Promise<Array<{id: number, name: string, quantity: number, price: number}>> {
@@ -88,6 +89,10 @@ export async function processWhatsAppOrder(message: string, phone: string): Prom
         notes: null // Use notes instead of specialInstructions per schema
       });
     }
+    
+    // Broadcast the new order to all connected clients for real-time updates
+    console.log("Broadcasting WhatsApp order to connected clients:", order);
+    broadcastNewOrder(order);
     
     return {
       success: true,
