@@ -207,7 +207,14 @@ export class MemStorage implements IStorage {
   }
   
   async getOrders(): Promise<Order[]> {
-    return Array.from(this.orders.values());
+    const orders = Array.from(this.orders.values());
+    console.log(`[DEBUG] getOrders returning ${orders.length} orders:`, orders.map(o => ({
+      id: o.id,
+      orderNumber: o.orderNumber,
+      status: o.status,
+      source: o.orderSource
+    })));
+    return orders;
   }
   
   async getOrdersByCustomerId(customerId: number): Promise<Order[]> {

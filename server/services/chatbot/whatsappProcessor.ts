@@ -67,44 +67,33 @@ export async function processWhatsAppOrder(message: string, phone: string): Prom
     // Calculate total amount
     const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    // Create order record with retry logic for duplicate order numbers
-    let orderNumber;
-    let order;
-    let retryCount = 0;
-    const maxRetries = 3;
+    // Create order record using the storage system
+    // This ensures the order is in both the database and in-memory
+    const orderNumber = generateOrderNumber();
+    console.log(`Attempting to create WhatsApp order with order number: ${orderNumber}`);
     
-    while (retryCount < maxRetries) {
-      try {
-        orderNumber = generateOrderNumber();
-        console.log(`Attempting to create WhatsApp order with order number: ${orderNumber}`);
-        
-        [order] = await db.insert(orders).values({
-          orderNumber,
-          status: "pending", // Use 'pending' instead of 'received' to match dashboard status options
-          totalAmount,
-          // customerPhone isn't in the schema, so store in notes
-          notes: `WhatsApp order from ${phone}`,
-          orderSource: "whatsapp",
-          createdAt: new Date()
-        }).returning();
-        
-        // If we get here, the order was created successfully
-        console.log(`Successfully created WhatsApp order: ${orderNumber}`);
-        break;
-      } catch (error: any) {
-        retryCount++;
-        if (error.code === '23505' && error.constraint === 'orders_order_number_unique') {
-          console.log(`Order number ${orderNumber} already exists, retrying with new number... (Attempt ${retryCount}/${maxRetries})`);
-          // Just try again with a new order number on next iteration
-        } else {
-          // If it's not a duplicate key error, rethrow
-          throw error;
-        }
-      }
-    }
+    // Create order through the storage system
+    const order = await storage.createOrder({
+      orderNumber,
+      status: "pending", // Use 'pending' instead of 'received' to match dashboard status options
+      totalAmount,
+      notes: `WhatsApp order from ${phone}`,
+      orderSource: "whatsapp",
+      tableNumber: null,
+      useAIAutomation: true, // Enable AI automation for WhatsApp orders
+    });
     
-    if (!order) {
-      throw new Error(`Failed to create order after ${maxRetries} attempts due to order number conflicts`);
+    console.log(`Successfully created WhatsApp order ${orderNumber} with ID ${order.id}`);
+    
+    // Verify order was created
+    const allOrders = await storage.getOrders();
+    console.log(`After WhatsApp order creation, storage has ${allOrders.length} orders:`, 
+      allOrders.map(o => ({ id: o.id, orderNumber: o.orderNumber, status: o.status })));
+    
+    // Double-check that our new order is in the storage
+    const createdOrder = allOrders.find(o => o.orderNumber === orderNumber);
+    if (!createdOrder) {
+      console.error(`CRITICAL ERROR: Order ${orderNumber} was created but not found in storage!`);
     }
     
     // Create order items for each extracted item

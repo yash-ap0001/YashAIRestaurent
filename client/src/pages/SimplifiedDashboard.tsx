@@ -232,7 +232,13 @@ export default function SimplifiedDashboard() {
     isLoading: isLoadingOrders,
     error: ordersError,
   } = useQuery<Order[]>({
-    queryKey: ["/api/orders"]
+    queryKey: ["/api/orders"],
+    onSuccess: (data) => {
+      console.log('Orders fetched successfully:', data);
+    },
+    onError: (error) => {
+      console.error('Error fetching orders:', error);
+    }
   });
 
   const {
