@@ -1834,41 +1834,11 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Meta WhatsApp API Webhook - for receiving messages
   app.post("/api/webhook/whatsapp", async (req: Request, res: Response) => {
     try {
-      // Verify webhook with Meta challenge if present
-      if (req.query['hub.mode'] === 'subscribe' && 
-          req.query['hub.verify_token'] === 'whatsApptoken') {
-        console.log('Webhook verified with challenge');
-        return res.send(req.query['hub.challenge']);
-      }
+      // Import the WhatsApp business API handler
+      const { handleWhatsAppWebhook } = await import('./services/whatsapp/whatsappBusinessAPI');
       
-      // Process incoming messages
-      const data = req.body;
-      console.log('Received webhook data:', JSON.stringify(data));
-      
-      if (data.object === 'whatsapp_business_account') {
-        for (const entry of data.entry) {
-          for (const change of entry.changes) {
-            if (change.field === 'messages') {
-              if (change.value && change.value.messages) {
-                for (const message of change.value.messages) {
-                  if (message.type === 'text') {
-                    const phone = message.from;
-                    const text = message.text.body;
-                    
-                    console.log(`Received WhatsApp message from ${phone}: ${text}`);
-                    
-                    // Import dynamically to avoid circular dependencies
-                    const metaWhatsapp = await import('./services/metaWhatsappService');
-                    // Get contact name if available or default to "Customer"
-                    const contactName = change.value.contacts?.[0]?.profile?.name || "Customer";
-                    await metaWhatsapp.processWhatsAppMessage(phone, text, contactName);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      // Process the webhook data with our dedicated service
+      const result = await handleWhatsAppWebhook(req.body);
       
       // Always return a 200 OK to acknowledge receipt
       res.status(200).send('EVENT_RECEIVED');
@@ -1882,34 +1852,29 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // WhatsApp Webhook verification endpoint
   app.get('/api/webhook/whatsapp', (req: Request, res: Response) => {
     try {
-      // Hard-coded token matching what's in the Meta Developer Portal
-      const verifyToken = 'whatsApptoken';
+      // Import the WhatsApp business API verification function
+      const { verifyWhatsAppWebhook } = require('./services/whatsapp/whatsappBusinessAPI');
       
       // Parse params from the webhook verification request
-      const mode = req.query['hub.mode'];
-      const token = req.query['hub.verify_token'];
-      const challenge = req.query['hub.challenge'];
+      const mode = req.query['hub.mode'] as string;
+      const token = req.query['hub.verify_token'] as string;
+      const challenge = req.query['hub.challenge'] as string;
       
       console.log(`Webhook verification request: mode=${mode}, token=${token}, challenge=${challenge}`);
       
-      // Check if a token and mode were sent
-      if (mode && token) {
-        // Check the mode and token sent are correct
-        if (mode === 'subscribe' && token === verifyToken) {
-          // Respond with 200 OK and challenge token
-          console.log('WEBHOOK_VERIFIED');
-          res.status(200).send(challenge);
-        } else {
-          // Responds with '403 Forbidden' if verify tokens do not match
-          console.error(`Webhook verification failed - token mismatch. Expected: ${verifyToken}, Got: ${token}`);
-          res.sendStatus(403);
-        }
-      } else {
-        console.error('Webhook verification failed - missing parameters');
-        res.sendStatus(400);
+      // Use our verification function
+      const result = verifyWhatsAppWebhook(mode, token, challenge);
+      
+      if (result.success) {
+        console.log('WEBHOOK_VERIFIED');
+        return res.status(200).send(result.challenge);
       }
+      
+      // Responds with '403 Forbidden' if verify tokens do not match
+      console.error('Webhook verification failed');
+      res.sendStatus(403);
     } catch (error) {
-      console.error('Error in webhook verification:', error);
+      console.error('Error verifying webhook:', error);
       res.sendStatus(500);
     }
   });
