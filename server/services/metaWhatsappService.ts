@@ -44,7 +44,7 @@ export async function sendWhatsAppMessage(to: string, message: string) {
     
     console.log('WhatsApp message sent successfully');
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending WhatsApp message:', error.response?.data || error.message);
     // Still return something in demo mode
     return { 
@@ -121,7 +121,7 @@ export async function sendOrderConfirmation(
       
       console.log('Order confirmation template sent successfully');
       return templateResponse.data;
-    } catch (templateError) {
+    } catch (templateError: any) {
       console.warn('Template message failed, falling back to text message:', templateError.message);
       
       // Fallback to regular text message
@@ -133,7 +133,7 @@ export async function sendOrderConfirmation(
       
       return await sendWhatsAppMessage(to, message);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending order confirmation:', error.response?.data || error.message);
     return { 
       success: false, 
@@ -169,7 +169,7 @@ export async function sendOrderStatusUpdate(
     }
     
     return await sendWhatsAppMessage(to, statusMessage);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending status update:', error);
     return { success: false, error: error.message };
   }

@@ -1783,7 +1783,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     try {
       // Verify webhook with Meta challenge if present
       if (req.query['hub.mode'] === 'subscribe' && 
-          req.query['hub.verify_token'] === process.env.WHATSAPP_VERIFY_TOKEN) {
+          req.query['hub.verify_token'] === 'whatsApptoken') {
         console.log('Webhook verified with challenge');
         return res.send(req.query['hub.challenge']);
       }
