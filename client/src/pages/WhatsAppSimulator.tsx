@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -24,7 +24,9 @@ import {
   MessageSquare,
   RefreshCw, 
   SendIcon, 
-  ClipboardList 
+  ClipboardList,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 
 interface WhatsAppMessage {
@@ -45,6 +47,8 @@ const WhatsAppSimulator: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const socketRef = useRef<WebSocket | null>(null);
 
   // Demo order templates
   const orderTemplates = [
@@ -54,10 +58,89 @@ const WhatsAppSimulator: React.FC = () => {
     "Please send me one chicken biryani and one chicken 65"
   ];
 
-  // Load messages on component mount
+  // Load messages on component mount and set up WebSocket connection
   useEffect(() => {
     fetchMessages();
+    setupWebSocket();
+    
+    // Clean up WebSocket on component unmount
+    return () => {
+      if (socketRef.current) {
+        console.log("Closing WebSocket connection");
+        socketRef.current.close();
+      }
+    };
   }, []);
+  
+  // Set up WebSocket connection for real-time order updates
+  const setupWebSocket = () => {
+    // Create WebSocket connection
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    // Close existing socket if it exists
+    if (socketRef.current) {
+      socketRef.current.close();
+    }
+    
+    console.log("Initializing WebSocket connection for WhatsApp simulator");
+    const socket = new WebSocket(wsUrl);
+    socketRef.current = socket;
+    
+    // Connection opened
+    socket.addEventListener('open', () => {
+      console.log('WhatsApp simulator WebSocket connected');
+      setWsConnected(true);
+    });
+    
+    // Listen for messages
+    socket.addEventListener('message', (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('WhatsApp simulator WebSocket message received:', data);
+        
+        // Handle different event types
+        if (data.type === 'chat_response' && data.phone === phone) {
+          // Add bot response to messages
+          setMessages(prev => [...prev, {
+            id: `msg-${Date.now()}-out`,
+            from: 'system',
+            to: phone,
+            content: data.content,
+            timestamp: new Date().toISOString(),
+            direction: 'outgoing',
+            type: data.messageType || 'text'
+          }]);
+        } 
+        else if (data.type === 'order_created' && data.data?.orderSource === 'whatsapp') {
+          // Bot created an order from this chat, refresh messages to show it
+          setTimeout(fetchMessages, 500);
+          
+          // Show a toast notification
+          toast({
+            title: "Order Created",
+            description: `New order ${data.data.orderNumber} created from WhatsApp chat`,
+            variant: "default",
+            className: "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700",
+          });
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    });
+    
+    // Handle errors
+    socket.addEventListener('error', (error) => {
+      console.error('WhatsApp simulator WebSocket error:', error);
+      setWsConnected(false);
+    });
+    
+    // Handle connection close
+    socket.addEventListener('close', () => {
+      console.log('WhatsApp simulator WebSocket connection closed');
+      setWsConnected(false);
+    });
+  };
 
   const fetchMessages = async () => {
     try {
@@ -164,7 +247,22 @@ const WhatsAppSimulator: React.FC = () => {
     <div className="container mx-auto py-8">
       <div className="flex flex-col gap-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">WhatsApp Simulator</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">WhatsApp Simulator</h1>
+            <div className="flex items-center text-sm">
+              {wsConnected ? (
+                <div className="flex items-center gap-1 text-green-500">
+                  <Wifi className="h-4 w-4" />
+                  <span>Connected</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 text-red-500">
+                  <WifiOff className="h-4 w-4" />
+                  <span>Disconnected</span>
+                </div>
+              )}
+            </div>
+          </div>
           <Button 
             variant="outline" 
             onClick={fetchMessages} 
