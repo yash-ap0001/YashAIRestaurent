@@ -2,7 +2,7 @@ import axios from 'axios';
 import { db } from '../db';
 import { orders, activities } from '@shared/schema';
 import { processChatbotRequest } from './chatbot/chatbotService';
-import * as notificationService from './notificationService';
+import { notificationService } from './notificationService';
 
 const WHATSAPP_API_BASE_URL = 'https://graph.facebook.com/v17.0';
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -190,9 +190,8 @@ export async function processWhatsAppMessage(phone: string, message: string) {
     
     // Process the message with AI
     const response = await processChatbotRequest(
-      message,
-      "customer",
-      { phone, channel: 'whatsapp' }
+      message, 
+      { userType: "customer", phone, channel: 'whatsapp' }
     );
     
     // The response should be an object with text property
