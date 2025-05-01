@@ -105,6 +105,7 @@ export class MemStorage implements IStorage {
   private customers: Map<number, Customer>;
   private activities: Map<number, Activity>;
   private scheduledOrders: Map<number, ScheduledOrder>;
+  private whatsappMessages: Map<string, any>; // Store WhatsApp messages by ID
   
   private userId: number = 1;
   private menuItemId: number = 1;
@@ -128,6 +129,7 @@ export class MemStorage implements IStorage {
     this.customers = new Map();
     this.activities = new Map();
     this.scheduledOrders = new Map();
+    this.whatsappMessages = new Map();
     
     // Initialize with sample data
     this.initSampleData();
