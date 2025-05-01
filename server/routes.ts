@@ -1827,14 +1827,15 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // WhatsApp Webhook verification endpoint
   app.get('/api/webhook/whatsapp', (req: Request, res: Response) => {
     try {
-      const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || 'yash_hotel_bot_verify_token';
+      // Hard-coded token matching what's in the Meta Developer Portal
+      const verifyToken = 'whatsApptoken';
       
       // Parse params from the webhook verification request
       const mode = req.query['hub.mode'];
       const token = req.query['hub.verify_token'];
       const challenge = req.query['hub.challenge'];
       
-      console.log(`Webhook verification request: mode=${mode}, token=${token}`);
+      console.log(`Webhook verification request: mode=${mode}, token=${token}, challenge=${challenge}`);
       
       // Check if a token and mode were sent
       if (mode && token) {
@@ -1845,7 +1846,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
           res.status(200).send(challenge);
         } else {
           // Responds with '403 Forbidden' if verify tokens do not match
-          console.error('Webhook verification failed - invalid token');
+          console.error(`Webhook verification failed - token mismatch. Expected: ${verifyToken}, Got: ${token}`);
           res.sendStatus(403);
         }
       } else {
