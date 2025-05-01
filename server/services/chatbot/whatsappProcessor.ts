@@ -13,18 +13,18 @@ import { db } from "../../db";
 import { orders } from "@shared/schema";
 
 // Simple menu item extraction from text using pattern matching
-function extractMenuItems(text: string): Array<{id: number, name: string, quantity: number, price: number}> {
+async function extractMenuItems(text: string): Promise<Array<{id: number, name: string, quantity: number, price: number}>> {
   try {
     // Get menu items from storage
-    const menuItemsArray = storage.getMenuItems();
+    const menuItemsArray = await storage.getMenuItems();
     
     // Lower case the text for case-insensitive matching
     const lowerText = text.toLowerCase();
     const extractedItems: Array<{id: number, name: string, quantity: number, price: number}> = [];
     
     // Go through each menu item and see if it appears in the text
-    menuItemsArray.forEach(item => {
-      if (!item.name) return;
+    for (const item of menuItemsArray) {
+      if (!item.name) continue;
       
       const itemName = item.name.toLowerCase();
       if (lowerText.includes(itemName)) {
@@ -40,7 +40,7 @@ function extractMenuItems(text: string): Array<{id: number, name: string, quanti
           price: item.price || 0
         });
       }
-    });
+    }
     
     return extractedItems;
   } catch (error) {
@@ -67,13 +67,14 @@ export async function processWhatsAppOrder(message: string, phone: string): Prom
     const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
     // Create order record
+    const orderNumber = generateOrderNumber();
     const [order] = await db.insert(orders).values({
-      orderNumber: generateOrderNumber(),
+      orderNumber,
       status: "received",
       totalAmount,
-      customerPhone: phone,
-      orderSource: "whatsapp",
+      // customerPhone isn't in the schema, so store in notes
       notes: `WhatsApp order from ${phone}`,
+      orderSource: "whatsapp",
       createdAt: new Date()
     }).returning();
     

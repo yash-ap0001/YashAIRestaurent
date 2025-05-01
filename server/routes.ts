@@ -1784,7 +1784,7 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       try {
         const metaWhatsapp = await import('./services/metaWhatsappService');
         // Don't wait for response, just trigger processing
-        metaWhatsapp.processWhatsAppMessage(phone, message).catch(err => {
+        metaWhatsapp.processWhatsAppMessage(phone, message, name || "Customer").catch((err: Error) => {
           console.error("Error processing WhatsApp message in background:", err);
         });
       } catch (e) {
@@ -1859,7 +1859,9 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
                     
                     // Import dynamically to avoid circular dependencies
                     const metaWhatsapp = await import('./services/metaWhatsappService');
-                    await metaWhatsapp.processWhatsAppMessage(phone, text);
+                    // Get contact name if available or default to "Customer"
+                    const contactName = change.value.contacts?.[0]?.profile?.name || "Customer";
+                    await metaWhatsapp.processWhatsAppMessage(phone, text, contactName);
                   }
                 }
               }

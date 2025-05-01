@@ -189,26 +189,26 @@ export async function processWhatsAppMessage(phone: string, message: string, cus
     });
     
     // Process the message with our dedicated WhatsApp processor
-    const response = await processWhatsAppMessage(phone, message, customerName);
+    const result = await processWithWhatsAppHandler(phone, message, customerName);
     
     // The response should be an object with text property
-    if (response && response.text) {
+    if (result && typeof result.text === 'string') {
       // Send the response back via WhatsApp
-      await sendWhatsAppMessage(phone, response.text);
+      await sendWhatsAppMessage(phone, result.text);
       
       // If this is an order intent, handle notifications
-      if (response.intent === 'place_order' && response.orderData) {
+      if (result.intent === 'place_order' && result.orderData) {
         // Send a notification to all clients
         notificationService.sendNotification(
           "New WhatsApp Order", 
-          `New order ${response.orderData.orderNumber} received via WhatsApp`,
+          `New order ${result.orderData.orderNumber} received via WhatsApp`,
           "info"
         );
         
         // Get items summary if available
         let itemsSummary = "your items";
-        if (response.items && Array.isArray(response.items)) {
-          itemsSummary = response.items
+        if (result.items && Array.isArray(result.items)) {
+          itemsSummary = result.items
             .map((item: any) => `${item.quantity || 1}x ${item.name}`)
             .join(', ');
         }
@@ -216,22 +216,22 @@ export async function processWhatsAppMessage(phone: string, message: string, cus
         // Send order confirmation
         await sendOrderConfirmation(
           phone,
-          response.orderData.orderNumber,
+          result.orderData.orderNumber,
           itemsSummary,
-          response.orderData.totalAmount || 0
+          result.orderData.totalAmount || 0
         );
         
         return { 
           success: true, 
           orderCreated: true, 
-          orderNumber: response.orderData.orderNumber 
+          orderNumber: result.orderData.orderNumber 
         };
       }
       
-      return { success: true, response };
+      return { success: true, response: result.text };
     }
     
-    return { success: true, aiResponse: response };
+    return { success: true, aiResponse: result };
     
   } catch (error: any) {
     console.error('Error processing WhatsApp message:', error);
