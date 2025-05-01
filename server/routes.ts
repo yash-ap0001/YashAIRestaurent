@@ -1735,22 +1735,24 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         });
       }
       
-      // Save incoming message to database
-      await db.insert(whatsappMessages).values({
+      // Create an ID for the simulated message
+      const messageId = `sim-${Date.now()}`;
+      const timestamp = new Date().toISOString();
+      const businessPhone = process.env.WHATSAPP_PHONE_NUMBER_ID || "BUSINESS_PHONE";
+      
+      // Store incoming message using our storage system
+      await storage.storeWhatsAppMessage({
+        id: messageId,
         from: phone,
-        to: "BUSINESS_PHONE", // This would be your actual WhatsApp business number
-        message: message,
+        to: businessPhone,
+        content: message,
+        timestamp,
         direction: "incoming",
-        messageType: "text",
-        status: "received",
-        metadata: { 
-          customerName: name || "Customer",
-          timestamp: new Date().toISOString()
-        }
+        type: "text"
       });
       
-      // Log to activity log
-      await db.insert(activities).values({
+      // Log activity for the incoming message
+      await storage.createActivity({
         type: "whatsapp_message",
         description: `New WhatsApp message from ${phone}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
         entityType: "whatsapp"
@@ -1764,31 +1766,58 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         ["admin", "manager"]
       );
       
-      // Process the message with AI (simple response for simulator)
-        
-      // Create a response message in the database
-      await db.insert(whatsappMessages).values({
-        from: "BUSINESS_PHONE", // From business to customer
-        to: phone,
-        message: `Thank you for your message. We'll process your request: "${message}"`,
-        direction: "outgoing",
-        messageType: "text",
-        status: "sent",
-        metadata: { 
-          responseType: "auto-reply",
-          timestamp: new Date().toISOString()
+      // Broadcast real-time event to all connected clients
+      broadcastToAllClients({
+        type: 'whatsapp_message',
+        data: {
+          id: messageId,
+          from: phone,
+          content: message,
+          timestamp,
+          direction: 'incoming',
+          type: 'text'
         }
       });
       
-      // Try to dynamically import metaWhatsappService
+      // Create an automated response message
+      const responseId = `sim-resp-${Date.now()}`;
+      const responseTimestamp = new Date().toISOString();
+      const responseMessage = `Thank you for your message. We'll process your request: "${message}"`;
+      
+      // Store the response message in our storage system
+      await storage.storeWhatsAppMessage({
+        id: responseId,
+        from: businessPhone,
+        to: phone,
+        content: responseMessage,
+        timestamp: responseTimestamp,
+        direction: "outgoing",
+        type: "text"
+      });
+      
+      // Broadcast the response message to clients
+      broadcastToAllClients({
+        type: 'whatsapp_message',
+        data: {
+          id: responseId,
+          from: businessPhone,
+          to: phone,
+          content: responseMessage,
+          timestamp: responseTimestamp,
+          direction: 'outgoing',
+          type: 'text'
+        }
+      });
+      
+      // Process the message with the WhatsApp processor
       try {
-        const metaWhatsapp = await import('./services/metaWhatsappService');
+        const whatsappProcessor = await import('./services/chatbot/whatsappProcessor');
         // Don't wait for response, just trigger processing
-        metaWhatsapp.processWhatsAppMessage(phone, message, name || "Customer").catch((err: Error) => {
+        whatsappProcessor.processWhatsAppMessage(phone, message, name || "Customer").catch((err: Error) => {
           console.error("Error processing WhatsApp message in background:", err);
         });
       } catch (e) {
-        console.error("Failed to import metaWhatsappService:", e);
+        console.error("Failed to import whatsappProcessor:", e);
       }
       
       res.json({
@@ -1808,24 +1837,11 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Get WhatsApp message history (for testing only)
   app.get("/api/whatsapp/message-history", async (req: Request, res: Response) => {
     try {
-      // Get messages from database instead of the client
-      const messages = await db.select().from(whatsappMessages)
-        .orderBy(whatsappMessages.createdAt);
+      // Get messages from storage
+      const messages = await storage.getWhatsAppMessages();
       
-      // Format for the frontend
-      const formattedMessages = messages.map(msg => ({
-        id: msg.id.toString(),
-        from: msg.from,
-        to: msg.to,
-        content: msg.message,
-        timestamp: msg.createdAt.toISOString(),
-        direction: msg.direction,
-        type: msg.messageType,
-        status: msg.status,
-        metadata: msg.metadata
-      }));
-      
-      res.json(formattedMessages);
+      // Messages are already in the right format from our storage implementation
+      res.json(messages);
     } catch (err) {
       errorHandler(err, res);
     }

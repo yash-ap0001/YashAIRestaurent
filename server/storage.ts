@@ -632,6 +632,46 @@ export class MemStorage implements IStorage {
     return this.scheduledOrders.delete(id);
   }
   
+  // WhatsApp message operations
+  async storeWhatsAppMessage(messageData: {
+    id: string,
+    from: string,
+    to: string,
+    content: string,
+    timestamp: string,
+    direction: string,
+    type: string
+  }): Promise<any> {
+    console.log(`Storing WhatsApp message ${messageData.id} from ${messageData.from} to ${messageData.to}`);
+    
+    // Structure to store in our map
+    const message = {
+      ...messageData,
+      createdAt: new Date(messageData.timestamp)
+    };
+    
+    this.whatsappMessages.set(messageData.id, message);
+    
+    // Log activity for incoming messages
+    if (messageData.direction === 'incoming') {
+      await this.createActivity({
+        type: 'whatsapp_message_received',
+        description: `WhatsApp message received from ${messageData.from}`,
+        entityType: 'whatsapp'
+      });
+    }
+    
+    return message;
+  }
+  
+  async getWhatsAppMessages(): Promise<any[]> {
+    return Array.from(this.whatsappMessages.values())
+      .sort((a, b) => {
+        // Sort by timestamp in descending order (most recent first)
+        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      });
+  }
+  
   // Initialize sample data for the application
   private initSampleData() {
     // Sample users with different roles using simple passwords
