@@ -81,7 +81,7 @@ function Router() {
       <ProtectedRoute path="/billing" component={Billing} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/health-advisor" component={HealthAdvisor} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/whatsapp" component={WhatsApp} allowedRoles={["admin", "manager"]} />
-      <Route path="/whatsapp-simulator" component={WhatsAppSimulator} />
+      <ProtectedRoute path="/whatsapp-simulator" component={WhatsAppSimulator} allowedRoles={["admin", "manager", "waiter", "kitchen", "delivery", "customer"]} />
       <ProtectedRoute path="/phone-orders" component={PhoneOrders} allowedRoles={["admin", "manager", "waiter"]} />
       <ProtectedRoute path="/ai-call-center" component={AICallCenter} allowedRoles={["admin", "manager"]} />
       <ProtectedRoute path="/test-ai-order" component={TestAIOrder} allowedRoles={["admin", "manager"]} />
