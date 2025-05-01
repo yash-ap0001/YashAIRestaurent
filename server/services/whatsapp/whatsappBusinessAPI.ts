@@ -272,13 +272,13 @@ export function verifyWhatsAppWebhook(mode: string, token: string, challenge: st
   // This should match the token you set in the WhatsApp Business Platform
   const VERIFY_TOKEN = 'whatsApptoken';
   
-  console.log(`Verifying WhatsApp webhook: mode=${mode}, token=${token}`);
+  console.log(`Verifying WhatsApp webhook: mode=${mode}, token=${token}, challenge=${challenge}`);
   
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    console.log('WhatsApp webhook verified successfully');
+    console.log('WhatsApp webhook verified successfully! Returning challenge:', challenge);
     return { success: true, challenge };
   } else {
-    console.error('WhatsApp webhook verification failed');
+    console.error(`WhatsApp webhook verification failed. Expected token: ${VERIFY_TOKEN}, Got: ${token}`);
     return { success: false };
   }
 }
