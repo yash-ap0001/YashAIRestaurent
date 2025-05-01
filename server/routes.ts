@@ -1777,6 +1777,86 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       errorHandler(err, res);
     }
   });
+  
+  // Meta WhatsApp API Webhook - for receiving messages
+  app.post("/api/webhook/whatsapp", async (req: Request, res: Response) => {
+    try {
+      // Verify webhook with Meta challenge if present
+      if (req.query['hub.mode'] === 'subscribe' && 
+          req.query['hub.verify_token'] === process.env.WHATSAPP_VERIFY_TOKEN) {
+        console.log('Webhook verified with challenge');
+        return res.send(req.query['hub.challenge']);
+      }
+      
+      // Process incoming messages
+      const data = req.body;
+      console.log('Received webhook data:', JSON.stringify(data));
+      
+      if (data.object === 'whatsapp_business_account') {
+        for (const entry of data.entry) {
+          for (const change of entry.changes) {
+            if (change.field === 'messages') {
+              if (change.value && change.value.messages) {
+                for (const message of change.value.messages) {
+                  if (message.type === 'text') {
+                    const phone = message.from;
+                    const text = message.text.body;
+                    
+                    console.log(`Received WhatsApp message from ${phone}: ${text}`);
+                    
+                    // Import dynamically to avoid circular dependencies
+                    const metaWhatsapp = await import('./services/metaWhatsappService');
+                    await metaWhatsapp.processWhatsAppMessage(phone, text);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Always return a 200 OK to acknowledge receipt
+      res.status(200).send('EVENT_RECEIVED');
+    } catch (error) {
+      console.error('Error processing WhatsApp webhook:', error);
+      // Still return 200 to acknowledge receipt, even on error
+      res.status(200).send('EVENT_RECEIVED');
+    }
+  });
+  
+  // WhatsApp Webhook verification endpoint
+  app.get('/api/webhook/whatsapp', (req: Request, res: Response) => {
+    try {
+      const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || 'yash_hotel_bot_verify_token';
+      
+      // Parse params from the webhook verification request
+      const mode = req.query['hub.mode'];
+      const token = req.query['hub.verify_token'];
+      const challenge = req.query['hub.challenge'];
+      
+      console.log(`Webhook verification request: mode=${mode}, token=${token}`);
+      
+      // Check if a token and mode were sent
+      if (mode && token) {
+        // Check the mode and token sent are correct
+        if (mode === 'subscribe' && token === verifyToken) {
+          // Respond with 200 OK and challenge token
+          console.log('WEBHOOK_VERIFIED');
+          res.status(200).send(challenge);
+        } else {
+          // Responds with '403 Forbidden' if verify tokens do not match
+          console.error('Webhook verification failed - invalid token');
+          res.sendStatus(403);
+        }
+      } else {
+        console.error('Webhook verification failed - missing parameters');
+        res.sendStatus(400);
+      }
+    } catch (error) {
+      console.error('Error in webhook verification:', error);
+      res.sendStatus(500);
+    }
+  });
 
   // Telephony Integration APIs
   
