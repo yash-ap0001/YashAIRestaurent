@@ -79,6 +79,18 @@ export interface IStorage {
   createScheduledOrder(scheduledOrder: InsertScheduledOrder): Promise<ScheduledOrder>;
   updateScheduledOrder(id: number, scheduledOrder: Partial<InsertScheduledOrder>): Promise<ScheduledOrder | undefined>;
   deleteScheduledOrder(id: number): Promise<boolean>;
+  
+  // WhatsApp message operations
+  storeWhatsAppMessage(messageData: {
+    id: string,
+    from: string,
+    to: string,
+    content: string,
+    timestamp: string,
+    direction: string,
+    type: string
+  }): Promise<any>;
+  getWhatsAppMessages(): Promise<any[]>;
 }
 
 // In-memory storage implementation

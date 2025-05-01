@@ -8,7 +8,7 @@
 import axios from 'axios';
 import { storage } from '../../storage';
 import { processWhatsAppMessage } from '../chatbot/whatsappProcessor';
-import { broadcastEvent } from '../realtime';
+import { broadcastToAllClients } from '../realtime';
 
 // WhatsApp API configuration
 const WHATSAPP_API_URL = 'https://graph.facebook.com/v17.0';
@@ -226,13 +226,16 @@ export async function handleWhatsAppWebhook(webhookEvent: any) {
       });
       
       // Broadcast real-time event for the new message
-      broadcastEvent('whatsapp_message', {
-        id: messageId,
-        from,
-        content: messageText,
-        timestamp,
-        direction: 'incoming',
-        type: messageType
+      broadcastToAllClients({
+        type: 'whatsapp_message',
+        data: {
+          id: messageId,
+          from,
+          content: messageText,
+          timestamp,
+          direction: 'incoming',
+          type: messageType
+        }
       });
       
       // Process the message with the WhatsApp processor
