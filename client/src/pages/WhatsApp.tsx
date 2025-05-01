@@ -7,8 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
-import { MessageCircle, Send, RefreshCcw, Utensils, FileText, HeartPulse } from 'lucide-react';
+import { MessageCircle, Send, RefreshCcw, Utensils, FileText, HeartPulse, AlertCircle } from 'lucide-react';
 import BillSimulator from '@/components/whatsapp/BillSimulator';
 
 interface Message {
@@ -97,6 +98,30 @@ export default function WhatsApp() {
       toast({
         title: 'Failed to process real number test',
         description: error.message || 'Something went wrong',
+        variant: 'destructive',
+      });
+    }
+  });
+  
+  // Mutation to simulate a webhook from Meta's servers
+  const webhookSimulationMutation = useMutation({
+    mutationFn: async (payload: { message: string }) => {
+      const response = await apiRequest('POST', '/api/test/webhook-simulation', payload);
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: 'Webhook processed successfully',
+        description: 'The Meta webhook simulation was processed by the system.',
+      });
+      setMessage('');
+      refetchMessages();
+      console.log('Webhook simulation result:', data);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Failed to process webhook',
+        description: error.message || 'Something went wrong with the webhook simulation',
         variant: 'destructive',
       });
     }
