@@ -242,9 +242,10 @@ export default function WhatsApp() {
             </CardHeader>
             <CardContent className="py-2">
               <Tabs defaultValue="simulate" value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3 h-7">
+                <TabsList className="grid w-full grid-cols-4 h-7">
                   <TabsTrigger value="simulate" className="text-xs">Simulate</TabsTrigger>
                   <TabsTrigger value="real" className="text-xs">Real Number</TabsTrigger>
+                  <TabsTrigger value="webhook" className="text-xs">Webhook</TabsTrigger>
                   <TabsTrigger value="send" className="text-xs">Send Direct</TabsTrigger>
                 </TabsList>
                 <TabsContent value="simulate" className="space-y-2 mt-2">
@@ -336,6 +337,52 @@ export default function WhatsApp() {
                     </Button>
                   </form>
                 </TabsContent>
+                <TabsContent value="webhook" className="space-y-2 mt-2">
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!message) {
+                      toast({
+                        title: 'Missing information',
+                        description: 'Message is required',
+                        variant: 'destructive',
+                      });
+                      return;
+                    }
+                    // Call our webhook simulation endpoint
+                    webhookSimulationMutation.mutate({ message });
+                  }} className="space-y-2">
+                    <div>
+                      <Alert variant="default" className="bg-amber-100 text-amber-800 border-amber-200 p-2">
+                        <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                        <AlertTitle className="text-xs font-semibold">Meta Webhook Simulation</AlertTitle>
+                        <AlertDescription className="text-xs">
+                          This simulates a webhook event from Meta's servers as if a real customer sent a message to your WhatsApp Business account.
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-0.5">Message Content</label>
+                      <Textarea 
+                        value={message} 
+                        onChange={(e) => setMessage(e.target.value)} 
+                        placeholder="I'd like to order a butter chicken with 2 naan..."
+                        rows={3}
+                        className="text-xs min-h-[80px]"
+                      />
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        This will be processed as if Meta sent a webhook with this message
+                      </p>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full h-7 text-xs"
+                      disabled={webhookSimulationMutation.isPending}
+                    >
+                      {webhookSimulationMutation.isPending ? 'Processing...' : 'Simulate Meta Webhook'}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
                 <TabsContent value="send" className="space-y-2 mt-2">
                   <form onSubmit={handleSendMessage} className="space-y-2">
                     <div>

@@ -2033,6 +2033,67 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       res.sendStatus(500);
     }
   });
+  
+  // Test endpoint to simulate a webhook event from Meta's servers
+  app.post("/api/test/webhook-simulation", async (req: Request, res: Response) => {
+    try {
+      console.log('Simulating webhook message from Meta servers');
+      
+      // Create a sample webhook payload similar to what Meta would send
+      const samplePayload = {
+        object: 'whatsapp_business_account',
+        entry: [{
+          id: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+          changes: [{
+            value: {
+              messaging_product: 'whatsapp',
+              metadata: {
+                display_phone_number: '+1234567890',
+                phone_number_id: process.env.WHATSAPP_PHONE_NUMBER_ID
+              },
+              contacts: [
+                {
+                  profile: {
+                    name: 'Test Customer'
+                  },
+                  wa_id: '919876543210' // Sample phone number
+                }
+              ],
+              messages: [
+                {
+                  from: '919876543210',
+                  id: 'test-message-id-' + Date.now(),
+                  timestamp: Math.floor(Date.now() / 1000),
+                  type: 'text',
+                  text: {
+                    body: req.body.message || "I'd like to order a Butter Chicken and two Naan"
+                  }
+                }
+              ]
+            },
+            field: 'messages'
+          }]
+        }]
+      };
+      
+      // Forward this payload to our actual webhook handler
+      const { handleWhatsAppWebhook } = await import('./services/whatsapp/whatsappBusinessAPI');
+      const result = await handleWhatsAppWebhook(samplePayload);
+      
+      // Return the result
+      res.status(200).json({
+        success: true,
+        webhookProcessed: result.success,
+        result
+      });
+    } catch (error) {
+      console.error('Error in webhook simulation:', error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
 
   // Telephony Integration APIs
   
