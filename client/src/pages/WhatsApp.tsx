@@ -52,9 +52,18 @@ export default function WhatsApp() {
   } = useQuery<StatusData>({
     queryKey: ['/api/whatsapp/status'],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/whatsapp/status');
-      return await response.json();
-    }
+      try {
+        const response = await apiRequest('GET', '/api/whatsapp/status');
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching WhatsApp status:", error);
+        return {
+          status: "error",
+          message: "Error connecting to WhatsApp service"
+        };
+      }
+    },
+    refetchInterval: 30000 // Refresh every 30 seconds
   });
 
   // Mutation to simulate a message
@@ -238,16 +247,33 @@ export default function WhatsApp() {
             </CardHeader>
             <CardContent className="py-1.5">
               {statusLoading ? (
-                <p className="text-sm">Loading status...</p>
+                <div className="flex items-center gap-2">
+                  <div className="h-2.5 w-2.5 rounded-full animate-pulse bg-gray-300"></div>
+                  <p className="text-sm">Loading WhatsApp service status...</p>
+                </div>
               ) : statusData ? (
                 <div className="flex items-center gap-2">
-                  <div className={`h-2.5 w-2.5 rounded-full ${statusData.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                  <p className="text-sm">{statusData.message}</p>
+                  {statusData.status === 'active' ? (
+                    <>
+                      <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></div>
+                      <p className="text-sm font-medium text-green-600">{statusData.message}</p>
+                    </>
+                  ) : statusData.status === 'error' ? (
+                    <>
+                      <div className="h-2.5 w-2.5 rounded-full bg-red-500"></div>
+                      <p className="text-sm font-medium text-red-600">{statusData.message}</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
+                      <p className="text-sm font-medium text-yellow-600">{statusData.message}</p>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
-                  <p className="text-sm">Status unknown</p>
+                  <p className="text-sm">Status unknown - Try refreshing</p>
                 </div>
               )}
             </CardContent>

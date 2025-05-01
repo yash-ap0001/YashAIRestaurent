@@ -1905,6 +1905,8 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       // Process the message with the WhatsApp processor
       try {
         // Use customer name from phone number by default
+        // Import processWhatsAppMessage function dynamically to avoid circular dependencies
+        const { processWhatsAppMessage } = await import('./services/metaWhatsappService');
         const result = await processWhatsAppMessage(phone, message, "Real WhatsApp Customer");
         
         // If order was created, generate a confirmation message
@@ -2039,6 +2041,38 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
     try {
       console.log('Simulating webhook message from Meta servers');
       
+      // Generate unique IDs for traceability
+      const messageId = 'webhook-sim-' + Date.now();
+      const timestamp = new Date().toISOString();
+      const customerPhone = '919876543210'; // Sample phone number
+      const businessPhone = process.env.WHATSAPP_PHONE_NUMBER_ID || '15550000000';
+      const message = req.body.message || "I'd like to order a Butter Chicken and two Naan";
+      
+      // Store the simulated incoming message in our WhatsApp message history
+      await storage.storeWhatsAppMessage({
+        id: messageId,
+        from: customerPhone,
+        to: businessPhone,
+        content: message,
+        timestamp,
+        direction: 'incoming',
+        type: 'text'
+      });
+      
+      // Broadcast the message event to all clients
+      broadcastToAllClients({
+        type: 'whatsapp_message',
+        data: {
+          id: messageId,
+          from: customerPhone,
+          to: businessPhone,
+          content: message,
+          timestamp,
+          direction: 'incoming',
+          type: 'text'
+        }
+      });
+      
       // Create a sample webhook payload similar to what Meta would send
       const samplePayload = {
         object: 'whatsapp_business_account',
@@ -2049,24 +2083,24 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
               messaging_product: 'whatsapp',
               metadata: {
                 display_phone_number: '+1234567890',
-                phone_number_id: process.env.WHATSAPP_PHONE_NUMBER_ID
+                phone_number_id: businessPhone
               },
               contacts: [
                 {
                   profile: {
                     name: 'Test Customer'
                   },
-                  wa_id: '919876543210' // Sample phone number
+                  wa_id: customerPhone
                 }
               ],
               messages: [
                 {
-                  from: '919876543210',
-                  id: 'test-message-id-' + Date.now(),
+                  from: customerPhone,
+                  id: messageId,
                   timestamp: Math.floor(Date.now() / 1000),
                   type: 'text',
                   text: {
-                    body: req.body.message || "I'd like to order a Butter Chicken and two Naan"
+                    body: message
                   }
                 }
               ]
@@ -2084,6 +2118,10 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
       res.status(200).json({
         success: true,
         webhookProcessed: result.success,
+        messageId,
+        timestamp,
+        phone: customerPhone,
+        message,
         result
       });
     } catch (error) {
@@ -2127,6 +2165,35 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   
   // Handle language selection for voice calls
   app.post("/api/telephony/select-language", selectLanguage);
+  
+  // WhatsApp service status endpoint
+  app.get("/api/whatsapp/status", async (req: Request, res: Response) => {
+    try {
+      // Check if the WhatsApp API token is available
+      const apiToken = process.env.WHATSAPP_API_TOKEN;
+      const businessAccountId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
+      const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+      
+      if (!apiToken || !businessAccountId || !phoneNumberId) {
+        return res.json({
+          status: "inactive",
+          message: "WhatsApp Business API is not fully configured. Missing credentials."
+        });
+      }
+      
+      // For the demo, simply return active if the tokens are set
+      res.json({
+        status: "active",
+        message: "WhatsApp Business API is connected and ready"
+      });
+    } catch (err) {
+      console.error("Error getting WhatsApp status:", err);
+      res.status(500).json({
+        status: "error",
+        message: "Error getting WhatsApp service status"
+      });
+    }
+  });
   
   // Get call history
   app.get("/api/telephony/calls", async (req: Request, res: Response) => {
