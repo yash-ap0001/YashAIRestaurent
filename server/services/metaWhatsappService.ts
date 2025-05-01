@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { db } from '../db';
 import { orders, activities } from '@shared/schema';
-import { processChatbotRequest } from './chatbot/chatbotService';
+import { processWhatsAppMessage as processWithWhatsAppHandler } from './chatbot/whatsappProcessor';
 import { notificationService } from './notificationService';
 
 const WHATSAPP_API_BASE_URL = 'https://graph.facebook.com/v17.0';
@@ -176,7 +176,7 @@ export async function sendOrderStatusUpdate(
 }
 
 // Process an incoming WhatsApp message
-export async function processWhatsAppMessage(phone: string, message: string) {
+export async function processWhatsAppMessage(phone: string, message: string, customerName: string = "Customer") {
   try {
     console.log(`Processing WhatsApp message from ${phone}: ${message}`);
     
@@ -188,63 +188,47 @@ export async function processWhatsAppMessage(phone: string, message: string) {
       createdAt: new Date()
     });
     
-    // Process the message with AI
-    const response = await processChatbotRequest(
-      message, 
-      { userType: "customer", phone, channel: 'whatsapp' }
-    );
+    // Process the message with our dedicated WhatsApp processor
+    const response = await processWhatsAppMessage(phone, message, customerName);
     
     // The response should be an object with text property
-    if (typeof response === 'string') {
-      // Handle simple string responses
-      await sendWhatsAppMessage(phone, response);
-      return { success: true, response };
-    }
-    
-    // Send the response back via WhatsApp
-    if (response.text) {
+    if (response && response.text) {
+      // Send the response back via WhatsApp
       await sendWhatsAppMessage(phone, response.text);
-    }
-    
-    // If this is an order intent, handle it
-    if (response.intent === 'place_order' && response.orderData) {
-      // Create the order
-      const [order] = await db.insert(orders).values({
-        ...response.orderData,
-        customerPhone: phone,
-        orderSource: 'whatsapp',
-        status: 'received',
-        createdAt: new Date()
-      }).returning();
       
-      // Send a notification to all clients
-      notificationService.sendNotification(
-        "New WhatsApp Order", 
-        `New order ${order.orderNumber} received via WhatsApp`,
-        "info"
-      );
-      
-      // Get items summary if available
-      let itemsSummary = "your items";
-      if (response.orderData.items && Array.isArray(response.orderData.items)) {
-        itemsSummary = response.orderData.items
-          .map((item: any) => `${item.quantity || 1}x ${item.name}`)
-          .join(', ');
+      // If this is an order intent, handle notifications
+      if (response.intent === 'place_order' && response.orderData) {
+        // Send a notification to all clients
+        notificationService.sendNotification(
+          "New WhatsApp Order", 
+          `New order ${response.orderData.orderNumber} received via WhatsApp`,
+          "info"
+        );
+        
+        // Get items summary if available
+        let itemsSummary = "your items";
+        if (response.items && Array.isArray(response.items)) {
+          itemsSummary = response.items
+            .map((item: any) => `${item.quantity || 1}x ${item.name}`)
+            .join(', ');
+        }
+        
+        // Send order confirmation
+        await sendOrderConfirmation(
+          phone,
+          response.orderData.orderNumber,
+          itemsSummary,
+          response.orderData.totalAmount || 0
+        );
+        
+        return { 
+          success: true, 
+          orderCreated: true, 
+          orderNumber: response.orderData.orderNumber 
+        };
       }
       
-      // Send order confirmation
-      await sendOrderConfirmation(
-        phone,
-        order.orderNumber,
-        itemsSummary,
-        order.totalAmount || 0
-      );
-      
-      return { 
-        success: true, 
-        orderCreated: true, 
-        orderNumber: order.orderNumber 
-      };
+      return { success: true, response };
     }
     
     return { success: true, aiResponse: response };
