@@ -1735,24 +1735,22 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         });
       }
       
-      // Create an ID for the simulated message
-      const messageId = `sim-${Date.now()}`;
-      const timestamp = new Date().toISOString();
-      const businessPhone = process.env.WHATSAPP_PHONE_NUMBER_ID || "BUSINESS_PHONE";
-      
-      // Store incoming message using our storage system
-      await storage.storeWhatsAppMessage({
-        id: messageId,
+      // Save incoming message to database
+      await db.insert(whatsappMessages).values({
         from: phone,
-        to: businessPhone,
-        content: message,
-        timestamp,
+        to: "BUSINESS_PHONE", // This would be your actual WhatsApp business number
+        message: message,
         direction: "incoming",
-        type: "text"
+        messageType: "text",
+        status: "received",
+        metadata: { 
+          customerName: name || "Customer",
+          timestamp: new Date().toISOString()
+        }
       });
       
-      // Log activity for the incoming message
-      await storage.createActivity({
+      // Log to activity log
+      await db.insert(activities).values({
         type: "whatsapp_message",
         description: `New WhatsApp message from ${phone}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
         entityType: "whatsapp"
@@ -1766,58 +1764,31 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
         ["admin", "manager"]
       );
       
-      // Broadcast real-time event to all connected clients
-      broadcastToAllClients({
-        type: 'whatsapp_message',
-        data: {
-          id: messageId,
-          from: phone,
-          content: message,
-          timestamp,
-          direction: 'incoming',
-          type: 'text'
-        }
-      });
-      
-      // Create an automated response message
-      const responseId = `sim-resp-${Date.now()}`;
-      const responseTimestamp = new Date().toISOString();
-      const responseMessage = `Thank you for your message. We'll process your request: "${message}"`;
-      
-      // Store the response message in our storage system
-      await storage.storeWhatsAppMessage({
-        id: responseId,
-        from: businessPhone,
+      // Process the message with AI (simple response for simulator)
+        
+      // Create a response message in the database
+      await db.insert(whatsappMessages).values({
+        from: "BUSINESS_PHONE", // From business to customer
         to: phone,
-        content: responseMessage,
-        timestamp: responseTimestamp,
+        message: `Thank you for your message. We'll process your request: "${message}"`,
         direction: "outgoing",
-        type: "text"
-      });
-      
-      // Broadcast the response message to clients
-      broadcastToAllClients({
-        type: 'whatsapp_message',
-        data: {
-          id: responseId,
-          from: businessPhone,
-          to: phone,
-          content: responseMessage,
-          timestamp: responseTimestamp,
-          direction: 'outgoing',
-          type: 'text'
+        messageType: "text",
+        status: "sent",
+        metadata: { 
+          responseType: "auto-reply",
+          timestamp: new Date().toISOString()
         }
       });
       
-      // Process the message with the WhatsApp processor
+      // Try to dynamically import metaWhatsappService
       try {
-        const whatsappProcessor = await import('./services/chatbot/whatsappProcessor');
+        const metaWhatsapp = await import('./services/metaWhatsappService');
         // Don't wait for response, just trigger processing
-        whatsappProcessor.processWhatsAppMessage(phone, message, name || "Customer").catch((err: Error) => {
+        metaWhatsapp.processWhatsAppMessage(phone, message, name || "Customer").catch((err: Error) => {
           console.error("Error processing WhatsApp message in background:", err);
         });
       } catch (e) {
-        console.error("Failed to import whatsappProcessor:", e);
+        console.error("Failed to import metaWhatsappService:", e);
       }
       
       res.json({
@@ -1837,152 +1808,24 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Get WhatsApp message history (for testing only)
   app.get("/api/whatsapp/message-history", async (req: Request, res: Response) => {
     try {
-      // Get messages from storage
-      const messages = await storage.getWhatsAppMessages();
+      // Get messages from database instead of the client
+      const messages = await db.select().from(whatsappMessages)
+        .orderBy(whatsappMessages.createdAt);
       
-      // Messages are already in the right format from our storage implementation
-      res.json(messages);
-    } catch (err) {
-      errorHandler(err, res);
-    }
-  });
-  
-  // Special endpoint for testing with a real WhatsApp number
-  app.post("/api/whatsapp/test-real-number", async (req: Request, res: Response) => {
-    try {
-      const { phone, message } = req.body;
+      // Format for the frontend
+      const formattedMessages = messages.map(msg => ({
+        id: msg.id.toString(),
+        from: msg.from,
+        to: msg.to,
+        content: msg.message,
+        timestamp: msg.createdAt.toISOString(),
+        direction: msg.direction,
+        type: msg.messageType,
+        status: msg.status,
+        metadata: msg.metadata
+      }));
       
-      if (!phone || !message) {
-        return res.status(400).json({
-          error: 'Phone number and message text are required'
-        });
-      }
-      
-      // Create an ID for the "real" message
-      const messageId = `real-${Date.now()}`;
-      const timestamp = new Date().toISOString();
-      const businessPhone = process.env.WHATSAPP_PHONE_NUMBER_ID || "BUSINESS_PHONE";
-      
-      // Store incoming message as if it came from the user's real number
-      await storage.storeWhatsAppMessage({
-        id: messageId,
-        from: phone,
-        to: businessPhone,
-        content: message,
-        timestamp,
-        direction: "incoming",
-        type: "text"
-      });
-      
-      // Log activity
-      await storage.createActivity({
-        type: "whatsapp_message",
-        description: `Real WhatsApp message from ${phone}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
-        entityType: "whatsapp"
-      });
-      
-      // Notify admin/manager
-      notificationService.sendNotification(
-        "WhatsApp Message", 
-        `New message from real WhatsApp number ${phone}: ${message.substring(0, 30)}${message.length > 30 ? '...' : ''}`,
-        "info",
-        ["admin", "manager"]
-      );
-      
-      // Broadcast message to all clients
-      broadcastToAllClients({
-        type: 'whatsapp_message',
-        data: {
-          id: messageId,
-          from: phone,
-          content: message,
-          timestamp,
-          direction: 'incoming',
-          type: 'text'
-        }
-      });
-      
-      // Process the message with the WhatsApp processor
-      try {
-        // Use customer name from phone number by default
-        // Import processWhatsAppMessage function dynamically to avoid circular dependencies
-        const { processWhatsAppMessage } = await import('./services/metaWhatsappService');
-        const result = await processWhatsAppMessage(phone, message, "Real WhatsApp Customer");
-        
-        // If order was created, generate a confirmation message
-        if (result.orderCreated && result.order) {
-          const responseId = `real-resp-${Date.now()}`;
-          const responseTimestamp = new Date().toISOString();
-          const responseMessage = `Thank you for your order! Your order #${result.order.orderNumber} has been received and is being processed. Total amount: ₹${result.totalAmount.toFixed(2)}`;
-          
-          // Store the response message
-          await storage.storeWhatsAppMessage({
-            id: responseId,
-            from: businessPhone,
-            to: phone,
-            content: responseMessage,
-            timestamp: responseTimestamp,
-            direction: "outgoing",
-            type: "text"
-          });
-          
-          // Broadcast the response message
-          broadcastToAllClients({
-            type: 'whatsapp_message',
-            data: {
-              id: responseId,
-              from: businessPhone,
-              to: phone,
-              content: responseMessage,
-              timestamp: responseTimestamp,
-              direction: 'outgoing',
-              type: 'text'
-            }
-          });
-        } else {
-          // Send general acknowledgment response
-          const responseId = `real-resp-${Date.now()}`;
-          const responseTimestamp = new Date().toISOString();
-          const responseMessage = `Thank you for your message. We'll process your request: "${message}"`;
-          
-          // Store the response message
-          await storage.storeWhatsAppMessage({
-            id: responseId,
-            from: businessPhone,
-            to: phone,
-            content: responseMessage,
-            timestamp: responseTimestamp,
-            direction: "outgoing",
-            type: "text"
-          });
-          
-          // Broadcast the response message
-          broadcastToAllClients({
-            type: 'whatsapp_message',
-            data: {
-              id: responseId,
-              from: businessPhone,
-              to: phone,
-              content: responseMessage,
-              timestamp: responseTimestamp,
-              direction: 'outgoing',
-              type: 'text'
-            }
-          });
-        }
-      } catch (e) {
-        console.error("Error processing real WhatsApp test message:", e);
-      }
-      
-      res.json({
-        success: true,
-        messageProcessed: true,
-        result: {
-          processed: true,
-          responseGenerated: true,
-          messageType: "text"
-        }
-      });
+      res.json(formattedMessages);
     } catch (err) {
       errorHandler(err, res);
     }
@@ -1991,11 +1834,41 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // Meta WhatsApp API Webhook - for receiving messages
   app.post("/api/webhook/whatsapp", async (req: Request, res: Response) => {
     try {
-      // Import the WhatsApp business API handler
-      const { handleWhatsAppWebhook } = await import('./services/whatsapp/whatsappBusinessAPI');
+      // Verify webhook with Meta challenge if present
+      if (req.query['hub.mode'] === 'subscribe' && 
+          req.query['hub.verify_token'] === 'whatsApptoken') {
+        console.log('Webhook verified with challenge');
+        return res.send(req.query['hub.challenge']);
+      }
       
-      // Process the webhook data with our dedicated service
-      const result = await handleWhatsAppWebhook(req.body);
+      // Process incoming messages
+      const data = req.body;
+      console.log('Received webhook data:', JSON.stringify(data));
+      
+      if (data.object === 'whatsapp_business_account') {
+        for (const entry of data.entry) {
+          for (const change of entry.changes) {
+            if (change.field === 'messages') {
+              if (change.value && change.value.messages) {
+                for (const message of change.value.messages) {
+                  if (message.type === 'text') {
+                    const phone = message.from;
+                    const text = message.text.body;
+                    
+                    console.log(`Received WhatsApp message from ${phone}: ${text}`);
+                    
+                    // Import dynamically to avoid circular dependencies
+                    const metaWhatsapp = await import('./services/metaWhatsappService');
+                    // Get contact name if available or default to "Customer"
+                    const contactName = change.value.contacts?.[0]?.profile?.name || "Customer";
+                    await metaWhatsapp.processWhatsAppMessage(phone, text, contactName);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
       
       // Always return a 200 OK to acknowledge receipt
       res.status(200).send('EVENT_RECEIVED');
@@ -2009,127 +1882,35 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   // WhatsApp Webhook verification endpoint
   app.get('/api/webhook/whatsapp', (req: Request, res: Response) => {
     try {
-      // Import the WhatsApp business API verification function
-      const { verifyWhatsAppWebhook } = require('./services/whatsapp/whatsappBusinessAPI');
+      // Hard-coded token matching what's in the Meta Developer Portal
+      const verifyToken = 'whatsApptoken';
       
       // Parse params from the webhook verification request
-      const mode = req.query['hub.mode'] as string;
-      const token = req.query['hub.verify_token'] as string;
-      const challenge = req.query['hub.challenge'] as string;
+      const mode = req.query['hub.mode'];
+      const token = req.query['hub.verify_token'];
+      const challenge = req.query['hub.challenge'];
       
       console.log(`Webhook verification request: mode=${mode}, token=${token}, challenge=${challenge}`);
       
-      // Use our verification function
-      const result = verifyWhatsAppWebhook(mode, token, challenge);
-      
-      if (result.success) {
-        console.log('WEBHOOK_VERIFIED');
-        return res.status(200).send(result.challenge);
-      }
-      
-      // Responds with '403 Forbidden' if verify tokens do not match
-      console.error('Webhook verification failed');
-      res.sendStatus(403);
-    } catch (error) {
-      console.error('Error verifying webhook:', error);
-      res.sendStatus(500);
-    }
-  });
-  
-  // Test endpoint to simulate a webhook event from Meta's servers
-  app.post("/api/test/webhook-simulation", async (req: Request, res: Response) => {
-    try {
-      console.log('Simulating webhook message from Meta servers');
-      
-      // Generate unique IDs for traceability
-      const messageId = 'webhook-sim-' + Date.now();
-      const timestamp = new Date().toISOString();
-      const customerPhone = '919876543210'; // Sample phone number
-      const businessPhone = process.env.WHATSAPP_PHONE_NUMBER_ID || '15550000000';
-      const message = req.body.message || "I'd like to order a Butter Chicken and two Naan";
-      
-      // Store the simulated incoming message in our WhatsApp message history
-      await storage.storeWhatsAppMessage({
-        id: messageId,
-        from: customerPhone,
-        to: businessPhone,
-        content: message,
-        timestamp,
-        direction: 'incoming',
-        type: 'text'
-      });
-      
-      // Broadcast the message event to all clients
-      broadcastToAllClients({
-        type: 'whatsapp_message',
-        data: {
-          id: messageId,
-          from: customerPhone,
-          to: businessPhone,
-          content: message,
-          timestamp,
-          direction: 'incoming',
-          type: 'text'
+      // Check if a token and mode were sent
+      if (mode && token) {
+        // Check the mode and token sent are correct
+        if (mode === 'subscribe' && token === verifyToken) {
+          // Respond with 200 OK and challenge token
+          console.log('WEBHOOK_VERIFIED');
+          res.status(200).send(challenge);
+        } else {
+          // Responds with '403 Forbidden' if verify tokens do not match
+          console.error(`Webhook verification failed - token mismatch. Expected: ${verifyToken}, Got: ${token}`);
+          res.sendStatus(403);
         }
-      });
-      
-      // Create a sample webhook payload similar to what Meta would send
-      const samplePayload = {
-        object: 'whatsapp_business_account',
-        entry: [{
-          id: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
-          changes: [{
-            value: {
-              messaging_product: 'whatsapp',
-              metadata: {
-                display_phone_number: '+1234567890',
-                phone_number_id: businessPhone
-              },
-              contacts: [
-                {
-                  profile: {
-                    name: 'Test Customer'
-                  },
-                  wa_id: customerPhone
-                }
-              ],
-              messages: [
-                {
-                  from: customerPhone,
-                  id: messageId,
-                  timestamp: Math.floor(Date.now() / 1000),
-                  type: 'text',
-                  text: {
-                    body: message
-                  }
-                }
-              ]
-            },
-            field: 'messages'
-          }]
-        }]
-      };
-      
-      // Forward this payload to our actual webhook handler
-      const { handleWhatsAppWebhook } = await import('./services/whatsapp/whatsappBusinessAPI');
-      const result = await handleWhatsAppWebhook(samplePayload);
-      
-      // Return the result
-      res.status(200).json({
-        success: true,
-        webhookProcessed: result.success,
-        messageId,
-        timestamp,
-        phone: customerPhone,
-        message,
-        result
-      });
+      } else {
+        console.error('Webhook verification failed - missing parameters');
+        res.sendStatus(400);
+      }
     } catch (error) {
-      console.error('Error in webhook simulation:', error);
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      console.error('Error in webhook verification:', error);
+      res.sendStatus(500);
     }
   });
 
@@ -2165,35 +1946,6 @@ app.post("/api/simulator/create-kitchen-token", async (req: Request, res: Respon
   
   // Handle language selection for voice calls
   app.post("/api/telephony/select-language", selectLanguage);
-  
-  // WhatsApp service status endpoint
-  app.get("/api/whatsapp/status", async (req: Request, res: Response) => {
-    try {
-      // Check if the WhatsApp API token is available
-      const apiToken = process.env.WHATSAPP_API_TOKEN;
-      const businessAccountId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
-      const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-      
-      if (!apiToken || !businessAccountId || !phoneNumberId) {
-        return res.json({
-          status: "inactive",
-          message: "WhatsApp Business API is not fully configured. Missing credentials."
-        });
-      }
-      
-      // For the demo, simply return active if the tokens are set
-      res.json({
-        status: "active",
-        message: "WhatsApp Business API is connected and ready"
-      });
-    } catch (err) {
-      console.error("Error getting WhatsApp status:", err);
-      res.status(500).json({
-        status: "error",
-        message: "Error getting WhatsApp service status"
-      });
-    }
-  });
   
   // Get call history
   app.get("/api/telephony/calls", async (req: Request, res: Response) => {

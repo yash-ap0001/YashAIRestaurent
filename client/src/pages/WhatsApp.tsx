@@ -7,9 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
-import { MessageCircle, Send, RefreshCcw, Utensils, FileText, HeartPulse, AlertCircle } from 'lucide-react';
+import { MessageCircle, Send, RefreshCcw, Utensils, FileText, HeartPulse } from 'lucide-react';
 import BillSimulator from '@/components/whatsapp/BillSimulator';
 
 interface Message {
@@ -52,18 +51,9 @@ export default function WhatsApp() {
   } = useQuery<StatusData>({
     queryKey: ['/api/whatsapp/status'],
     queryFn: async () => {
-      try {
-        const response = await apiRequest('GET', '/api/whatsapp/status');
-        return await response.json();
-      } catch (error) {
-        console.error("Error fetching WhatsApp status:", error);
-        return {
-          status: "error",
-          message: "Error connecting to WhatsApp service"
-        };
-      }
-    },
-    refetchInterval: 30000 // Refresh every 30 seconds
+      const response = await apiRequest('GET', '/api/whatsapp/status');
+      return await response.json();
+    }
   });
 
   // Mutation to simulate a message
@@ -84,53 +74,6 @@ export default function WhatsApp() {
       toast({
         title: 'Failed to send message',
         description: error.message || 'Something went wrong',
-        variant: 'destructive',
-      });
-    }
-  });
-  
-  // Mutation to test with real WhatsApp number
-  const testRealNumberMutation = useMutation({
-    mutationFn: async (payload: { phone: string; message: string }) => {
-      const response = await apiRequest('POST', '/api/whatsapp/test-real-number', payload);
-      return await response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Real WhatsApp test processed',
-        description: 'The message has been processed as if it came from your real WhatsApp number.',
-      });
-      setMessage('');
-      refetchMessages();
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Failed to process real number test',
-        description: error.message || 'Something went wrong',
-        variant: 'destructive',
-      });
-    }
-  });
-  
-  // Mutation to simulate a webhook from Meta's servers
-  const webhookSimulationMutation = useMutation({
-    mutationFn: async (payload: { message: string }) => {
-      const response = await apiRequest('POST', '/api/test/webhook-simulation', payload);
-      return await response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: 'Webhook processed successfully',
-        description: 'The Meta webhook simulation was processed by the system.',
-      });
-      setMessage('');
-      refetchMessages();
-      console.log('Webhook simulation result:', data);
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Failed to process webhook',
-        description: error.message || 'Something went wrong with the webhook simulation',
         variant: 'destructive',
       });
     }
@@ -247,33 +190,16 @@ export default function WhatsApp() {
             </CardHeader>
             <CardContent className="py-1.5">
               {statusLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full animate-pulse bg-gray-300"></div>
-                  <p className="text-sm">Loading WhatsApp service status...</p>
-                </div>
+                <p className="text-sm">Loading status...</p>
               ) : statusData ? (
                 <div className="flex items-center gap-2">
-                  {statusData.status === 'active' ? (
-                    <>
-                      <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></div>
-                      <p className="text-sm font-medium text-green-600">{statusData.message}</p>
-                    </>
-                  ) : statusData.status === 'error' ? (
-                    <>
-                      <div className="h-2.5 w-2.5 rounded-full bg-red-500"></div>
-                      <p className="text-sm font-medium text-red-600">{statusData.message}</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
-                      <p className="text-sm font-medium text-yellow-600">{statusData.message}</p>
-                    </>
-                  )}
+                  <div className={`h-2.5 w-2.5 rounded-full ${statusData.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <p className="text-sm">{statusData.message}</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
-                  <p className="text-sm">Status unknown - Try refreshing</p>
+                  <p className="text-sm">Status unknown</p>
                 </div>
               )}
             </CardContent>
@@ -293,10 +219,8 @@ export default function WhatsApp() {
             </CardHeader>
             <CardContent className="py-2">
               <Tabs defaultValue="simulate" value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-4 h-7">
+                <TabsList className="grid w-full grid-cols-2 h-7">
                   <TabsTrigger value="simulate" className="text-xs">Simulate</TabsTrigger>
-                  <TabsTrigger value="real" className="text-xs">Real Number</TabsTrigger>
-                  <TabsTrigger value="webhook" className="text-xs">Webhook</TabsTrigger>
                   <TabsTrigger value="send" className="text-xs">Send Direct</TabsTrigger>
                 </TabsList>
                 <TabsContent value="simulate" className="space-y-2 mt-2">
@@ -341,99 +265,6 @@ export default function WhatsApp() {
                     </Button>
                   </form>
                 </TabsContent>
-                <TabsContent value="real" className="space-y-2 mt-2">
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!phone || !message) {
-                      toast({
-                        title: 'Missing information',
-                        description: 'Phone number and message are required',
-                        variant: 'destructive',
-                      });
-                      return;
-                    }
-                    testRealNumberMutation.mutate({ phone, message });
-                  }} className="space-y-2">
-                    <div>
-                      <label className="block text-xs font-medium mb-0.5">Your WhatsApp Number</label>
-                      <Input 
-                        value={phone} 
-                        onChange={(e) => setPhone(e.target.value)} 
-                        placeholder="Include country code, e.g., 918765432100"
-                        className="h-7 text-xs"
-                      />
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Enter your real WhatsApp number with country code
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium mb-0.5">Message Content</label>
-                      <Textarea 
-                        value={message} 
-                        onChange={(e) => setMessage(e.target.value)} 
-                        placeholder="Type a message you'd send from WhatsApp..."
-                        rows={2}
-                        className="text-xs min-h-[50px]"
-                      />
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        This will be processed as if you sent it from your real WhatsApp
-                      </p>
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full h-7 text-xs"
-                      disabled={testRealNumberMutation.isPending}
-                    >
-                      {testRealNumberMutation.isPending ? 'Processing...' : 'Test with Real Number'}
-                    </Button>
-                  </form>
-                </TabsContent>
-                <TabsContent value="webhook" className="space-y-2 mt-2">
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!message) {
-                      toast({
-                        title: 'Missing information',
-                        description: 'Message is required',
-                        variant: 'destructive',
-                      });
-                      return;
-                    }
-                    // Call our webhook simulation endpoint
-                    webhookSimulationMutation.mutate({ message });
-                  }} className="space-y-2">
-                    <div>
-                      <Alert variant="default" className="bg-amber-100 text-amber-800 border-amber-200 p-2">
-                        <AlertCircle className="h-3.5 w-3.5 mr-1" />
-                        <AlertTitle className="text-xs font-semibold">Meta Webhook Simulation</AlertTitle>
-                        <AlertDescription className="text-xs">
-                          This simulates a webhook event from Meta's servers as if a real customer sent a message to your WhatsApp Business account.
-                        </AlertDescription>
-                      </Alert>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium mb-0.5">Message Content</label>
-                      <Textarea 
-                        value={message} 
-                        onChange={(e) => setMessage(e.target.value)} 
-                        placeholder="I'd like to order a butter chicken with 2 naan..."
-                        rows={3}
-                        className="text-xs min-h-[80px]"
-                      />
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        This will be processed as if Meta sent a webhook with this message
-                      </p>
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full h-7 text-xs"
-                      disabled={webhookSimulationMutation.isPending}
-                    >
-                      {webhookSimulationMutation.isPending ? 'Processing...' : 'Simulate Meta Webhook'}
-                    </Button>
-                  </form>
-                </TabsContent>
-                
                 <TabsContent value="send" className="space-y-2 mt-2">
                   <form onSubmit={handleSendMessage} className="space-y-2">
                     <div>
